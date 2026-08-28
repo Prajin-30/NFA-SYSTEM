@@ -29,9 +29,3 @@ authRouter.get('/embedded', (_req, res) => {
   res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role, department_id: user.department_id } });
 });
 
-/** GET /api/auth/me */
-authRouter.get('/demo-accounts', (_req, res) => {
-  res.json(
-    store.data.users.map((u) => ({ email: u.email, role: u.role, password: 'password123' }))
-  );
-});

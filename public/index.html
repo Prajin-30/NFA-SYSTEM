@@ -62,8 +62,6 @@
   .field-label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin:0 0 5px}
   .field-help{font-size:12px;color:var(--muted);margin:-5px 0 10px}
   .close{float:right;cursor:pointer;color:var(--muted);font-size:18px}
-  .demo-list{font-size:12px;color:var(--muted);margin-top:14px}
-  .demo-list div{padding:2px 0}
   .sheet-tabs{display:flex;gap:4px;overflow:auto;border-bottom:1px solid var(--border);margin:12px 0}
   .sheet-tab{background:#eef1f7;color:var(--text);border-radius:6px 6px 0 0;padding:8px 12px;white-space:nowrap}
   .sheet-tab.active{background:var(--blue);color:#fff}
@@ -81,11 +79,10 @@
   <img class="logo" src="/christ-logo.png" alt="CHRIST University" />
   <h1>NFA &amp; Budget Portal</h1>
   <p>Sign in to continue</p>
-  <input id="loginEmail" placeholder="Email" value="hod@christ.edu" />
-  <input id="loginPassword" type="password" placeholder="Password" value="password123" />
+  <input id="loginEmail" placeholder="Email" autocomplete="username" />
+  <input id="loginPassword" type="password" placeholder="Password" autocomplete="current-password" />
   <button style="width:100%" onclick="doLogin()">Sign in</button>
   <div id="loginErr" style="color:var(--red);font-size:13px;margin-top:8px"></div>
-  <div class="demo-list" id="demoList"></div>
 </div>
 
 <div id="app">
@@ -176,15 +173,7 @@ async function doLogin(){
     boot();
   } catch(e){ document.getElementById('loginErr').textContent = e.message; }
 }
-function logout(){ TOKEN=''; USER=null; localStorage.clear(); document.getElementById('app').style.display='none'; document.getElementById('login').style.display='block'; loadDemoAccounts(); }
-
-async function loadDemoAccounts(){
-  try {
-    const accts = await api('/auth/demo-accounts');
-    document.getElementById('demoList').innerHTML = '<div style="margin-bottom:4px;font-weight:600">Demo accounts (password123):</div>' +
-      accts.map(a=>`<div>${a.role.padEnd(12,'\u00a0')} — ${a.email}</div>`).join('');
-  } catch(e){}
-}
+function logout(){ TOKEN=''; USER=null; localStorage.clear(); document.getElementById('app').style.display='none'; document.getElementById('login').style.display='block'; }
 
 const TABS_BY_ROLE = {
   student: ['dashboard','projects','nfas'],
@@ -633,7 +622,7 @@ function closeModal(){ document.getElementById('modalBg').style.display='none'; 
 document.getElementById('modalBg').addEventListener('click', e=>{ if(e.target.id==='modalBg') closeModal(); });
 
 // ---------- INIT ----------
-if (TOKEN && USER) boot(); else loadDemoAccounts();
+if (TOKEN && USER) boot();
 </script>
 </body>
 </html>

@@ -1,0 +1,2 @@
+PORT=4000
+JWT_SECRET=change_this_secret_in_production

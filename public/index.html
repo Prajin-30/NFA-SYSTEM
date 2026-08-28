@@ -1,0 +1,639 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>NFA & Budget Portal</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root{--blue:#1d4ed8;--bg:#f4f6fb;--card:#fff;--border:#e2e6ee;--text:#1f2430;--muted:#6b7280;--green:#059669;--red:#dc2626;--amber:#d97706;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text)}
+  #login{max-width:380px;margin:80px auto;background:var(--card);padding:32px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.06)}
+  #login .logo{display:block;width:100%;height:auto;margin:0 auto 22px}
+  #login h1{font-size:20px;margin:0 0 4px}
+  #login p{color:var(--muted);font-size:13px;margin-top:0}
+  input,select,textarea,button{font:inherit}
+  input,select,textarea{width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;background:#fff}
+  button{cursor:pointer;border:none;border-radius:8px;padding:9px 16px;background:var(--blue);color:#fff;font-weight:600}
+  button.secondary{background:#eef1f7;color:var(--text)}
+  button.danger{background:var(--red)}
+  button.green{background:var(--green)}
+  button:disabled{opacity:.5;cursor:default}
+  #app{display:none}
+  header{background:#111827;color:#fff;padding:12px 20px;display:flex;align-items:center;gap:20px}
+  header .brand{display:flex;align-items:center;gap:10px;font-weight:700}
+  header .brand img{display:block;width:185px;height:auto;background:#fff}
+  header .who{margin-left:auto;font-size:13px;color:#cbd5e1}
+  nav{display:flex;gap:4px;background:#1f2937;padding:0 20px}
+  nav button{background:transparent;color:#cbd5e1;border-radius:0;padding:12px 14px;font-weight:500}
+  nav button.active{color:#fff;border-bottom:2px solid #60a5fa;background:#111827}
+  main{max-width:1100px;margin:24px auto;padding:0 20px 60px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:16px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+  .stat{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px}
+  .stat .label{font-size:12px;color:var(--muted)}
+  .stat .val{font-size:20px;font-weight:700;margin-top:2px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border)}
+  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase}
+  .badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;text-transform:capitalize}
+  .b-draft{background:#e5e7eb;color:#374151}
+  .b-submitted,.b-under_review,.b-budget_validation{background:#dbeafe;color:#1d4ed8}
+  .b-revision_required{background:#fef3c7;color:#92400e}
+  .b-pending_higher_approval{background:#fde68a;color:#92400e}
+  .b-approved{background:#d1fae5;color:#065f46}
+  .b-rejected{background:#fee2e2;color:#991b1b}
+  h2{font-size:16px;margin:0 0 12px}
+  h3{font-size:14px;margin:18px 0 8px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .muted{color:var(--muted);font-size:12px}
+  .item-row{display:grid;grid-template-columns:minmax(0,2fr) minmax(58px,.8fr) minmax(72px,.9fr) minmax(82px,1fr) minmax(0,1.8fr) 28px;gap:8px;align-items:start}
+  .item-row>*{min-width:0}
+  .item-row input{margin-bottom:0}
+  .item-row .it-c{grid-column:1 / span 2}
+  .item-row .it-b{grid-column:3}
+  .item-row .it-pb{grid-column:4}
+  .item-row .it-pa{grid-column:5}
+  .item-row .link{grid-column:6;grid-row:2;align-self:center}
+  .link{color:var(--blue);cursor:pointer;background:none;border:none;padding:0;font-weight:600}
+  .toast{position:fixed;top:16px;right:16px;background:#111827;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;z-index:99;display:none}
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto;z-index:50}
+  .modal{background:#fff;border-radius:12px;padding:22px;max-width:640px;width:100%}
+  .field-label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin:0 0 5px}
+  .field-help{font-size:12px;color:var(--muted);margin:-5px 0 10px}
+  .close{float:right;cursor:pointer;color:var(--muted);font-size:18px}
+  .demo-list{font-size:12px;color:var(--muted);margin-top:14px}
+  .demo-list div{padding:2px 0}
+  .sheet-tabs{display:flex;gap:4px;overflow:auto;border-bottom:1px solid var(--border);margin:12px 0}
+  .sheet-tab{background:#eef1f7;color:var(--text);border-radius:6px 6px 0 0;padding:8px 12px;white-space:nowrap}
+  .sheet-tab.active{background:var(--blue);color:#fff}
+  @media (max-width:700px){
+    .item-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+    .item-row>*{grid-column:auto!important;grid-row:auto!important}
+    .item-row .it-p,.item-row .it-j,.item-row .it-c{grid-column:1 / -1!important}
+    .item-row .link{justify-self:start}
+  }
+</style>
+</head>
+<body>
+
+<div id="login">
+  <img class="logo" src="/christ-logo.png" alt="CHRIST University" />
+  <h1>NFA &amp; Budget Portal</h1>
+  <p>Sign in to continue</p>
+  <input id="loginEmail" placeholder="Email" value="hod@christ.edu" />
+  <input id="loginPassword" type="password" placeholder="Password" value="password123" />
+  <button style="width:100%" onclick="doLogin()">Sign in</button>
+  <div id="loginErr" style="color:var(--red);font-size:13px;margin-top:8px"></div>
+  <div class="demo-list" id="demoList"></div>
+</div>
+
+<div id="app">
+  <header>
+    <div class="brand"><img src="/christ-logo.png" alt="CHRIST University" /><span>NFA &amp; Budget Portal</span></div>
+    <div class="who" id="whoami"></div>
+    <button class="secondary" onclick="logout()">Log out</button>
+  </header>
+  <nav id="nav"></nav>
+  <main id="main"></main>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="modal-bg" id="modalBg"><div class="modal" id="modalBody"></div></div>
+
+<script>
+const API = '/api';
+let TOKEN = localStorage.getItem('token') || '';
+let USER = JSON.parse(localStorage.getItem('user') || 'null');
+let REF = { departments:[], categories:[], financialYears:[] };
+let currentTab = 'dashboard';
+
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.style.display='block'; setTimeout(()=>t.style.display='none', 3500); }
+function inr(n){ return 'Rs. ' + Number(n||0).toLocaleString('en-IN'); }
+function fmtStatus(s){ return s.replace(/_/g,' '); }
+
+async function api(path, opts={}){
+  const res = await fetch(API+path, {
+    ...opts,
+    headers: { ...(opts.body && !(opts.body instanceof FormData) ? {'Content-Type':'application/json'} : {}), Authorization: TOKEN ? 'Bearer '+TOKEN : '', ...(opts.headers||{}) },
+    body: opts.body && !(opts.body instanceof FormData) ? JSON.stringify(opts.body) : opts.body
+  });
+  if (res.status === 401) { logout(); throw new Error('Session expired'); }
+  const ct = res.headers.get('content-type')||'';
+  if (!ct.includes('application/json')) { if(!res.ok) throw new Error('Request failed'); return res; }
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+
+async function downloadPdf(id){
+  try {
+    const res = await fetch(`${API}/nfas/${id}/pdf`, { headers: { Authorization: 'Bearer '+TOKEN } });
+    if (!res.ok) {
+      let message = 'PDF download failed';
+      try { message = (await res.json()).error || message; } catch(e) {}
+      throw new Error(message);
+    }
+    const url = URL.createObjectURL(await res.blob());
+    const link = document.createElement('a');
+    link.href = url;
+    const disposition = res.headers.get('Content-Disposition') || '';
+    const fileName = disposition.match(/filename="?([^";]+)"?/i)?.[1] || `nfa-${id}.pdf`;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch(e){ toast(e.message); }
+}
+
+async function downloadExcel(dept){
+  try {
+    const res = await fetch(`${API}/budgets/export/${dept}?fy=${activeFy().id}`, { headers: { Authorization: 'Bearer '+TOKEN } });
+    if (!res.ok) {
+      let message = 'Excel download failed';
+      try { message = (await res.json()).error || message; } catch(e) {}
+      throw new Error(message);
+    }
+    const url = URL.createObjectURL(await res.blob());
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `budget-${dept}-${activeFy().label}.xlsx`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch(e){ toast(e.message); }
+}
+
+async function doLogin(){
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  try {
+    const data = await api('/auth/login', { method:'POST', body:{ email, password } });
+    TOKEN = data.token; USER = data.user;
+    localStorage.setItem('token', TOKEN); localStorage.setItem('user', JSON.stringify(USER));
+    boot();
+  } catch(e){ document.getElementById('loginErr').textContent = e.message; }
+}
+function logout(){ TOKEN=''; USER=null; localStorage.clear(); document.getElementById('app').style.display='none'; document.getElementById('login').style.display='block'; loadDemoAccounts(); }
+
+async function loadDemoAccounts(){
+  try {
+    const accts = await api('/auth/demo-accounts');
+    document.getElementById('demoList').innerHTML = '<div style="margin-bottom:4px;font-weight:600">Demo accounts (password123):</div>' +
+      accts.map(a=>`<div>${a.role.padEnd(12,'\u00a0')} — ${a.email}</div>`).join('');
+  } catch(e){}
+}
+
+const TABS_BY_ROLE = {
+  student: ['dashboard','projects','nfas'],
+  faculty: ['dashboard','projects','nfas','budgets','excel','audit'],
+  hod: ['dashboard','projects','nfas','budgets','excel','audit'],
+  finance: ['dashboard','nfas','budgets','audit'],
+  super_admin: ['dashboard','projects','nfas','budgets','excel','audit','admin'],
+  it_admin: ['dashboard','nfas','budgets','audit'],
+};
+const TAB_LABEL = { dashboard:'Dashboard', projects:'Projects', nfas:'NFAs', budgets:'Budgets', excel:'Excel', audit:'Audit History', admin:'Settings' };
+
+async function boot(){
+  document.getElementById('login').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('whoami').textContent = `${USER.name} · ${USER.role.replace('_',' ')}`;
+  const [depts, cats, fys] = await Promise.all([api('/budgets/departments'), api('/budgets/categories'), api('/budgets/financial-years')]);
+  REF.departments = depts; REF.categories = cats; REF.financialYears = fys;
+  const tabs = TABS_BY_ROLE[USER.role] || ['dashboard'];
+  document.getElementById('nav').innerHTML = tabs.map(t=>`<button data-tab="${t}" onclick="showTab('${t}')">${TAB_LABEL[t]}</button>`).join('');
+  showTab(tabs[0]);
+}
+
+function deptName(id){ return REF.departments.find(d=>d.id===id)?.name || id; }
+function catName(id){ return REF.categories.find(c=>c.id===id)?.name || id; }
+function activeFy(){ return REF.financialYears.find(f=>f.is_active) || REF.financialYears[0]; }
+
+async function showTab(tab){
+  currentTab = tab;
+  [...document.querySelectorAll('nav button')].forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  const main = document.getElementById('main');
+  main.innerHTML = '<div class="card muted">Loading…</div>';
+  try {
+    if (tab==='dashboard') await renderDashboard(main);
+    else if (tab==='projects') await renderProjects(main);
+    else if (tab==='nfas') await renderNfas(main);
+    else if (tab==='budgets') await renderBudgets(main);
+    else if (tab==='excel') await renderExcel(main);
+    else if (tab==='audit') await renderAudit(main);
+    else if (tab==='admin') await renderAdmin(main);
+  } catch(e){ main.innerHTML = `<div class="card" style="color:var(--red)">${e.message}</div>`; }
+}
+
+// ---------- DASHBOARD ----------
+async function renderDashboard(main){
+  const nfas = await api('/nfas');
+  const mine = USER.role==='student' ? nfas : nfas;
+  const byStatus = {};
+  mine.forEach(n=>byStatus[n.status]=(byStatus[n.status]||0)+1);
+  let html = `<div class="card"><h2>Welcome, ${USER.name}</h2><div class="grid">`;
+  ['submitted','under_review','pending_higher_approval','approved','rejected','revision_required'].forEach(s=>{
+    html += `<div class="stat"><div class="label">${fmtStatus(s)}</div><div class="val">${byStatus[s]||0}</div></div>`;
+  });
+  html += `</div></div>`;
+
+  if (['faculty','hod'].includes(USER.role) && USER.department_id){
+    const summary = await api(`/budgets/${USER.department_id}/summary?fy=${activeFy().id}`);
+    const projects = await api(`/projects?fy=${activeFy().id}`);
+    const budgetHistory = await api(`/budgets/uploads?department=${USER.department_id}&fy=${activeFy().id}`);
+    const originalTotal = summary.totals.allocated_amount;
+    const currentTotal = summary.totals.approved_amount + summary.totals.pending_amount;
+    html += `<div class="card"><h2>Budget Overview — ${activeFy().label}</h2><div class="grid"><div class="stat"><div class="label">Original Budget</div><div class="val">${inr(originalTotal)}</div></div><div class="stat"><div class="label">Current Budget</div><div class="val">${inr(currentTotal)}</div></div><div class="stat"><div class="label">Projects</div><div class="val">${projects.length}</div></div><div class="stat"><div class="label">New / Pending Changes</div><div class="val">${budgetHistory.changes.filter(c=>c.approval_status==='pending').length}</div></div></div><div class="muted" style="margin-top:10px">Last updated: ${budgetHistory.changes.length ? new Date(budgetHistory.changes[budgetHistory.changes.length-1].created_at).toLocaleString() : 'No changes recorded'}</div></div>`;
+    html += `<div class="card"><h2>${deptName(USER.department_id)} — Department Master Budget (${activeFy().label})</h2>`;
+    html += budgetTable(summary.lines, summary.totals);
+    html += `</div>`;
+  }
+  if (USER.role==='finance' || USER.role==='super_admin'){
+    const pending = nfas.filter(n=>n.status==='pending_higher_approval');
+    html += `<div class="card"><h2>Awaiting Finance Approval (${pending.length})</h2>` + nfaTable(pending) + `</div>`;
+  }
+  main.innerHTML = html;
+}
+
+function budgetTable(lines, totals){
+  let h = `<table><thead><tr><th>Category</th><th>Allocated</th><th>Approved</th><th>Pending</th><th>Available</th></tr></thead><tbody>`;
+  lines.forEach(l=>{
+    h += `<tr><td>${l.category_name}</td><td>${inr(l.allocated_amount)}</td><td>${inr(l.approved_amount)}</td><td>${inr(l.pending_amount)}</td><td style="font-weight:700;color:${l.available_amount<0?'var(--red)':'var(--green)'}">${inr(l.available_amount)}</td></tr>`;
+  });
+  if (totals) h += `<tr style="font-weight:700"><td>TOTAL</td><td>${inr(totals.allocated_amount)}</td><td>${inr(totals.approved_amount)}</td><td>${inr(totals.pending_amount)}</td><td>${inr(totals.available_amount)}</td></tr>`;
+  return h + `</tbody></table>`;
+}
+
+function nfaTable(list){
+  if (!list.length) return `<div class="muted">None</div>`;
+  let h = `<table><thead><tr><th>Ref No.</th><th>Title</th><th>Department</th><th>Category</th><th>Amount</th><th>Status</th><th></th></tr></thead><tbody>`;
+  list.forEach(n=>{
+    h += `<tr><td>${n.ref_no}</td><td>${n.title}</td><td>${deptName(n.department_id)}</td><td>${catName(n.budget_category_id)}</td><td>${inr(n.total_amount)}</td><td><span class="badge b-${n.status}">${fmtStatus(n.status)}</span></td><td><button class="link" onclick="openNfa('${n.id}')">Open →</button></td></tr>`;
+  });
+  return h + `</tbody></table>`;
+}
+
+// ---------- PROJECTS ----------
+async function renderProjects(main){
+  const projects = await api('/projects' + (USER.department_id ? `?department=${USER.department_id}` : ''));
+  let html = `<div class="card"><div class="row" style="justify-content:space-between"><h2>Projects</h2><button onclick="newProjectModal()">+ New Project</button></div>`;
+  html += `<table><thead><tr><th>Name</th><th>Department</th><th>Category</th><th>NFAs</th></tr></thead><tbody>`;
+  projects.forEach(p=>{
+    html += `<tr><td>${p.name}</td><td>${deptName(p.department_id)}</td><td>${catName(p.budget_category_id)}</td><td>${p.nfas.map(n=>`<span class="badge b-${n.status}">${n.ref_no}</span>`).join(' ')}</td><td><button class="danger" onclick="deleteProject('${p.id}')">Delete</button></td></tr>`;
+  });
+  html = html.replace('<th>NFAs</th>', '<th>NFAs</th><th></th>');
+  html += `</tbody></table></div>`;
+  main.innerHTML = html;
+}
+
+async function newProjectModal(){
+  let facultyOptions = '';
+  if (['hod','super_admin'].includes(USER.role)) {
+    const faculty = await api(`/projects/faculty?department=${USER.department_id || REF.departments[0].id}`);
+    facultyOptions = `<select id="pjFaculty"><option value="">Unassigned</option>${faculty.map(f=>`<option value="${f.id}">${f.name} (${f.email})</option>`).join('')}</select>`;
+  }
+  openModal(`
+    <span class="close" onclick="closeModal()">✕</span>
+    <h2>New Project</h2>
+    <input id="pjName" placeholder="Project name" />
+      <textarea id="pjDescription" placeholder="Description" rows="2"></textarea>
+      <input id="pjAmount" type="number" placeholder="Budget amount" />
+      <input id="pjRemarks" placeholder="Remarks" />
+    <select id="pjDept">${REF.departments.map(d=>`<option value="${d.id}" ${d.id===USER.department_id?'selected':''}>${d.name}</option>`).join('')}</select>
+    <select id="pjFy">${REF.financialYears.map(f=>`<option value="${f.id}" ${f.is_active?'selected':''}>${f.label}</option>`).join('')}</select>
+    <select id="pjCat">${REF.categories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}</select>
+    ${facultyOptions}
+    <button onclick="createProject()">Create</button>
+  `);
+}
+async function createProject(){
+  try {
+    await api('/projects', { method:'POST', body:{ name: pjName.value, description: pjDescription.value, budget_amount: Number(pjAmount.value)||0, remarks: pjRemarks.value, assigned_faculty_id: document.getElementById('pjFaculty')?.value || null, department_id: pjDept.value, financial_year_id: pjFy.value, budget_category_id: pjCat.value }});
+    closeModal(); toast('Project created'); showTab('projects');
+  } catch(e){ toast(e.message); }
+}
+async function deleteProject(id){
+  if(!confirm('Delete this project and its NFAs?')) return;
+  try { await api(`/projects/${id}`, {method:'DELETE'}); toast('Project deleted'); showTab('projects'); } catch(e){ toast(e.message); }
+}
+
+// ---------- NFAs ----------
+async function renderNfas(main){
+  const list = await api('/nfas');
+  let html = `<div class="card"><div class="row" style="justify-content:space-between"><h2>NFAs</h2>`;
+  if (['student','faculty','hod','super_admin'].includes(USER.role)) html += `<button onclick="newNfaModal()">+ New NFA</button>`;
+  html += `</div>` + nfaTable(list) + `</div>`;
+  main.innerHTML = html;
+}
+
+async function newNfaModal(){
+  const projects = await api('/projects' + (USER.department_id ? `?department=${USER.department_id}` : ''));
+  openModal(`
+    <span class="close" onclick="closeModal()">✕</span>
+    <h2>New NFA</h2>
+    <label class="field-label" for="nfaProject">Project</label>
+    <select id="nfaProject">${projects.map(p=>`<option value="${p.id}" data-dept="${p.department_id}" data-cat="${p.budget_category_id}" data-fy="${p.financial_year_id}">${p.name}</option>`).join('')}</select>
+    <div class="field-help">A project groups related NFAs and tracks their budget against the selected department and financial year.</div>
+    <div class="grid"><div><label class="field-label" for="nfaFacultyName">Submitted by name</label><input id="nfaFacultyName" placeholder="Enter faculty name" value="${USER.name}" /></div>
+    <div><label class="field-label" for="nfaFacultyDesignation">Designation</label><select id="nfaFacultyDesignation"><option>Faculty</option><option>Assistant Professor</option><option>Associate Professor</option><option>Professor</option></select></div></div>
+    <input id="nfaTitle" placeholder="Title" />
+    <textarea id="nfaPurpose" placeholder="Purpose" rows="2"></textarea>
+    <textarea id="nfaDesc" placeholder="Description" rows="2"></textarea>
+    <textarea id="nfaJust" placeholder="Justification" rows="2"></textarea>
+    <textarea id="nfaSdgs" placeholder="Aligned SDGs" rows="2"></textarea>
+    <textarea id="nfaRequirements" placeholder="Requirements / infrastructure details" rows="2"></textarea>
+    <h3>Budget Items</h3>
+    <div id="itemsWrap"></div>
+    <button class="secondary" onclick="addItemRow()">+ Add item</button>
+    <div style="margin-top:14px"><button onclick="createNfa()">Create Draft</button></div>
+  `);
+  addItemRow();
+}
+function addItemRow(){
+  const wrap = document.getElementById('itemsWrap');
+  const row = document.createElement('div');
+  row.className = 'item-row';
+  row.innerHTML = `<input placeholder="Particulars" class="it-p" /><input placeholder="Qty" class="it-q" /><input placeholder="Rate" class="it-r" /><input placeholder="Amount" type="number" class="it-a" /><input placeholder="Justification of need" class="it-j" /><button class="link" onclick="this.parentElement.remove()">✕</button>
+    <input placeholder="Comments" class="it-c" /><input placeholder="Basis of budget" class="it-b" /><input placeholder="Previous budget" type="number" class="it-pb" /><input placeholder="Previous actual" type="number" class="it-pa" />`;
+  wrap.appendChild(row);
+}
+async function createNfa(){
+  const proj = document.getElementById('nfaProject');
+  const opt = proj.selectedOptions[0];
+  const items = [...document.querySelectorAll('#itemsWrap .item-row')].map(r=>({
+    particulars: r.querySelector('.it-p').value, quantity: r.querySelector('.it-q').value, rate: r.querySelector('.it-r').value,
+    amount: Number(r.querySelector('.it-a').value)||0, justification: r.querySelector('.it-j').value, comments: r.querySelector('.it-c').value,
+    basis_of_budget: r.querySelector('.it-b').value, previous_year_budget: Number(r.querySelector('.it-pb').value)||0, previous_year_actual: Number(r.querySelector('.it-pa').value)||0
+  })).filter(i=>i.particulars);
+  try {
+    const nfa = await api('/nfas', { method:'POST', body:{
+      project_id: proj.value, department_id: opt.dataset.dept, financial_year_id: opt.dataset.fy, budget_category_id: opt.dataset.cat,
+      title: nfaTitle.value, purpose: nfaPurpose.value, description: nfaDesc.value, justification: nfaJust.value, sdgs: nfaSdgs.value, requirements: nfaRequirements.value,
+      submitted_by_name: nfaFacultyName.value, submitted_by_designation: nfaFacultyDesignation.value, items
+    }});
+    closeModal(); toast('NFA draft created'); openNfa(nfa.id);
+  } catch(e){ toast(e.message); }
+}
+
+async function openNfa(id){
+  const n = await api(`/nfas/${id}`);
+  const canSubmit = n.status==='draft' && n.created_by===USER.id;
+  const canReview1 = n.status==='submitted' && USER.role==='faculty';
+  const canReview2 = n.status==='under_review' && USER.role==='hod';
+  const canFinance = n.status==='pending_higher_approval' && (USER.role==='finance'||USER.role==='super_admin');
+  const canRevise = n.status==='approved' && ['faculty','hod','super_admin'].includes(USER.role);
+
+  let html = `<span class="close" onclick="closeModal()">✕</span>
+    <h2>${n.title} <span class="badge b-${n.status}">${fmtStatus(n.status)}</span></h2>
+    <div class="muted">${n.ref_no} · ${deptName(n.department_id)} · ${catName(n.budget_category_id)} · ${n.date}</div>
+    <p>${n.purpose}</p>
+    <table><thead><tr><th>#</th><th>Particulars</th><th>Qty</th><th>Amount</th></tr></thead><tbody>
+    ${n.items.map(i=>`<tr><td>${i.sl_no}</td><td>${i.particulars}</td><td>${i.quantity}</td><td>${inr(i.amount)}</td></tr>`).join('')}
+    </tbody><tfoot><tr style="font-weight:700"><td colspan="3">Total</td><td>${inr(n.total_amount)}</td></tr></tfoot></table>
+    <div class="row" style="margin-top:14px">
+      <button class="secondary" onclick="downloadPdf('${n.id}')">Download PDF</button>`;
+
+  if (canSubmit) html += `<button onclick="submitNfa('${n.id}')">Submit for Review</button>`;
+  if (canReview1 || canReview2) html += `
+      <button class="green" onclick="reviewNfa('${n.id}','approve')">Approve</button>
+      <button class="danger" onclick="reviewNfa('${n.id}','reject')">Reject</button>
+      <button class="secondary" onclick="reviewNfa('${n.id}','revision_required')">Request Revision</button>`;
+  if (canFinance) html += `
+      <button class="green" onclick="financeDecision('${n.id}','approve')">Approve (Finance)</button>
+      <button class="danger" onclick="financeDecision('${n.id}','reject')">Reject</button>`;
+  if (canRevise) html += `<button class="secondary" onclick="reviseModal('${n.id}', ${n.total_amount})">Revise Budget</button>`;
+  html += `</div>`;
+  if (USER.role==='super_admin' || n.created_by===USER.id || (['faculty','hod'].includes(USER.role) && n.department_id===USER.department_id)) {
+    html += `<div style="margin-top:10px"><button class="danger" onclick="deleteNfa('${n.id}')">Delete NFA</button></div>`;
+  }
+
+  if (n.pending_revision_amount !== undefined) {
+    html += `<div class="muted" style="margin-top:8px">Pending revision to ${inr(n.pending_revision_amount)} — awaiting Finance.</div>`;
+  }
+  openModal(html);
+}
+async function deleteNfa(id){
+  if(!confirm('Delete this NFA?')) return;
+  try { await api(`/nfas/${id}`, {method:'DELETE'}); closeModal(); toast('NFA deleted'); showTab('nfas'); } catch(e){ toast(e.message); }
+}
+async function submitNfa(id){ try{ await api(`/nfas/${id}/submit`,{method:'POST'}); toast('Submitted'); openNfa(id);}catch(e){toast(e.message);} }
+async function reviewNfa(id, decision){
+  const comments = decision!=='approve' ? (prompt('Comments (required for reject/revision):')||'') : '';
+  try {
+    const r = await api(`/nfas/${id}/review`, { method:'POST', body:{ decision, comments }});
+    if (r.escalated) toast('Budget exceeded / above threshold — escalated to Finance');
+    else toast('Review recorded');
+    openNfa(id);
+  } catch(e){ toast(e.message); }
+}
+async function financeDecision(id, decision){
+  const comments = prompt('Comments:')||'';
+  try { await api(`/nfas/${id}/finance-decision`, { method:'POST', body:{ decision, comments }}); toast('Recorded'); openNfa(id); } catch(e){ toast(e.message); }
+}
+function reviseModal(id, current){
+  openModal(`
+    <span class="close" onclick="closeModal()">✕</span>
+    <h2>Revise Budget</h2>
+    <div class="muted">Current: ${inr(current)}</div>
+    <input id="revAmt" type="number" placeholder="New total amount" value="${current}" />
+    <textarea id="revReason" placeholder="Reason for change" rows="2"></textarea>
+    <button onclick="submitRevision('${id}')">Submit Revision</button>
+  `);
+}
+async function submitRevision(id){
+  try {
+    const r = await api(`/nfas/${id}/revise`, { method:'POST', body:{ new_total_amount: Number(revAmt.value), reason: revReason.value }});
+    toast(r.revision.status==='pending_higher_approval' ? `Difference ${inr(r.revision.difference)} — escalated to Finance` : `Updated, difference ${inr(r.revision.difference)}`);
+    openNfa(id);
+  } catch(e){ toast(e.message); }
+}
+
+// ---------- BUDGETS ----------
+async function renderBudgets(main){
+  const availableDepartments = USER.role==='super_admin' || USER.role==='finance' || USER.role==='it_admin'
+    ? REF.departments
+    : REF.departments.filter(d=>d.id===USER.department_id);
+  const dept = availableDepartments.find(d=>d.id===USER.department_id)?.id || availableDepartments[0]?.id;
+  if (!dept) { main.innerHTML = `<div class="card muted">No department is available.</div>`; return; }
+  const summary = await api(`/budgets/${dept}/summary?fy=${activeFy().id}`);
+  let html = `<div class="card"><div class="row" style="justify-content:space-between">
+    <div><h2>${deptName(dept)} — Master Budget (${activeFy().label})</h2>${availableDepartments.length>1?`<select id="budgetDepartment" onchange="changeBudgetDepartment(this.value)" style="max-width:360px;margin-top:4px">${availableDepartments.map(d=>`<option value="${d.id}" ${d.id===dept?'selected':''}>${d.name} (${d.code})</option>`).join('')}</select>`:''}</div>
+    <button class="secondary" onclick="downloadExcel('${dept}')">Export Excel</button>
+    </div>` + budgetTable(summary.lines, summary.totals) + `</div>`;
+  main.innerHTML = html;
+}
+async function changeBudgetDepartment(departmentId){
+  const main = document.getElementById('main');
+  main.innerHTML = '<div class="card muted">Loading budget...</div>';
+  try {
+    const summary = await api(`/budgets/${departmentId}/summary?fy=${activeFy().id}`);
+    main.innerHTML = `<div class="card"><div class="row" style="justify-content:space-between"><div><h2>${deptName(departmentId)} — Master Budget (${activeFy().label})</h2><select id="budgetDepartment" onchange="changeBudgetDepartment(this.value)" style="max-width:360px;margin-top:4px">${REF.departments.map(d=>`<option value="${d.id}" ${d.id===departmentId?'selected':''}>${d.name} (${d.code})</option>`).join('')}</select></div><button class="secondary" onclick="downloadExcel('${departmentId}')">Export Excel</button></div>${budgetTable(summary.lines, summary.totals)}</div>`;
+  } catch(e){ main.innerHTML = `<div class="card" style="color:var(--red)">${e.message}</div>`; }
+}
+
+// ---------- EXCEL ----------
+async function renderExcel(main){
+  let uploadHtml = '';
+  if (['hod','super_admin'].includes(USER.role)) uploadHtml = `<h3>Upload Original Budget</h3><div class="row"><select id="uploadFy">${REF.financialYears.map(f=>`<option value="${f.id}">${f.label}</option>`).join('')}</select><select id="uploadDept">${REF.departments.map(d=>`<option value="${d.id}" ${d.id===USER.department_id?'selected':''}>${d.name}</option>`).join('')}</select><input id="budgetFile" type="file" accept=".xlsx,.xls" /><button onclick="uploadOriginalBudget()">Upload Budget</button></div>`;
+  const dept = USER.department_id || REF.departments[0].id;
+  const records = await api(`/budgets/import/records?department=${dept}`);
+  const originals = await api(`/budgets/uploads?department=${dept}`);
+  let html = `<div class="card"><h2>Excel Import / Synchronization</h2>${uploadHtml}
+    <p class="muted">Upload a modified budget workbook. Changes are previewed as a diff against the database before anything is written.</p>
+    <input type="file" id="excelFile" accept=".xlsx" />
+    <button onclick="previewExcel('${dept}')">Preview Changes</button>
+    <div id="excelResult"></div>
+  </div>
+  <div class="card"><h2>Sync History</h2>
+    <table><thead><tr><th>File</th><th>Status</th><th>Items changed</th><th>Date</th></tr></thead><tbody>
+    ${records.map(r=>`<tr><td>${r.filename}</td><td>${r.status}</td><td>${r.diff.length}</td><td>${new Date(r.created_at).toLocaleString()}</td></tr>`).join('')}
+    </tbody></table>
+  </div>`;
+  html += `<div class="card"><h2>Original Uploaded Budgets</h2><table><thead><tr><th>File</th><th>Year</th><th>Uploaded</th></tr></thead><tbody>${originals.uploads.map(u=>`<tr><td>${u.filename}</td><td>${REF.financialYears.find(f=>f.id===u.financial_year_id)?.label || u.financial_year_id}</td><td>${new Date(u.uploaded_at).toLocaleString()}</td></tr>`).join('') || '<tr><td colspan="3">No original budget uploaded</td></tr>'}</tbody></table></div>`;
+  main.innerHTML = html;
+}
+async function uploadOriginalBudget(){
+  const file = document.getElementById('budgetFile').files[0];
+  if (!file) return toast('Choose an Excel file first');
+  const fd = new FormData(); fd.append('file', file); fd.append('department_id', uploadDept.value); fd.append('financial_year_id', uploadFy.value);
+  try { await api('/budgets/upload', {method:'POST', body:fd}); toast('Original budget uploaded safely'); showTab('excel'); } catch(e){ toast(e.message); }
+}
+async function previewExcel(dept){
+  const f = document.getElementById('excelFile').files[0];
+  if (!f) return toast('Choose a file first');
+  const fd = new FormData(); fd.append('file', f); fd.append('department_id', dept); fd.append('financial_year_id', activeFy().id);
+  try {
+    const r = await api('/budgets/import/preview', { method:'POST', body: fd });
+    window.lastExcelSheets = r.sheets || [];
+    const changed = r.diffs.filter(d=>d.change_type!=='new');
+    const added = r.diffs.filter(d=>d.change_type==='new');
+    let h = `<h3>Uploaded workbook</h3><div class="sheet-tabs">${r.sheets.map((s,i)=>`<button class="sheet-tab ${i===0?'active':''}" onclick="showUploadedSheet(this,'${s.name.replace(/'/g,"\\'")}')">${s.name}</button>`).join('')}</div>`;
+    h += `<div id="uploadedSheetInfo" class="muted">${r.sheets[0] ? `${r.sheets[0].rows} rows · ${r.sheets[0].columns} columns · ${r.sheets[0].headers.join(' · ')}` : 'No sheets found'}</div>`;
+    h += `<h3>Detected changes (${r.diffs.length})</h3>`;
+    if (!r.diffs.length) h += `<div class="muted">No differences found.</div>`;
+    else {
+      h += `<table><thead><tr><th>Change</th><th>Item</th><th>Old</th><th>New</th><th>Difference</th></tr></thead><tbody>`;
+      r.diffs.forEach(d=>{ h += `<tr><td>${d.change_type==='new'?'New row':'Changed'}</td><td>${d.particulars}</td><td>${d.old_amount===null?'(new)':inr(d.old_amount)}</td><td>${inr(d.new_amount)}</td><td style="color:${d.difference<0?'var(--green)':'var(--amber)'}">${d.difference>0?'+':''}${inr(d.difference)}</td></tr>`; });
+      h += `</tbody></table><div class="row" style="margin-top:10px"><button onclick="confirmExcel('${r.sync_record_id}','${dept}')">Apply ${changed.length} matched change(s)</button>${added.length?`<span class="muted">${added.length} new row(s) shown above need an NFA/project before they can be added.</span>`:''}</div>`;
+    }
+    document.getElementById('excelResult').innerHTML = h;
+  } catch(e){ toast(e.message); }
+}
+function showUploadedSheet(button, name){
+  document.querySelectorAll('.sheet-tab').forEach(tab=>tab.classList.remove('active'));
+  button.classList.add('active');
+  const sheets = window.lastExcelSheets || [];
+  const sheet = sheets.find(s=>s.name===name);
+  if (sheet) document.getElementById('uploadedSheetInfo').textContent = `${sheet.rows} rows · ${sheet.columns} columns · ${sheet.headers.join(' · ')}`;
+}
+async function confirmExcel(syncId, dept){
+  try { const r = await api(`/budgets/import/confirm/${syncId}`, { method:'POST' }); toast(`Applied ${r.applied.length} change(s)`); showTab('excel'); } catch(e){ toast(e.message); }
+}
+
+// ---------- AUDIT ----------
+async function renderAudit(main){
+  const logs = await api('/audit');
+  const changes = await api('/audit/budget-changes');
+  let html = `<div class="card"><h2>Audit History</h2>
+    <table><thead><tr><th>When</th><th>Entity</th><th>Old</th><th>New</th><th>Diff</th><th>By</th><th>Source</th><th>Status</th><th>Reason</th></tr></thead><tbody>`;
+  logs.forEach(l=>{
+    const u = null;
+    html += `<tr><td>${new Date(l.created_at).toLocaleString()}</td><td>${l.entity_type}</td><td>${l.old_amount!==null?inr(l.old_amount):'—'}</td><td>${l.new_amount!==null?inr(l.new_amount):'—'}</td><td>${l.difference!==null?((l.difference>0?'+':'')+inr(l.difference)):'—'}</td><td>${l.role}</td><td>${l.source}</td><td>${l.approval_status}</td><td class="muted">${l.reason}</td></tr>`;
+  });
+  html += `</tbody></table></div>`;
+  html += `<div class="card"><h2>Budget Version History</h2><table><thead><tr><th>Version</th><th>When</th><th>Action</th><th>Previous</th><th>New</th><th>Status</th><th>Description</th></tr></thead><tbody>${changes.map(c=>`<tr><td>V${c.version}</td><td>${new Date(c.created_at).toLocaleString()}</td><td>${c.action}</td><td>${c.previous_value || '—'}</td><td>${c.new_value || '—'}</td><td>${c.approval_status}</td><td>${c.description}</td></tr>`).join('')}</tbody></table></div>`;
+  main.innerHTML = html;
+}
+
+// ---------- ADMIN ----------
+async function renderAdmin(main){
+  const departments = await api('/budgets/departments');
+  const users = await api('/admin/users');
+  let html = `<div class="card"><h2>Financial Years</h2>
+    <div class="row"><input id="fyLabel" placeholder="e.g. 2027-28" style="max-width:200px" /><button onclick="addFy()">Add</button></div>
+    <table><thead><tr><th>Label</th><th>Active</th><th></th></tr></thead><tbody>
+    ${REF.financialYears.map(f=>`<tr><td>${f.label}</td><td>${f.is_active?'✓':''}</td><td>${!f.is_active?`<button class="link" onclick="activateFy('${f.id}')">Set active</button>`:''}</td></tr>`).join('')}
+    </tbody></table></div>
+  <div class="card"><h2>Create Department</h2>
+    <div class="grid"><input id="departmentName" placeholder="Department name" /><input id="departmentCode" placeholder="Department code, e.g. CSE" /></div>
+    <button onclick="addDepartment()">Create Department</button>
+  </div>
+  <div class="card"><h2>Department Approval Names</h2><p class="muted">These names appear on newly generated NFA PDFs.</p>
+    <table><thead><tr><th>Department</th><th>Faculty</th><th>HOD</th><th>Dean</th><th>Associate Dean</th><th>Director</th><th>Finance Officer</th><th></th></tr></thead><tbody>
+    ${departments.map(d=>`<tr><td>${d.name}</td><td><input id="faculty-${d.id}" value="${d.faculty_name||''}" /></td><td><input id="hod-${d.id}" value="${d.hod_name||''}" /></td><td><input id="dean-${d.id}" value="${d.dean_name||''}" /></td><td><input id="associate-dean-${d.id}" value="${d.associate_dean_name||''}" /></td><td><input id="director-${d.id}" value="${d.director_name||''}" /></td><td><input id="finance-${d.id}" value="${d.finance_officer_name||''}" /></td><td><button class="secondary" onclick="updateDepartment('${d.id}')">Save</button></td></tr>`).join('')}
+    </tbody></table></div>
+  <div class="card"><h2>Users</h2>
+    <div class="grid">
+      <input id="userName" placeholder="Full name" />
+      <input id="userEmail" type="email" placeholder="Email" />
+      <input id="userPassword" type="password" placeholder="Temporary password" />
+      <select id="userRole">
+        <option value="faculty">Faculty / Professor</option>
+        <option value="hod">HOD</option>
+        <option value="student">Student</option>
+        <option value="finance">Finance</option>
+        <option value="it_admin">IT Administrator</option>
+        <option value="super_admin">Super Admin</option>
+      </select>
+      <select id="userDepartment"><option value="">No department</option>${REF.departments.map(d=>`<option value="${d.id}">${d.name}</option>`).join('')}</select>
+    </div>
+    <button onclick="addUser()">Create User</button>
+    <table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Department</th><th></th></tr></thead><tbody>
+    ${users.map(u=>`<tr><td><input id="user-name-${u.id}" value="${u.name}" /></td><td>${u.email}</td><td>${u.role}</td><td>${u.department_id?deptName(u.department_id):'—'}</td><td><div class="row"><button class="secondary" onclick="updateUser('${u.id}')">Save</button><button class="danger" onclick="removeUser('${u.id}', '${u.name.replace(/'/g, "\\'")}')">Remove</button></div></td></tr>`).join('')}
+  </tbody></table></div>`;
+  main.innerHTML = html;
+}
+async function addFy(){ try{ await api('/admin/financial-years',{method:'POST',body:{label:fyLabel.value}}); toast('Added'); const fys=await api('/budgets/financial-years'); REF.financialYears=fys; showTab('admin'); }catch(e){toast(e.message);} }
+async function activateFy(id){ try{ await api(`/admin/financial-years/${id}/activate`,{method:'PUT'}); const fys=await api('/budgets/financial-years'); REF.financialYears=fys; toast('Activated'); showTab('admin'); }catch(e){toast(e.message);} }
+async function addDepartment(){
+  try {
+    await api('/admin/departments', { method:'POST', body:{ name: departmentName.value, code: departmentCode.value.trim().toUpperCase() } });
+    REF.departments = await api('/budgets/departments');
+    toast('Department created');
+    showTab('admin');
+  } catch(e){ toast(e.message); }
+}
+async function addUser(){
+  try {
+    await api('/admin/users', { method:'POST', body:{
+      name: userName.value, email: userEmail.value, password: userPassword.value,
+      role: userRole.value, department_id: userDepartment.value || null
+    }});
+    toast('User created');
+    showTab('admin');
+  } catch(e){ toast(e.message); }
+}
+async function updateDepartment(id){
+  try {
+    await api(`/admin/departments/${id}`, { method:'PUT', body:{ faculty_name: document.getElementById(`faculty-${id}`).value, hod_name: document.getElementById(`hod-${id}`).value, dean_name: document.getElementById(`dean-${id}`).value, associate_dean_name: document.getElementById(`associate-dean-${id}`).value, director_name: document.getElementById(`director-${id}`).value, finance_officer_name: document.getElementById(`finance-${id}`).value } });
+    REF.departments = await api('/budgets/departments');
+    toast('Department names updated');
+  } catch(e){ toast(e.message); }
+}
+async function updateUser(id){
+  try {
+    await api(`/admin/users/${id}`, { method:'PUT', body:{ name: document.getElementById(`user-name-${id}`).value } });
+    toast('User name updated');
+  } catch(e){ toast(e.message); }
+}
+async function removeUser(id, name){
+  if(!confirm(`Remove user ${name}?`)) return;
+  try {
+    await api(`/admin/users/${id}`, { method:'DELETE' });
+    toast('User removed');
+    showTab('admin');
+  } catch(e){ toast(e.message); }
+}
+
+// ---------- MODAL ----------
+function openModal(html){ document.getElementById('modalBody').innerHTML = html; document.getElementById('modalBg').style.display='flex'; }
+function closeModal(){ document.getElementById('modalBg').style.display='none'; }
+document.getElementById('modalBg').addEventListener('click', e=>{ if(e.target.id==='modalBg') closeModal(); });
+
+// ---------- INIT ----------
+if (TOKEN && USER) boot(); else loadDemoAccounts();
+</script>
+</body>
+</html>

@@ -1,0 +1,488 @@
+{
+  "users": [
+    {
+      "id": "532c6129-cbab-45f2-a70d-94b653d4d855",
+      "name": "Ananya Rao",
+      "email": "student@christ.edu",
+      "password_hash": "$2a$08$fso9z8FixiaO2RKDp7xiMO6j9EYWZ5xpbaQfOfXSlSaEvW6l.vw4a",
+      "role": "student",
+      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
+      "created_at": "2026-08-25T08:35:07.312Z"
+    },
+    {
+      "id": "05fee8aa-7cd5-4168-bc21-3b20ea533f62",
+      "name": "Dr Arul V",
+      "email": "faculty@christ.edu",
+      "password_hash": "$2a$08$fso9z8FixiaO2RKDp7xiMO6j9EYWZ5xpbaQfOfXSlSaEvW6l.vw4a",
+      "role": "faculty",
+      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
+      "created_at": "2026-08-25T08:35:07.312Z"
+    },
+    {
+      "id": "53709076-c3be-46eb-a123-0be426a086ee",
+      "name": "Dr Michael Moses T",
+      "email": "hod@christ.edu",
+      "password_hash": "$2a$08$fso9z8FixiaO2RKDp7xiMO6j9EYWZ5xpbaQfOfXSlSaEvW6l.vw4a",
+      "role": "hod",
+      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
+      "created_at": "2026-08-25T08:35:07.312Z"
+    },
+    {
+      "id": "3db93f9d-d4b9-4534-a700-cdba8df2d6a0",
+      "name": "Fr Shijin P J",
+      "email": "finance@christ.edu",
+      "password_hash": "$2a$08$fso9z8FixiaO2RKDp7xiMO6j9EYWZ5xpbaQfOfXSlSaEvW6l.vw4a",
+      "role": "finance",
+      "department_id": null,
+      "created_at": "2026-08-25T08:35:07.312Z"
+    },
+    {
+      "id": "5bc13647-3a05-4705-b376-19ffaeed45c2",
+      "name": "System Admin",
+      "email": "admin@christ.edu",
+      "password_hash": "$2a$08$fso9z8FixiaO2RKDp7xiMO6j9EYWZ5xpbaQfOfXSlSaEvW6l.vw4a",
+      "role": "super_admin",
+      "department_id": null,
+      "created_at": "2026-08-25T08:35:07.312Z"
+    },
+    {
+      "id": "1ed1919a-2c53-4608-a51f-32380353e702",
+      "name": "IT Administrator",
+      "email": "itadmin@christ.edu",
+      "password_hash": "$2a$08$fso9z8FixiaO2RKDp7xiMO6j9EYWZ5xpbaQfOfXSlSaEvW6l.vw4a",
+      "role": "it_admin",
+      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
+      "created_at": "2026-08-25T08:35:07.312Z"
+    },
+    {
+      "id": "067c03ec-9464-4542-bcff-5c3d90253600",
+      "name": "2462348",
+      "email": "prajin.s@btech.christuniversity.in",
+      "password_hash": "$2a$08$llYRa9fWJAxqAb0uqSdJ..vV9j6K70Xwfpy6LJyneRh8E0R4qGiyi",
+      "role": "student",
+      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
+      "created_at": "2026-08-28T12:06:39.750Z"
+    }
+  ],
+  "departments": [
+    {
+      "id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
+      "name": "Computer Science and Engineering",
+      "code": "CSE",
+      "hod_name": "Dr M Balamurugan",
+      "dean_name": "Dr Raghunandhankumar"
+    },
+    {
+      "id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
+      "name": "Applied Data Science and Engineering",
+      "code": "ADSE",
+      "hod_name": "Dr Michael Moses T",
+      "dean_name": "Dr Mary Anita E A"
+    }
+  ],
+  "financial_years": [
+    {
+      "id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "label": "2026-27",
+      "is_active": true
+    },
+    {
+      "id": "6986edcf-0285-46c0-bd17-1076f299dc98",
+      "label": "2027-28",
+      "is_active": false
+    }
+  ],
+  "budget_types": [
+    {
+      "id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Revenue Expenditure"
+    },
+    {
+      "id": "ecdfc569-50b7-4242-adf2-102a8a3ff266",
+      "name": "CAPEX"
+    },
+    {
+      "id": "53aa7a65-a652-4e86-beef-c7acf806a48c",
+      "name": "Revenue / Earnings"
+    }
+  ],
+  "budget_categories": [
+    {
+      "id": "8a82532c-e7f4-457a-a8f7-9979f008c616",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "External Remuneration"
+    },
+    {
+      "id": "e8b44f98-cbe2-4713-baa3-88e06abd2c2d",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Staff Development & Welfare"
+    },
+    {
+      "id": "a7c78e5e-4ced-46f8-b6f3-09687bad9ef5",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Student Related Expenses"
+    },
+    {
+      "id": "2e3e2f81-ebfa-432c-a9c7-49e09b0ddc02",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Administrative Expenses"
+    },
+    {
+      "id": "5990ce8a-25a2-4a53-a736-49169c5f2053",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Others"
+    }
+  ],
+  "department_budgets": [
+    {
+      "id": "48e8349e-83ac-46f5-8f86-e86757e7d267",
+      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "8a82532c-e7f4-457a-a8f7-9979f008c616",
+      "allocated_amount": 6530000,
+      "approved_amount": 6530000,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "78801a97-786d-4109-8541-74a5a45e5efe",
+      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "e8b44f98-cbe2-4713-baa3-88e06abd2c2d",
+      "allocated_amount": 2585000,
+      "approved_amount": 2585000,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "644c301d-8aef-4b89-b533-33512bc13d2b",
+      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "a7c78e5e-4ced-46f8-b6f3-09687bad9ef5",
+      "allocated_amount": 13978700,
+      "approved_amount": 13861000,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "5f447282-d881-4357-8a38-ea80cca9d7e0",
+      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "2e3e2f81-ebfa-432c-a9c7-49e09b0ddc02",
+      "allocated_amount": 745000,
+      "approved_amount": 745000,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "c6bff7df-5be9-4d31-9f84-5e25be5e2bc7",
+      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "5990ce8a-25a2-4a53-a736-49169c5f2053",
+      "allocated_amount": 7300000,
+      "approved_amount": 7300000,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "13b7b39e-c4eb-4a0f-af46-c402cd2088fb",
+      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "8a82532c-e7f4-457a-a8f7-9979f008c616",
+      "allocated_amount": 1306000,
+      "approved_amount": 653000,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "f05a08b7-197d-4293-8e7d-f1888160cb4d",
+      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "e8b44f98-cbe2-4713-baa3-88e06abd2c2d",
+      "allocated_amount": 517000,
+      "approved_amount": 258500,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "43e4cb33-e02d-46dd-85e6-513fec376676",
+      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "a7c78e5e-4ced-46f8-b6f3-09687bad9ef5",
+      "allocated_amount": 2795740,
+      "approved_amount": 2678040,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "f3a60fd5-238e-4bc0-95ee-4cf448435b2f",
+      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "2e3e2f81-ebfa-432c-a9c7-49e09b0ddc02",
+      "allocated_amount": 149000,
+      "approved_amount": 74500,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "058c2abb-f1e8-4133-9727-179d1b828c95",
+      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "5990ce8a-25a2-4a53-a736-49169c5f2053",
+      "allocated_amount": 1460000,
+      "approved_amount": 730000,
+      "pending_amount": 0,
+      "revised_amount": 0
+    }
+  ],
+  "projects": [
+    {
+      "id": "54737b0d-763e-4abe-a5e3-3b49ec5ffb4c",
+      "name": "Server Infrastructure Plan for School of Engineering ERP System",
+      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "a7c78e5e-4ced-46f8-b6f3-09687bad9ef5",
+      "created_by": "05fee8aa-7cd5-4168-bc21-3b20ea533f62",
+      "status": "active",
+      "created_at": "2026-08-25T08:35:07.312Z"
+    }
+  ],
+  "nfas": [
+    {
+      "id": "e8ff6001-0efa-409d-8854-e7cd8ac8ce84",
+      "ref_no": "NFA/CU/SoET/ADSE/2026-27/004",
+      "project_id": "54737b0d-763e-4abe-a5e3-3b49ec5ffb4c",
+      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "a7c78e5e-4ced-46f8-b6f3-09687bad9ef5",
+      "title": "Server Infrastructure Plan for School of Engineering ERP System",
+      "purpose": "The Department of ADSE seeks approval to design and implement a centralized Server Infrastructure Plan for the School of Engineering's ERP system, serving approx. 2,000 students and faculty across all eight departments.",
+      "description": "Infrastructure deployed on Ubuntu Server 22.04 LTS, secured through Role-Based Access Control (RBAC). Executed with technical support from the department IT Administrator; no external resource person required.",
+      "justification": "Replaces fragmented, manual record-keeping with a scalable, reliable, and secure digital system that improves administrative efficiency across the institution.",
+      "sdgs": "SDG 4 - Quality Education; SDG 9 - Industry, Innovation and Infrastructure",
+      "total_amount": 117700,
+      "status": "draft",
+      "created_by": "05fee8aa-7cd5-4168-bc21-3b20ea533f62",
+      "submitted_by_name": "Dr Arul V, Asst. Professor, Dept. of ADSE",
+      "hod_name": "Dr Michael Moses T, HOD / Coordinator, Dept. of ADSE",
+      "date": "2026-08-01",
+      "created_at": "2026-08-25T08:35:07.312Z",
+      "updated_at": "2026-08-25T08:35:07.312Z"
+    },
+    {
+      "id": "7cece5b9-ad95-4926-b220-2c058a879a08",
+      "ref_no": "NFA/CU/330A/2026/002",
+      "project_id": "54737b0d-763e-4abe-a5e3-3b49ec5ffb4c",
+      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "a7c78e5e-4ced-46f8-b6f3-09687bad9ef5",
+      "title": "Bootcamp",
+      "purpose": "pvijd df w",
+      "description": "v wrf erwf efpeqfqe wc0ghrwjigjrimi42tj-qecofjcs ḍl̥ṅṇfn vrpigjw cto3jtv rjgioer nvpfgmcpcgerpgrigh vorgr",
+      "justification": "rerpongc,trccgn5 v;rtjwot cpwtpwt w;rjtrnklkf df/b f bwrogwn,aS",
+      "sdgs": "elfeef;enfpe",
+      "requirements": "ef;kfnepf e",
+      "total_amount": 55338,
+      "status": "submitted",
+      "created_by": "53709076-c3be-46eb-a123-0be426a086ee",
+      "submitted_by_name": "Dr Michael Moses T",
+      "hod_name": "",
+      "date": "2026-08-28",
+      "created_at": "2026-08-28T11:30:37.389Z",
+      "updated_at": "2026-08-28T11:30:51.141Z"
+    }
+  ],
+  "nfa_items": [
+    {
+      "id": "1735b9cb-8664-4739-b9ef-f8664641c4c0",
+      "nfa_id": "e8ff6001-0efa-409d-8854-e7cd8ac8ce84",
+      "sl_no": 1,
+      "particulars": "Server Hardware (8-core CPU, 32 GB RAM, ECC Motherboard, RAID)",
+      "quantity": "1 Unit",
+      "amount": 90000
+    },
+    {
+      "id": "c8047b60-df01-45fb-96be-1d833b939bd3",
+      "nfa_id": "e8ff6001-0efa-409d-8854-e7cd8ac8ce84",
+      "sl_no": 2,
+      "particulars": "Storage - 2 TB SSD",
+      "quantity": "1 Unit",
+      "amount": 5500
+    },
+    {
+      "id": "d045ffbc-bd93-45e7-9f0c-eabc8875e9be",
+      "nfa_id": "e8ff6001-0efa-409d-8854-e7cd8ac8ce84",
+      "sl_no": 3,
+      "particulars": "UPS (Power Backup)",
+      "quantity": "1 Unit",
+      "amount": 11500
+    },
+    {
+      "id": "2b51976b-dcb3-48fd-b9b6-6592bd9b260c",
+      "nfa_id": "e8ff6001-0efa-409d-8854-e7cd8ac8ce84",
+      "sl_no": 4,
+      "particulars": "Network Setup (Gigabit Ethernet, Switches, Cabling)",
+      "quantity": "1 Set",
+      "amount": 7500
+    },
+    {
+      "id": "c888b1ad-9b64-4a5f-ba76-a492afc792bb",
+      "nfa_id": "e8ff6001-0efa-409d-8854-e7cd8ac8ce84",
+      "sl_no": 5,
+      "particulars": "Backup Solution",
+      "quantity": "1 Set",
+      "amount": 2000
+    },
+    {
+      "id": "12707ec8-ec27-4a34-a4b9-84d10f548c1e",
+      "nfa_id": "e8ff6001-0efa-409d-8854-e7cd8ac8ce84",
+      "sl_no": 6,
+      "particulars": "Domain (Annual)",
+      "quantity": "1 Year",
+      "amount": 1200
+    },
+    {
+      "id": "8cd26887-d845-45cd-8f0d-6dae17fc0a2c",
+      "nfa_id": "7cece5b9-ad95-4926-b220-2c058a879a08",
+      "sl_no": 1,
+      "particulars": "868",
+      "quantity": "85",
+      "rate": "457",
+      "amount": 55338,
+      "comments": "",
+      "justification": "86",
+      "basis_of_budget": "",
+      "previous_year_budget": 0,
+      "previous_year_actual": 0
+    }
+  ],
+  "approvals": [],
+  "budget_transactions": [],
+  "audit_logs": [
+    {
+      "id": "21235fde-b8f5-4375-bed5-520173bd9a58",
+      "entity_type": "excel_sync",
+      "entity_id": "717bc88c-c91a-4d0c-845e-41479f2a1ca9",
+      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
+      "old_amount": null,
+      "new_amount": null,
+      "difference": null,
+      "changed_by": "53709076-c3be-46eb-a123-0be426a086ee",
+      "role": "hod",
+      "reason": "Confirmed Excel sync of CSE_Financial_Budget_for_2026-2027_with_ERP_Project_v2_student_expenses.xlsx: 0 item(s) updated",
+      "source": "excel",
+      "approval_status": "confirmed",
+      "created_at": "2026-08-25T12:50:12.854Z"
+    },
+    {
+      "id": "1c233fb3-9875-4163-9b3a-643b94f1c2d0",
+      "entity_type": "excel_sync",
+      "entity_id": "a6182103-16d3-472e-90aa-e2c42de372b8",
+      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
+      "old_amount": null,
+      "new_amount": null,
+      "difference": null,
+      "changed_by": "53709076-c3be-46eb-a123-0be426a086ee",
+      "role": "hod",
+      "reason": "Confirmed Excel sync of budget-330ada81-5246-4c92-9ca2-688eae0f28d4-2026-27 (1).xlsx: 0 item(s) updated",
+      "source": "excel",
+      "approval_status": "confirmed",
+      "created_at": "2026-08-25T13:11:08.794Z"
+    },
+    {
+      "id": "7a48a4fe-599d-4f00-8f58-1a7263bab8d0",
+      "entity_type": "excel_sync",
+      "entity_id": "637a599d-18e6-4c96-8c49-d3c09067f1f5",
+      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
+      "old_amount": null,
+      "new_amount": null,
+      "difference": null,
+      "changed_by": "53709076-c3be-46eb-a123-0be426a086ee",
+      "role": "hod",
+      "reason": "Confirmed Excel sync of budget-330ada81-5246-4c92-9ca2-688eae0f28d4-2026-27 (1).xlsx: 0 item(s) updated",
+      "source": "excel",
+      "approval_status": "confirmed",
+      "created_at": "2026-08-28T11:54:11.826Z"
+    }
+  ],
+  "excel_sync_records": [
+    {
+      "id": "717bc88c-c91a-4d0c-845e-41479f2a1ca9",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
+      "filename": "CSE_Financial_Budget_for_2026-2027_with_ERP_Project_v2_student_expenses.xlsx",
+      "status": "confirmed",
+      "diff_json": "[{\"particulars\":\"Adjunct Faculty Honorarium (Refer note 2)\",\"old_amount\":null,\"new_amount\":4680000,\"difference\":4680000,\"matched_nfa_id\":null},{\"particulars\":\"Guest Lectures\",\"old_amount\":null,\"new_amount\":25000,\"difference\":25000,\"matched_nfa_id\":null},{\"particulars\":\"Guest Relation\",\"old_amount\":null,\"new_amount\":25000,\"difference\":25000,\"matched_nfa_id\":null},{\"particulars\":\"Remenuration to Consultants\",\"old_amount\":null,\"new_amount\":1600000,\"difference\":1600000,\"matched_nfa_id\":null},{\"particulars\":\"Project Viva\",\"old_amount\":null,\"new_amount\":75000,\"difference\":75000,\"matched_nfa_id\":null},{\"particulars\":\"Professor in Practice\",\"old_amount\":null,\"new_amount\":125000,\"difference\":125000,\"matched_nfa_id\":null},{\"particulars\":\"Faculty Development Programme\",\"old_amount\":null,\"new_amount\":400000,\"difference\":400000,\"matched_nfa_id\":null},{\"particulars\":\"Seminar\",\"old_amount\":null,\"new_amount\":75000,\"difference\":75000,\"matched_nfa_id\":null},{\"particulars\":\"Workshops\",\"old_amount\":null,\"new_amount\":100000,\"difference\":100000,\"matched_nfa_id\":null},{\"particulars\":\"Conference\",\"old_amount\":null,\"new_amount\":400000,\"difference\":400000,\"matched_nfa_id\":null},{\"particulars\":\"Membership Reimbursement\",\"old_amount\":null,\"new_amount\":200000,\"difference\":200000,\"matched_nfa_id\":null},{\"particulars\":\"Travel & Conveyance - Conveyance\",\"old_amount\":null,\"new_amount\":400000,\"difference\":400000,\"matched_nfa_id\":null},{\"particulars\":\"Travel & Conveyance - Domestic Travel\",\"old_amount\":null,\"new_amount\":200000,\"difference\":200000,\"matched_nfa_id\":null},{\"particulars\":\"Travel & Conveyance - International Travel\",\"old_amount\":null,\"new_amount\":200000,\"difference\":200000,\"matched_nfa_id\":null},{\"particulars\":\"Fests/Seminars / Workshops / Events  #(Specify) (Refer note 3)\",\"old_amount\":null,\"new_amount\":2261000,\"difference\":2261000,\"matched_nfa_id\":null},{\"particulars\":\"Fee Concession\",\"old_amount\":null,\"new_amount\":4200000,\"difference\":4200000,\"matched_nfa_id\":null},{\"particulars\":\"Scholarships\",\"old_amount\":null,\"new_amount\":4200000,\"difference\":4200000,\"matched_nfa_id\":null},{\"particulars\":\"Contribution for Social Cause (Student Sensitization)\",\"old_amount\":null,\"new_amount\":100000,\"difference\":100000,\"matched_nfa_id\":null},{\"particulars\":\"Charges for Training students\\n\\nPlacement Training for 2nd year & 3 rd Year students\",\"old_amount\":null,\"new_amount\":1000000,\"difference\":1000000,\"matched_nfa_id\":null},{\"particulars\":\"Inauguration Expenses\",\"old_amount\":null,\"new_amount\":50000,\"difference\":50000,\"matched_nfa_id\":null},{\"particulars\":\"Exhibitions\",\"old_amount\":null,\"new_amount\":100000,\"difference\":100000,\"matched_nfa_id\":null},{\"particulars\":\"Registration Fee and Travel for external fests and events\",\"old_amount\":null,\"new_amount\":1000000,\"difference\":1000000,\"matched_nfa_id\":null},{\"particulars\":\"Student project Development\",\"old_amount\":null,\"new_amount\":200000,\"difference\":200000,\"matched_nfa_id\":null},{\"particulars\":\"Students Research Internship\",\"old_amount\":null,\"new_amount\":150000,\"difference\":150000,\"matched_nfa_id\":null},{\"particulars\":\"Server Infrastructure Plan for ERP System\",\"old_amount\":null,\"new_amount\":117700,\"difference\":117700,\"matched_nfa_id\":null},{\"particulars\":\"Membership & Registration Fee for external agencies\",\"old_amount\":null,\"new_amount\":200000,\"difference\":200000,\"matched_nfa_id\":null},{\"particulars\":\"Postage, Stamps & Couriers\",\"old_amount\":null,\"new_amount\":10000,\"difference\":10000,\"matched_nfa_id\":null},{\"particulars\":\"Printing\",\"old_amount\":null,\"new_amount\":100000,\"difference\":100000,\"matched_nfa_id\":null},{\"particulars\":\"Photocopying & Binding\",\"old_amount\":null,\"new_amount\":100000,\"difference\":100000,\"matched_nfa_id\":null},{\"particulars\":\"Stationery (Paper, pens, writing pads etc.)\",\"old_amount\":null,\"new_amount\":100000,\"difference\":100000,\"matched_nfa_id\":null},{\"particulars\":\"(mention separately the list of Department/ Academic meetings planned)\",\"old_amount\":null,\"new_amount\":210000,\"difference\":210000,\"matched_nfa_id\":null},{\"particulars\":\"Refreshments to Guests\",\"old_amount\":null,\"new_amount\":25000,\"difference\":25000,\"matched_nfa_id\":null},{\"particulars\":\"Internal Projects (Seed Money)\",\"old_amount\":null,\"new_amount\":4000000,\"difference\":4000000,\"matched_nfa_id\":null},{\"particulars\":\"Academic renewals\",\"old_amount\":null,\"new_amount\":300000,\"difference\":300000,\"matched_nfa_id\":null},{\"particulars\":\"Rankings related\",\"old_amount\":null,\"new_amount\":500000,\"difference\":500000,\"matched_nfa_id\":null}]",
+      "created_by": "53709076-c3be-46eb-a123-0be426a086ee",
+      "created_at": "2026-08-25T12:49:55.198Z"
+    },
+    {
+      "id": "bb59a240-be13-40dc-9a6a-a2c805a7c2f6",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
+      "filename": "reference.xlsx",
+      "status": "pending_review",
+      "diff_json": "[{\"particulars\":\"Adjunct Faculty Honorarium (Refer note 2)\",\"old_amount\":null,\"new_amount\":4680000,\"difference\":4680000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Guest Lectures\",\"old_amount\":null,\"new_amount\":25000,\"difference\":25000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Guest Relation\",\"old_amount\":null,\"new_amount\":25000,\"difference\":25000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Remenuration to Consultants\",\"old_amount\":null,\"new_amount\":1600000,\"difference\":1600000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Project Viva\",\"old_amount\":null,\"new_amount\":75000,\"difference\":75000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Professor in Practice\",\"old_amount\":null,\"new_amount\":125000,\"difference\":125000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Faculty Development Programme\",\"old_amount\":null,\"new_amount\":400000,\"difference\":400000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Seminar\",\"old_amount\":null,\"new_amount\":75000,\"difference\":75000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Workshops\",\"old_amount\":null,\"new_amount\":100000,\"difference\":100000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Conference\",\"old_amount\":null,\"new_amount\":400000,\"difference\":400000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Membership Reimbursement\",\"old_amount\":null,\"new_amount\":200000,\"difference\":200000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Travel & Conveyance - Conveyance\",\"old_amount\":null,\"new_amount\":400000,\"difference\":400000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Travel & Conveyance - Domestic Travel\",\"old_amount\":null,\"new_amount\":200000,\"difference\":200000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Travel & Conveyance - International Travel\",\"old_amount\":null,\"new_amount\":200000,\"difference\":200000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Fests/Seminars / Workshops / Events  #(Specify) (Refer note 3)\",\"old_amount\":null,\"new_amount\":2261000,\"difference\":2261000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Fee Concession\",\"old_amount\":null,\"new_amount\":4200000,\"difference\":4200000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Scholarships\",\"old_amount\":null,\"new_amount\":4200000,\"difference\":4200000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Contribution for Social Cause (Student Sensitization)\",\"old_amount\":null,\"new_amount\":100000,\"difference\":100000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Charges for Training students\\n\\nPlacement Training for 2nd year & 3 rd Year students\",\"old_amount\":null,\"new_amount\":1000000,\"difference\":1000000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Inauguration Expenses\",\"old_amount\":null,\"new_amount\":50000,\"difference\":50000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Exhibitions\",\"old_amount\":null,\"new_amount\":100000,\"difference\":100000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Registration Fee and Travel for external fests and events\",\"old_amount\":null,\"new_amount\":1000000,\"difference\":1000000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Student project Development\",\"old_amount\":null,\"new_amount\":200000,\"difference\":200000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Students Research Internship\",\"old_amount\":null,\"new_amount\":150000,\"difference\":150000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Server Infrastructure Plan for ERP System\",\"old_amount\":null,\"new_amount\":117700,\"difference\":117700,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Membership & Registration Fee for external agencies\",\"old_amount\":null,\"new_amount\":200000,\"difference\":200000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Postage, Stamps & Couriers\",\"old_amount\":null,\"new_amount\":10000,\"difference\":10000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Printing\",\"old_amount\":null,\"new_amount\":100000,\"difference\":100000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Photocopying & Binding\",\"old_amount\":null,\"new_amount\":100000,\"difference\":100000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Stationery (Paper, pens, writing pads etc.)\",\"old_amount\":null,\"new_amount\":100000,\"difference\":100000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"(mention separately the list of Department/ Academic meetings planned)\",\"old_amount\":null,\"new_amount\":210000,\"difference\":210000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Refreshments to Guests\",\"old_amount\":null,\"new_amount\":25000,\"difference\":25000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Internal Projects (Seed Money)\",\"old_amount\":null,\"new_amount\":4000000,\"difference\":4000000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Academic renewals\",\"old_amount\":null,\"new_amount\":300000,\"difference\":300000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Rankings related\",\"old_amount\":null,\"new_amount\":500000,\"difference\":500000,\"matched_nfa_id\":null,\"change_type\":\"new\"}]",
+      "created_by": "53709076-c3be-46eb-a123-0be426a086ee",
+      "created_at": "2026-08-25T12:57:23.865Z"
+    },
+    {
+      "id": "a6182103-16d3-472e-90aa-e2c42de372b8",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
+      "filename": "budget-330ada81-5246-4c92-9ca2-688eae0f28d4-2026-27 (1).xlsx",
+      "status": "confirmed",
+      "diff_json": "[{\"particulars\":\"TOTAL External Remuneration\",\"old_amount\":null,\"new_amount\":1306000,\"difference\":1306000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"TOTAL Staff Development & Welfare\",\"old_amount\":null,\"new_amount\":517000,\"difference\":517000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"TOTAL Student Related Expenses\",\"old_amount\":null,\"new_amount\":2795740,\"difference\":2795740,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"TOTAL Administrative Expenses\",\"old_amount\":null,\"new_amount\":149000,\"difference\":149000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"TOTAL Others\",\"old_amount\":null,\"new_amount\":1460000,\"difference\":1460000,\"matched_nfa_id\":null,\"change_type\":\"new\"}]",
+      "created_by": "53709076-c3be-46eb-a123-0be426a086ee",
+      "created_at": "2026-08-25T13:11:02.272Z"
+    },
+    {
+      "id": "203b1a9b-ea60-4d27-87f9-ac5bb9fcffba",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
+      "filename": "budget-330ada81-5246-4c92-9ca2-688eae0f28d4-2026-27 (1).xlsx",
+      "status": "pending_review",
+      "diff_json": "[{\"particulars\":\"Adjunct Faculty Honorarium (Refer note 2)\",\"old_amount\":null,\"new_amount\":4680000,\"difference\":4680000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Guest Lectures\",\"old_amount\":null,\"new_amount\":25000,\"difference\":25000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Guest Relation\",\"old_amount\":null,\"new_amount\":25000,\"difference\":25000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Remenuration to Consultants\",\"old_amount\":null,\"new_amount\":1600000,\"difference\":1600000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Project Viva\",\"old_amount\":null,\"new_amount\":75000,\"difference\":75000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Professor in Practice\",\"old_amount\":null,\"new_amount\":125000,\"difference\":125000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Faculty Development Programme\",\"old_amount\":null,\"new_amount\":400000,\"difference\":400000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Seminar\",\"old_amount\":null,\"new_amount\":75000,\"difference\":75000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Workshops\",\"old_amount\":null,\"new_amount\":100000,\"difference\":100000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Conference\",\"old_amount\":null,\"new_amount\":400000,\"difference\":400000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Membership Reimbursement\",\"old_amount\":null,\"new_amount\":200000,\"difference\":200000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Travel & Conveyance - Conveyance\",\"old_amount\":null,\"new_amount\":400000,\"difference\":400000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Travel & Conveyance - Domestic Travel\",\"old_amount\":null,\"new_amount\":200000,\"difference\":200000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Travel & Conveyance - International Travel\",\"old_amount\":null,\"new_amount\":200000,\"difference\":200000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Fests/Seminars / Workshops / Events  #(Specify) (Refer note 3)\",\"old_amount\":null,\"new_amount\":2261000,\"difference\":2261000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Fee Concession\",\"old_amount\":null,\"new_amount\":4200000,\"difference\":4200000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Scholarships\",\"old_amount\":null,\"new_amount\":4200000,\"difference\":4200000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Contribution for Social Cause (Student Sensitization)\",\"old_amount\":null,\"new_amount\":100000,\"difference\":100000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Charges for Training students\\n\\nPlacement Training for 2nd year & 3 rd Year students\",\"old_amount\":null,\"new_amount\":1000000,\"difference\":1000000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Inauguration Expenses\",\"old_amount\":null,\"new_amount\":50000,\"difference\":50000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Exhibitions\",\"old_amount\":null,\"new_amount\":100000,\"difference\":100000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Registration Fee and Travel for external fests and events\",\"old_amount\":null,\"new_amount\":1000000,\"difference\":1000000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Student project Development\",\"old_amount\":null,\"new_amount\":200000,\"difference\":200000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Students Research Internship\",\"old_amount\":null,\"new_amount\":150000,\"difference\":150000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Server Infrastructure Plan for ERP System\",\"old_amount\":null,\"new_amount\":117700,\"difference\":117700,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Membership & Registration Fee for external agencies\",\"old_amount\":null,\"new_amount\":200000,\"difference\":200000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Postage, Stamps & Couriers\",\"old_amount\":null,\"new_amount\":10000,\"difference\":10000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Printing\",\"old_amount\":null,\"new_amount\":100000,\"difference\":100000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Photocopying & Binding\",\"old_amount\":null,\"new_amount\":100000,\"difference\":100000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Stationery (Paper, pens, writing pads etc.)\",\"old_amount\":null,\"new_amount\":100000,\"difference\":100000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"(mention separately the list of Department/ Academic meetings planned)\",\"old_amount\":null,\"new_amount\":210000,\"difference\":210000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Refreshments to Guests\",\"old_amount\":null,\"new_amount\":25000,\"difference\":25000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Internal Projects (Seed Money)\",\"old_amount\":null,\"new_amount\":4000000,\"difference\":4000000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Academic renewals\",\"old_amount\":null,\"new_amount\":300000,\"difference\":300000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Rankings related\",\"old_amount\":null,\"new_amount\":500000,\"difference\":500000,\"matched_nfa_id\":null,\"change_type\":\"new\"}]",
+      "created_by": "53709076-c3be-46eb-a123-0be426a086ee",
+      "created_at": "2026-08-28T11:53:54.297Z"
+    },
+    {
+      "id": "637a599d-18e6-4c96-8c49-d3c09067f1f5",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
+      "filename": "budget-330ada81-5246-4c92-9ca2-688eae0f28d4-2026-27 (1).xlsx",
+      "status": "confirmed",
+      "diff_json": "[{\"particulars\":\"Adjunct Faculty Honorarium (Refer note 2)\",\"old_amount\":null,\"new_amount\":4680000,\"difference\":4680000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Guest Lectures\",\"old_amount\":null,\"new_amount\":25000,\"difference\":25000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Guest Relation\",\"old_amount\":null,\"new_amount\":25000,\"difference\":25000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Remenuration to Consultants\",\"old_amount\":null,\"new_amount\":1600000,\"difference\":1600000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Project Viva\",\"old_amount\":null,\"new_amount\":75000,\"difference\":75000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Professor in Practice\",\"old_amount\":null,\"new_amount\":125000,\"difference\":125000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Faculty Development Programme\",\"old_amount\":null,\"new_amount\":400000,\"difference\":400000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Seminar\",\"old_amount\":null,\"new_amount\":75000,\"difference\":75000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Workshops\",\"old_amount\":null,\"new_amount\":100000,\"difference\":100000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Conference\",\"old_amount\":null,\"new_amount\":400000,\"difference\":400000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Membership Reimbursement\",\"old_amount\":null,\"new_amount\":200000,\"difference\":200000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Travel & Conveyance - Conveyance\",\"old_amount\":null,\"new_amount\":400000,\"difference\":400000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Travel & Conveyance - Domestic Travel\",\"old_amount\":null,\"new_amount\":200000,\"difference\":200000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Travel & Conveyance - International Travel\",\"old_amount\":null,\"new_amount\":200000,\"difference\":200000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Fests/Seminars / Workshops / Events  #(Specify) (Refer note 3)\",\"old_amount\":null,\"new_amount\":2261000,\"difference\":2261000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Fee Concession\",\"old_amount\":null,\"new_amount\":4200000,\"difference\":4200000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Scholarships\",\"old_amount\":null,\"new_amount\":4200000,\"difference\":4200000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Contribution for Social Cause (Student Sensitization)\",\"old_amount\":null,\"new_amount\":100000,\"difference\":100000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Charges for Training students\\n\\nPlacement Training for 2nd year & 3 rd Year students\",\"old_amount\":null,\"new_amount\":1000000,\"difference\":1000000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Inauguration Expenses\",\"old_amount\":null,\"new_amount\":50000,\"difference\":50000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Exhibitions\",\"old_amount\":null,\"new_amount\":100000,\"difference\":100000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Registration Fee and Travel for external fests and events\",\"old_amount\":null,\"new_amount\":1000000,\"difference\":1000000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Student project Development\",\"old_amount\":null,\"new_amount\":200000,\"difference\":200000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Students Research Internship\",\"old_amount\":null,\"new_amount\":150000,\"difference\":150000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Server Infrastructure Plan for ERP System\",\"old_amount\":null,\"new_amount\":117700,\"difference\":117700,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Membership & Registration Fee for external agencies\",\"old_amount\":null,\"new_amount\":200000,\"difference\":200000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Postage, Stamps & Couriers\",\"old_amount\":null,\"new_amount\":10000,\"difference\":10000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Printing\",\"old_amount\":null,\"new_amount\":100000,\"difference\":100000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Photocopying & Binding\",\"old_amount\":null,\"new_amount\":100000,\"difference\":100000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Stationery (Paper, pens, writing pads etc.)\",\"old_amount\":null,\"new_amount\":100000,\"difference\":100000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"(mention separately the list of Department/ Academic meetings planned)\",\"old_amount\":null,\"new_amount\":210000,\"difference\":210000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Refreshments to Guests\",\"old_amount\":null,\"new_amount\":25000,\"difference\":25000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Internal Projects (Seed Money)\",\"old_amount\":null,\"new_amount\":4000000,\"difference\":4000000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Academic renewals\",\"old_amount\":null,\"new_amount\":300000,\"difference\":300000,\"matched_nfa_id\":null,\"change_type\":\"new\"},{\"particulars\":\"Rankings related\",\"old_amount\":null,\"new_amount\":500000,\"difference\":500000,\"matched_nfa_id\":null,\"change_type\":\"new\"}]",
+      "created_by": "53709076-c3be-46eb-a123-0be426a086ee",
+      "created_at": "2026-08-28T11:53:56.292Z"
+    }
+  ],
+  "budget_uploads": [
+    {
+      "id": "22ca38ec-5c26-4a94-9c2d-3e38d6d374ea",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
+      "filename": "budget-330ada81-5246-4c92-9ca2-688eae0f28d4-2026-27 (2).xlsx",
+      "stored_filename": "22ca38ec-5c26-4a94-9c2d-3e38d6d374ea-budget-330ada81-5246-4c92-9ca2-688eae0f28d4-2026-27__2_.xlsx",
+      "uploaded_by": "53709076-c3be-46eb-a123-0be426a086ee",
+      "uploaded_at": "2026-08-28T11:53:03.029Z",
+      "status": "original"
+    }
+  ],
+  "budget_changes": [
+    {
+      "id": "0a540a23-1906-49aa-9359-8eef1dbf9241",
+      "version": 1,
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
+      "project_id": null,
+      "changed_by": "53709076-c3be-46eb-a123-0be426a086ee",
+      "action": "Original budget uploaded",
+      "previous_value": "",
+      "new_value": "budget-330ada81-5246-4c92-9ca2-688eae0f28d4-2026-27 (2).xlsx",
+      "description": "Original budget uploaded by HOD: budget-330ada81-5246-4c92-9ca2-688eae0f28d4-2026-27 (2).xlsx",
+      "approval_status": "original",
+      "created_at": "2026-08-28T11:53:03.029Z"
+    }
+  ]
+}

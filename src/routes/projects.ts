@@ -11,9 +11,11 @@ projectsRouter.get('/', (req: AuthedRequest, res) => {
   let list = store.data.projects;
   if (req.query.department) list = list.filter((p) => p.department_id === req.query.department);
   if (req.query.fy) list = list.filter((p) => p.financial_year_id === req.query.fy);
-  // Students only see their own projects
+  // Role scoping
   if (req.user!.role === 'student') list = list.filter((p) => p.created_by === req.user!.id);
-  if (req.user!.role === 'faculty') list = list.filter((p) => p.assigned_faculty_id === req.user!.id || p.created_by === req.user!.id);
+  else if (req.user!.role === 'faculty') list = list.filter((p) => p.assigned_faculty_id === req.user!.id || p.created_by === req.user!.id);
+  else if (req.user!.role === 'hod') list = list.filter((p) => p.department_id === req.user!.department_id);
+  // dean, director, finance, super_admin, it_admin see all
   const withNfas = list.map((p) => ({
     ...p,
     nfas: store.data.nfas.filter((n) => n.project_id === p.id).map((n) => ({ id: n.id, ref_no: n.ref_no, status: n.status, total_amount: n.total_amount })),

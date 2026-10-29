@@ -90,10 +90,12 @@ async function seed() {
     const student = mkUser('Ananya Rao', 'student@christ.edu', 'student', deptCSE.id);
     const faculty = mkUser('Dr Arul V', 'faculty@christ.edu', 'faculty', deptADSE.id);
     const hod = mkUser('Dr Michael Moses T', 'hod@christ.edu', 'hod', deptADSE.id);
+    const dean = mkUser('Dr Mary Anita E A', 'dean@christ.edu', 'dean', null);
+    const director = mkUser('Fr Jiby Jose', 'director@christ.edu', 'director', null);
     const finance = mkUser('Fr Shijin P J', 'finance@christ.edu', 'finance', null);
     const superAdmin = mkUser('System Admin', 'admin@christ.edu', 'super_admin', null);
     const itAdmin = mkUser('IT Administrator', 'itadmin@christ.edu', 'it_admin', deptADSE.id);
-    db.users.push(student, faculty, hod, finance, superAdmin, itAdmin);
+    db.users.push(student, faculty, hod, dean, director, finance, superAdmin, itAdmin);
 
     // ---- Seed Project + NFA: the ERP Server Infrastructure NFA (first test case, from the .docx) ----
     const project = {

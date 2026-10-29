@@ -34,12 +34,18 @@ export function availableAmount(b: DepartmentBudget) {
 export function validateBudget(b: DepartmentBudget, requestedAmount: number) {
   const available = availableAmount(b);
   const sufficient = requestedAmount <= available;
+  const totalAllocated = b.allocated_amount > 0 ? b.allocated_amount : 1;
+  const utilizedPct = Math.round(((b.approved_amount + b.pending_amount) / totalAllocated) * 100);
+  const postRequestedPct = Math.round(((b.approved_amount + b.pending_amount + requestedAmount) / totalAllocated) * 100);
   return {
     available,
     requested: requestedAmount,
     sufficient,
     shortfall: sufficient ? 0 : requestedAmount - available,
     higherApprovalRequired: !sufficient || requestedAmount >= HIGHER_APPROVAL_THRESHOLD,
+    utilizedPct,
+    postRequestedPct,
+    warningLevel: postRequestedPct >= 100 ? 'danger' : postRequestedPct >= 80 ? 'warning' : 'safe',
   };
 }
 
@@ -57,6 +63,16 @@ export function applyNewApproval(
   const oldApproved = line.approved_amount;
   line.pending_amount = Math.max(0, line.pending_amount - amount);
   line.approved_amount += amount;
+
+  // Deduct from subcategory as well if assigned
+  const nfa = db.nfas.find((n) => n.id === ctx.nfa_id);
+  if (nfa?.budget_subcategory_id && db.budget_subcategories) {
+    const subcat = db.budget_subcategories.find((s) => s.id === nfa.budget_subcategory_id);
+    if (subcat) {
+      subcat.pending_amount = Math.max(0, subcat.pending_amount - amount);
+      subcat.approved_amount += amount;
+    }
+  }
 
   db.budget_transactions.push({
     id: uuid(),

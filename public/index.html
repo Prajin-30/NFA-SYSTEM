@@ -2,99 +2,815 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>NFA & Budget Portal</title>
+<title>CHRIST University — Institutional NFA &amp; Budget Management System</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root{--blue:#1d4ed8;--bg:#f4f6fb;--card:#fff;--border:#e2e6ee;--text:#1f2430;--muted:#6b7280;--green:#059669;--red:#dc2626;--amber:#d97706;}
-  *{box-sizing:border-box}
-  body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text)}
-  #login{max-width:380px;margin:80px auto;background:var(--card);padding:32px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.06)}
-  #login .logo{display:block;width:100%;height:auto;margin:0 auto 22px}
-  #login h1{font-size:20px;margin:0 0 4px}
-  #login p{color:var(--muted);font-size:13px;margin-top:0}
-  input,select,textarea,button{font:inherit}
-  input,select,textarea{width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;background:#fff}
-  button{cursor:pointer;border:none;border-radius:8px;padding:9px 16px;background:var(--blue);color:#fff;font-weight:600}
-  button.secondary{background:#eef1f7;color:var(--text)}
-  button.danger{background:var(--red)}
-  button.green{background:var(--green)}
-  button:disabled{opacity:.5;cursor:default}
-  #app{display:none}
-  header{background:#111827;color:#fff;padding:12px 20px;display:flex;align-items:center;gap:20px}
-  header .brand{display:flex;align-items:center;gap:10px;font-weight:700}
-  header .brand img{display:block;width:185px;height:auto;background:#fff}
-  header .who{margin-left:auto;font-size:13px;color:#cbd5e1}
-  nav{display:flex;gap:4px;background:#1f2937;padding:0 20px}
-  nav button{background:transparent;color:#cbd5e1;border-radius:0;padding:12px 14px;font-weight:500}
-  nav button.active{color:#fff;border-bottom:2px solid #60a5fa;background:#111827}
-  main{max-width:1100px;margin:24px auto;padding:0 20px 60px}
-  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:16px}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
-  .stat{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px}
-  .stat .label{font-size:12px;color:var(--muted)}
-  .stat .val{font-size:20px;font-weight:700;margin-top:2px}
-  table{width:100%;border-collapse:collapse;font-size:13px}
-  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border)}
-  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase}
-  .badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;text-transform:capitalize}
-  .b-draft{background:#e5e7eb;color:#374151}
-  .b-submitted,.b-under_review,.b-budget_validation{background:#dbeafe;color:#1d4ed8}
-  .b-revision_required{background:#fef3c7;color:#92400e}
-  .b-pending_higher_approval{background:#fde68a;color:#92400e}
-  .b-approved{background:#d1fae5;color:#065f46}
-  .b-rejected{background:#fee2e2;color:#991b1b}
-  h2{font-size:16px;margin:0 0 12px}
-  h3{font-size:14px;margin:18px 0 8px}
-  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-  .muted{color:var(--muted);font-size:12px}
-  .item-row{display:grid;grid-template-columns:minmax(0,2fr) minmax(58px,.8fr) minmax(72px,.9fr) minmax(82px,1fr) minmax(0,1.8fr) 28px;gap:8px;align-items:start}
-  .item-row>*{min-width:0}
-  .item-row input{margin-bottom:0}
-  .item-row .it-c{grid-column:1 / span 2}
-  .item-row .it-b{grid-column:3}
-  .item-row .it-pb{grid-column:4}
-  .item-row .it-pa{grid-column:5}
-  .item-row .link{grid-column:6;grid-row:2;align-self:center}
-  .link{color:var(--blue);cursor:pointer;background:none;border:none;padding:0;font-weight:600}
-  .toast{position:fixed;top:16px;right:16px;background:#111827;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;z-index:99;display:none}
-  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto;z-index:50}
-  .modal{background:#fff;border-radius:12px;padding:22px;max-width:640px;width:100%}
-  .field-label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin:0 0 5px}
-  .field-help{font-size:12px;color:var(--muted);margin:-5px 0 10px}
-  .close{float:right;cursor:pointer;color:var(--muted);font-size:18px}
-  .sheet-tabs{display:flex;gap:4px;overflow:auto;border-bottom:1px solid var(--border);margin:12px 0}
-  .sheet-tab{background:#eef1f7;color:var(--text);border-radius:6px 6px 0 0;padding:8px 12px;white-space:nowrap}
-  .sheet-tab.active{background:var(--blue);color:#fff}
-  @media (max-width:700px){
-    .item-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
-    .item-row>*{grid-column:auto!important;grid-row:auto!important}
-    .item-row .it-p,.item-row .it-j,.item-row .it-c{grid-column:1 / -1!important}
-    .item-row .link{justify-self:start}
+  :root {
+    /* Institutional Deep Maroon & Muted Gold Palette */
+    --primary: #6B1735;             /* Deep Maroon */
+    --primary-hover: #531028;       /* Darker Maroon */
+    --primary-light: #fbf2f5;       /* Soft maroon tint */
+    --primary-glow: rgba(107, 23, 53, 0.15);
+    
+    --accent: #C6A15B;              /* Muted Gold */
+    --accent-hover: #b58f48;
+    --accent-light: #fdfaf3;        /* Warm gold tint */
+    --accent-border: #e6cf9b;
+    
+    --bg: #FFFFFF;                  /* Clean White */
+    --section-bg: #F5F6F8;          /* Light Grey Section Background */
+    --card: #FFFFFF;                /* White Card */
+    --border: #E2E6ED;              /* Refined border */
+    --border-light: #EEF1F5;
+    
+    --text: #252A34;                /* Charcoal */
+    --text-muted: #5A6275;          /* Muted Charcoal */
+    --text-subtle: #8792A2;
+    
+    --success: #1E7E51;
+    --success-bg: #E8F5EE;
+    --warning: #B45309;
+    --warning-bg: #FEF3C7;
+    --danger: #991B1B;
+    --danger-bg: #FEE2E2;
+    
+    --radius-sm: 6px;
+    --radius: 10px;
+    --radius-lg: 14px;
+    
+    --shadow-sm: 0 1px 3px rgba(37, 42, 52, 0.05);
+    --shadow: 0 4px 10px -2px rgba(37, 42, 52, 0.08), 0 2px 4px -2px rgba(37, 42, 52, 0.04);
+    --shadow-lg: 0 14px 28px -5px rgba(37, 42, 52, 0.12), 0 6px 12px -4px rgba(37, 42, 52, 0.06);
   }
+  
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--section-bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  
+  h1, h2, h3, h4, .brand-title {
+    font-family: 'Outfit', sans-serif;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+  
+  /* LOGIN PAGE */
+  #login {
+    max-width: 500px;
+    margin: 40px auto;
+    background: var(--card);
+    padding: 36px 40px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border);
+  }
+  .login-crest-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+  .login-crest-wrap img {
+    max-width: 260px;
+    height: auto;
+    display: block;
+    object-fit: contain;
+  }
+  .login-badge {
+    display: inline-block;
+    background: var(--accent-light);
+    color: #8c6827;
+    border: 1px solid var(--accent-border);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  #login h1 {
+    font-size: 24px;
+    margin: 0 0 6px;
+    color: var(--primary);
+    text-align: center;
+  }
+  #login p {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin: 0 0 24px;
+    text-align: center;
+  }
+  .demo-accounts {
+    background: var(--section-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    margin-bottom: 22px;
+  }
+  .demo-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .demo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .demo-btn {
+    background: #fff;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .demo-btn:hover {
+    background: var(--primary-light);
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: translateY(-1px);
+  }
+
+  /* FORMS & BUTTONS */
+  input, select, textarea, button { font: inherit; }
+  input, select, textarea {
+    width: 100%;
+    padding: 10px 13px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 12px;
+    background: #fff;
+    color: var(--text);
+    transition: border-color 0.15s, box-shadow 0.15s;
+    font-size: 13.5px;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-glow);
+  }
+  button {
+    cursor: pointer;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 9px 16px;
+    background: var(--primary);
+    color: #fff;
+    font-weight: 600;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+  }
+  button:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+  }
+  button.secondary {
+    background: #fff;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  button.secondary:hover {
+    background: var(--section-bg);
+    border-color: #cbd5e1;
+    color: var(--primary);
+  }
+  button.gold {
+    background: var(--accent);
+    color: #fff;
+  }
+  button.gold:hover {
+    background: var(--accent-hover);
+  }
+  button.danger {
+    background: var(--danger);
+    color: #fff;
+  }
+  button.danger:hover {
+    background: #801414;
+  }
+  button.green {
+    background: var(--success);
+    color: #fff;
+  }
+  button.green:hover {
+    background: #176541;
+  }
+  button.amber {
+    background: var(--warning);
+    color: #fff;
+  }
+  button.amber:hover {
+    background: #92400e;
+  }
+  button:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+    transform: none!important;
+    box-shadow: none!important;
+  }
+
+  /* HEADER & NAVIGATION */
+  #app { display: none; }
+  header {
+    background: var(--primary);
+    color: #fff;
+    padding: 10px 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border-bottom: 2px solid var(--accent);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  header .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  header .brand img {
+    height: 44px;
+    object-fit: contain;
+    background: #ffffff;
+    padding: 4px 8px;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  }
+  header .brand-texts {
+    display: flex;
+    flex-direction: column;
+  }
+  header .brand-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: 0.02em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  header .brand-pill {
+    background: rgba(198, 161, 91, 0.25);
+    border: 1px solid var(--accent);
+    color: #fce7ba;
+    font-size: 9.5px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+  header .brand-sub {
+    font-size: 11.5px;
+    color: #f7d8e2;
+    font-weight: 500;
+  }
+  header .user-info {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+  }
+  .role-pill {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: #fff;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .fy-pill-select {
+    background: rgba(0,0,0,0.25);
+    border: 1px solid rgba(198, 161, 91, 0.6);
+    color: #fce7ba;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 0;
+    cursor: pointer;
+  }
+
+  nav {
+    display: flex;
+    gap: 2px;
+    background: #501026;
+    padding: 0 24px;
+    overflow-x: auto;
+    border-bottom: 1px solid rgba(0,0,0,0.12);
+  }
+  nav button {
+    background: transparent;
+    color: #f2cdd9;
+    border-radius: 0;
+    padding: 12px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    border-bottom: 3px solid transparent;
+  }
+  nav button:hover {
+    background: rgba(255,255,255,0.06);
+    color: #fff;
+    transform: none;
+    box-shadow: none;
+  }
+  nav button.active {
+    color: #fff;
+    border-bottom-color: var(--accent);
+    background: rgba(255,255,255,0.1);
+  }
+  .inbox-badge {
+    background: var(--accent);
+    color: #3f101f;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 800;
+    margin-left: 4px;
+  }
+
+  /* MAIN CONTENT */
+  main {
+    max-width: 1240px;
+    margin: 28px auto;
+    padding: 0 20px 80px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 22px;
+    box-shadow: var(--shadow-sm);
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .card-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+    color: var(--primary);
+  }
+  .card-sub {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    margin-top: 3px;
+  }
+  
+  .grid-4 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    transition: transform 0.15s, box-shadow 0.15s;
+    border-top: 3px solid var(--border);
+  }
+  .stat-card:hover {
+    box-shadow: var(--shadow);
+    transform: translateY(-2px);
+  }
+  .stat-card.primary { border-top-color: var(--primary); }
+  .stat-card.success { border-top-color: var(--success); }
+  .stat-card.warning { border-top-color: var(--warning); }
+  .stat-card.accent { border-top-color: var(--accent); }
+
+  .stat-label {
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+  }
+  .stat-val {
+    font-size: 23px;
+    font-weight: 800;
+    margin: 8px 0 4px;
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+  }
+  .stat-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* CATEGORY TYPE FILTER PILLS */
+  .type-filter-group {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .type-pill {
+    padding: 7px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--text);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .type-pill:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+  .type-pill.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+  }
+
+  /* ACCORDION CATEGORY CARDS */
+  .category-accordion {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 14px;
+    background: #fff;
+    overflow: hidden;
+    transition: all 0.2s ease;
+  }
+  .category-accordion:hover {
+    border-color: #cbd5e1;
+    box-shadow: var(--shadow-sm);
+  }
+  .category-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    cursor: pointer;
+    background: #fff;
+    user-select: none;
+  }
+  .category-header:hover {
+    background: #fdfafb;
+  }
+  .category-name-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .category-chevron {
+    font-size: 13px;
+    color: var(--accent);
+    transition: transform 0.2s;
+  }
+  .category-accordion.open .category-chevron {
+    transform: rotate(90deg);
+  }
+  .category-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .category-type-tag {
+    font-size: 10.5px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--section-bg);
+    color: var(--text-muted);
+    font-weight: 600;
+    border: 1px solid var(--border);
+  }
+  .category-stats-summary {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    font-size: 13px;
+  }
+  .category-subtable {
+    display: none;
+    border-top: 1px solid var(--border);
+    background: #fafbfc;
+    padding: 18px 20px;
+  }
+  .category-accordion.open .category-subtable {
+    display: block;
+  }
+
+  /* PROGRESS BAR */
+  .progress-wrap {
+    width: 110px;
+    height: 7px;
+    background: #e2e8f0;
+    border-radius: 10px;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 10px;
+  }
+  .progress-fill.safe { background: var(--success); }
+  .progress-fill.warning { background: var(--warning); }
+  .progress-fill.danger { background: var(--danger); }
+
+  /* TABLES */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--border); }
+  th {
+    color: var(--text-muted);
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: var(--section-bg);
+  }
+  tbody tr:nth-child(even) td { background: #fafbfc; }
+  tbody tr:hover td { background: #fbf5f7; }
+
+  /* BADGES */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: capitalize;
+  }
+  .b-draft { background: #f1f5f9; color: #475569; }
+  .b-submitted { background: #e0f2fe; color: #0369a1; }
+  .b-under_review { background: #f3e8ff; color: #7e22ce; }
+  .b-dean_review { background: #fef3c7; color: #92400e; }
+  .b-accounts_review { background: #ede9fe; color: #5b21b6; }
+  .b-pending_director_approval, .b-pending_higher_approval {
+    background: #fed7aa;
+    color: #9a3412;
+    animation: pulse 2s infinite;
+  }
+  .b-approved { background: var(--success-bg); color: var(--success); }
+  .b-rejected { background: var(--danger-bg); color: var(--danger); }
+  .b-revision_required { background: #fef08a; color: #854d0e; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.75; } }
+
+  /* SDG CHIPS SELECTOR */
+  .sdg-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .sdg-chip {
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    background: #fff;
+    user-select: none;
+    transition: all 0.15s ease;
+  }
+  .sdg-chip.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+  }
+
+  /* WORKFLOW STEPPER TIMELINE */
+  .stepper {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin: 20px 0 24px;
+    padding: 18px 20px;
+    background: var(--section-bg);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .step-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    min-width: 110px;
+    text-align: center;
+  }
+  .step-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    color: var(--text-muted);
+    font-weight: 700;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 6px;
+    z-index: 2;
+  }
+  .step-node.completed .step-circle {
+    background: var(--success);
+    color: #fff;
+  }
+  .step-node.active .step-circle {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 0 0 4px var(--primary-glow);
+  }
+  .step-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .step-sub {
+    font-size: 10.5px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* ITEMS EDITOR IN NFA */
+  .item-row {
+    display: grid;
+    grid-template-columns: 2fr 75px 95px 110px 1.5fr 36px;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .item-row input { margin-bottom: 0; }
+  .item-row button.del-item {
+    background: var(--danger-bg);
+    color: var(--danger);
+    padding: 9px;
+    border-radius: var(--radius-sm);
+    justify-content: center;
+  }
+  .item-row button.del-item:hover { background: #fca5a5; }
+
+  /* TOAST & MODAL */
+  .toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--primary);
+    color: #fff;
+    padding: 12px 22px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    z-index: 1000;
+    display: none;
+    box-shadow: var(--shadow-lg);
+    border-left: 4px solid var(--accent);
+  }
+  .modal-bg {
+    position: fixed;
+    inset: 0;
+    background: rgba(37, 42, 52, 0.65);
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 16px;
+    overflow-y: auto;
+    z-index: 500;
+    backdrop-filter: blur(3px);
+  }
+  .modal {
+    background: #fff;
+    border-radius: var(--radius-lg);
+    padding: 30px 32px;
+    max-width: 820px;
+    width: 100%;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border);
+  }
+  .close-btn {
+    float: right;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 20px;
+    font-weight: 700;
+    background: none;
+    border: none;
+    padding: 0;
+  }
+  .close-btn:hover { color: var(--primary); background: none; }
+  .field-label {
+    display: block;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 10px 0 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .field-help {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    margin: -2px 0 12px;
+  }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 </style>
 </head>
 <body>
 
+<!-- LOGIN VIEW -->
 <div id="login">
-  <img class="logo" src="/christ-logo.png" alt="CHRIST University" />
-  <h1>NFA &amp; Budget Portal</h1>
-  <p>Sign in to continue</p>
-  <input id="loginEmail" placeholder="Email" autocomplete="username" />
+  <div class="login-crest-wrap">
+    <!-- Official CHRIST University Logo -->
+    <img src="/christ-logo.png" alt="CHRIST University" />
+  </div>
+  <div style="text-align:center"><span class="login-badge">Institutional Financial ERP</span></div>
+  <h1>CHRIST UNIVERSITY</h1>
+  <p>Hierarchical NFA Workflow &amp; Annual Budget Management System</p>
+  
+  <div class="demo-accounts">
+    <div class="demo-title">⚡ 1-Click Quick Demo Sign-In</div>
+    <div class="demo-grid">
+      <button class="demo-btn" onclick="quickLogin('faculty@christ.edu')">👨‍🏫 Faculty (Dr. Arul)</button>
+      <button class="demo-btn" onclick="quickLogin('hod@christ.edu')">🎓 HOD (Dr. Moses)</button>
+      <button class="demo-btn" onclick="quickLogin('dean@christ.edu')">🏛️ Dean (Dr. Mary Anita)</button>
+      <button class="demo-btn" onclick="quickLogin('finance@christ.edu')">💼 Accounts (Fr. Shijin)</button>
+      <button class="demo-btn" onclick="quickLogin('director@christ.edu')">👑 Director (Fr. Jiby)</button>
+      <button class="demo-btn" onclick="quickLogin('admin@christ.edu')">⚙️ Super Admin</button>
+    </div>
+  </div>
+
+  <input id="loginEmail" placeholder="Official University Email" autocomplete="username" />
   <input id="loginPassword" type="password" placeholder="Password" autocomplete="current-password" />
-  <button style="width:100%" onclick="doLogin()">Sign in</button>
-  <div id="loginErr" style="color:var(--red);font-size:13px;margin-top:8px"></div>
+  <button style="width:100%;padding:12px;" onclick="doLogin()">Sign In to ERP Portal →</button>
+  <div id="loginErr" style="color:var(--danger);font-size:13px;margin-top:12px;text-align:center;"></div>
 </div>
 
+<!-- APPLICATION VIEW -->
 <div id="app">
   <header>
-    <div class="brand"><img src="/christ-logo.png" alt="CHRIST University" /><span>NFA &amp; Budget Portal</span></div>
-    <div class="who" id="whoami"></div>
-    <button class="secondary" onclick="logout()">Log out</button>
+    <div class="brand">
+      <!-- Official CHRIST University Logo -->
+      <img src="/christ-logo.png" alt="CHRIST University" />
+      <div class="brand-texts">
+        <div class="brand-title">
+          CHRIST <span style="font-weight:400;opacity:0.9">UNIVERSITY</span>
+          <span class="brand-pill">ESTD. 1969</span>
+        </div>
+        <span class="brand-sub">School of Engineering &amp; Technology · Institutional NFA &amp; Budget System</span>
+      </div>
+    </div>
+    <div class="user-info">
+      <!-- Global FY Selector -->
+      <div class="row" style="gap:6px">
+        <span style="font-size:11px;font-weight:700;color:#fce7ba;text-transform:uppercase;">Academic Year:</span>
+        <select id="headerFySelect" class="fy-pill-select" onchange="onHeaderFyChange(this.value)"></select>
+      </div>
+      <span id="whoamiName" style="font-weight:700"></span>
+      <span id="whoamiRole" class="role-pill"></span>
+      <button class="secondary" style="padding:6px 12px;font-size:12px;border:none;" onclick="logout()">Log Out</button>
+    </div>
   </header>
+  
   <nav id="nav"></nav>
+  
   <main id="main"></main>
 </div>
 
+<!-- TOAST & MODAL -->
 <div class="toast" id="toast"></div>
 <div class="modal-bg" id="modalBg"><div class="modal" id="modalBody"></div></div>
 
@@ -102,40 +818,1595 @@
 const API = '/api';
 let TOKEN = localStorage.getItem('token') || '';
 let USER = JSON.parse(localStorage.getItem('user') || 'null');
-let REF = { departments:[], categories:[], financialYears:[] };
+let REF = { departments:[], categories:[], subcategories:[], financialYears:[], budgetTypes:[] };
 let currentTab = 'dashboard';
+let currentActiveFyId = '';
+let activeBudgetTypeFilter = 'all';
 
-function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.style.display='block'; setTimeout(()=>t.style.display='none', 3500); }
-function inr(n){ return 'Rs. ' + Number(n||0).toLocaleString('en-IN'); }
-function fmtStatus(s){ return s.replace(/_/g,' '); }
+// SDG 17 List
+const SDG_LIST = [
+  "SDG 1: No Poverty", "SDG 2: Zero Hunger", "SDG 3: Good Health", "SDG 4: Quality Education",
+  "SDG 5: Gender Equality", "SDG 6: Clean Water", "SDG 7: Clean Energy", "SDG 8: Decent Work",
+  "SDG 9: Industry & Innovation", "SDG 10: Reduced Inequalities", "SDG 11: Sustainable Cities",
+  "SDG 12: Responsible Consumption", "SDG 13: Climate Action", "SDG 14: Life Below Water",
+  "SDG 15: Life on Land", "SDG 16: Peace & Justice", "SDG 17: Partnerships"
+];
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 3800);
+}
+
+function inr(n){
+  return '₹' + Number(n||0).toLocaleString('en-IN');
+}
+
+function fmtStatus(s){
+  const map = {
+    draft: 'Draft',
+    submitted: 'Pending HOD Review',
+    under_review: 'Pending HOD Review',
+    dean_review: 'Pending Dean Review',
+    accounts_review: 'Pending Accounts Verification',
+    pending_director_approval: 'Need Permission (Director Approval)',
+    pending_higher_approval: 'Need Permission (Director Approval)',
+    approved: 'Approved',
+    rejected: 'Rejected',
+    revision_required: 'Revision Required'
+  };
+  return map[s] || (s ? String(s).replace(/_/g, ' ') : '');
+}
 
 async function api(path, opts={}){
   const res = await fetch(API+path, {
     ...opts,
-    headers: { ...(opts.body && !(opts.body instanceof FormData) ? {'Content-Type':'application/json'} : {}), Authorization: TOKEN ? 'Bearer '+TOKEN : '', ...(opts.headers||{}) },
+    headers: {
+      ...(opts.body && !(opts.body instanceof FormData) ? {'Content-Type':'application/json'} : {}),
+      Authorization: TOKEN ? 'Bearer '+TOKEN : '',
+      ...(opts.headers||{})
+    },
     body: opts.body && !(opts.body instanceof FormData) ? JSON.stringify(opts.body) : opts.body
   });
   if (res.status === 401) { logout(); throw new Error('Session expired'); }
   const ct = res.headers.get('content-type')||'';
-  if (!ct.includes('application/json')) { if(!res.ok) throw new Error('Request failed'); return res; }
+  if (!ct.includes('application/json')) {
+    if(!res.ok) throw new Error('Request failed');
+    return res;
+  }
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Request failed');
   return data;
 }
 
+function quickLogin(email){
+  document.getElementById('loginEmail').value = email;
+  document.getElementById('loginPassword').value = 'password123';
+  doLogin();
+}
+
+async function doLogin(){
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  try {
+    const data = await api('/auth/login', { method:'POST', body:{ email, password } });
+    TOKEN = data.token;
+    USER = data.user;
+    localStorage.setItem('token', TOKEN);
+    localStorage.setItem('user', JSON.stringify(USER));
+    boot();
+  } catch(e){
+    document.getElementById('loginErr').textContent = e.message;
+  }
+}
+
+function logout(){
+  TOKEN = '';
+  USER = null;
+  localStorage.clear();
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login').style.display = 'block';
+}
+
+const TABS_BY_ROLE = {
+  faculty: ['dashboard', 'inbox', 'nfas', 'projects', 'budgets', 'audit'],
+  hod: ['dashboard', 'inbox', 'nfas', 'projects', 'budgets', 'excel', 'audit'],
+  dean: ['dashboard', 'inbox', 'nfas', 'projects', 'budgets', 'audit'],
+  associate_dean: ['dashboard', 'inbox', 'nfas', 'projects', 'budgets', 'audit'],
+  finance: ['dashboard', 'inbox', 'nfas', 'budgets', 'audit'],
+  director: ['dashboard', 'inbox', 'nfas', 'budgets', 'audit'],
+  super_admin: ['dashboard', 'inbox', 'nfas', 'projects', 'budgets', 'excel', 'audit', 'admin'],
+  it_admin: ['dashboard', 'nfas', 'budgets', 'audit'],
+};
+
+// Requirement 3 & 4: Dashboard renamed to "Home" without emojis or diagrams in the line
+const TAB_LABEL = {
+  dashboard: 'Home',
+  inbox: 'Approvals Inbox',
+  nfas: 'Notes For Approval (NFAs)',
+  projects: 'Projects',
+  budgets: 'Department Budgets',
+  excel: 'Excel Import',
+  audit: 'Financial Ledger',
+  admin: 'Settings'
+};
+
+async function boot(){
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('whoamiName').textContent = USER ? USER.name : '';
+  document.getElementById('whoamiRole').textContent = USER && USER.role ? String(USER.role).replace('_', ' ') : '';
+
+  const [depts, cats, subcats, fys] = await Promise.all([
+    api('/budgets/departments'),
+    api('/budgets/categories'),
+    api('/budgets/subcategories'),
+    api('/budgets/financial-years')
+  ]);
+  REF.departments = depts;
+  REF.categories = cats;
+  REF.subcategories = subcats;
+  REF.financialYears = fys;
+
+  const activeFyObj = activeFy();
+  currentActiveFyId = activeFyObj.id;
+
+  const fySelect = document.getElementById('headerFySelect');
+  fySelect.innerHTML = REF.financialYears.map(f => 
+    `<option value="${f.id}" ${f.id === currentActiveFyId ? 'selected' : ''}>${f.label}${f.is_active ? ' (Active)' : ''}</option>`
+  ).join('');
+
+  const tabs = TABS_BY_ROLE[USER.role] || ['dashboard', 'nfas', 'budgets'];
+  document.getElementById('nav').innerHTML = tabs.map(t =>
+    `<button data-tab="${t}" onclick="showTab('${t}')">${TAB_LABEL[t] || t}</button>`
+  ).join('');
+  showTab(tabs[0]);
+}
+
+function deptName(id){ return REF.departments.find(d => d.id === id)?.name || id; }
+function catName(id){ return REF.categories.find(c => c.id === id)?.name || id; }
+function subcatName(id){ return REF.subcategories.find(s => s.id === id)?.name || id; }
+function activeFy(){
+  if (currentActiveFyId) {
+    const found = REF.financialYears.find(f => f.id === currentActiveFyId);
+    if (found) return found;
+  }
+  return REF.financialYears.find(f => f.is_active) || REF.financialYears[0];
+}
+
+async function onHeaderFyChange(fyId){
+  currentActiveFyId = fyId;
+  toast(`Switched view to Academic Year: ${activeFy().label}`);
+  showTab(currentTab);
+}
+
+async function showTab(tab){
+  currentTab = tab;
+  [...document.querySelectorAll('nav button')].forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  const main = document.getElementById('main');
+  main.innerHTML = '<div class="card muted" style="text-align:center;padding:40px 20px;">Loading data…</div>';
+  try {
+    if (tab === 'dashboard') await renderHome(main);
+    else if (tab === 'inbox') await renderInbox(main);
+    else if (tab === 'nfas') await renderNfas(main);
+    else if (tab === 'projects') await renderProjects(main);
+    else if (tab === 'budgets') await renderBudgets(main);
+    else if (tab === 'excel') await renderExcel(main);
+    else if (tab === 'audit') await renderAudit(main);
+    else if (tab === 'admin') await renderAdmin(main);
+  } catch(e){
+    main.innerHTML = `<div class="card" style="color:var(--danger)">${e.message}</div>`;
+  }
+}
+
+// ---------------- HOME VIEW ----------------
+async function renderHome(main){
+  const deptId = USER.department_id || REF.departments[0]?.id;
+  const fy = activeFy();
+  const [nfas, summary, inboxItems] = await Promise.all([
+    api('/nfas'),
+    api(`/budgets/${deptId}/summary?fy=${fy.id}`),
+    api('/nfas/inbox')
+  ]);
+
+  let html = '';
+
+  // Pending Actions Banner
+  if (inboxItems.length > 0) {
+    html += `
+      <div class="card" style="border-left: 5px solid var(--warning); background: var(--warning-bg);">
+        <div class="row" style="justify-content: space-between;">
+          <div>
+            <strong style="color:var(--warning);font-size:15px;">Pending Action: ${inboxItems.length} Note(s) For Approval awaiting your authorization</strong>
+            <div class="card-sub">Please review and decide on proposals promptly to maintain departmental operations.</div>
+          </div>
+          <button class="amber" onclick="showTab('inbox')">Open Inbox (${inboxItems.length}) →</button>
+        </div>
+      </div>
+    `;
+  }
+
+  // Summary Metrics Header
+  const totals = summary.totals;
+  const isAdmin = USER.role === 'super_admin';
+
+  html += `
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Department Master Budget Overview — ${fy.label}</h2>
+          <div class="card-sub">${deptName(deptId)}</div>
+        </div>
+        <div class="row">
+          ${isAdmin ? `
+            <button class="gold" onclick="openPrivateBudgetUploadModal()">📁 Upload Private University Budget (.xlsx)</button>
+            <button class="secondary" onclick="exportBudgetReport('${deptId}')">📥 Export Master Budget Excel</button>
+          ` : ''}
+          ${['super_admin', 'director', 'finance'].includes(USER.role) ? `
+            <button class="secondary" onclick="openRolloverModal()">Annual Rollover &amp; Next-Year Projection</button>
+          ` : ''}
+        </div>
+      </div>
+      <div class="grid-4">
+        <div class="stat-card primary">
+          <div class="stat-label">Total Allocated Ceiling</div>
+          <div class="stat-val" style="color:var(--primary)">${inr(totals.allocated_amount)}</div>
+          <div class="stat-desc">Approved Academic Year Ceiling</div>
+        </div>
+        <div class="stat-card success">
+          <div class="stat-label">Approved &amp; Debited</div>
+          <div class="stat-val" style="color:var(--success)">${inr(totals.approved_amount)}</div>
+          <div class="stat-desc">${totals.utilization_pct}% Utilized</div>
+        </div>
+        <div class="stat-card warning">
+          <div class="stat-label">Pending Approval Pipeline</div>
+          <div class="stat-val" style="color:var(--warning)">${inr(totals.pending_amount)}</div>
+          <div class="stat-desc">In Multi-Tier Review</div>
+        </div>
+        <div class="stat-card accent">
+          <div class="stat-label">Remaining Balance</div>
+          <div class="stat-val" style="color:${totals.available_amount < 0 ? 'var(--danger)' : '#6B1735'}">
+            ${inr(totals.available_amount)}
+          </div>
+          <div class="stat-desc">Available for New Proposals</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // CATEGORY & SUBCATEGORY ACCORDION WITH CAPEX FILTER
+  html += `
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Categorized Budget Allocations (Click to Expand Subcategories)</h2>
+          <div class="card-sub">Detailed breakdown including CAPEX, Revenue Expenditure, and Earnings</div>
+        </div>
+      </div>
+      
+      <!-- Type Filter Pills -->
+      <div class="type-filter-group">
+        <div class="type-pill ${activeBudgetTypeFilter==='all'?'active':''}" onclick="setBudgetTypeFilter('all')">All Categories (${summary.lines.length})</div>
+        <div class="type-pill ${activeBudgetTypeFilter==='revenue'?'active':''}" onclick="setBudgetTypeFilter('revenue')">Revenue Expenditure</div>
+        <div class="type-pill ${activeBudgetTypeFilter==='capex'?'active':''}" onclick="setBudgetTypeFilter('capex')">Capital Expenditure (CAPEX)</div>
+        <div class="type-pill ${activeBudgetTypeFilter==='earnings'?'active':''}" onclick="setBudgetTypeFilter('earnings')">Revenue &amp; Earnings</div>
+      </div>
+  `;
+
+  const filteredLines = summary.lines.filter(l => {
+    const name = (l.category_name || '').toLowerCase();
+    if (activeBudgetTypeFilter === 'capex') return name.includes('capex') || name.includes('server') || name.includes('equipment') || name.includes('license');
+    if (activeBudgetTypeFilter === 'earnings') return name.includes('earning') || name.includes('grant') || name.includes('consultancy') || name.includes('conference');
+    if (activeBudgetTypeFilter === 'revenue') return !name.includes('capex') && !name.includes('earning') && !name.includes('grant');
+    return true;
+  });
+
+  if (filteredLines.length === 0) {
+    html += `<div class="muted" style="padding:20px;text-align:center;">No categories found for selected filter.</div>`;
+  }
+
+  filteredLines.forEach((line, idx) => {
+    const subcats = line.subcategories || [];
+    const utilClass = line.status === 'exceeded' ? 'danger' : line.status === 'warning' ? 'warning' : 'safe';
+    const isCapex = (line.category_name || '').toLowerCase().includes('capex');
+    const isEarnings = (line.category_name || '').toLowerCase().includes('grant') || (line.category_name || '').toLowerCase().includes('consultancy');
+
+    html += `
+      <div class="category-accordion ${idx === 0 ? 'open' : ''}" id="cat-acc-${line.id}">
+        <div class="category-header" onclick="toggleAccordion('cat-acc-${line.id}')">
+          <div class="category-name-group">
+            <span class="category-chevron">▶</span>
+            <span class="category-title">${line.category_name}</span>
+            ${isCapex ? `<span class="category-type-tag" style="background:#fce7ba;color:#8c6827;border-color:#e6cf9b;">CAPEX</span>` : ''}
+            ${isEarnings ? `<span class="category-type-tag" style="background:#e0f2fe;color:#0369a1;border-color:#bae6fd;">EARNINGS</span>` : ''}
+            <span class="badge ${line.status === 'exceeded' ? 'b-rejected' : 'b-approved'}">${line.utilization_pct}%</span>
+          </div>
+          <div class="category-stats-summary">
+            <div><span class="muted">Allocated:</span> <strong>${inr(line.allocated_amount)}</strong></div>
+            <div><span class="muted">Approved:</span> <strong style="color:var(--success)">${inr(line.approved_amount)}</strong></div>
+            <div><span class="muted">Available:</span> <strong style="color:${line.available_amount < 0 ? 'var(--danger)' : 'var(--primary)'}">${inr(line.available_amount)}</strong></div>
+            <div class="progress-wrap"><div class="progress-fill ${utilClass}" style="width:${Math.min(100, line.utilization_pct)}%"></div></div>
+            ${isAdmin ? `
+              <button class="secondary" style="padding:4px 8px;font-size:11px;" data-line-id="${line.id}" data-cat-name="${encodeURIComponent(line.category_name || '')}" data-alloc="${line.allocated_amount || 0}" onclick="event.stopPropagation(); onEditCategoryClick(this)">✏️ Edit</button>
+            ` : ''}
+          </div>
+        </div>
+        <div class="category-subtable">
+          <table>
+            <thead>
+              <tr>
+                <th>Subcategory Item</th>
+                <th>Allocated Budget</th>
+                <th>Approved &amp; Debited</th>
+                <th>Pending Review</th>
+                <th>Remaining Balance</th>
+                <th>Utilization</th>
+                ${isAdmin ? `<th>Action</th>` : ''}
+              </tr>
+            </thead>
+            <tbody>
+              ${subcats.length > 0 ? subcats.map(sub => `
+                <tr>
+                  <td><strong>${sub.name || 'Particulars'}</strong></td>
+                  <td>${inr(sub.allocated_amount)}</td>
+                  <td style="color:var(--success)">${inr(sub.approved_amount)}</td>
+                  <td style="color:var(--warning)">${inr(sub.pending_amount)}</td>
+                  <td style="font-weight:700;color:${sub.available_amount < 0 ? 'var(--danger)' : 'var(--text)'}">${inr(sub.available_amount)}</td>
+                  <td>
+                    <div class="row" style="gap:6px">
+                      <div class="progress-wrap"><div class="progress-fill ${sub.utilization_pct >= 100 ? 'danger' : sub.utilization_pct >= 80 ? 'warning' : 'safe'}" style="width:${Math.min(100, sub.utilization_pct)}%"></div></div>
+                      <span class="muted" style="font-size:11px">${sub.utilization_pct}%</span>
+                    </div>
+                  </td>
+                  ${isAdmin ? `
+                    <td>
+                      <button class="secondary" style="padding:3px 7px;font-size:11px;" data-sub-id="${sub.id}" data-sub-name="${encodeURIComponent(sub.name || '')}" data-alloc="${sub.allocated_amount || 0}" onclick="onEditSubcategoryClick(this)">✏️ Edit</button>
+                    </td>
+                  ` : ''}
+                </tr>
+              `).join('') : `<tr><td colspan="${isAdmin?7:6}" class="muted">No specific subcategories registered. Directly charged to parent category.</td></tr>`}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+  main.innerHTML = html;
+}
+
+function setBudgetTypeFilter(filter){
+  activeBudgetTypeFilter = filter;
+  const main = document.getElementById('main');
+  renderHome(main);
+}
+
+function toggleAccordion(id){
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('open');
+}
+
+// ---------------- ADMIN EDIT MODALS ----------------
+function onEditCategoryClick(btn){
+  const lineId = btn.getAttribute('data-line-id');
+  const catName = decodeURIComponent(btn.getAttribute('data-cat-name') || '');
+  const alloc = Number(btn.getAttribute('data-alloc') || 0);
+  openEditCategoryModal(lineId, catName, alloc);
+}
+
+function onEditSubcategoryClick(btn){
+  const subId = btn.getAttribute('data-sub-id');
+  const subName = decodeURIComponent(btn.getAttribute('data-sub-name') || '');
+  const alloc = Number(btn.getAttribute('data-alloc') || 0);
+  openEditSubcategoryModal(subId, subName, alloc);
+}
+
+function openEditCategoryModal(lineId, catName, currentAlloc){
+  openModal(`
+    <button class="close-btn" onclick="closeModal()">✕</button>
+    <h2>Edit Category Budget Allocation</h2>
+    <div class="field-help">Admin direct update for department budget ceiling. Changes reflect immediately across all views.</div>
+
+    <label class="field-label">Category Name</label>
+    <input id="editCatName" value="${catName}" />
+
+    <label class="field-label">Allocated Annual Ceiling (₹)</label>
+    <input id="editCatAlloc" type="number" value="${currentAlloc}" min="0" />
+
+    <div class="row" style="justify-content:flex-end;margin-top:20px;gap:10px;">
+      <button class="secondary" onclick="closeModal()">Cancel</button>
+      <button class="green" onclick="saveCategoryBudgetEdit('${lineId}')">Save Changes</button>
+    </div>
+  `);
+}
+
+async function saveCategoryBudgetEdit(lineId){
+  const name = document.getElementById('editCatName').value.trim();
+  const allocated_amount = Number(document.getElementById('editCatAlloc').value);
+  if (!name || isNaN(allocated_amount)) return toast('Valid name and amount required');
+  try {
+    await api(`/budgets/${lineId}`, {
+      method: 'PUT',
+      body: { category_name: name, allocated_amount }
+    });
+    toast('Budget line updated successfully');
+    closeModal();
+    REF.categories = await api('/budgets/categories');
+    showTab(currentTab);
+  } catch(e) { toast(e.message); }
+}
+
+function openEditSubcategoryModal(subId, subName, currentAlloc){
+  openModal(`
+    <button class="close-btn" onclick="closeModal()">✕</button>
+    <h2>Edit Subcategory Budget</h2>
+    <div class="field-help">Admin direct update for subcategory particulars and allocation.</div>
+
+    <label class="field-label">Subcategory Name</label>
+    <input id="editSubName" value="${subName}" />
+
+    <label class="field-label">Allocated Budget (₹)</label>
+    <input id="editSubAlloc" type="number" value="${currentAlloc}" min="0" />
+
+    <div class="row" style="justify-content:flex-end;margin-top:20px;gap:10px;">
+      <button class="secondary" onclick="closeModal()">Cancel</button>
+      <button class="green" onclick="saveSubcategoryEdit('${subId}')">Save Changes</button>
+    </div>
+  `);
+}
+
+async function saveSubcategoryEdit(subId){
+  const name = document.getElementById('editSubName').value.trim();
+  const allocated_amount = Number(document.getElementById('editSubAlloc').value);
+  if (!name || isNaN(allocated_amount)) return toast('Valid name and amount required');
+  try {
+    await api(`/budgets/subcategory/${subId}`, {
+      method: 'PUT',
+      body: { name, allocated_amount }
+    });
+    toast('Subcategory budget updated successfully');
+    closeModal();
+    REF.subcategories = await api('/budgets/subcategories');
+    showTab(currentTab);
+  } catch(e) { toast(e.message); }
+}
+
+// ---------------- ADMIN PRIVATE MASTER BUDGET UPLOAD MODAL ----------------
+function openPrivateBudgetUploadModal(){
+  const fy = activeFy();
+  openModal(`
+    <button class="close-btn" onclick="closeModal()">✕</button>
+    <h2>Private University Budget Master Upload</h2>
+    <div class="field-help">Admin-only secure upload. Upload your private university Excel budget sheet (.xlsx) to automatically configure departments, categories, subcategories, and allocations.</div>
+
+    <div class="card" style="background:var(--section-bg);margin:16px 0;padding:16px;">
+      <div class="row" style="justify-content:space-between;">
+        <div>
+          <strong>Need a standard template?</strong>
+          <div class="card-sub">Download our clean pre-formatted official Excel template with sample rows.</div>
+        </div>
+        <button class="secondary" onclick="downloadBudgetTemplate()">📥 Download Template (.xlsx)</button>
+      </div>
+    </div>
+
+    <label class="field-label">Select Private University Excel Workbook (.xlsx)</label>
+    <input type="file" id="masterExcelFileInput" accept=".xlsx" />
+
+    <label class="field-label">Target Academic / Financial Year</label>
+    <select id="masterUploadFy">${REF.financialYears.map(f => `<option value="${f.id}" ${f.id === fy.id ? 'selected' : ''}>${f.label}</option>`).join('')}</select>
+
+    <label class="field-label">Initialization Mode</label>
+    <select id="masterUploadMode">
+      <option value="replace">Clean Slate: Replace &amp; Initialize Entire University Budget (Wipes sample data)</option>
+      <option value="merge">Merge: Update &amp; Add to Existing Allocations</option>
+    </select>
+
+    <div class="row" style="justify-content:flex-end;margin-top:20px;gap:12px;">
+      <button class="secondary" onclick="closeModal()">Cancel</button>
+      <button class="gold" onclick="submitPrivateBudgetExcel()">Upload &amp; Auto-Configure Website</button>
+    </div>
+  `);
+}
+
+async function downloadBudgetTemplate(){
+  try {
+    const res = await fetch(`${API}/budgets/template`, {
+      headers: { Authorization: 'Bearer ' + TOKEN }
+    });
+    if (!res.ok) throw new Error('Template download failed');
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'CHRIST_University_Budget_Template.xlsx';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    toast('Official budget template downloaded');
+  } catch(e) { toast(e.message); }
+}
+
+async function submitPrivateBudgetExcel(){
+  const fileInput = document.getElementById('masterExcelFileInput');
+  if (!fileInput.files || !fileInput.files[0]) return toast('Please select your private Excel workbook (.xlsx)');
+  const fyId = document.getElementById('masterUploadFy').value;
+  const mode = document.getElementById('masterUploadMode').value;
+
+  const fd = new FormData();
+  fd.append('file', fileInput.files[0]);
+  fd.append('financial_year_id', fyId);
+  fd.append('mode', mode);
+
+  try {
+    toast('Processing and configuring budget workbook...');
+    const res = await fetch(`${API}/budgets/upload-master-excel`, {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + TOKEN },
+      body: fd
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Upload failed');
+    toast(`🎉 Successfully initialized budget! Processed ${data.items_processed} items. Total: ${inr(data.total_allocated)}`);
+    closeModal();
+    boot();
+  } catch(e) {
+    toast(e.message);
+  }
+}
+
+// ---------------- APPROVALS INBOX ----------------
+async function renderInbox(main){
+  const inboxItems = await api('/nfas/inbox');
+  let html = `
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Approvals Inbox (${inboxItems.length} Action Needed)</h2>
+          <div class="card-sub">Official requests currently awaiting your review, validation, or endorsement</div>
+        </div>
+      </div>
+  `;
+
+  if (inboxItems.length === 0) {
+    html += `<div class="muted" style="padding:30px 0;text-align:center;">You are completely caught up! No NFAs are currently pending your approval.</div></div>`;
+    main.innerHTML = html;
+    return;
+  }
+
+  html += `
+    <table>
+      <thead>
+        <tr>
+          <th>Ref No.</th>
+          <th>Title &amp; Proposer</th>
+          <th>Department</th>
+          <th>Category &amp; Subcategory</th>
+          <th>Amount</th>
+          <th>Current Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  inboxItems.forEach(n => {
+    html += `
+      <tr>
+        <td><strong>${n.ref_no}</strong><div class="muted">${n.date}</div></td>
+        <td><strong>${n.title}</strong><div class="muted">${n.submitted_by_name || 'Faculty'}</div></td>
+        <td>${deptName(n.department_id)}</td>
+        <td>
+          <strong>${catName(n.budget_category_id)}</strong>
+          ${n.budget_subcategory_name ? `<div class="muted">↳ ${n.budget_subcategory_name}</div>` : ''}
+        </td>
+        <td><strong style="color:var(--primary);font-size:14px">${inr(n.total_amount)}</strong></td>
+        <td><span class="badge b-${n.status}">${fmtStatus(n.status)}</span></td>
+        <td><button onclick="openNfa('${n.id}')">Review &amp; Decide →</button></td>
+      </tr>
+    `;
+  });
+
+  html += `</tbody></table></div>`;
+  main.innerHTML = html;
+}
+
+// ---------------- NFAs LIST ----------------
+async function renderNfas(main){
+  const list = await api('/nfas');
+  let html = `
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Notes For Approval (NFAs)</h2>
+          <div class="card-sub">Institutional master ledger of requested, reviewed, and debited expenditures</div>
+        </div>
+        <button onclick="newNfaModal()">+ Request New NFA</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Ref No.</th>
+            <th>Title</th>
+            <th>Department</th>
+            <th>Category &amp; Subcategory</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+
+  if (list.length === 0) {
+    html += `<tr><td colspan="7" class="muted" style="text-align:center;padding:30px;">No NFAs submitted yet. Click "+ Request New NFA" to propose one.</td></tr>`;
+  } else {
+    list.forEach(n => {
+      html += `
+        <tr>
+          <td><strong>${n.ref_no}</strong><div class="muted">${n.date}</div></td>
+          <td><strong>${n.title}</strong><div class="muted">${n.submitted_by_name || 'Faculty'}</div></td>
+          <td>${deptName(n.department_id)}</td>
+          <td>
+            <strong>${catName(n.budget_category_id)}</strong>
+            ${n.budget_subcategory_name ? `<div class="muted">↳ ${n.budget_subcategory_name}</div>` : ''}
+          </td>
+          <td><strong>${inr(n.total_amount)}</strong></td>
+          <td><span class="badge b-${n.status}">${fmtStatus(n.status)}</span></td>
+          <td><button class="secondary" onclick="openNfa('${n.id}')">View Details →</button></td>
+        </tr>
+      `;
+    });
+  }
+
+  html += `</tbody></table></div>`;
+  main.innerHTML = html;
+}
+
+// ---------------- CREATE NEW NFA MODAL ----------------
+let selectedSdgs = [];
+
+async function newNfaModal(){
+  selectedSdgs = [];
+  const deptId = USER.department_id || REF.departments[0]?.id;
+  const fy = activeFy();
+  
+  let autoRef = `NFA/CU/${fy.label}/${String(Date.now()).slice(-4)}`;
+  try {
+    const refData = await api(`/nfas/next-ref?department_id=${deptId}&financial_year_id=${fy.id}`);
+    if (refData.ref_no) autoRef = refData.ref_no;
+  } catch(e) {}
+
+  const projects = await api('/projects' + (deptId ? `?department=${deptId}` : ''));
+
+  openModal(`
+    <button class="close-btn" onclick="closeModal()">✕</button>
+    <h2>Request Note For Approval (NFA)</h2>
+    <div class="field-help">Institutional workflow: Proposer (Faculty) $\\rightarrow$ HOD $\\rightarrow$ Dean $\\rightarrow$ Accounts Verification $\\rightarrow$ Director Final Approval.</div>
+
+    <div class="row">
+      <div style="flex:1">
+        <label class="field-label">Reference Number (Auto-Generated)</label>
+        <div class="row" style="gap:6px">
+          <input id="nfaRefNo" value="${autoRef}" style="margin-bottom:0;flex:1;font-weight:700;color:var(--primary)" />
+          <span class="badge" style="background:var(--accent-light);color:#8c6827;border:1px solid var(--accent-border);">⚡ Auto</span>
+        </div>
+      </div>
+      <div style="flex:1">
+        <label class="field-label">Academic / Financial Year</label>
+        <select id="nfaFy" onchange="onNfaFyOrDeptChange()">${REF.financialYears.map(f=>`<option value="${f.id}" ${f.id===fy.id?'selected':''}>${f.label}</option>`).join('')}</select>
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:10px;">
+      <div style="flex:1">
+        <label class="field-label">Department</label>
+        <select id="nfaDept" onchange="onNfaDeptSelect(this.value)">
+          ${REF.departments.map(d=>`<option value="${d.id}" ${d.id===deptId?'selected':''}>${d.name}</option>`).join('')}
+          <option value="__custom__">➕ Other / Enter Custom Department Name...</option>
+        </select>
+        <div id="customDeptWrap" style="display:none;margin-top:8px;">
+          <input id="customDeptName" placeholder="Enter Full Department Name (e.g. Dept. of Data Science)" style="margin-bottom:6px;" />
+          <input id="customDeptCode" placeholder="Department Code (optional, e.g. DS)" style="max-width:200px;" />
+        </div>
+      </div>
+      <div style="flex:1">
+        <label class="field-label">Faculty Proposer Name</label>
+        <input id="nfaFacultyName" value="${USER.name}" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div style="flex:1">
+        <label class="field-label">Project (Optional)</label>
+        <select id="nfaProject">
+          <option value="">— None / Direct Department NFA (No Specific Project) —</option>
+          ${projects.map(p=>`<option value="${p.id}">${p.name}</option>`).join('')}
+        </select>
+      </div>
+      <div style="flex:1">
+        <label class="field-label">Budget Nature / Classification</label>
+        <select id="nfaBudgetType" onchange="filterModalCategories(this.value)">
+          <option value="all">All Budget Types</option>
+          <option value="revenue">Revenue Expenditure (Operating / Departmental)</option>
+          <option value="capex">Capital Expenditure (CAPEX - Computing, Lab, Software, Equipment)</option>
+          <option value="earnings">Revenue / Earnings (Grants, Consultancy, Registrations)</option>
+        </select>
+      </div>
+    </div>
+
+    <label class="field-label">Budget Main Category</label>
+    <select id="nfaCat" onchange="onCategorySelect(this.value)">
+      <option value="">Select Category...</option>
+      ${REF.categories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}
+    </select>
+
+    <label class="field-label">Budget Subcategory</label>
+    <select id="nfaSubcat">
+      <option value="">Select subcategory after choosing category above...</option>
+    </select>
+
+    <label class="field-label">Title of Proposal</label>
+    <input id="nfaTitle" placeholder="e.g. Procurement of Research GPU Servers / Academic Hackathon / FDP" />
+
+    <label class="field-label">Purpose &amp; Objective</label>
+    <textarea id="nfaPurpose" rows="2" placeholder="Explain the specific purpose and outcome of this proposal"></textarea>
+
+    <label class="field-label">Justification of Need</label>
+    <textarea id="nfaJust" rows="2" placeholder="Institutional impact and rationale for sanctioning this budget"></textarea>
+
+    <label class="field-label">Select Relevant UN Sustainable Development Goals (SDGs)</label>
+    <div class="field-help">Click to highlight all sustainable development goals addressed:</div>
+    <div class="sdg-grid" id="sdgGrid">
+      ${SDG_LIST.map(sdg => `
+        <div class="sdg-chip" onclick="toggleSdg('${sdg}', this)">
+          ${sdg}
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="card-header" style="margin-top:20px;margin-bottom:8px">
+      <label class="field-label" style="margin:0">Budget Items (Qty × Rate automatically calculates Amount)</label>
+      <button class="secondary" type="button" onclick="addItemRow()">+ Add Item Row</button>
+    </div>
+    
+    <div id="itemsHeader" class="item-row muted" style="font-size:11px;font-weight:700">
+      <div>Particulars</div>
+      <div>Qty</div>
+      <div>Rate (₹)</div>
+      <div>Amount (₹)</div>
+      <div>Justification</div>
+      <div></div>
+    </div>
+    
+    <div id="itemsWrap"></div>
+
+    <div class="row" style="justify-content:flex-end;margin:14px 0 20px;font-size:16px;">
+      <span class="muted">Total Budget Requested:</span>
+      <strong id="grandTotalText" style="color:var(--primary);font-size:19px;font-family:'Outfit',sans-serif;">₹0</strong>
+    </div>
+
+    <div class="row" style="justify-content:flex-end;gap:12px">
+      <button class="secondary" onclick="closeModal()">Cancel</button>
+      <button onclick="createNfa(false)">💾 Save as Draft</button>
+      <button class="green" onclick="createNfa(true)">🚀 Submit to HOD</button>
+    </div>
+  `);
+
+  addItemRow();
+}
+
+async function onNfaDeptSelect(val){
+  const customWrap = document.getElementById('customDeptWrap');
+  if (val === '__custom__') {
+    customWrap.style.display = 'block';
+  } else {
+    customWrap.style.display = 'none';
+    await onNfaFyOrDeptChange();
+  }
+}
+
+async function onNfaFyOrDeptChange(){
+  const deptSelect = document.getElementById('nfaDept');
+  const deptId = deptSelect.value === '__custom__' ? '' : deptSelect.value;
+  const fyId = document.getElementById('nfaFy').value;
+  
+  if (deptId && fyId) {
+    try {
+      const refData = await api(`/nfas/next-ref?department_id=${deptId}&financial_year_id=${fyId}`);
+      if (refData.ref_no) {
+        document.getElementById('nfaRefNo').value = refData.ref_no;
+      }
+    } catch(e) {}
+  }
+}
+
+function filterModalCategories(type){
+  const catSelect = document.getElementById('nfaCat');
+  let list = REF.categories;
+  if (type === 'capex') {
+    list = list.filter(c => c.name.toLowerCase().includes('capex') || c.name.toLowerCase().includes('server') || c.name.toLowerCase().includes('equipment') || c.name.toLowerCase().includes('license'));
+  } else if (type === 'earnings') {
+    list = list.filter(c => c.name.toLowerCase().includes('grant') || c.name.toLowerCase().includes('consultancy') || c.name.toLowerCase().includes('conference'));
+  } else if (type === 'revenue') {
+    list = list.filter(c => !c.name.toLowerCase().includes('capex') && !c.name.toLowerCase().includes('grant'));
+  }
+  catSelect.innerHTML = '<option value="">Select Category...</option>' + list.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+  document.getElementById('nfaSubcat').innerHTML = '<option value="">Select subcategory after choosing category above...</option>';
+}
+
+function onCategorySelect(catId){
+  const subcatSelect = document.getElementById('nfaSubcat');
+  const subs = REF.subcategories.filter(s => s.budget_category_id === catId);
+  if (subs.length === 0) {
+    subcatSelect.innerHTML = '<option value="">No subcategories registered (Direct Category Allocation)</option>';
+  } else {
+    subcatSelect.innerHTML = '<option value="">Select Subcategory...</option>' +
+      subs.map(s => `<option value="${s.id}" data-name="${s.name}">${s.name} (Available: ${inr(s.allocated_amount - s.approved_amount - s.pending_amount)})</option>`).join('');
+  }
+}
+
+function toggleSdg(sdg, el){
+  if (selectedSdgs.includes(sdg)) {
+    selectedSdgs = selectedSdgs.filter(s => s !== sdg);
+    el.classList.remove('active');
+  } else {
+    selectedSdgs.push(sdg);
+    el.classList.add('active');
+  }
+}
+
+function addItemRow(p='', q='', r='', a='', j=''){
+  const wrap = document.getElementById('itemsWrap');
+  const row = document.createElement('div');
+  row.className = 'item-row';
+  row.innerHTML = `
+    <input placeholder="Particulars / Item Description" class="it-p" value="${p}" />
+    <input placeholder="Qty" class="it-q" type="number" min="1" value="${q}" oninput="calcRow(this)" />
+    <input placeholder="Rate (₹)" class="it-r" type="number" min="0" value="${r}" oninput="calcRow(this)" />
+    <input placeholder="Amount (₹)" class="it-a" type="number" min="0" value="${a}" oninput="calcTotal()" style="font-weight:700" />
+    <input placeholder="Justification of need" class="it-j" value="${j}" />
+    <button class="del-item" type="button" onclick="this.parentElement.remove();calcTotal()">✕</button>
+  `;
+  wrap.appendChild(row);
+  calcTotal();
+}
+
+function calcRow(input){
+  const row = input.parentElement;
+  const q = Number(row.querySelector('.it-q').value) || 0;
+  const r = Number(row.querySelector('.it-r').value) || 0;
+  if (q > 0 && r > 0) {
+    row.querySelector('.it-a').value = q * r;
+  }
+  calcTotal();
+}
+
+function calcTotal(){
+  const amounts = [...document.querySelectorAll('#itemsWrap .it-a')].map(i => Number(i.value) || 0);
+  const total = amounts.reduce((s, a) => s + a, 0);
+  const totalEl = document.getElementById('grandTotalText');
+  if (totalEl) totalEl.textContent = inr(total);
+}
+
+async function createNfa(andSubmit){
+  const deptSelect = document.getElementById('nfaDept');
+  let deptId = deptSelect.value;
+  const customDeptName = document.getElementById('customDeptName')?.value?.trim() || '';
+  const customDeptCode = document.getElementById('customDeptCode')?.value?.trim() || '';
+
+  const fyId = document.getElementById('nfaFy').value;
+  const refNo = document.getElementById('nfaRefNo').value.trim();
+  const projId = document.getElementById('nfaProject').value || null;
+  const catId = document.getElementById('nfaCat').value;
+  const subcatSelect = document.getElementById('nfaSubcat');
+  const subcatId = subcatSelect.value || null;
+  const subcatName = subcatSelect.selectedOptions[0]?.dataset.name || '';
+  const title = document.getElementById('nfaTitle').value.trim();
+  const purpose = document.getElementById('nfaPurpose').value.trim();
+  const justification = document.getElementById('nfaJust').value.trim();
+  const submittedByName = document.getElementById('nfaFacultyName').value.trim();
+
+  if (deptId === '__custom__' && !customDeptName) return toast('Please enter the custom department name');
+  if (!title) return toast('Proposal title is required');
+  if (!catId) return toast('Please select a Budget Main Category');
+
+  const items = [...document.querySelectorAll('#itemsWrap .item-row')].map(r => ({
+    particulars: r.querySelector('.it-p').value.trim(),
+    quantity: r.querySelector('.it-q').value.trim(),
+    rate: r.querySelector('.it-r').value.trim(),
+    amount: Number(r.querySelector('.it-a').value) || 0,
+    justification: r.querySelector('.it-j').value.trim()
+  })).filter(i => i.particulars && i.amount > 0);
+
+  if (items.length === 0) return toast('Add at least one item with particulars and amount');
+
+  try {
+    const nfa = await api('/nfas', {
+      method: 'POST',
+      body: {
+        ref_no: refNo,
+        project_id: projId,
+        department_id: deptId,
+        custom_department_name: customDeptName,
+        custom_department_code: customDeptCode,
+        financial_year_id: fyId,
+        budget_category_id: catId,
+        budget_subcategory_id: subcatId,
+        budget_subcategory_name: subcatName,
+        title,
+        purpose,
+        justification,
+        sdgs: selectedSdgs.join('; '),
+        submitted_by_name: submittedByName,
+        items
+      }
+    });
+
+    REF.departments = await api('/budgets/departments');
+
+    if (andSubmit) {
+      await api(`/nfas/${nfa.id}/submit`, { method:'POST' });
+      toast('🚀 NFA submitted to HOD for review!');
+    } else {
+      toast('💾 NFA draft saved successfully!');
+    }
+    closeModal();
+    openNfa(nfa.id);
+  } catch(e){
+    toast(e.message);
+  }
+}
+
+// ---------------- NFA DETAILS & WORKFLOW STEPPER ----------------
+async function openNfa(id){
+  const n = await api(`/nfas/${id}`);
+  
+  const isOwner = n.created_by === USER.id;
+  const canOwnerEdit = isOwner && ['draft', 'submitted', 'revision_required'].includes(n.status);
+  const canHodEdit = USER.role === 'hod' && n.status === 'submitted' && USER.department_id === n.department_id;
+  const canDeanEdit = ['dean', 'associate_dean'].includes(USER.role) && n.status === 'dean_review';
+  const canSuperAdminEdit = USER.role === 'super_admin';
+  const canEdit = canOwnerEdit || canHodEdit || canDeanEdit || canSuperAdminEdit;
+
+  const canSubmit = n.status === 'draft' && isOwner;
+  const canHodReview = (n.status === 'submitted' || n.status === 'under_review') && USER.role === 'hod' && USER.department_id === n.department_id;
+  const canDeanReview = n.status === 'dean_review' && ['dean', 'associate_dean', 'super_admin'].includes(USER.role);
+  const canAccountsReview = (n.status === 'accounts_review' || n.status === 'budget_validation') && ['finance', 'super_admin'].includes(USER.role);
+  const canDirectorApprove = (n.status === 'pending_director_approval' || n.status === 'pending_higher_approval') && ['director', 'super_admin'].includes(USER.role);
+
+  const stages = [
+    { key: 'draft', title: '1. Faculty', desc: 'Applied' },
+    { key: 'submitted', title: '2. HOD', desc: 'Department Review' },
+    { key: 'dean_review', title: '3. Dean', desc: 'School Endorsement' },
+    { key: 'accounts_review', title: '4. Accounts', desc: 'Budget Verification' },
+    { key: 'approved', title: '5. Director', desc: 'Sanction & Debit' },
+  ];
+
+  const stageOrder = ['draft', 'submitted', 'dean_review', 'accounts_review', 'pending_director_approval', 'approved'];
+  const currentIdx = stageOrder.indexOf(n.status);
+
+  let stepperHtml = `<div class="stepper">`;
+  stages.forEach((st, idx) => {
+    let stateClass = '';
+    if (n.status === 'approved' || currentIdx > idx) stateClass = 'completed';
+    else if (currentIdx === idx || (idx === 4 && n.status === 'pending_director_approval')) stateClass = 'active';
+
+    stepperHtml += `
+      <div class="step-node ${stateClass}">
+        <div class="step-circle">${stateClass === 'completed' ? '✓' : idx + 1}</div>
+        <div class="step-label">${st.title}</div>
+        <div class="step-sub">${st.desc}</div>
+      </div>
+    `;
+  });
+  stepperHtml += `</div>`;
+
+  let html = `
+    <button class="close-btn" onclick="closeModal()">✕</button>
+    <div class="row" style="justify-content:space-between;align-items:flex-start">
+      <div>
+        <h2 style="margin:0 0 4px">${n.title}</h2>
+        <div class="card-sub">${n.ref_no} · ${deptName(n.department_id)} · ${n.date}</div>
+      </div>
+      <span class="badge b-${n.status}" style="font-size:13px;padding:6px 14px;">${fmtStatus(n.status)}</span>
+    </div>
+
+    ${stepperHtml}
+
+    <div class="card" style="padding:16px;background:var(--section-bg);margin:16px 0;border-left:4px solid var(--accent)">
+      <div class="row" style="gap:24px;">
+        <div><span class="muted">Main Category:</span> <strong>${catName(n.budget_category_id)}</strong></div>
+        ${n.budget_subcategory_name ? `<div><span class="muted">Subcategory:</span> <strong style="color:var(--primary)">${n.budget_subcategory_name}</strong></div>` : ''}
+        <div><span class="muted">Proposer:</span> <strong>${n.submitted_by_name || 'Faculty'}</strong></div>
+      </div>
+      ${n.sdgs ? `<div style="margin-top:8px"><span class="muted">SDGs:</span> <span style="color:var(--primary);font-weight:600">${n.sdgs}</span></div>` : ''}
+    </div>
+
+    <p><strong>Purpose:</strong> ${n.purpose || '—'}</p>
+    <p><strong>Justification:</strong> ${n.justification || '—'}</p>
+
+    <h3 style="margin-top:20px;font-size:16px;">Budget Items</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Particulars</th>
+          <th>Quantity</th>
+          <th>Rate</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${n.items.map(it => `
+          <tr>
+            <td>${it.sl_no}</td>
+            <td><strong>${it.particulars}</strong>${it.justification ? `<div class="muted">${it.justification}</div>` : ''}</td>
+            <td>${it.quantity || '—'}</td>
+            <td>${it.rate ? inr(it.rate) : '—'}</td>
+            <td style="font-weight:700">${inr(it.amount)}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+      <tfoot>
+        <tr style="font-weight:800;font-size:15px;background:var(--section-bg)">
+          <td colspan="4" style="text-align:right">Total Amount:</td>
+          <td style="color:var(--primary);font-size:16px;">${inr(n.total_amount)}</td>
+        </tr>
+      </tfoot>
+    </table>
+
+    ${n.approvals && n.approvals.length > 0 ? `
+      <h3 style="margin-top:24px;font-size:16px;">Approvals &amp; Institutional Signatures</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Approver Name</th>
+            <th>Role</th>
+            <th>Decision</th>
+            <th>Comments</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${n.approvals.map(a => `
+            <tr>
+              <td>${new Date(a.created_at).toLocaleString()}</td>
+              <td><strong>${a.approver_name || a.approver_role || 'Approver'}</strong></td>
+              <td><span class="role-pill" style="color:#501026;background:var(--accent-light);border:1px solid var(--accent-border)">${String(a.approver_role || '').replace('_',' ')}</span></td>
+              <td><span class="badge ${a.decision==='approved'?'b-approved':a.decision==='rejected'?'b-rejected':'b-submitted'}">${a.decision}</span></td>
+              <td>${a.comments || '—'}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    ` : ''}
+
+    <div class="row" style="margin-top:24px;justify-content:space-between">
+      <div class="row">
+        <button class="secondary" onclick="downloadPdf('${n.id}')">📄 Download Official PDF</button>
+        ${canEdit ? `<button class="secondary" onclick="editNfaModal('${n.id}')">✏️ Edit Details</button>` : ''}
+      </div>
+      <div class="row">
+  `;
+
+  if (canSubmit) {
+    html += `<button class="green" onclick="submitNfa('${n.id}')">🚀 Submit to HOD</button>`;
+  }
+
+  if (canHodReview) {
+    html += `
+      <button class="green" onclick="decideReview('${n.id}', 'approve', 'Recommend to Dean & Associate Dean')">✓ Recommend to Dean</button>
+      <button class="amber" onclick="decideReview('${n.id}', 'revision_required')">Request Revision</button>
+      <button class="danger" onclick="decideReview('${n.id}', 'reject')">Reject</button>
+    `;
+  } else if (canDeanReview) {
+    html += `
+      <button class="green" onclick="decideReview('${n.id}', 'approve', 'Endorse to Accounts Officer')">✓ Endorse to Accounts</button>
+      <button class="amber" onclick="decideReview('${n.id}', 'revision_required')">Request Revision</button>
+      <button class="danger" onclick="decideReview('${n.id}', 'reject')">Reject</button>
+    `;
+  } else if (canAccountsReview) {
+    html += `
+      <button class="green" onclick="decideReview('${n.id}', 'approve', 'Verify budget & forward to Director')">✓ Verify &amp; Forward to Director</button>
+      <button class="amber" onclick="decideReview('${n.id}', 'revision_required')">Request Revision</button>
+      <button class="danger" onclick="decideReview('${n.id}', 'reject')">Reject</button>
+    `;
+  } else if (canDirectorApprove) {
+    html += `
+      <button class="green" style="font-size:13.5px;padding:11px 20px;" onclick="decideReview('${n.id}', 'approve', 'Sanction Proposal & Auto-Debit Department Budget')">👑 Final Director Approval (Auto-Debit)</button>
+      <button class="danger" onclick="decideReview('${n.id}', 'reject')">Reject Proposal</button>
+    `;
+  }
+
+  html += `</div></div>`;
+  openModal(html);
+}
+
+async function submitNfa(id){
+  try {
+    await api(`/nfas/${id}/submit`, { method:'POST' });
+    toast('🚀 NFA submitted to HOD!');
+    openNfa(id);
+    if (currentTab === 'nfas') showTab('nfas');
+  } catch(e){ toast(e.message); }
+}
+
+async function decideReview(id, decision, promptTitle){
+  let comments = '';
+  if (decision !== 'approve') {
+    comments = prompt(`Enter comments or justification for ${decision}:`) || '';
+    if (!comments) return toast('Comments are required for this action');
+  } else if (promptTitle) {
+    if (!confirm(`${promptTitle}?`)) return;
+  }
+
+  try {
+    const res = await api(`/nfas/${id}/review`, {
+      method: 'POST',
+      body: { decision, comments }
+    });
+    toast(decision === 'approve' ? 'Decision recorded successfully & budget updated!' : 'Decision submitted');
+    openNfa(id);
+    if (currentTab === 'inbox') showTab('inbox');
+    else if (currentTab === 'nfas') showTab('nfas');
+    else if (currentTab === 'dashboard') showTab('dashboard');
+  } catch(e){ toast(e.message); }
+}
+
+// ---------------- EDIT NFA MODAL ----------------
+async function editNfaModal(id){
+  const n = await api(`/nfas/${id}`);
+  selectedSdgs = n.sdgs ? n.sdgs.split(';').map(s=>s.trim()).filter(Boolean) : [];
+
+  openModal(`
+    <button class="close-btn" onclick="closeModal()">✕</button>
+    <h2>Edit NFA: ${n.ref_no}</h2>
+    <div class="field-help">Update particulars, items, rates, or justification before next approval.</div>
+
+    <label class="field-label">Title</label>
+    <input id="editTitle" value="${n.title}" />
+
+    <label class="field-label">Purpose</label>
+    <textarea id="editPurpose" rows="2">${n.purpose || ''}</textarea>
+
+    <label class="field-label">Justification</label>
+    <textarea id="editJust" rows="2">${n.justification || ''}</textarea>
+
+    <label class="field-label">Select Relevant UN SDGs</label>
+    <div class="sdg-grid" id="sdgGrid">
+      ${SDG_LIST.map(sdg => `
+        <div class="sdg-chip ${selectedSdgs.includes(sdg) ? 'active' : ''}" onclick="toggleSdg('${sdg}', this)">
+          ${sdg}
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="card-header" style="margin-top:20px;margin-bottom:8px">
+      <label class="field-label" style="margin:0">Budget Items (Qty × Rate automatically calculates Amount)</label>
+      <button class="secondary" type="button" onclick="addItemRow()">+ Add Item Row</button>
+    </div>
+    
+    <div id="itemsWrap"></div>
+
+    <div class="row" style="justify-content:flex-end;margin:14px 0 20px;font-size:16px;">
+      <span class="muted">Total Budget:</span>
+      <strong id="grandTotalText" style="color:var(--primary);font-size:18px;">${inr(n.total_amount)}</strong>
+    </div>
+
+    <div class="row" style="justify-content:flex-end;gap:12px">
+      <button class="secondary" onclick="openNfa('${n.id}')">Cancel</button>
+      <button class="green" onclick="saveNfaEdits('${n.id}')">💾 Save Changes</button>
+    </div>
+  `);
+
+  if (n.items && n.items.length > 0) {
+    n.items.forEach(it => addItemRow(it.particulars, it.quantity, it.rate, it.amount, it.justification));
+  } else {
+    addItemRow();
+  }
+}
+
+async function saveNfaEdits(id){
+  const title = document.getElementById('editTitle').value.trim();
+  const purpose = document.getElementById('editPurpose').value.trim();
+  const justification = document.getElementById('editJust').value.trim();
+
+  const items = [...document.querySelectorAll('#itemsWrap .item-row')].map(r => ({
+    particulars: r.querySelector('.it-p').value.trim(),
+    quantity: r.querySelector('.it-q').value.trim(),
+    rate: r.querySelector('.it-r').value.trim(),
+    amount: Number(r.querySelector('.it-a').value) || 0,
+    justification: r.querySelector('.it-j').value.trim()
+  })).filter(i => i.particulars && i.amount > 0);
+
+  try {
+    await api(`/nfas/${id}`, {
+      method: 'PUT',
+      body: {
+        title,
+        purpose,
+        justification,
+        sdgs: selectedSdgs.join('; '),
+        items
+      }
+    });
+    toast('💾 NFA changes saved successfully!');
+    openNfa(id);
+    if (currentTab === 'nfas') showTab('nfas');
+  } catch(e){ toast(e.message); }
+}
+
+// ---------------- PROJECTS ----------------
+async function renderProjects(main){
+  const deptId = USER.department_id || REF.departments[0]?.id;
+  const projects = await api(`/projects?department=${deptId}`);
+  let html = `
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Department Projects</h2>
+          <div class="card-sub">Major departmental programs, labs, and research initiatives</div>
+        </div>
+        <button onclick="newProjectModal()">+ Add New Project</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Project Name</th>
+            <th>Department</th>
+            <th>Category</th>
+            <th>Budget Limit</th>
+            <th>Associated NFAs</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+
+  if (projects.length === 0) {
+    html += `<tr><td colspan="5" class="muted" style="text-align:center;padding:30px;">No projects created yet. Projects are optional for NFAs.</td></tr>`;
+  } else {
+    projects.forEach(p => {
+      html += `
+        <tr>
+          <td><strong>${p.name}</strong>${p.description ? `<div class="muted">${p.description}</div>` : ''}</td>
+          <td>${deptName(p.department_id)}</td>
+          <td>${catName(p.budget_category_id)}</td>
+          <td><strong>${inr(p.budget_amount)}</strong></td>
+          <td>
+            ${p.nfas.map(n => `<span class="badge b-${n.status}" style="cursor:pointer" onclick="openNfa('${n.id}')">${n.ref_no}</span>`).join(' ') || 'None'}
+          </td>
+        </tr>
+      `;
+    });
+  }
+
+  html += `</tbody></table></div>`;
+  main.innerHTML = html;
+}
+
+function newProjectModal(){
+  openModal(`
+    <button class="close-btn" onclick="closeModal()">✕</button>
+    <h2>Add New Project</h2>
+    <label class="field-label">Project Name</label>
+    <input id="pjName" placeholder="e.g. Cyber Security Lab Upgrade / Cloud VM Cluster" />
+    <label class="field-label">Description</label>
+    <textarea id="pjDesc" rows="2"></textarea>
+    <label class="field-label">Department</label>
+    <select id="pjDept">${REF.departments.map(d=>`<option value="${d.id}">${d.name}</option>`).join('')}</select>
+    <label class="field-label">Budget Main Category</label>
+    <select id="pjCat">${REF.categories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}</select>
+    <label class="field-label">Planned Budget (₹)</label>
+    <input id="pjAmt" type="number" placeholder="Total planned allocation" />
+    <div class="row" style="justify-content:flex-end;margin-top:16px">
+      <button class="secondary" onclick="closeModal()">Cancel</button>
+      <button onclick="createProject()">Create Project</button>
+    </div>
+  `);
+}
+
+async function createProject(){
+  const name = document.getElementById('pjName').value.trim();
+  const description = document.getElementById('pjDesc').value.trim();
+  const department_id = document.getElementById('pjDept').value;
+  const budget_category_id = document.getElementById('pjCat').value;
+  const budget_amount = Number(document.getElementById('pjAmt').value) || 0;
+
+  if (!name) return toast('Project name is required');
+  try {
+    await api('/projects', {
+      method: 'POST',
+      body: {
+        name,
+        description,
+        department_id,
+        financial_year_id: activeFy().id,
+        budget_category_id,
+        budget_amount
+      }
+    });
+    toast('Project created successfully');
+    closeModal();
+    showTab('projects');
+  } catch(e){ toast(e.message); }
+}
+
+// ---------------- BUDGETS VIEW ----------------
+async function renderBudgets(main){
+  const deptId = USER.department_id || REF.departments[0]?.id;
+  const fy = activeFy();
+  const summary = await api(`/budgets/${deptId}/summary?fy=${fy.id}`);
+  const isAdmin = USER.role === 'super_admin';
+
+  let html = `
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Department Master Budget — ${fy.label}</h2>
+          <div class="card-sub">${deptName(deptId)}</div>
+        </div>
+        <div class="row">
+          <select style="max-width:280px;margin-bottom:0;" onchange="changeBudgetDept(this.value)">
+            ${REF.departments.map(d=>`<option value="${d.id}" ${d.id===deptId?'selected':''}>${d.name}</option>`).join('')}
+          </select>
+          ${isAdmin ? `
+            <button class="gold" onclick="openPrivateBudgetUploadModal()">📁 Upload Private University Budget (.xlsx)</button>
+            <button class="secondary" onclick="exportBudgetReport('${deptId}')">📥 Export Excel</button>
+          ` : ''}
+          ${['super_admin', 'director', 'finance'].includes(USER.role) ? `
+            <button class="secondary" onclick="openRolloverModal()">Annual Rollover</button>
+          ` : ''}
+        </div>
+      </div>
+  `;
+
+  summary.lines.forEach((line, idx) => {
+    const subcats = line.subcategories || [];
+    const utilClass = line.status === 'exceeded' ? 'danger' : line.status === 'warning' ? 'warning' : 'safe';
+    const isCapex = (line.category_name || '').toLowerCase().includes('capex');
+
+    html += `
+      <div class="category-accordion ${idx === 0 ? 'open' : ''}" id="bgt-acc-${line.id}">
+        <div class="category-header" onclick="toggleAccordion('bgt-acc-${line.id}')">
+          <div class="category-name-group">
+            <span class="category-chevron">▶</span>
+            <span class="category-title">${line.category_name}</span>
+            ${isCapex ? `<span class="category-type-tag" style="background:#fce7ba;color:#8c6827;border-color:#e6cf9b;">CAPEX</span>` : ''}
+            <span class="badge ${line.status === 'exceeded' ? 'b-rejected' : 'b-approved'}">${line.utilization_pct}%</span>
+          </div>
+          <div class="category-stats-summary">
+            <div><span class="muted">Allocated:</span> <strong>${inr(line.allocated_amount)}</strong></div>
+            <div><span class="muted">Approved:</span> <strong style="color:var(--success)">${inr(line.approved_amount)}</strong></div>
+            <div><span class="muted">Pending:</span> <strong style="color:var(--warning)">${inr(line.pending_amount)}</strong></div>
+            <div><span class="muted">Available:</span> <strong style="color:${line.available_amount < 0 ? 'var(--danger)' : 'var(--primary)'}">${inr(line.available_amount)}</strong></div>
+            <div class="progress-wrap"><div class="progress-fill ${utilClass}" style="width:${Math.min(100, line.utilization_pct)}%"></div></div>
+            ${isAdmin ? `
+              <button class="secondary" style="padding:4px 8px;font-size:11px;" data-line-id="${line.id}" data-cat-name="${encodeURIComponent(line.category_name || '')}" data-alloc="${line.allocated_amount || 0}" onclick="event.stopPropagation(); onEditCategoryClick(this)">✏️ Edit</button>
+            ` : ''}
+          </div>
+        </div>
+        <div class="category-subtable">
+          <table>
+            <thead>
+              <tr>
+                <th>Subcategory Item</th>
+                <th>Allocated Budget</th>
+                <th>Approved &amp; Debited</th>
+                <th>Pending Review</th>
+                <th>Remaining Balance</th>
+                <th>Utilization</th>
+                ${isAdmin ? `<th>Action</th>` : ''}
+              </tr>
+            </thead>
+            <tbody>
+              ${subcats.length > 0 ? subcats.map(sub => `
+                <tr>
+                  <td><strong>${sub.name || 'Particulars'}</strong></td>
+                  <td>${inr(sub.allocated_amount)}</td>
+                  <td style="color:var(--success)">${inr(sub.approved_amount)}</td>
+                  <td style="color:var(--warning)">${inr(sub.pending_amount)}</td>
+                  <td style="font-weight:700;color:${sub.available_amount < 0 ? 'var(--danger)' : 'var(--text)'}">${inr(sub.available_amount)}</td>
+                  <td>
+                    <div class="row" style="gap:6px">
+                      <div class="progress-wrap"><div class="progress-fill ${sub.utilization_pct >= 100 ? 'danger' : sub.utilization_pct >= 80 ? 'warning' : 'safe'}" style="width:${Math.min(100, sub.utilization_pct)}%"></div></div>
+                      <span class="muted" style="font-size:11px">${sub.utilization_pct}%</span>
+                    </div>
+                  </td>
+                  ${isAdmin ? `
+                    <td>
+                      <button class="secondary" style="padding:3px 7px;font-size:11px;" data-sub-id="${sub.id}" data-sub-name="${encodeURIComponent(sub.name || '')}" data-alloc="${sub.allocated_amount || 0}" onclick="onEditSubcategoryClick(this)">✏️ Edit</button>
+                    </td>
+                  ` : ''}
+                </tr>
+              `).join('') : `<tr><td colspan="${isAdmin?7:6}" class="muted">No specific subcategories registered.</td></tr>`}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+  main.innerHTML = html;
+}
+
+async function changeBudgetDept(deptId){
+  const main = document.getElementById('main');
+  main.innerHTML = '<div class="card muted" style="text-align:center;padding:40px;">Loading department budget...</div>';
+  USER.department_id = deptId;
+  await renderBudgets(main);
+}
+
+// ---------------- ANNUAL FISCAL YEAR ROLLOVER & PROJECTION ----------------
+async function openRolloverModal(){
+  const fy = activeFy();
+  openModal(`
+    <button class="close-btn" onclick="closeModal()">✕</button>
+    <h2>Annual Fiscal Year Rollover &amp; Budget Projection</h2>
+    <div class="field-help">Automates academic annual transition for university administration. Automatically rolls over, scales allocations, and creates the next financial year.</div>
+
+    <div class="row" style="margin-bottom:14px;">
+      <div style="flex:1">
+        <label class="field-label">Current Academic Year</label>
+        <input value="${fy.label}" disabled style="background:#f1f5f9;font-weight:700" />
+      </div>
+      <div style="flex:1">
+        <label class="field-label">Next Academic Year</label>
+        <input id="rollTargetLabel" placeholder="Auto-calculated (e.g. 2027-28)" />
+      </div>
+    </div>
+
+    <div class="row" style="margin-bottom:14px;">
+      <div style="flex:1">
+        <label class="field-label">Annual Growth Increment (%)</label>
+        <input id="rollPct" type="number" value="8" min="0" max="100" oninput="loadRolloverPreview()" />
+      </div>
+      <div style="flex:1;display:flex;align-items:center;padding-top:20px;">
+        <label style="cursor:pointer;display:flex;align-items:center;gap:8px;font-weight:600;font-size:13px;">
+          <input type="checkbox" id="rollCarry" style="width:auto;margin-bottom:0;" onchange="loadRolloverPreview()" />
+          Carry Forward Unspent Balance
+        </label>
+      </div>
+    </div>
+
+    <div id="rolloverPreviewWrap" style="margin:16px 0;max-height:360px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius-sm)">
+      <div style="padding:20px;text-align:center;" class="muted">Calculating simulation preview...</div>
+    </div>
+
+    <div class="row" style="justify-content:space-between;align-items:center;margin-top:20px;">
+      <label style="cursor:pointer;display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-muted)">
+        <input type="checkbox" id="rollSetActive" checked style="width:auto;margin-bottom:0;" />
+        Set new academic year as active upon rollover
+      </label>
+      <div class="row" style="gap:10px;">
+        <button class="secondary" onclick="closeModal()">Cancel</button>
+        <button class="green" onclick="executeRollover()">🚀 Apply Next Year Budget Rollover</button>
+      </div>
+    </div>
+  `);
+
+  loadRolloverPreview();
+}
+
+async function loadRolloverPreview(){
+  const fy = activeFy();
+  const pct = document.getElementById('rollPct')?.value || 8;
+  const carry = document.getElementById('rollCarry')?.checked || false;
+  const wrap = document.getElementById('rolloverPreviewWrap');
+
+  try {
+    const data = await api(`/budgets/rollover-preview?source_fy=${fy.id}&percentage=${pct}&carry_forward=${carry}`);
+    document.getElementById('rollTargetLabel').value = data.target_label;
+
+    let h = `
+      <table>
+        <thead>
+          <tr>
+            <th>Department</th>
+            <th>Current Allocation</th>
+            <th>Projected Allocation</th>
+            <th>Net Growth</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${data.departments.map(d => `
+            <tr>
+              <td><strong>${d.department_name}</strong> (${d.department_code})</td>
+              <td>${inr(d.current_allocated)}</td>
+              <td style="font-weight:700;color:var(--primary)">${inr(d.projected_allocated)}</td>
+              <td style="color:var(--success)">+${inr(d.difference)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+        <tfoot>
+          <tr style="font-weight:800;background:var(--section-bg)">
+            <td>Grand Total University Allocation</td>
+            <td>${inr(data.totals.current_allocated)}</td>
+            <td style="color:var(--primary)">${inr(data.totals.projected_allocated)}</td>
+            <td style="color:var(--success)">+${inr(data.totals.projected_growth)} (+${data.totals.growth_pct}%)</td>
+          </tr>
+        </tfoot>
+      </table>
+    `;
+    wrap.innerHTML = h;
+  } catch(e) {
+    wrap.innerHTML = `<div style="padding:16px;color:var(--danger)">${e.message}</div>`;
+  }
+}
+
+async function executeRollover(){
+  const fy = activeFy();
+  const targetLabel = document.getElementById('rollTargetLabel').value.trim();
+  const pct = Number(document.getElementById('rollPct').value) || 0;
+  const carry = document.getElementById('rollCarry').checked;
+  const setActive = document.getElementById('rollSetActive').checked;
+
+  if (!confirm(`Execute annual budget transition to ${targetLabel} with +${pct}% adjustment?`)) return;
+
+  try {
+    const res = await api('/budgets/rollover', {
+      method: 'POST',
+      body: {
+        source_fy_id: fy.id,
+        target_label: targetLabel,
+        percentage: pct,
+        carry_forward: carry,
+        set_active: setActive
+      }
+    });
+
+    toast(`🎉 Successfully rolled over to Academic Year ${res.target_fy.label}!`);
+    REF.financialYears = await api('/budgets/financial-years');
+    if (setActive) {
+      currentActiveFyId = res.target_fy.id;
+    }
+    closeModal();
+    boot();
+  } catch(e){
+    toast(e.message);
+  }
+}
+
+// ---------------- EXCEL EXPORT (ADMIN-ONLY) & PDF ----------------
+async function exportBudgetReport(deptId){
+  if (USER.role !== 'super_admin') {
+    return toast('Access restricted: Only Super Administrator can download master budget workbooks');
+  }
+  try {
+    const res = await fetch(`${API}/budgets/export/${deptId}?fy=${activeFy().id}`, {
+      headers: { Authorization: 'Bearer ' + TOKEN }
+    });
+    if (!res.ok) throw new Error('Excel download failed');
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    const fyLabel = activeFy() ? activeFy().label : 'FY';
+    const deptStr = deptId ? String(deptName(deptId) || 'Dept').replace(/\s+/g, '_') : 'Master_University';
+    link.download = `Budget_Report_${deptStr}_${fyLabel}.xlsx`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    toast('Excel report downloaded');
+  } catch(e){ toast(e.message); }
+}
+
 async function downloadPdf(id){
   try {
-    const res = await fetch(`${API}/nfas/${id}/pdf`, { headers: { Authorization: 'Bearer '+TOKEN } });
-    if (!res.ok) {
-      let message = 'PDF download failed';
-      try { message = (await res.json()).error || message; } catch(e) {}
-      throw new Error(message);
-    }
-    const url = URL.createObjectURL(await res.blob());
+    const res = await fetch(`${API}/nfas/${id}/pdf`, {
+      headers: { Authorization: 'Bearer ' + TOKEN }
+    });
+    if (!res.ok) throw new Error('PDF download failed');
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
     const disposition = res.headers.get('Content-Disposition') || '';
-    const fileName = disposition.match(/filename="?([^";]+)"?/i)?.[1] || `nfa-${id}.pdf`;
+    const fileName = disposition.match(/filename="?([^";]+)"?/i)?.[1] || `NFA-${id}.pdf`;
     link.download = fileName;
     document.body.appendChild(link);
     link.click();
@@ -144,471 +2415,232 @@ async function downloadPdf(id){
   } catch(e){ toast(e.message); }
 }
 
-async function downloadExcel(dept){
-  try {
-    const res = await fetch(`${API}/budgets/export/${dept}?fy=${activeFy().id}`, { headers: { Authorization: 'Bearer '+TOKEN } });
-    if (!res.ok) {
-      let message = 'Excel download failed';
-      try { message = (await res.json()).error || message; } catch(e) {}
-      throw new Error(message);
-    }
-    const url = URL.createObjectURL(await res.blob());
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `budget-${dept}-${activeFy().label}.xlsx`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  } catch(e){ toast(e.message); }
-}
-
-async function doLogin(){
-  const email = document.getElementById('loginEmail').value;
-  const password = document.getElementById('loginPassword').value;
-  try {
-    const data = await api('/auth/login', { method:'POST', body:{ email, password } });
-    TOKEN = data.token; USER = data.user;
-    localStorage.setItem('token', TOKEN); localStorage.setItem('user', JSON.stringify(USER));
-    boot();
-  } catch(e){ document.getElementById('loginErr').textContent = e.message; }
-}
-function logout(){ TOKEN=''; USER=null; localStorage.clear(); document.getElementById('app').style.display='none'; document.getElementById('login').style.display='block'; }
-
-const TABS_BY_ROLE = {
-  student: ['dashboard','projects','nfas'],
-  faculty: ['dashboard','projects','nfas','budgets','excel','audit'],
-  hod: ['dashboard','projects','nfas','budgets','excel','audit'],
-  finance: ['dashboard','nfas','budgets','audit'],
-  super_admin: ['dashboard','projects','nfas','budgets','excel','audit','admin'],
-  it_admin: ['dashboard','nfas','budgets','audit'],
-};
-const TAB_LABEL = { dashboard:'Dashboard', projects:'Projects', nfas:'NFAs', budgets:'Budgets', excel:'Excel', audit:'Audit History', admin:'Settings' };
-
-async function boot(){
-  document.getElementById('login').style.display='none';
-  document.getElementById('app').style.display='block';
-  document.getElementById('whoami').textContent = `${USER.name} · ${USER.role.replace('_',' ')}`;
-  const [depts, cats, fys] = await Promise.all([api('/budgets/departments'), api('/budgets/categories'), api('/budgets/financial-years')]);
-  REF.departments = depts; REF.categories = cats; REF.financialYears = fys;
-  const tabs = TABS_BY_ROLE[USER.role] || ['dashboard'];
-  document.getElementById('nav').innerHTML = tabs.map(t=>`<button data-tab="${t}" onclick="showTab('${t}')">${TAB_LABEL[t]}</button>`).join('');
-  showTab(tabs[0]);
-}
-
-function deptName(id){ return REF.departments.find(d=>d.id===id)?.name || id; }
-function catName(id){ return REF.categories.find(c=>c.id===id)?.name || id; }
-function activeFy(){ return REF.financialYears.find(f=>f.is_active) || REF.financialYears[0]; }
-
-async function showTab(tab){
-  currentTab = tab;
-  [...document.querySelectorAll('nav button')].forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
-  const main = document.getElementById('main');
-  main.innerHTML = '<div class="card muted">Loading…</div>';
-  try {
-    if (tab==='dashboard') await renderDashboard(main);
-    else if (tab==='projects') await renderProjects(main);
-    else if (tab==='nfas') await renderNfas(main);
-    else if (tab==='budgets') await renderBudgets(main);
-    else if (tab==='excel') await renderExcel(main);
-    else if (tab==='audit') await renderAudit(main);
-    else if (tab==='admin') await renderAdmin(main);
-  } catch(e){ main.innerHTML = `<div class="card" style="color:var(--red)">${e.message}</div>`; }
-}
-
-// ---------- DASHBOARD ----------
-async function renderDashboard(main){
-  const nfas = await api('/nfas');
-  const mine = USER.role==='student' ? nfas : nfas;
-  const byStatus = {};
-  mine.forEach(n=>byStatus[n.status]=(byStatus[n.status]||0)+1);
-  let html = `<div class="card"><h2>Welcome, ${USER.name}</h2><div class="grid">`;
-  ['submitted','under_review','pending_higher_approval','approved','rejected','revision_required'].forEach(s=>{
-    html += `<div class="stat"><div class="label">${fmtStatus(s)}</div><div class="val">${byStatus[s]||0}</div></div>`;
-  });
-  html += `</div></div>`;
-
-  if (['faculty','hod'].includes(USER.role) && USER.department_id){
-    const summary = await api(`/budgets/${USER.department_id}/summary?fy=${activeFy().id}`);
-    const projects = await api(`/projects?fy=${activeFy().id}`);
-    const budgetHistory = await api(`/budgets/uploads?department=${USER.department_id}&fy=${activeFy().id}`);
-    const originalTotal = summary.totals.allocated_amount;
-    const currentTotal = summary.totals.approved_amount + summary.totals.pending_amount;
-    html += `<div class="card"><h2>Budget Overview — ${activeFy().label}</h2><div class="grid"><div class="stat"><div class="label">Original Budget</div><div class="val">${inr(originalTotal)}</div></div><div class="stat"><div class="label">Current Budget</div><div class="val">${inr(currentTotal)}</div></div><div class="stat"><div class="label">Projects</div><div class="val">${projects.length}</div></div><div class="stat"><div class="label">New / Pending Changes</div><div class="val">${budgetHistory.changes.filter(c=>c.approval_status==='pending').length}</div></div></div><div class="muted" style="margin-top:10px">Last updated: ${budgetHistory.changes.length ? new Date(budgetHistory.changes[budgetHistory.changes.length-1].created_at).toLocaleString() : 'No changes recorded'}</div></div>`;
-    html += `<div class="card"><h2>${deptName(USER.department_id)} — Department Master Budget (${activeFy().label})</h2>`;
-    html += budgetTable(summary.lines, summary.totals);
-    html += `</div>`;
-  }
-  if (USER.role==='finance' || USER.role==='super_admin'){
-    const pending = nfas.filter(n=>n.status==='pending_higher_approval');
-    html += `<div class="card"><h2>Awaiting Finance Approval (${pending.length})</h2>` + nfaTable(pending) + `</div>`;
-  }
-  main.innerHTML = html;
-}
-
-function budgetTable(lines, totals){
-  let h = `<table><thead><tr><th>Category</th><th>Allocated</th><th>Approved</th><th>Pending</th><th>Available</th></tr></thead><tbody>`;
-  lines.forEach(l=>{
-    h += `<tr><td>${l.category_name}</td><td>${inr(l.allocated_amount)}</td><td>${inr(l.approved_amount)}</td><td>${inr(l.pending_amount)}</td><td style="font-weight:700;color:${l.available_amount<0?'var(--red)':'var(--green)'}">${inr(l.available_amount)}</td></tr>`;
-  });
-  if (totals) h += `<tr style="font-weight:700"><td>TOTAL</td><td>${inr(totals.allocated_amount)}</td><td>${inr(totals.approved_amount)}</td><td>${inr(totals.pending_amount)}</td><td>${inr(totals.available_amount)}</td></tr>`;
-  return h + `</tbody></table>`;
-}
-
-function nfaTable(list){
-  if (!list.length) return `<div class="muted">None</div>`;
-  let h = `<table><thead><tr><th>Ref No.</th><th>Title</th><th>Department</th><th>Category</th><th>Amount</th><th>Status</th><th></th></tr></thead><tbody>`;
-  list.forEach(n=>{
-    h += `<tr><td>${n.ref_no}</td><td>${n.title}</td><td>${deptName(n.department_id)}</td><td>${catName(n.budget_category_id)}</td><td>${inr(n.total_amount)}</td><td><span class="badge b-${n.status}">${fmtStatus(n.status)}</span></td><td><button class="link" onclick="openNfa('${n.id}')">Open →</button></td></tr>`;
-  });
-  return h + `</tbody></table>`;
-}
-
-// ---------- PROJECTS ----------
-async function renderProjects(main){
-  const projects = await api('/projects' + (USER.department_id ? `?department=${USER.department_id}` : ''));
-  let html = `<div class="card"><div class="row" style="justify-content:space-between"><h2>Projects</h2><button onclick="newProjectModal()">+ New Project</button></div>`;
-  html += `<table><thead><tr><th>Name</th><th>Department</th><th>Category</th><th>NFAs</th></tr></thead><tbody>`;
-  projects.forEach(p=>{
-    html += `<tr><td>${p.name}</td><td>${deptName(p.department_id)}</td><td>${catName(p.budget_category_id)}</td><td>${p.nfas.map(n=>`<span class="badge b-${n.status}">${n.ref_no}</span>`).join(' ')}</td><td><button class="danger" onclick="deleteProject('${p.id}')">Delete</button></td></tr>`;
-  });
-  html = html.replace('<th>NFAs</th>', '<th>NFAs</th><th></th>');
-  html += `</tbody></table></div>`;
-  main.innerHTML = html;
-}
-
-async function newProjectModal(){
-  let facultyOptions = '';
-  if (['hod','super_admin'].includes(USER.role)) {
-    const faculty = await api(`/projects/faculty?department=${USER.department_id || REF.departments[0].id}`);
-    facultyOptions = `<select id="pjFaculty"><option value="">Unassigned</option>${faculty.map(f=>`<option value="${f.id}">${f.name} (${f.email})</option>`).join('')}</select>`;
-  }
-  openModal(`
-    <span class="close" onclick="closeModal()">✕</span>
-    <h2>New Project</h2>
-    <input id="pjName" placeholder="Project name" />
-      <textarea id="pjDescription" placeholder="Description" rows="2"></textarea>
-      <input id="pjAmount" type="number" placeholder="Budget amount" />
-      <input id="pjRemarks" placeholder="Remarks" />
-    <select id="pjDept">${REF.departments.map(d=>`<option value="${d.id}" ${d.id===USER.department_id?'selected':''}>${d.name}</option>`).join('')}</select>
-    <select id="pjFy">${REF.financialYears.map(f=>`<option value="${f.id}" ${f.is_active?'selected':''}>${f.label}</option>`).join('')}</select>
-    <select id="pjCat">${REF.categories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}</select>
-    ${facultyOptions}
-    <button onclick="createProject()">Create</button>
-  `);
-}
-async function createProject(){
-  try {
-    await api('/projects', { method:'POST', body:{ name: pjName.value, description: pjDescription.value, budget_amount: Number(pjAmount.value)||0, remarks: pjRemarks.value, assigned_faculty_id: document.getElementById('pjFaculty')?.value || null, department_id: pjDept.value, financial_year_id: pjFy.value, budget_category_id: pjCat.value }});
-    closeModal(); toast('Project created'); showTab('projects');
-  } catch(e){ toast(e.message); }
-}
-async function deleteProject(id){
-  if(!confirm('Delete this project and its NFAs?')) return;
-  try { await api(`/projects/${id}`, {method:'DELETE'}); toast('Project deleted'); showTab('projects'); } catch(e){ toast(e.message); }
-}
-
-// ---------- NFAs ----------
-async function renderNfas(main){
-  const list = await api('/nfas');
-  let html = `<div class="card"><div class="row" style="justify-content:space-between"><h2>NFAs</h2>`;
-  if (['student','faculty','hod','super_admin'].includes(USER.role)) html += `<button onclick="newNfaModal()">+ New NFA</button>`;
-  html += `</div>` + nfaTable(list) + `</div>`;
-  main.innerHTML = html;
-}
-
-async function newNfaModal(){
-  const projects = await api('/projects' + (USER.department_id ? `?department=${USER.department_id}` : ''));
-  openModal(`
-    <span class="close" onclick="closeModal()">✕</span>
-    <h2>New NFA</h2>
-    <label class="field-label" for="nfaProject">Project</label>
-    <select id="nfaProject">${projects.map(p=>`<option value="${p.id}" data-dept="${p.department_id}" data-cat="${p.budget_category_id}" data-fy="${p.financial_year_id}">${p.name}</option>`).join('')}</select>
-    <div class="field-help">A project groups related NFAs and tracks their budget against the selected department and financial year.</div>
-    <div class="grid"><div><label class="field-label" for="nfaFacultyName">Submitted by name</label><input id="nfaFacultyName" placeholder="Enter faculty name" value="${USER.name}" /></div>
-    <div><label class="field-label" for="nfaFacultyDesignation">Designation</label><select id="nfaFacultyDesignation"><option>Faculty</option><option>Assistant Professor</option><option>Associate Professor</option><option>Professor</option></select></div></div>
-    <input id="nfaTitle" placeholder="Title" />
-    <textarea id="nfaPurpose" placeholder="Purpose" rows="2"></textarea>
-    <textarea id="nfaDesc" placeholder="Description" rows="2"></textarea>
-    <textarea id="nfaJust" placeholder="Justification" rows="2"></textarea>
-    <textarea id="nfaSdgs" placeholder="Aligned SDGs" rows="2"></textarea>
-    <textarea id="nfaRequirements" placeholder="Requirements / infrastructure details" rows="2"></textarea>
-    <h3>Budget Items</h3>
-    <div id="itemsWrap"></div>
-    <button class="secondary" onclick="addItemRow()">+ Add item</button>
-    <div style="margin-top:14px"><button onclick="createNfa()">Create Draft</button></div>
-  `);
-  addItemRow();
-}
-function addItemRow(){
-  const wrap = document.getElementById('itemsWrap');
-  const row = document.createElement('div');
-  row.className = 'item-row';
-  row.innerHTML = `<input placeholder="Particulars" class="it-p" /><input placeholder="Qty" class="it-q" /><input placeholder="Rate" class="it-r" /><input placeholder="Amount" type="number" class="it-a" /><input placeholder="Justification of need" class="it-j" /><button class="link" onclick="this.parentElement.remove()">✕</button>
-    <input placeholder="Comments" class="it-c" /><input placeholder="Basis of budget" class="it-b" /><input placeholder="Previous budget" type="number" class="it-pb" /><input placeholder="Previous actual" type="number" class="it-pa" />`;
-  wrap.appendChild(row);
-}
-async function createNfa(){
-  const proj = document.getElementById('nfaProject');
-  const opt = proj.selectedOptions[0];
-  const items = [...document.querySelectorAll('#itemsWrap .item-row')].map(r=>({
-    particulars: r.querySelector('.it-p').value, quantity: r.querySelector('.it-q').value, rate: r.querySelector('.it-r').value,
-    amount: Number(r.querySelector('.it-a').value)||0, justification: r.querySelector('.it-j').value, comments: r.querySelector('.it-c').value,
-    basis_of_budget: r.querySelector('.it-b').value, previous_year_budget: Number(r.querySelector('.it-pb').value)||0, previous_year_actual: Number(r.querySelector('.it-pa').value)||0
-  })).filter(i=>i.particulars);
-  try {
-    const nfa = await api('/nfas', { method:'POST', body:{
-      project_id: proj.value, department_id: opt.dataset.dept, financial_year_id: opt.dataset.fy, budget_category_id: opt.dataset.cat,
-      title: nfaTitle.value, purpose: nfaPurpose.value, description: nfaDesc.value, justification: nfaJust.value, sdgs: nfaSdgs.value, requirements: nfaRequirements.value,
-      submitted_by_name: nfaFacultyName.value, submitted_by_designation: nfaFacultyDesignation.value, items
-    }});
-    closeModal(); toast('NFA draft created'); openNfa(nfa.id);
-  } catch(e){ toast(e.message); }
-}
-
-async function openNfa(id){
-  const n = await api(`/nfas/${id}`);
-  const canSubmit = n.status==='draft' && n.created_by===USER.id;
-  const canReview1 = n.status==='submitted' && USER.role==='faculty';
-  const canReview2 = n.status==='under_review' && USER.role==='hod';
-  const canFinance = n.status==='pending_higher_approval' && (USER.role==='finance'||USER.role==='super_admin');
-  const canRevise = n.status==='approved' && ['faculty','hod','super_admin'].includes(USER.role);
-
-  let html = `<span class="close" onclick="closeModal()">✕</span>
-    <h2>${n.title} <span class="badge b-${n.status}">${fmtStatus(n.status)}</span></h2>
-    <div class="muted">${n.ref_no} · ${deptName(n.department_id)} · ${catName(n.budget_category_id)} · ${n.date}</div>
-    <p>${n.purpose}</p>
-    <table><thead><tr><th>#</th><th>Particulars</th><th>Qty</th><th>Amount</th></tr></thead><tbody>
-    ${n.items.map(i=>`<tr><td>${i.sl_no}</td><td>${i.particulars}</td><td>${i.quantity}</td><td>${inr(i.amount)}</td></tr>`).join('')}
-    </tbody><tfoot><tr style="font-weight:700"><td colspan="3">Total</td><td>${inr(n.total_amount)}</td></tr></tfoot></table>
-    <div class="row" style="margin-top:14px">
-      <button class="secondary" onclick="downloadPdf('${n.id}')">Download PDF</button>`;
-
-  if (canSubmit) html += `<button onclick="submitNfa('${n.id}')">Submit for Review</button>`;
-  if (canReview1 || canReview2) html += `
-      <button class="green" onclick="reviewNfa('${n.id}','approve')">Approve</button>
-      <button class="danger" onclick="reviewNfa('${n.id}','reject')">Reject</button>
-      <button class="secondary" onclick="reviewNfa('${n.id}','revision_required')">Request Revision</button>`;
-  if (canFinance) html += `
-      <button class="green" onclick="financeDecision('${n.id}','approve')">Approve (Finance)</button>
-      <button class="danger" onclick="financeDecision('${n.id}','reject')">Reject</button>`;
-  if (canRevise) html += `<button class="secondary" onclick="reviseModal('${n.id}', ${n.total_amount})">Revise Budget</button>`;
-  html += `</div>`;
-  if (USER.role==='super_admin' || n.created_by===USER.id || (['faculty','hod'].includes(USER.role) && n.department_id===USER.department_id)) {
-    html += `<div style="margin-top:10px"><button class="danger" onclick="deleteNfa('${n.id}')">Delete NFA</button></div>`;
-  }
-
-  if (n.pending_revision_amount !== undefined) {
-    html += `<div class="muted" style="margin-top:8px">Pending revision to ${inr(n.pending_revision_amount)} — awaiting Finance.</div>`;
-  }
-  openModal(html);
-}
-async function deleteNfa(id){
-  if(!confirm('Delete this NFA?')) return;
-  try { await api(`/nfas/${id}`, {method:'DELETE'}); closeModal(); toast('NFA deleted'); showTab('nfas'); } catch(e){ toast(e.message); }
-}
-async function submitNfa(id){ try{ await api(`/nfas/${id}/submit`,{method:'POST'}); toast('Submitted'); openNfa(id);}catch(e){toast(e.message);} }
-async function reviewNfa(id, decision){
-  const comments = decision!=='approve' ? (prompt('Comments (required for reject/revision):')||'') : '';
-  try {
-    const r = await api(`/nfas/${id}/review`, { method:'POST', body:{ decision, comments }});
-    if (r.escalated) toast('Budget exceeded / above threshold — escalated to Finance');
-    else toast('Review recorded');
-    openNfa(id);
-  } catch(e){ toast(e.message); }
-}
-async function financeDecision(id, decision){
-  const comments = prompt('Comments:')||'';
-  try { await api(`/nfas/${id}/finance-decision`, { method:'POST', body:{ decision, comments }}); toast('Recorded'); openNfa(id); } catch(e){ toast(e.message); }
-}
-function reviseModal(id, current){
-  openModal(`
-    <span class="close" onclick="closeModal()">✕</span>
-    <h2>Revise Budget</h2>
-    <div class="muted">Current: ${inr(current)}</div>
-    <input id="revAmt" type="number" placeholder="New total amount" value="${current}" />
-    <textarea id="revReason" placeholder="Reason for change" rows="2"></textarea>
-    <button onclick="submitRevision('${id}')">Submit Revision</button>
-  `);
-}
-async function submitRevision(id){
-  try {
-    const r = await api(`/nfas/${id}/revise`, { method:'POST', body:{ new_total_amount: Number(revAmt.value), reason: revReason.value }});
-    toast(r.revision.status==='pending_higher_approval' ? `Difference ${inr(r.revision.difference)} — escalated to Finance` : `Updated, difference ${inr(r.revision.difference)}`);
-    openNfa(id);
-  } catch(e){ toast(e.message); }
-}
-
-// ---------- BUDGETS ----------
-async function renderBudgets(main){
-  const availableDepartments = USER.role==='super_admin' || USER.role==='finance' || USER.role==='it_admin'
-    ? REF.departments
-    : REF.departments.filter(d=>d.id===USER.department_id);
-  const dept = availableDepartments.find(d=>d.id===USER.department_id)?.id || availableDepartments[0]?.id;
-  if (!dept) { main.innerHTML = `<div class="card muted">No department is available.</div>`; return; }
-  const summary = await api(`/budgets/${dept}/summary?fy=${activeFy().id}`);
-  let html = `<div class="card"><div class="row" style="justify-content:space-between">
-    <div><h2>${deptName(dept)} — Master Budget (${activeFy().label})</h2>${availableDepartments.length>1?`<select id="budgetDepartment" onchange="changeBudgetDepartment(this.value)" style="max-width:360px;margin-top:4px">${availableDepartments.map(d=>`<option value="${d.id}" ${d.id===dept?'selected':''}>${d.name} (${d.code})</option>`).join('')}</select>`:''}</div>
-    <button class="secondary" onclick="downloadExcel('${dept}')">Export Excel</button>
-    </div>` + budgetTable(summary.lines, summary.totals) + `</div>`;
-  main.innerHTML = html;
-}
-async function changeBudgetDepartment(departmentId){
-  const main = document.getElementById('main');
-  main.innerHTML = '<div class="card muted">Loading budget...</div>';
-  try {
-    const summary = await api(`/budgets/${departmentId}/summary?fy=${activeFy().id}`);
-    main.innerHTML = `<div class="card"><div class="row" style="justify-content:space-between"><div><h2>${deptName(departmentId)} — Master Budget (${activeFy().label})</h2><select id="budgetDepartment" onchange="changeBudgetDepartment(this.value)" style="max-width:360px;margin-top:4px">${REF.departments.map(d=>`<option value="${d.id}" ${d.id===departmentId?'selected':''}>${d.name} (${d.code})</option>`).join('')}</select></div><button class="secondary" onclick="downloadExcel('${departmentId}')">Export Excel</button></div>${budgetTable(summary.lines, summary.totals)}</div>`;
-  } catch(e){ main.innerHTML = `<div class="card" style="color:var(--red)">${e.message}</div>`; }
-}
-
-// ---------- EXCEL ----------
+// ---------------- EXCEL IMPORT ----------------
 async function renderExcel(main){
-  let uploadHtml = '';
-  if (['hod','super_admin'].includes(USER.role)) uploadHtml = `<h3>Upload Original Budget</h3><div class="row"><select id="uploadFy">${REF.financialYears.map(f=>`<option value="${f.id}">${f.label}</option>`).join('')}</select><select id="uploadDept">${REF.departments.map(d=>`<option value="${d.id}" ${d.id===USER.department_id?'selected':''}>${d.name}</option>`).join('')}</select><input id="budgetFile" type="file" accept=".xlsx,.xls" /><button onclick="uploadOriginalBudget()">Upload Budget</button></div>`;
-  const dept = USER.department_id || REF.departments[0].id;
+  const dept = USER.department_id || REF.departments[0]?.id;
   const records = await api(`/budgets/import/records?department=${dept}`);
-  const originals = await api(`/budgets/uploads?department=${dept}`);
-  let html = `<div class="card"><h2>Excel Import / Synchronization</h2>${uploadHtml}
-    <p class="muted">Upload a modified budget workbook. Changes are previewed as a diff against the database before anything is written.</p>
-    <input type="file" id="excelFile" accept=".xlsx" />
-    <button onclick="previewExcel('${dept}')">Preview Changes</button>
-    <div id="excelResult"></div>
-  </div>
-  <div class="card"><h2>Sync History</h2>
-    <table><thead><tr><th>File</th><th>Status</th><th>Items changed</th><th>Date</th></tr></thead><tbody>
-    ${records.map(r=>`<tr><td>${r.filename}</td><td>${r.status}</td><td>${r.diff.length}</td><td>${new Date(r.created_at).toLocaleString()}</td></tr>`).join('')}
-    </tbody></table>
-  </div>`;
-  html += `<div class="card"><h2>Original Uploaded Budgets</h2><table><thead><tr><th>File</th><th>Year</th><th>Uploaded</th></tr></thead><tbody>${originals.uploads.map(u=>`<tr><td>${u.filename}</td><td>${REF.financialYears.find(f=>f.id===u.financial_year_id)?.label || u.financial_year_id}</td><td>${new Date(u.uploaded_at).toLocaleString()}</td></tr>`).join('') || '<tr><td colspan="3">No original budget uploaded</td></tr>'}</tbody></table></div>`;
+  let html = `
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Excel Budget Synchronization</h2>
+          <div class="card-sub">Upload modified department Excel workbooks to safely inspect and synchronize differences</div>
+        </div>
+      </div>
+      <p class="card-sub">All workbook changes are previewed against the master ledger before any allocations are committed.</p>
+      <input type="file" id="excelFile" accept=".xlsx" style="max-width:400px" />
+      <button onclick="previewExcel('${dept}')">Preview Workbook Diff</button>
+      <div id="excelResult" style="margin-top:16px"></div>
+    </div>
+    <div class="card">
+      <h2 class="card-title" style="margin-bottom:12px">Sync Audit Records</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Filename</th>
+            <th>Status</th>
+            <th>Changed Items</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${records.map(r=>`
+            <tr>
+              <td><strong>${r.filename}</strong></td>
+              <td><span class="badge ${r.status==='confirmed'?'b-approved':'b-submitted'}">${r.status}</span></td>
+              <td>${r.diff.length}</td>
+              <td>${new Date(r.created_at).toLocaleString()}</td>
+            </tr>
+          `).join('') || '<tr><td colspan="4" class="muted">No synchronization records</td></tr>'}
+        </tbody>
+      </table>
+    </div>
+  `;
   main.innerHTML = html;
 }
-async function uploadOriginalBudget(){
-  const file = document.getElementById('budgetFile').files[0];
-  if (!file) return toast('Choose an Excel file first');
-  const fd = new FormData(); fd.append('file', file); fd.append('department_id', uploadDept.value); fd.append('financial_year_id', uploadFy.value);
-  try { await api('/budgets/upload', {method:'POST', body:fd}); toast('Original budget uploaded safely'); showTab('excel'); } catch(e){ toast(e.message); }
-}
+
 async function previewExcel(dept){
   const f = document.getElementById('excelFile').files[0];
-  if (!f) return toast('Choose a file first');
-  const fd = new FormData(); fd.append('file', f); fd.append('department_id', dept); fd.append('financial_year_id', activeFy().id);
+  if (!f) return toast('Select an Excel file first');
+  const fd = new FormData();
+  fd.append('file', f);
+  fd.append('department_id', dept);
+  fd.append('financial_year_id', activeFy().id);
   try {
     const r = await api('/budgets/import/preview', { method:'POST', body: fd });
-    window.lastExcelSheets = r.sheets || [];
-    const changed = r.diffs.filter(d=>d.change_type!=='new');
-    const added = r.diffs.filter(d=>d.change_type==='new');
-    let h = `<h3>Uploaded workbook</h3><div class="sheet-tabs">${r.sheets.map((s,i)=>`<button class="sheet-tab ${i===0?'active':''}" onclick="showUploadedSheet(this,'${s.name.replace(/'/g,"\\'")}')">${s.name}</button>`).join('')}</div>`;
-    h += `<div id="uploadedSheetInfo" class="muted">${r.sheets[0] ? `${r.sheets[0].rows} rows · ${r.sheets[0].columns} columns · ${r.sheets[0].headers.join(' · ')}` : 'No sheets found'}</div>`;
-    h += `<h3>Detected changes (${r.diffs.length})</h3>`;
-    if (!r.diffs.length) h += `<div class="muted">No differences found.</div>`;
+    let h = `<h3>Detected Differences (${r.diffs.length})</h3>`;
+    if (!r.diffs.length) h += `<div class="muted">No differences detected between workbook and system database.</div>`;
     else {
-      h += `<table><thead><tr><th>Change</th><th>Item</th><th>Old</th><th>New</th><th>Difference</th></tr></thead><tbody>`;
-      r.diffs.forEach(d=>{ h += `<tr><td>${d.change_type==='new'?'New row':'Changed'}</td><td>${d.particulars}</td><td>${d.old_amount===null?'(new)':inr(d.old_amount)}</td><td>${inr(d.new_amount)}</td><td style="color:${d.difference<0?'var(--green)':'var(--amber)'}">${d.difference>0?'+':''}${inr(d.difference)}</td></tr>`; });
-      h += `</tbody></table><div class="row" style="margin-top:10px"><button onclick="confirmExcel('${r.sync_record_id}','${dept}')">Apply ${changed.length} matched change(s)</button>${added.length?`<span class="muted">${added.length} new row(s) shown above need an NFA/project before they can be added.</span>`:''}</div>`;
+      h += `<table><thead><tr><th>Change</th><th>Particulars</th><th>Current Amount</th><th>Workbook Amount</th><th>Difference</th></tr></thead><tbody>`;
+      r.diffs.forEach(d => {
+        h += `<tr><td>${d.change_type==='new'?'New row':'Changed'}</td><td>${d.particulars}</td><td>${d.old_amount===null?'(new)':inr(d.old_amount)}</td><td>${inr(d.new_amount)}</td><td style="color:${d.difference<0?'var(--success)':'var(--warning)'}">${inr(d.difference)}</td></tr>`;
+      });
+      h += `</tbody></table><button style="margin-top:12px" onclick="confirmExcel('${r.sync_record_id}')">Confirm and Apply Changes</button>`;
     }
     document.getElementById('excelResult').innerHTML = h;
   } catch(e){ toast(e.message); }
 }
-function showUploadedSheet(button, name){
-  document.querySelectorAll('.sheet-tab').forEach(tab=>tab.classList.remove('active'));
-  button.classList.add('active');
-  const sheets = window.lastExcelSheets || [];
-  const sheet = sheets.find(s=>s.name===name);
-  if (sheet) document.getElementById('uploadedSheetInfo').textContent = `${sheet.rows} rows · ${sheet.columns} columns · ${sheet.headers.join(' · ')}`;
-}
-async function confirmExcel(syncId, dept){
-  try { const r = await api(`/budgets/import/confirm/${syncId}`, { method:'POST' }); toast(`Applied ${r.applied.length} change(s)`); showTab('excel'); } catch(e){ toast(e.message); }
+
+async function confirmExcel(syncId){
+  try {
+    await api(`/budgets/import/confirm/${syncId}`, { method:'POST' });
+    toast('Excel changes synchronized with database');
+    showTab('excel');
+  } catch(e){ toast(e.message); }
 }
 
-// ---------- AUDIT ----------
+// ---------------- AUDIT LEDGER ----------------
 async function renderAudit(main){
   const logs = await api('/audit');
-  const changes = await api('/audit/budget-changes');
-  let html = `<div class="card"><h2>Audit History</h2>
-    <table><thead><tr><th>When</th><th>Entity</th><th>Old</th><th>New</th><th>Diff</th><th>By</th><th>Source</th><th>Status</th><th>Reason</th></tr></thead><tbody>`;
-  logs.forEach(l=>{
-    const u = null;
-    html += `<tr><td>${new Date(l.created_at).toLocaleString()}</td><td>${l.entity_type}</td><td>${l.old_amount!==null?inr(l.old_amount):'—'}</td><td>${l.new_amount!==null?inr(l.new_amount):'—'}</td><td>${l.difference!==null?((l.difference>0?'+':'')+inr(l.difference)):'—'}</td><td>${l.role}</td><td>${l.source}</td><td>${l.approval_status}</td><td class="muted">${l.reason}</td></tr>`;
-  });
-  html += `</tbody></table></div>`;
-  html += `<div class="card"><h2>Budget Version History</h2><table><thead><tr><th>Version</th><th>When</th><th>Action</th><th>Previous</th><th>New</th><th>Status</th><th>Description</th></tr></thead><tbody>${changes.map(c=>`<tr><td>V${c.version}</td><td>${new Date(c.created_at).toLocaleString()}</td><td>${c.action}</td><td>${c.previous_value || '—'}</td><td>${c.new_value || '—'}</td><td>${c.approval_status}</td><td>${c.description}</td></tr>`).join('')}</tbody></table></div>`;
+  let html = `
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Immutable Financial Audit Ledger</h2>
+          <div class="card-sub">Real-time trace of every approval, budget debit, and status transition</div>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Entity</th>
+            <th>Previous</th>
+            <th>Updated</th>
+            <th>Net Diff</th>
+            <th>Role</th>
+            <th>Reason &amp; Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${logs.map(l => `
+            <tr>
+              <td>${new Date(l.created_at).toLocaleString()}</td>
+              <td><strong>${l.entity_type.toUpperCase()}</strong></td>
+              <td>${l.old_amount !== null ? inr(l.old_amount) : '—'}</td>
+              <td style="font-weight:700">${l.new_amount !== null ? inr(l.new_amount) : '—'}</td>
+              <td style="color:${l.difference > 0 ? 'var(--warning)' : 'var(--success)'}">${l.difference !== null ? inr(l.difference) : '—'}</td>
+              <td><span class="role-pill" style="color:#501026;background:var(--accent-light);border:1px solid var(--accent-border)">${String(l.role || '').replace('_',' ')}</span></td>
+              <td class="muted">${l.reason}</td>
+            </tr>
+          `).join('') || '<tr><td colspan="7" class="muted" style="text-align:center;padding:30px;">No audit events recorded</td></tr>'}
+        </tbody>
+      </table>
+    </div>
+  `;
   main.innerHTML = html;
 }
 
-// ---------- ADMIN ----------
+// ---------------- ADMIN / SETTINGS ----------------
 async function renderAdmin(main){
   const departments = await api('/budgets/departments');
   const users = await api('/admin/users');
-  let html = `<div class="card"><h2>Financial Years</h2>
-    <div class="row"><input id="fyLabel" placeholder="e.g. 2027-28" style="max-width:200px" /><button onclick="addFy()">Add</button></div>
-    <table><thead><tr><th>Label</th><th>Active</th><th></th></tr></thead><tbody>
-    ${REF.financialYears.map(f=>`<tr><td>${f.label}</td><td>${f.is_active?'✓':''}</td><td>${!f.is_active?`<button class="link" onclick="activateFy('${f.id}')">Set active</button>`:''}</td></tr>`).join('')}
-    </tbody></table></div>
-  <div class="card"><h2>Create Department</h2>
-    <div class="grid"><input id="departmentName" placeholder="Department name" /><input id="departmentCode" placeholder="Department code, e.g. CSE" /></div>
-    <button onclick="addDepartment()">Create Department</button>
-  </div>
-  <div class="card"><h2>Department Approval Names</h2><p class="muted">These names appear on newly generated NFA PDFs.</p>
-    <table><thead><tr><th>Department</th><th>Faculty</th><th>HOD</th><th>Dean</th><th>Associate Dean</th><th>Director</th><th>Finance Officer</th><th></th></tr></thead><tbody>
-    ${departments.map(d=>`<tr><td>${d.name}</td><td><input id="faculty-${d.id}" value="${d.faculty_name||''}" /></td><td><input id="hod-${d.id}" value="${d.hod_name||''}" /></td><td><input id="dean-${d.id}" value="${d.dean_name||''}" /></td><td><input id="associate-dean-${d.id}" value="${d.associate_dean_name||''}" /></td><td><input id="director-${d.id}" value="${d.director_name||''}" /></td><td><input id="finance-${d.id}" value="${d.finance_officer_name||''}" /></td><td><button class="secondary" onclick="updateDepartment('${d.id}')">Save</button></td></tr>`).join('')}
-    </tbody></table></div>
-  <div class="card"><h2>Users</h2>
-    <div class="grid">
-      <input id="userName" placeholder="Full name" />
-      <input id="userEmail" type="email" placeholder="Email" />
-      <input id="userPassword" type="password" placeholder="Temporary password" />
-      <select id="userRole">
-        <option value="faculty">Faculty / Professor</option>
-        <option value="hod">HOD</option>
-        <option value="student">Student</option>
-        <option value="finance">Finance</option>
-        <option value="it_admin">IT Administrator</option>
-        <option value="super_admin">Super Admin</option>
-      </select>
-      <select id="userDepartment"><option value="">No department</option>${REF.departments.map(d=>`<option value="${d.id}">${d.name}</option>`).join('')}</select>
+  let html = `
+    <div class="card">
+      <h2 class="card-title" style="margin-bottom:12px">Private Master Budget Management (Admin Only)</h2>
+      <div class="card-sub" style="margin-bottom:16px">Upload your private university Excel budget workbook or download the official template.</div>
+      <div class="row" style="gap:12px;">
+        <button class="gold" onclick="openPrivateBudgetUploadModal()">📁 Upload Private University Budget (.xlsx)</button>
+        <button class="secondary" onclick="downloadBudgetTemplate()">📥 Download Blank Template (.xlsx)</button>
+        <button class="secondary" onclick="exportBudgetReport('')">📥 Export Entire University Master Workbook</button>
+      </div>
     </div>
-    <button onclick="addUser()">Create User</button>
-    <table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Department</th><th></th></tr></thead><tbody>
-    ${users.map(u=>`<tr><td><input id="user-name-${u.id}" value="${u.name}" /></td><td>${u.email}</td><td>${u.role}</td><td>${u.department_id?deptName(u.department_id):'—'}</td><td><div class="row"><button class="secondary" onclick="updateUser('${u.id}')">Save</button><button class="danger" onclick="removeUser('${u.id}', '${u.name.replace(/'/g, "\\'")}')">Remove</button></div></td></tr>`).join('')}
-  </tbody></table></div>`;
+
+    <div class="card">
+      <h2 class="card-title" style="margin-bottom:12px">Academic &amp; Financial Years</h2>
+      <div class="row" style="margin-bottom:14px">
+        <input id="fyLabel" placeholder="e.g. 2027-28" style="max-width:220px;margin-bottom:0" />
+        <button onclick="addFy()">Add Financial Year</button>
+      </div>
+      <table>
+        <thead><tr><th>Label</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody>
+          ${REF.financialYears.map(f => `
+            <tr>
+              <td><strong>${f.label}</strong></td>
+              <td>${f.is_active ? '<span class="badge b-approved">Active Year</span>' : '<span class="badge b-draft">Inactive</span>'}</td>
+              <td>${!f.is_active ? `<button class="secondary" style="padding:5px 10px;font-size:12px" onclick="activateFy('${f.id}')">Set Active</button>` : ''}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title" style="margin-bottom:12px">Create User Account</h2>
+      <div class="row">
+        <input id="userName" placeholder="Full Name" style="flex:1" />
+        <input id="userEmail" type="email" placeholder="Official Email" style="flex:1" />
+        <input id="userPassword" type="password" placeholder="Password" style="flex:1" />
+        <select id="userRole" style="flex:1">
+          <option value="faculty">Faculty</option>
+          <option value="hod">Head of Department (HOD)</option>
+          <option value="dean">Dean / Associate Dean</option>
+          <option value="finance">Accounts Officer (Finance)</option>
+          <option value="director">University Director</option>
+          <option value="super_admin">Super Administrator</option>
+        </select>
+        <button onclick="addUser()">Create Account</button>
+      </div>
+      <h3 style="margin-top:20px;margin-bottom:8px">Registered System Users</h3>
+      <table>
+        <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Department</th><th>Action</th></tr></thead>
+        <tbody>
+          ${users.map(u => `
+            <tr>
+              <td><strong>${u.name}</strong></td>
+              <td>${u.email}</td>
+              <td><span class="role-pill" style="color:#501026;background:var(--accent-light);border:1px solid var(--accent-border)">${String(u.role || '').replace('_',' ')}</span></td>
+              <td>${u.department_id ? deptName(u.department_id) : 'Institution-wide'}</td>
+              <td><button class="danger" style="padding:4px 8px;font-size:11px" onclick="removeUser('${u.id}', '${u.name}')">Remove</button></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
   main.innerHTML = html;
 }
-async function addFy(){ try{ await api('/admin/financial-years',{method:'POST',body:{label:fyLabel.value}}); toast('Added'); const fys=await api('/budgets/financial-years'); REF.financialYears=fys; showTab('admin'); }catch(e){toast(e.message);} }
-async function activateFy(id){ try{ await api(`/admin/financial-years/${id}/activate`,{method:'PUT'}); const fys=await api('/budgets/financial-years'); REF.financialYears=fys; toast('Activated'); showTab('admin'); }catch(e){toast(e.message);} }
-async function addDepartment(){
+
+async function addFy(){
+  const label = document.getElementById('fyLabel').value.trim();
+  if (!label) return toast('Label is required');
   try {
-    await api('/admin/departments', { method:'POST', body:{ name: departmentName.value, code: departmentCode.value.trim().toUpperCase() } });
-    REF.departments = await api('/budgets/departments');
-    toast('Department created');
+    await api('/admin/financial-years', { method:'POST', body:{ label } });
+    REF.financialYears = await api('/budgets/financial-years');
+    toast('Financial year added');
     showTab('admin');
   } catch(e){ toast(e.message); }
 }
-async function addUser(){
+
+async function activateFy(id){
   try {
-    await api('/admin/users', { method:'POST', body:{
-      name: userName.value, email: userEmail.value, password: userPassword.value,
-      role: userRole.value, department_id: userDepartment.value || null
-    }});
+    await api(`/admin/financial-years/${id}/activate`, { method:'PUT' });
+    REF.financialYears = await api('/budgets/financial-years');
+    currentActiveFyId = id;
+    toast('Financial year set as active');
+    showTab('admin');
+  } catch(e){ toast(e.message); }
+}
+
+async function addUser(){
+  const name = document.getElementById('userName').value.trim();
+  const email = document.getElementById('userEmail').value.trim();
+  const password = document.getElementById('userPassword').value;
+  const role = document.getElementById('userRole').value;
+  if (!name || !email || !password) return toast('All fields required');
+  try {
+    await api('/admin/users', {
+      method: 'POST',
+      body: { name, email, password, role, department_id: REF.departments[0]?.id }
+    });
     toast('User created');
     showTab('admin');
   } catch(e){ toast(e.message); }
 }
-async function updateDepartment(id){
-  try {
-    await api(`/admin/departments/${id}`, { method:'PUT', body:{ faculty_name: document.getElementById(`faculty-${id}`).value, hod_name: document.getElementById(`hod-${id}`).value, dean_name: document.getElementById(`dean-${id}`).value, associate_dean_name: document.getElementById(`associate-dean-${id}`).value, director_name: document.getElementById(`director-${id}`).value, finance_officer_name: document.getElementById(`finance-${id}`).value } });
-    REF.departments = await api('/budgets/departments');
-    toast('Department names updated');
-  } catch(e){ toast(e.message); }
-}
-async function updateUser(id){
-  try {
-    await api(`/admin/users/${id}`, { method:'PUT', body:{ name: document.getElementById(`user-name-${id}`).value } });
-    toast('User name updated');
-  } catch(e){ toast(e.message); }
-}
+
 async function removeUser(id, name){
-  if(!confirm(`Remove user ${name}?`)) return;
+  if (!confirm(`Remove account for ${name}?`)) return;
   try {
     await api(`/admin/users/${id}`, { method:'DELETE' });
     toast('User removed');
@@ -616,12 +2648,19 @@ async function removeUser(id, name){
   } catch(e){ toast(e.message); }
 }
 
-// ---------- MODAL ----------
-function openModal(html){ document.getElementById('modalBody').innerHTML = html; document.getElementById('modalBg').style.display='flex'; }
-function closeModal(){ document.getElementById('modalBg').style.display='none'; }
-document.getElementById('modalBg').addEventListener('click', e=>{ if(e.target.id==='modalBg') closeModal(); });
+// ---------------- MODAL UTILITIES ----------------
+function openModal(html){
+  document.getElementById('modalBody').innerHTML = html;
+  document.getElementById('modalBg').style.display = 'flex';
+}
+function closeModal(){
+  document.getElementById('modalBg').style.display = 'none';
+}
+document.getElementById('modalBg').addEventListener('click', e => {
+  if (e.target.id === 'modalBg') closeModal();
+});
 
-// ---------- INIT ----------
+// Auto-boot if logged in
 if (TOKEN && USER) boot();
 </script>
 </body>

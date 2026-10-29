@@ -35,6 +35,7 @@ class Store {
       this.db = JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
       this.db.budget_uploads ||= [];
       this.db.budget_changes ||= [];
+      this.db.budget_subcategories ||= [];
     } else {
       this.db = emptyDb();
       this.persist();

@@ -1,9 +1,21 @@
-export type Role = 'student' | 'faculty' | 'hod' | 'finance' | 'super_admin' | 'it_admin';
+export type Role =
+  | 'faculty'
+  | 'hod'
+  | 'dean'
+  | 'associate_dean'
+  | 'finance'
+  | 'director'
+  | 'super_admin'
+  | 'it_admin'
+  | 'student';
 
 export type NfaStatus =
   | 'draft'
   | 'submitted'
   | 'under_review'
+  | 'dean_review'
+  | 'accounts_review'
+  | 'pending_director_approval'
   | 'revision_required'
   | 'budget_validation'
   | 'pending_higher_approval'
@@ -47,6 +59,16 @@ export interface BudgetCategory {
   id: string;
   budget_type_id: string;
   name: string; // External Remuneration, Staff Development & Welfare, Student Related Expenses, Administrative Expenses, Others...
+}
+
+export interface BudgetSubcategory {
+  id: string;
+  budget_category_id: string;
+  department_id?: string;
+  name: string;
+  allocated_amount: number;
+  approved_amount: number;
+  pending_amount: number;
 }
 
 export interface DepartmentBudget {
@@ -93,10 +115,13 @@ export interface NfaItem {
 export interface Nfa {
   id: string;
   ref_no: string;
-  project_id: string;
+  project_id?: string | null;
   department_id: string;
   financial_year_id: string;
+  budget_type_id?: string;
   budget_category_id: string;
+  budget_subcategory_id?: string;
+  budget_subcategory_name?: string;
   title: string;
   purpose: string;
   description: string;
@@ -122,6 +147,7 @@ export interface Approval {
   nfa_id: string;
   approver_role: Role;
   approver_id: string;
+  approver_name?: string;
   decision: 'approved' | 'rejected' | 'revision_required' | 'recommended';
   comments: string;
   level: number;
@@ -200,6 +226,7 @@ export interface DB {
   financial_years: FinancialYear[];
   budget_types: BudgetType[];
   budget_categories: BudgetCategory[];
+  budget_subcategories?: BudgetSubcategory[];
   department_budgets: DepartmentBudget[];
   projects: Project[];
   nfas: Nfa[];

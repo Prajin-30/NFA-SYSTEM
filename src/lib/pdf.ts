@@ -60,8 +60,8 @@ export function renderNfaPdf(
   const titleBoxY = 145;
   const titleBoxWidth = 511;
   const titleBoxHeight = 36;
-  doc.lineWidth(3).strokeColor('#6d2a2a').rect(titleBoxX, titleBoxY, titleBoxWidth, titleBoxHeight).stroke();
-  doc.lineWidth(1).strokeColor('#6d2a2a').rect(titleBoxX + 5, titleBoxY + 5, titleBoxWidth - 10, titleBoxHeight - 10).stroke();
+  doc.lineWidth(3).strokeColor('#6B1735').rect(titleBoxX, titleBoxY, titleBoxWidth, titleBoxHeight).stroke();
+  doc.lineWidth(1).strokeColor('#6B1735').rect(titleBoxX + 5, titleBoxY + 5, titleBoxWidth - 10, titleBoxHeight - 10).stroke();
   doc.fontSize(13).font(boldFont).fillColor('#000000').text(nfa.title, titleBoxX + 10, titleBoxY + 10, { width: titleBoxWidth - 20, align: 'center', lineGap: 0 });
   doc.fontSize(14).font(boldFont).text('NOTE FOR APPROVAL', 90, 195, { width: 415, align: 'center', lineGap: 0, underline: true });
 

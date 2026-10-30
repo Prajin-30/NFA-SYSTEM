@@ -507,18 +507,33 @@
       "id": "8534da53-8575-4b65-8ffc-d4749060409c",
       "name": "TOTAL EXPENDITURE",
       "code": "TOTAL "
+    },
+    {
+      "id": "8c211561-e650-473f-9e29-153d6d60228a",
+      "name": "Semester: Odd /Even:",
+      "code": "DEPART"
+    },
+    {
+      "id": "ac1a7fc6-82f8-46b4-a48b-fd96efe03610",
+      "name": "Remarks (if any)",
+      "code": "COURSE"
+    },
+    {
+      "id": "790d12a2-d22a-4747-a88f-491dc8f01db0",
+      "name": "Remarks (if any)",
+      "code": "COURSE"
     }
   ],
   "financial_years": [
     {
       "id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "label": "2026-27",
-      "is_active": false
+      "is_active": true
     },
     {
       "id": "6986edcf-0285-46c0-bd17-1076f299dc98",
       "label": "2027-28",
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "c25e67a4-7bfd-4ec1-b695-7fefca2549a2",
@@ -1029,7 +1044,7 @@
   ],
   "department_budgets": [
     {
-      "id": "c9e1bc86-dbca-43d0-b1a5-e05f611b0886",
+      "id": "397ce85f-9299-44c1-ba2d-b575f2f4ec98",
       "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "91b25772-973a-4b6b-a199-729d6803d3c8",
@@ -1039,7 +1054,7 @@
       "revised_amount": 0
     },
     {
-      "id": "3c1e9488-f5d0-457c-8903-ca40c80dcf0a",
+      "id": "4db85c8b-76bc-482e-ace7-54ef5e7b0183",
       "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "2d729702-80b7-40db-8793-ac0ec82a9afa",
@@ -1049,7 +1064,7 @@
       "revised_amount": 0
     },
     {
-      "id": "0856c85b-2bac-4f8a-a0c6-fe2aeae8c15c",
+      "id": "7ec32533-f302-4896-9cd9-57d1fec466c2",
       "department_id": "7ba9fa0a-ae10-47cf-acf2-b5ba39dc8859",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "3975b808-c399-468c-9343-4f0a2af3d70d",
@@ -1059,7 +1074,7 @@
       "revised_amount": 0
     },
     {
-      "id": "132517d2-41a4-4af8-bf29-eb7668d5900c",
+      "id": "a99370c7-494d-48db-a07e-cfa2ed6bf7e8",
       "department_id": "1185b9f4-2a85-4efe-90b3-a9fb7380a5d1",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "a5c8c790-3f07-419b-8dd5-58ae61b12d0f",
@@ -1069,7 +1084,7 @@
       "revised_amount": 0
     },
     {
-      "id": "d3cf9dc0-1499-4b09-8c6d-076fe8ec976a",
+      "id": "3c3aedbb-55e0-4f02-9ba0-b6c86d4478eb",
       "department_id": "b8649d8a-3457-40ae-b5d6-ac53d63ff739",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "a5c8c790-3f07-419b-8dd5-58ae61b12d0f",
@@ -1079,7 +1094,7 @@
       "revised_amount": 0
     },
     {
-      "id": "fce16606-006c-4a74-a6e6-cf679bba0726",
+      "id": "fca39f78-50d6-4877-b0c1-228e5eda3e2c",
       "department_id": "2413162d-9f55-45d0-831f-fb1f581d51ca",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1089,7 +1104,7 @@
       "revised_amount": 0
     },
     {
-      "id": "3a4c67af-44a6-49da-9c6d-07368e0e8ef9",
+      "id": "3f9a2ad3-e82a-4776-97e1-7edb03fc1954",
       "department_id": "c2f1c26d-b062-411e-abee-664a1c107f3b",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "243db335-d058-4587-95c3-95ae585f3d9c",
@@ -1099,7 +1114,7 @@
       "revised_amount": 0
     },
     {
-      "id": "eefdc81b-092c-4097-abb4-9f5ee93bd66a",
+      "id": "d4c02a72-177f-4565-b290-a8eec00d0509",
       "department_id": "4439a95e-353e-4fea-8d9b-7ec7618d934c",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1109,7 +1124,7 @@
       "revised_amount": 0
     },
     {
-      "id": "0ffe0268-8bed-4e55-8e84-f4518f2e9be2",
+      "id": "4a59e6b4-dbb6-4ed6-aa03-ad2e809325c7",
       "department_id": "acfcd8ad-b8f7-48cd-ab8b-5262a4cbff0e",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1119,7 +1134,7 @@
       "revised_amount": 0
     },
     {
-      "id": "296d9745-d2a4-454a-9084-c2a8af686ad9",
+      "id": "19a3fbdb-7f88-4de0-b452-36ea48ae1f52",
       "department_id": "3fa043b8-f182-4649-88c5-9ff8b5c8a62c",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1129,7 +1144,7 @@
       "revised_amount": 0
     },
     {
-      "id": "e327e669-ed3f-42b3-9705-da1164dc45da",
+      "id": "da5d96ef-966f-427b-b1b5-a2f50479a3a2",
       "department_id": "04a28c74-832b-4454-bb5d-e905a7f19619",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1139,7 +1154,7 @@
       "revised_amount": 0
     },
     {
-      "id": "a5f94960-e041-4c23-b41d-7990c42abb59",
+      "id": "b5658ebf-e5e3-41f3-9cd5-65eaa4cabd91",
       "department_id": "9c72cf33-bb25-40dd-82e6-56fcd291c2d1",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1149,7 +1164,7 @@
       "revised_amount": 0
     },
     {
-      "id": "a903780d-8570-46fe-8747-74a130f8c6b2",
+      "id": "8e2f2d7e-971c-4a84-957d-7ed62affa7c7",
       "department_id": "4ebd2c91-b82b-443a-83f5-bee304f895a6",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1159,7 +1174,7 @@
       "revised_amount": 0
     },
     {
-      "id": "a23a3e09-1339-4147-bbd7-8c9159775892",
+      "id": "496ec374-86a5-4940-960d-99392e888f94",
       "department_id": "837ec895-dfd0-48bc-bf3b-d21a25cd3190",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1169,7 +1184,7 @@
       "revised_amount": 0
     },
     {
-      "id": "7bd7e0a8-b7a0-4cb5-842b-451e244f0f7d",
+      "id": "f3cca48d-0c6d-4a4d-9158-a0f96ee2c539",
       "department_id": "1d7bafad-7dd9-4b37-80e9-a41582da3122",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1179,7 +1194,7 @@
       "revised_amount": 0
     },
     {
-      "id": "1dec232b-28fa-4a5e-8633-9534e74228e8",
+      "id": "40f4c9ee-0ca4-475c-8902-fb15f4652963",
       "department_id": "91f0a08a-0b19-4f94-8760-02dcbcfd633b",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1189,7 +1204,7 @@
       "revised_amount": 0
     },
     {
-      "id": "6b73fb2e-c410-424b-8043-9254d2774a98",
+      "id": "7a626b97-5205-40f1-b247-6a4f0d2a22fd",
       "department_id": "8e5b1f53-b4bc-4eb1-8eff-18a1183fe0d5",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1199,7 +1214,7 @@
       "revised_amount": 0
     },
     {
-      "id": "42fdf765-2779-4fbc-8362-45b57ce4f2f4",
+      "id": "8baf108f-484a-4205-8edb-04f3e5e661af",
       "department_id": "c0d2e17e-a5f0-45f1-a60a-9bbb316b5354",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "7e24ed9c-5af6-4fdf-94c5-0110de1f7ff8",
@@ -1209,7 +1224,7 @@
       "revised_amount": 0
     },
     {
-      "id": "3996f57a-20b5-4438-9e07-58574132f318",
+      "id": "b7ab7162-d775-49fa-8eb1-3be3b52271b4",
       "department_id": "51c60256-948e-4013-8ccc-8c084cab45e2",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "83ba2613-e615-410f-8027-0cdb535098ed",
@@ -1219,7 +1234,7 @@
       "revised_amount": 0
     },
     {
-      "id": "98244cd2-fad5-4cf4-a9f2-26c8c5130a54",
+      "id": "f79d8e22-066e-44e4-b9d0-e16b5be9c560",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "e5ad2341-7801-453b-9e1d-94bfb992ef31",
@@ -1229,7 +1244,7 @@
       "revised_amount": 0
     },
     {
-      "id": "eb3b77b0-9624-460a-a990-9876304f6ca5",
+      "id": "cfc74473-3c2a-4db5-aeae-13d3d062bcc4",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "f911aa6e-9494-4052-b317-cf0152a3be5d",
@@ -1239,7 +1254,7 @@
       "revised_amount": 0
     },
     {
-      "id": "f90b01dc-29b6-483c-acbf-ba35f5648765",
+      "id": "b1d31a3f-2bdf-48a5-b37b-297911af44d9",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "67a62538-ed38-4df0-929f-d526b56c14a1",
@@ -1249,7 +1264,7 @@
       "revised_amount": 0
     },
     {
-      "id": "7143b9bc-826f-48ab-babe-4117cc474a73",
+      "id": "0df14824-cde2-4b0f-96cc-af450ee72fb6",
       "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "c894d28e-6822-479a-9567-d6046339cf69",
@@ -1259,7 +1274,7 @@
       "revised_amount": 0
     },
     {
-      "id": "838205e8-8d96-420f-8fbc-1b98859a9574",
+      "id": "a843b41a-5907-4d00-a2e6-501af9f54386",
       "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "1cae1016-7835-4bc2-8311-0b8d6085726b",
@@ -1269,7 +1284,7 @@
       "revised_amount": 0
     },
     {
-      "id": "01e1f626-86b5-4b77-9e52-fe5452dd937a",
+      "id": "d71fed88-6d57-4d22-bb5b-392c05e9458b",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "91c2cddd-537c-4726-94a1-bdcfc58902d6",
@@ -1279,7 +1294,7 @@
       "revised_amount": 0
     },
     {
-      "id": "d0e5094a-a4d4-48c3-97c4-506af7112706",
+      "id": "8d9fb20a-cf59-49b0-b76b-79565d925b68",
       "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "a31ed1b6-67ae-4cc7-b02e-2426603169a2",
@@ -1289,7 +1304,7 @@
       "revised_amount": 0
     },
     {
-      "id": "9cba41ce-9afa-4fb8-ab77-9a1ea2bdd81b",
+      "id": "2b8ec966-93a7-4167-8e0d-050bd46d9562",
       "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "bb22f67a-b22c-46b3-b7f6-40f01370cc6c",
@@ -1299,7 +1314,7 @@
       "revised_amount": 0
     },
     {
-      "id": "aca12f2f-6ffe-4e78-97dd-ea2021aac43c",
+      "id": "75ad4731-44d1-45fc-98e6-fda049abb069",
       "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "21d372fd-f048-416c-b6fa-4aac4618d26f",
@@ -1309,7 +1324,7 @@
       "revised_amount": 0
     },
     {
-      "id": "c1035565-67cb-4d70-ab61-9499aad7311c",
+      "id": "97cb3784-8dd6-4155-b3b8-bb045dc5947e",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "34da5248-1866-4027-9f5e-c9dc38674ff7",
@@ -1319,7 +1334,7 @@
       "revised_amount": 0
     },
     {
-      "id": "263a8565-8a52-40f3-97d9-9f068c7fa436",
+      "id": "9e289696-fa3d-4f55-9603-2c2be394e2a8",
       "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "2dd58195-917c-41d5-bbbb-46652be867b3",
@@ -1329,7 +1344,7 @@
       "revised_amount": 0
     },
     {
-      "id": "0e2b4953-f1e5-4372-ad3c-222f3248a3ed",
+      "id": "e9e1106c-2b60-468d-8a91-b957ba04655d",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "a5c8c790-3f07-419b-8dd5-58ae61b12d0f",
@@ -1339,7 +1354,7 @@
       "revised_amount": 0
     },
     {
-      "id": "315dc2db-66d9-4af8-ad1a-a99365cc6b42",
+      "id": "af50c65c-44f8-4f53-a8ee-2a595f305600",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "1810eae7-846e-4d8e-8516-091f3d0e7a8a",
@@ -1349,7 +1364,7 @@
       "revised_amount": 0
     },
     {
-      "id": "29eaacdb-008d-4165-a4c9-d978608eba14",
+      "id": "cfa8dfa3-d676-49a9-a65d-3a31929fe859",
       "department_id": "8c013c40-7d46-4dbb-83cc-26dece257838",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "f000f877-3a00-4da1-9f45-8157b836e222",
@@ -1359,7 +1374,7 @@
       "revised_amount": 0
     },
     {
-      "id": "115c0efc-841b-4082-8feb-c1f02261f2f4",
+      "id": "b2efa0f7-7160-43c6-9155-91318ee37c6d",
       "department_id": "b8649d8a-3457-40ae-b5d6-ac53d63ff739",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1369,7 +1384,7 @@
       "revised_amount": 0
     },
     {
-      "id": "dc141f68-207d-4281-b965-1103b5a48dae",
+      "id": "e24d3f6a-bf17-42fb-b80c-134a9d27e149",
       "department_id": "c2f1c26d-b062-411e-abee-664a1c107f3b",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1379,7 +1394,7 @@
       "revised_amount": 0
     },
     {
-      "id": "9b787fce-9fea-488a-9b1f-9f264f35d0fc",
+      "id": "321f5db6-676b-43ad-b0ac-512f1fef2c41",
       "department_id": "512ae22a-f256-4659-bb7f-4f46f2f66cc7",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1389,7 +1404,7 @@
       "revised_amount": 0
     },
     {
-      "id": "f1f05630-e3b9-477e-9d7e-3dd3925f3206",
+      "id": "24dcda77-c210-4057-b96e-e12fae941811",
       "department_id": "8b4e6dda-fb84-4e82-8c74-9d590938d028",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1399,7 +1414,7 @@
       "revised_amount": 0
     },
     {
-      "id": "6fbe5d25-2ba4-4a8a-8599-813d06cc15ef",
+      "id": "3e202937-eacb-4f5d-ba9e-d3614b700c64",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1409,7 +1424,7 @@
       "revised_amount": 0
     },
     {
-      "id": "c3cfd9cd-a208-48e3-b5ca-3cbaa0587afd",
+      "id": "bd2a562f-474d-4222-9f0d-40a55dd13404",
       "department_id": "a9e0086d-d0a6-4722-aaf4-91b393816231",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1419,7 +1434,7 @@
       "revised_amount": 0
     },
     {
-      "id": "c220e6a5-e825-4ff3-a874-2f9d7f227d39",
+      "id": "5c5ab7e7-a4fe-4a62-90b6-5a503afa5b57",
       "department_id": "79262fc9-653e-4396-9dc5-c7e16a4eb060",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1429,7 +1444,7 @@
       "revised_amount": 0
     },
     {
-      "id": "0c632edf-a72a-4673-ad41-a2c5a728fda7",
+      "id": "be11664b-368e-469c-a947-749eb874c965",
       "department_id": "8d776c12-8de9-4dd0-a728-8a3f5d62d963",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1439,7 +1454,7 @@
       "revised_amount": 0
     },
     {
-      "id": "d52591e0-6ff6-4e56-bd2f-d1d056d5b4e2",
+      "id": "e615f29d-e77f-4038-aa49-9fa004a67c15",
       "department_id": "48bde8a7-58ea-4541-9c99-4fb07d259deb",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1449,7 +1464,7 @@
       "revised_amount": 0
     },
     {
-      "id": "14f990ab-5e49-4e03-a795-581a3a6cf5f9",
+      "id": "48dd0824-e6ec-4ed4-9d38-ef111f56213d",
       "department_id": "ec5395e7-1b94-4680-9777-2c1d82a0473b",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1459,7 +1474,7 @@
       "revised_amount": 0
     },
     {
-      "id": "d6d85e18-de39-42b6-860a-aaab6bc03720",
+      "id": "b3b6a3d6-01e7-42c5-8da3-5f3f75a5c5aa",
       "department_id": "cbdbd057-eb24-434a-9c09-6b5d6f32b74b",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1469,7 +1484,7 @@
       "revised_amount": 0
     },
     {
-      "id": "b23a73b3-d168-4952-8697-eb83268939c2",
+      "id": "1eca6a17-4ad0-4039-ab9d-05d246688abb",
       "department_id": "4887d464-9024-4dd3-9ce1-5ce8fab96f2c",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1479,7 +1494,7 @@
       "revised_amount": 0
     },
     {
-      "id": "c8a48493-1aeb-4f31-a709-ca48593c22f5",
+      "id": "313d1592-a5d2-493a-a228-77c582b4c1f8",
       "department_id": "bca314b3-94ba-4153-87ac-7dab0b54a279",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1489,7 +1504,7 @@
       "revised_amount": 0
     },
     {
-      "id": "842fe7ef-59f0-427f-ac3c-fa04cdd965a2",
+      "id": "9f50c755-fbb3-466a-8509-a285e1ca045d",
       "department_id": "51c60256-948e-4013-8ccc-8c084cab45e2",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "a5c8c790-3f07-419b-8dd5-58ae61b12d0f",
@@ -1499,7 +1514,7 @@
       "revised_amount": 0
     },
     {
-      "id": "b2a36c8d-5278-46c0-a677-03e024d62bc6",
+      "id": "79a4a3bb-40c7-4911-ab1f-db18874f107b",
       "department_id": "c394e90e-9aec-4e6a-839f-196eda0b76ce",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "a5c8c790-3f07-419b-8dd5-58ae61b12d0f",
@@ -1509,7 +1524,7 @@
       "revised_amount": 0
     },
     {
-      "id": "5064cef8-fd69-44f6-89d5-d9dee7afed44",
+      "id": "18b00a31-ab0e-474f-a1f5-d01ce4dcec77",
       "department_id": "17cf89fa-1730-491e-8a9c-ea7ccf0f4862",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "a5c8c790-3f07-419b-8dd5-58ae61b12d0f",
@@ -1519,7 +1534,7 @@
       "revised_amount": 0
     },
     {
-      "id": "c3dc183b-4dbc-43b1-907d-a8a8af57b7c2",
+      "id": "6726183d-2efc-469a-a4aa-f0a3b75c30dc",
       "department_id": "795737b6-6268-49c1-86ce-79671e55b871",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "a5c8c790-3f07-419b-8dd5-58ae61b12d0f",
@@ -1529,7 +1544,7 @@
       "revised_amount": 0
     },
     {
-      "id": "40ea50b6-8925-4ef1-ba25-a4370c2654f9",
+      "id": "497fe6b6-d6cd-49f9-92d1-e5fb2672de1a",
       "department_id": "4461c5a9-6ab0-4272-90a8-0656404548c1",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1539,7 +1554,7 @@
       "revised_amount": 0
     },
     {
-      "id": "e2171f5e-bee2-45d1-87b6-43aeda4a2aa2",
+      "id": "c26abdc8-1c83-47b9-a074-cd2288d35e77",
       "department_id": "c2c88693-5b59-41e7-9dc2-f489df48722c",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1549,7 +1564,7 @@
       "revised_amount": 0
     },
     {
-      "id": "3bb20367-536b-4979-8f5b-25e976e1fac7",
+      "id": "18384177-b787-4a77-93db-158ff9a3cf9a",
       "department_id": "8c013c40-7d46-4dbb-83cc-26dece257838",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "a5c8c790-3f07-419b-8dd5-58ae61b12d0f",
@@ -1559,7 +1574,7 @@
       "revised_amount": 0
     },
     {
-      "id": "26901261-52ad-4f32-804f-2929a087e508",
+      "id": "c1bb192a-a6bf-4740-8858-645db8ffdd25",
       "department_id": "aa2a3f71-8d28-4025-add5-f14f5433b8b2",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1569,7 +1584,7 @@
       "revised_amount": 0
     },
     {
-      "id": "fe6d544b-a67d-4bb8-aa66-cd063b82ff05",
+      "id": "22a1478e-f309-44b3-a420-e5bc3dcb2071",
       "department_id": "9bf19ba6-320c-4a52-aa90-543ffefe9ddd",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1579,7 +1594,7 @@
       "revised_amount": 0
     },
     {
-      "id": "393b6a63-43bc-4de1-bfd8-f3b897f4f264",
+      "id": "a70612e1-78d2-47d4-b1d9-e1d38184a82c",
       "department_id": "3b331638-8ba9-4394-9d6a-62466b67e195",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1589,7 +1604,7 @@
       "revised_amount": 0
     },
     {
-      "id": "caa59f31-e969-4883-a390-b38c442d96d9",
+      "id": "faf485c8-07ad-4547-87b4-31127e89e5db",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "54676fcd-73f6-4b6e-887d-9144ec21ce7d",
@@ -1599,7 +1614,7 @@
       "revised_amount": 0
     },
     {
-      "id": "df1d2304-e290-453f-97fe-ffd2d56d0ad2",
+      "id": "f0250270-001c-4976-bdae-4bc9804086ee",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "1ce2e272-c949-4ccd-b15c-5fb3f8d4a5f1",
@@ -1609,7 +1624,7 @@
       "revised_amount": 0
     },
     {
-      "id": "9bd7f4bc-42b0-4e67-9bd5-e921a94d4bd0",
+      "id": "4753c442-b724-4a9f-bd63-30983402b6f1",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "fe925e01-1bda-4029-9358-8be2b8fa91ff",
@@ -1619,7 +1634,7 @@
       "revised_amount": 0
     },
     {
-      "id": "2b1c2efe-7785-40e9-a032-049e5ed5fcaf",
+      "id": "94b5d65b-6952-479a-ab14-20954f317cd1",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "d022320d-3a98-4917-951a-214e5b513a53",
@@ -1629,7 +1644,7 @@
       "revised_amount": 0
     },
     {
-      "id": "9262bd08-f72b-4f8f-a262-eb64836a5645",
+      "id": "e5dcd8aa-de2a-4065-94b6-20bad130b6d3",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "ae9591a2-d908-46c9-bfe3-247d538c883d",
@@ -1639,7 +1654,7 @@
       "revised_amount": 0
     },
     {
-      "id": "fe3e2d57-268c-4267-983a-48a0cf742c01",
+      "id": "590e3bcb-dfeb-4f8d-8503-441f14084845",
       "department_id": "14df92ec-8eb7-4281-97e8-9a2bcccd6639",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1649,7 +1664,7 @@
       "revised_amount": 0
     },
     {
-      "id": "a5e46212-e30c-4b0d-a0a7-bb9ec409e132",
+      "id": "6cbae08c-1974-4218-9849-896bba573d7b",
       "department_id": "3d320ae9-38be-4945-a522-8537a0dcf99f",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "394f8e95-d360-4dcd-ba98-186f6fd38b6a",
@@ -1659,7 +1674,7 @@
       "revised_amount": 0
     },
     {
-      "id": "65a31494-e060-4dbe-a6e6-55bbc63fc42d",
+      "id": "d84a0a18-c69a-46eb-8df2-96a17f784c2e",
       "department_id": "e733bbe0-9adf-437b-956a-f4f3733faf3c",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1669,7 +1684,7 @@
       "revised_amount": 0
     },
     {
-      "id": "dcdd7aa0-1766-492b-96ce-f3f3413e255e",
+      "id": "c4a1c604-a8a8-4666-871c-af50284fb471",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "c394f809-33fd-4840-aedc-049f6497ce5f",
@@ -1679,7 +1694,7 @@
       "revised_amount": 0
     },
     {
-      "id": "d39e6ebd-6b03-4fc8-9db6-07801f3db5b3",
+      "id": "c1f25285-5b39-4346-91df-550bdd06a5ca",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "389a1e85-ad48-4f41-acc7-e59c18ab5b6d",
@@ -1689,7 +1704,7 @@
       "revised_amount": 0
     },
     {
-      "id": "ae6e7068-5db2-4ac7-9b98-d814064a9a4c",
+      "id": "b5bafcfe-3e0e-4fc2-b543-67992fb2ff0f",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "5873017e-a4cf-41c5-8d90-eda0f100e8b9",
@@ -1699,7 +1714,7 @@
       "revised_amount": 0
     },
     {
-      "id": "a03941ea-6acf-4a38-8e7e-bd2bc1224194",
+      "id": "e92b885e-af40-4f65-8c1a-920e2576063d",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "18d4d8a3-c579-4587-96e9-f118b455f29f",
@@ -1709,7 +1724,7 @@
       "revised_amount": 0
     },
     {
-      "id": "9a63b08d-815e-4a35-a37b-08283fdf8e01",
+      "id": "85e74741-c501-4f59-8a2e-f9100e76fcad",
       "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "5e0a2dba-fb84-48ee-b4fd-e6a20d766165",
@@ -1719,7 +1734,7 @@
       "revised_amount": 0
     },
     {
-      "id": "5a2ae595-d3a7-4c81-86c6-ddcc88ecd8e1",
+      "id": "4faaa0b8-281a-423a-979b-f6b2d982e0b7",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "8eb80dd6-bafe-450a-a275-58a19dc72dc5",
@@ -1729,7 +1744,7 @@
       "revised_amount": 0
     },
     {
-      "id": "d88a385a-9715-41f4-9af7-74e2345150be",
+      "id": "2dd25800-37a3-4484-b9d1-447cb697ac96",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "139e3174-7912-45ca-bf5d-59aea38df57d",
@@ -1739,7 +1754,7 @@
       "revised_amount": 0
     },
     {
-      "id": "c5ee3bca-6a63-4aec-a438-0b5cf5a2332b",
+      "id": "585103b3-d6da-4ca9-b81f-70f348c7a591",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "9432c937-620e-4099-8966-319e55b566c2",
@@ -1749,7 +1764,7 @@
       "revised_amount": 0
     },
     {
-      "id": "ca44f7f3-7c00-49e9-afa0-0baaf69c3172",
+      "id": "c78f4d26-5c84-4c5c-9365-d135c81f1f3b",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "7e0da474-de3e-426c-97e8-9dd443263df7",
@@ -1759,7 +1774,7 @@
       "revised_amount": 0
     },
     {
-      "id": "5d1fab3f-ce4a-4714-8f3d-c009c4fe8ee4",
+      "id": "f7e10f5e-61f6-448a-a757-0302d3900fc4",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "acde4888-b42f-4bfd-81ae-fcad47b55c37",
@@ -1769,7 +1784,7 @@
       "revised_amount": 0
     },
     {
-      "id": "3e5088b4-df21-4f60-9e63-6ad5918da113",
+      "id": "316b3124-f4a2-4448-8a47-cacf97f061a5",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "6192678c-1441-4c64-b575-a16c728d7307",
@@ -1779,7 +1794,7 @@
       "revised_amount": 0
     },
     {
-      "id": "5de1d7da-510a-4a81-b514-a493d0f9b283",
+      "id": "53914e10-a228-4428-b62a-7674df53f926",
       "department_id": "9f941e3c-4c6d-4733-8d77-c1dc8f29dfc4",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1789,7 +1804,7 @@
       "revised_amount": 0
     },
     {
-      "id": "0d072c40-3a36-4aeb-8030-1decdbafba34",
+      "id": "5d7755a4-867f-4e55-82d4-a9adf3d89c6c",
       "department_id": "6549019f-024c-4d3c-b40b-3b87c7a973a9",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1799,7 +1814,7 @@
       "revised_amount": 0
     },
     {
-      "id": "809098f7-b465-4c7a-99b6-ae9d91496444",
+      "id": "a3212e7d-f0f6-4da1-94f8-cffce80e7196",
       "department_id": "26e152d3-fbab-45dd-8af4-5080b6e73bac",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1809,7 +1824,7 @@
       "revised_amount": 0
     },
     {
-      "id": "93072dc7-b4c4-42fd-9e04-cb5734210cd5",
+      "id": "e988b34d-a94f-4b6f-b970-8c18b3951a13",
       "department_id": "8f9e61dc-be31-4d38-b339-dc4c53d506f5",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1819,7 +1834,7 @@
       "revised_amount": 0
     },
     {
-      "id": "1695526f-79e9-4baf-b031-fa0ef817d9cb",
+      "id": "ae20074d-75d9-4587-9d92-50eda1a0df07",
       "department_id": "5caea629-a5c7-43ea-b09a-ac5cd36b3788",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1829,7 +1844,7 @@
       "revised_amount": 0
     },
     {
-      "id": "3458f488-2502-4da4-8372-73b9af715171",
+      "id": "ec52acf3-ab1e-4576-9329-c8ed1a4036ae",
       "department_id": "d8749e40-3c1e-492b-b77b-19c57c092de0",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1839,7 +1854,7 @@
       "revised_amount": 0
     },
     {
-      "id": "0c523189-3e1a-4a01-92db-2e11e055ecc4",
+      "id": "7d4e0e12-2820-4a4c-b065-2ed7aca0fa7f",
       "department_id": "f1617984-b4c9-4992-8c02-2cd548e788ef",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1849,7 +1864,7 @@
       "revised_amount": 0
     },
     {
-      "id": "67c2558c-cdc1-4a6d-a8c7-5faa135eb230",
+      "id": "7289af77-37bb-454f-9818-aa4db9b7a610",
       "department_id": "07575e83-c6f2-4d6e-b023-d60617c1dda3",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1859,7 +1874,7 @@
       "revised_amount": 0
     },
     {
-      "id": "dd3b359a-b0e2-4fb3-8d23-ae77a678dd4d",
+      "id": "4a853735-3a12-440d-874f-85af97092c27",
       "department_id": "48a4f757-c0ae-4048-9bd8-de38cac5b801",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1869,7 +1884,7 @@
       "revised_amount": 0
     },
     {
-      "id": "5fa08ba1-0c0b-4685-9372-cb66e0eac1e3",
+      "id": "2aac8b37-38b7-46f1-9e35-b9f3407d984d",
       "department_id": "2425423b-97bd-423f-a3f0-8f25ae20a8c3",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1879,7 +1894,7 @@
       "revised_amount": 0
     },
     {
-      "id": "dfea0d78-a6ba-4b43-96a3-87776ece29ad",
+      "id": "fb52c81c-2e1c-4205-8ca1-d8170d7fa512",
       "department_id": "00bfab5a-6f9d-4f93-a0b1-9b7f0613b199",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1889,7 +1904,7 @@
       "revised_amount": 0
     },
     {
-      "id": "d03aafca-3f48-4318-bfbb-3fba2ceae9ee",
+      "id": "20fc999e-15f4-4063-85ec-dd455bbafcd1",
       "department_id": "c0d2e17e-a5f0-45f1-a60a-9bbb316b5354",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "390ee00e-2dee-484e-8e2f-51993202aae5",
@@ -1899,7 +1914,7 @@
       "revised_amount": 0
     },
     {
-      "id": "5a83f80e-f4cb-4f93-b81c-14c56faaaab8",
+      "id": "bf037b82-3fac-4d77-bea2-2cfe03b60315",
       "department_id": "51c60256-948e-4013-8ccc-8c084cab45e2",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "8fe70e8d-8581-4733-b99e-afc15d1e69e1",
@@ -1909,7 +1924,7 @@
       "revised_amount": 0
     },
     {
-      "id": "5e7824c5-4f9e-4373-95a8-ce0593605f93",
+      "id": "bb1ffa74-d31f-4e5c-84b7-47caed6bb99a",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "b2e85c8b-272f-4e28-9209-2f9345fbc643",
@@ -1919,7 +1934,7 @@
       "revised_amount": 0
     },
     {
-      "id": "27c48b3b-643e-4a50-b552-1c4c5e254d49",
+      "id": "da523437-a213-4981-9bfc-eb622f8732cc",
       "department_id": "7da73643-455e-4dfa-97af-407d430d1670",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "2744af89-23b2-4f85-be96-4e79daaba535",
@@ -1929,7 +1944,7 @@
       "revised_amount": 0
     },
     {
-      "id": "fc149a6d-75d7-40f5-b149-5bf76f836cab",
+      "id": "6f1e1365-136d-4952-87b1-523fb176fe7e",
       "department_id": "c394e90e-9aec-4e6a-839f-196eda0b76ce",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "8fe70e8d-8581-4733-b99e-afc15d1e69e1",
@@ -1939,7 +1954,7 @@
       "revised_amount": 0
     },
     {
-      "id": "a92b04b4-ef3f-450e-b95e-b157a0dd6b97",
+      "id": "43ce485d-5c2f-4151-bea7-d2b4d5070d03",
       "department_id": "17cf89fa-1730-491e-8a9c-ea7ccf0f4862",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "8fe70e8d-8581-4733-b99e-afc15d1e69e1",
@@ -1949,7 +1964,7 @@
       "revised_amount": 0
     },
     {
-      "id": "16ddf6e6-842a-4256-ae0c-41cfd687f7d8",
+      "id": "f3d7eab7-e405-4201-9098-f45a479bf2ef",
       "department_id": "795737b6-6268-49c1-86ce-79671e55b871",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "8fe70e8d-8581-4733-b99e-afc15d1e69e1",
@@ -1959,7 +1974,7 @@
       "revised_amount": 0
     },
     {
-      "id": "37aceef3-b2a5-4355-8626-c0d97be67ed9",
+      "id": "7ee9f502-0d71-40a3-90b2-38dedaec33b9",
       "department_id": "4461c5a9-6ab0-4272-90a8-0656404548c1",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "8fe70e8d-8581-4733-b99e-afc15d1e69e1",
@@ -1969,7 +1984,7 @@
       "revised_amount": 0
     },
     {
-      "id": "f7d374ce-d38e-49f1-b8bd-525634a2f3b6",
+      "id": "c109305f-f8c4-4ab2-974d-53cede83edbc",
       "department_id": "c2c88693-5b59-41e7-9dc2-f489df48722c",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "8fe70e8d-8581-4733-b99e-afc15d1e69e1",
@@ -1979,7 +1994,7 @@
       "revised_amount": 0
     },
     {
-      "id": "58e82b57-03cb-4c93-94ed-0e94857873ba",
+      "id": "218d531e-9291-4698-844c-28102e802358",
       "department_id": "8c013c40-7d46-4dbb-83cc-26dece257838",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -1989,7 +2004,7 @@
       "revised_amount": 0
     },
     {
-      "id": "7d6a6059-0656-4da2-b51b-3de0d003e0f1",
+      "id": "ff8e3c8c-c1e5-460d-9530-ed65f8919f7c",
       "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "8fe70e8d-8581-4733-b99e-afc15d1e69e1",
@@ -1999,7 +2014,7 @@
       "revised_amount": 0
     },
     {
-      "id": "a53dd5d1-cc6f-4039-a98e-6df72f4bb007",
+      "id": "029d887e-6909-4440-801b-262411e14360",
       "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "2dae266e-1f48-4d1b-ac77-21925805f4bb",
@@ -2009,7 +2024,7 @@
       "revised_amount": 0
     },
     {
-      "id": "51598672-7aa4-4b82-99df-f646ca46b528",
+      "id": "270bca89-2935-4811-a9a4-2e3e7430e5b4",
       "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "b0782a12-26f5-4a21-91ec-556a7fe7b5b1",
@@ -2019,7 +2034,7 @@
       "revised_amount": 0
     },
     {
-      "id": "ecf52d17-f769-414a-96af-b14ca1c62b42",
+      "id": "5b2a016d-c90d-4484-8be2-77879d34ed83",
       "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "b41112b5-3082-47df-91fc-40545ee555c1",
@@ -2029,7 +2044,7 @@
       "revised_amount": 0
     },
     {
-      "id": "25964e8d-4c8d-47c4-a39f-41111de5eaf1",
+      "id": "905e9c10-ffd2-463e-b913-3b8b6a003921",
       "department_id": "6f5cb64f-f047-4a03-9e26-0b4eab6fffc6",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -2039,7 +2054,7 @@
       "revised_amount": 0
     },
     {
-      "id": "61a87fa7-e0a2-45b0-93d4-08b45a0c143d",
+      "id": "032d25b2-837d-4ebd-a66c-ab187701795a",
       "department_id": "2413162d-9f55-45d0-831f-fb1f581d51ca",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "1b9a4e0e-19b9-4f3f-81c9-44b72ff0d873",
@@ -2049,7 +2064,7 @@
       "revised_amount": 0
     },
     {
-      "id": "34b54d6c-fab0-4c13-8f87-c6d5c26b2ea4",
+      "id": "6d63d504-023a-44fe-9ec2-176fc5ac6130",
       "department_id": "8f221956-181c-4abe-9229-c80875dc906e",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -2059,7 +2074,7 @@
       "revised_amount": 0
     },
     {
-      "id": "ca01cedf-4efd-465f-9be8-d02dbb123262",
+      "id": "13936bfe-3877-4264-9e38-906f2b4efcae",
       "department_id": "2ce59c13-be09-4c94-8e65-8b09784c253f",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -2069,7 +2084,7 @@
       "revised_amount": 0
     },
     {
-      "id": "7cb13422-69e5-4d5b-bda1-e355d843117d",
+      "id": "a8d739e4-46e3-493e-b64d-42496c211a3f",
       "department_id": "ab016c26-ecc2-4f83-8360-42ffd3a72bd3",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -2079,7 +2094,7 @@
       "revised_amount": 0
     },
     {
-      "id": "c6af3ba5-1276-4357-9b3d-b0a362132ae0",
+      "id": "a7de7e44-116d-4914-b56c-0a3e03b39e03",
       "department_id": "642e857c-f5b4-4842-949b-1492c1756134",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -2089,7 +2104,7 @@
       "revised_amount": 0
     },
     {
-      "id": "a94771f6-9ee4-49d6-b4d1-916fd725f98f",
+      "id": "8bbdcfac-747a-494d-890a-ad3a08782b46",
       "department_id": "5f285494-26b2-42cb-805d-fd9461c63132",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -2099,7 +2114,7 @@
       "revised_amount": 0
     },
     {
-      "id": "b5c697f6-833f-4027-a92b-ba322f1a302a",
+      "id": "0ad78d92-e7f5-4481-8421-d9e1f29bedc5",
       "department_id": "851a95e4-b00b-46bd-849a-de4785eef60d",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -2109,8 +2124,8 @@
       "revised_amount": 0
     },
     {
-      "id": "8737a862-4b32-4127-b2b9-afb8e7f32db5",
-      "department_id": "59d5c5ae-a8d1-4989-9bf7-28e2f4b3b852",
+      "id": "733ca4ea-e4e2-4020-8a4b-5aebbc2efc55",
+      "department_id": "8c211561-e650-473f-9e29-153d6d60228a",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
       "allocated_amount": 0,
@@ -2119,8 +2134,8 @@
       "revised_amount": 0
     },
     {
-      "id": "bb8d3f71-cb8f-4ade-ab50-474ab423579c",
-      "department_id": "537cd94f-ba0f-43fb-85f4-7c1f3e6bfe65",
+      "id": "c1b2940c-d4b8-4d5a-8659-4dd6b94c43ee",
+      "department_id": "ac1a7fc6-82f8-46b4-a48b-fd96efe03610",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "23799228-30c8-4cd9-96c1-9a802e3e5496",
       "allocated_amount": 0,
@@ -2129,8 +2144,8 @@
       "revised_amount": 0
     },
     {
-      "id": "95471d05-6485-4735-9903-8cdeb4bcb966",
-      "department_id": "d84f6656-e6ea-491d-8bab-938ba315989a",
+      "id": "b2782ca7-7a87-4ad3-b020-a2923b590c35",
+      "department_id": "790d12a2-d22a-4747-a88f-491dc8f01db0",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "23799228-30c8-4cd9-96c1-9a802e3e5496",
       "allocated_amount": 0,
@@ -2139,7 +2154,7 @@
       "revised_amount": 0
     },
     {
-      "id": "5be9eb00-456f-48e9-90ed-b92750ae75c1",
+      "id": "8527a1f3-7f17-4ea4-9e2a-ce7bd1d7253c",
       "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "5a61aa69-a757-447b-a226-8ae642a0cf73",
@@ -2149,7 +2164,7 @@
       "revised_amount": 0
     },
     {
-      "id": "8c34fe00-a433-423a-8040-b820b55f8049",
+      "id": "67f399e0-d805-4aea-be8b-85396a0bb080",
       "department_id": "7a83c4bb-8a1a-4202-9448-46080ba0c31c",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -2159,7 +2174,7 @@
       "revised_amount": 0
     },
     {
-      "id": "4d7f7d6e-4598-40c1-9f73-3d01c2e0cd3c",
+      "id": "31d1beb4-7234-4f96-a159-4c2d3a0fe729",
       "department_id": "ba918f12-2f78-42cb-a0d2-af8ef8e7cd1b",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "34248de5-a175-4b31-a0b8-9759fbc047b2",
@@ -2169,7 +2184,7 @@
       "revised_amount": 0
     },
     {
-      "id": "63b68116-1f3a-41db-b620-6eb500be7878",
+      "id": "fbb71879-5b72-4443-9595-257f5ab4d439",
       "department_id": "ba918f12-2f78-42cb-a0d2-af8ef8e7cd1b",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "1f2982ea-3057-4385-9998-2815247ee282",
@@ -2179,7 +2194,7 @@
       "revised_amount": 0
     },
     {
-      "id": "0ec63627-e140-46f5-988a-de3354da9b8b",
+      "id": "66a30b69-963e-454d-a126-e314d240497e",
       "department_id": "3536768a-caf3-4679-9636-32acfb0a2305",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -2189,7 +2204,7 @@
       "revised_amount": 0
     },
     {
-      "id": "c85bc65c-33fd-4540-9afd-6f8cca53b953",
+      "id": "fb3166e7-418f-4d7a-b668-745d3c6b13a4",
       "department_id": "f41a79ae-da0d-40dc-9543-fc4709fa6013",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -2199,7 +2214,7 @@
       "revised_amount": 0
     },
     {
-      "id": "6416d1d0-a757-402e-9f1a-38d02e500015",
+      "id": "6e9d775d-6209-475b-b8a7-3b3434df6972",
       "department_id": "a95a391c-3034-4422-b705-fe57a7b01d71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -2209,7 +2224,7 @@
       "revised_amount": 0
     },
     {
-      "id": "06e25663-2e27-4696-bc4e-1c6279049a34",
+      "id": "b15dc4a1-fd7e-470a-ab21-f90552cefada",
       "department_id": "b9725cf0-fc11-44b0-8e92-406ac6499b6d",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -2219,7 +2234,7 @@
       "revised_amount": 0
     },
     {
-      "id": "e3d9dde5-ecce-470c-8133-986b3c1cac63",
+      "id": "10530f17-7857-42fc-8585-9347e445b303",
       "department_id": "7ae50ab6-6232-42e4-b93e-b1de02882bde",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -2229,7 +2244,7 @@
       "revised_amount": 0
     },
     {
-      "id": "dc45081f-3a80-4a6f-8ff7-218c9fb38a04",
+      "id": "1547e2f6-c1b6-4147-b9e8-28479ff5e177",
       "department_id": "26c6736e-2ebd-49b2-bd7d-b94ea1768300",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -2239,7 +2254,7 @@
       "revised_amount": 0
     },
     {
-      "id": "c1394116-1500-4751-a5fe-0d41dbbd6d8f",
+      "id": "bd6acea1-a5f3-41f2-95ab-751ee2cd38c8",
       "department_id": "6e0c4765-4a89-4a00-97ce-445121bfdd46",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "c71c5572-0ff3-42d6-9363-c2f9b6dc9f00",
@@ -2249,7 +2264,7 @@
       "revised_amount": 0
     },
     {
-      "id": "f53b7ba0-be8b-4078-9257-5d955e611107",
+      "id": "ec597303-787c-48e7-ac1f-09adbd9b9b22",
       "department_id": "f6ff6274-c20c-4ca7-b04a-5db3bcd3f002",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "554a0b0b-0c35-4027-97db-cf889494265a",
@@ -2259,7 +2274,7 @@
       "revised_amount": 0
     },
     {
-      "id": "0acbecd3-349d-47e5-b654-6f03614eae1e",
+      "id": "f305d233-cf63-48b2-ad2d-ea933939634e",
       "department_id": "7b5b32b4-01c2-4a9f-999a-783b6faf00fb",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "587167fa-5b7f-4f02-94f5-b8e9e266d56f",
@@ -2269,7 +2284,7 @@
       "revised_amount": 0
     },
     {
-      "id": "2cf7777a-de01-48f2-b8f2-df5a3668ba8d",
+      "id": "2f3e3b69-06a3-4d21-a235-bb067e458939",
       "department_id": "de44ec4c-69a8-4f66-9f56-10138ac984d1",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "73ddff8a-f9c0-4ccf-bbb0-d0128ba2ecc6",
@@ -2279,7 +2294,7 @@
       "revised_amount": 0
     },
     {
-      "id": "5c3c68df-7534-409d-923e-21df60be4c81",
+      "id": "7e56f6dc-f474-441b-97cd-ed0795e65840",
       "department_id": "41d1afa7-27e0-4f01-86fd-153b190041be",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "599a8ecf-dfc9-469f-95cf-38917f680793",
@@ -2289,7 +2304,7 @@
       "revised_amount": 0
     },
     {
-      "id": "8193e8b2-e12f-4e79-9c75-1188b046c232",
+      "id": "c8ee4658-e1f1-4483-9c98-c153a1a343fb",
       "department_id": "2a6c3a01-8c80-43d3-96df-a6a09d1aea2c",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "2af3e823-e5b7-4a9d-842d-d3defe79e0e8",
@@ -2299,7 +2314,7 @@
       "revised_amount": 0
     },
     {
-      "id": "bbec0a6f-d02e-4ff1-8b83-b90b54ff3786",
+      "id": "c915d46a-cadb-47cd-8c56-904d2702beab",
       "department_id": "8aec87d4-fc8b-4ccc-b84f-9c8267c60566",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -2309,7 +2324,7 @@
       "revised_amount": 0
     },
     {
-      "id": "700d5539-001f-4a59-babc-1e8ae53f54bd",
+      "id": "77cefa56-04a4-4d6a-8e27-d8e8a5055cbf",
       "department_id": "c0d2e17e-a5f0-45f1-a60a-9bbb316b5354",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "b9ccdcab-2c13-4c48-aaf8-06133937db6d",
@@ -2319,7 +2334,7 @@
       "revised_amount": 0
     },
     {
-      "id": "2f27350d-39c9-4549-a4dc-c6a2aef9c9df",
+      "id": "72651f71-332c-44dc-83be-4f8ebaf65802",
       "department_id": "51c60256-948e-4013-8ccc-8c084cab45e2",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "268f59a0-f35c-4322-bdf8-c82ed2b41158",
@@ -2329,7 +2344,7 @@
       "revised_amount": 0
     },
     {
-      "id": "676aaecd-2902-4cec-8ff3-52c341fdd4dd",
+      "id": "111f2484-50e6-445d-8e3b-fddcc70c5d89",
       "department_id": "ef2bf604-e5ee-4d0c-96e6-ac6fdd7361ed",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "c46daf75-3c51-483b-87d5-4a2ddb2176cc",
@@ -2339,7 +2354,7 @@
       "revised_amount": 0
     },
     {
-      "id": "18347032-1435-4d37-b740-0765bde4cee3",
+      "id": "f62d211d-01a1-4e5f-a686-548efa8a4e6c",
       "department_id": "7da73643-455e-4dfa-97af-407d430d1670",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "5990ce8a-25a2-4a53-a736-49169c5f2053",
@@ -2349,7 +2364,7 @@
       "revised_amount": 0
     },
     {
-      "id": "62496ed7-c93d-4caa-bb7e-1311fd7ebfbe",
+      "id": "a88b09c3-d6e6-481f-8ecc-fab1fda0e038",
       "department_id": "05022e15-a0b5-4662-a564-b9257ca10720",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "dcd21946-f89f-45d0-aa71-b43b29030f94",
@@ -2359,7 +2374,7 @@
       "revised_amount": 0
     },
     {
-      "id": "584828a2-6538-4766-8fdf-a98144d6efe3",
+      "id": "2727f59d-b552-4f12-ace8-6a143d7a7b8e",
       "department_id": "5af5484c-373f-4642-8e8f-448b95a88a18",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
@@ -2369,7 +2384,7 @@
       "revised_amount": 0
     },
     {
-      "id": "01ce7d80-ba9c-454c-acbb-088ec321e6a5",
+      "id": "1db5a8ad-bf84-49d7-bd40-efea773940fd",
       "department_id": "c0d2e17e-a5f0-45f1-a60a-9bbb316b5354",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "baee58cd-d406-480a-a0f9-3f9cdb42096a",
@@ -2379,7 +2394,7 @@
       "revised_amount": 0
     },
     {
-      "id": "e36d0a1b-a086-407d-bec6-ccd488885016",
+      "id": "6954d2d8-7122-4438-b68e-a1112d9238b7",
       "department_id": "51c60256-948e-4013-8ccc-8c084cab45e2",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "a35a344a-12f0-44c6-938c-a253c50d9f71",
@@ -2389,7 +2404,7 @@
       "revised_amount": 0
     },
     {
-      "id": "c17c4d13-474b-4046-a45c-523afc1c373e",
+      "id": "5a61be31-ad4b-47fb-9c8b-6e6669bfa656",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "b968abae-9b68-4ffa-a739-6ca3b62531b3",
@@ -2399,7 +2414,7 @@
       "revised_amount": 0
     },
     {
-      "id": "09a6b57e-68e3-4311-88b7-74e21676c06e",
+      "id": "3cd7d678-c258-4d51-af64-cb65d60dd39a",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "97a25d2e-3ba1-4f20-921a-a8af45c05313",
@@ -2409,7 +2424,7 @@
       "revised_amount": 0
     },
     {
-      "id": "dbd8b241-d898-4305-8376-88d1c75e63ea",
+      "id": "f39b7c30-c71a-4ffc-95fb-2427a9169cb4",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "f46ad227-d8ad-4e27-92ec-762130cd65b8",
@@ -2419,7 +2434,7 @@
       "revised_amount": 0
     },
     {
-      "id": "337730e7-4997-4bb1-8e22-18ed81b9536a",
+      "id": "b2054855-17d3-40a8-9884-2601c99da55c",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "8addb174-ddd5-4e01-935f-36f9d046d82e",
@@ -2429,7 +2444,7 @@
       "revised_amount": 0
     },
     {
-      "id": "6e77b31e-7fb8-423e-a72a-9b59a3f004c1",
+      "id": "517b8425-ebe6-47f7-9eb6-22fbd5d974da",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "2096be77-199f-4109-afd6-40d2631e96f4",
@@ -2439,7 +2454,7 @@
       "revised_amount": 0
     },
     {
-      "id": "c316c726-268b-4bc2-8d3e-7c3e03bd86c1",
+      "id": "9c64a404-c811-42b3-ab94-da5cfd3d78d7",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "8cc7d107-5b7a-4949-be66-85c33272141d",
@@ -2449,7 +2464,7 @@
       "revised_amount": 0
     },
     {
-      "id": "442253a5-3c3d-4203-bd99-b2634c527c6f",
+      "id": "911ed61c-1ab9-4636-9c8b-861fe2c46922",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "9dfd4ae4-b62b-4612-87df-2f8b2360fc85",
@@ -2459,7 +2474,7 @@
       "revised_amount": 0
     },
     {
-      "id": "edfc1bbe-5f1a-4b6a-9d5c-c2ae3df19185",
+      "id": "85a55b07-8c4f-45de-bab7-018785610629",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "469e140c-e766-4419-8f07-28d81f56bb69",
@@ -2469,7 +2484,7 @@
       "revised_amount": 0
     },
     {
-      "id": "0358f952-72fb-45df-abbb-c9afe0375429",
+      "id": "c5818044-0c00-49fd-acc7-07172364eac7",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "d930e1a4-410d-46fc-945d-6fd14e962447",
@@ -2479,7 +2494,7 @@
       "revised_amount": 0
     },
     {
-      "id": "b2946013-ce84-4c90-b4ff-08d6218e9531",
+      "id": "88963092-fa74-4afd-9e5e-e5234eb32b59",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "9b8160aa-9ad4-4226-8bc2-e9c797e6f06a",
@@ -2489,7 +2504,7 @@
       "revised_amount": 0
     },
     {
-      "id": "be8781a4-e30d-446f-afd1-50bf5599b472",
+      "id": "a66a95d0-1ad7-4193-bc15-df2c193a7cfc",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "791fb2ab-17de-4474-a0c7-3b022b37df19",
@@ -2499,7 +2514,7 @@
       "revised_amount": 0
     },
     {
-      "id": "d586975f-5830-46e8-b5ad-5a9bac9d73f1",
+      "id": "7c17f28a-e736-4f86-a86f-2555c43618a8",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "7bd1beb1-e137-48da-9ba7-ffdf970fef33",
@@ -2509,7 +2524,7 @@
       "revised_amount": 0
     },
     {
-      "id": "60b7ab01-b9b2-4771-9744-50e4acf9d837",
+      "id": "5f5ec5a6-b804-4a73-8768-a1623be0d568",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "ff9143f5-08d9-483e-839f-c073a8a811a7",
@@ -2519,7 +2534,7 @@
       "revised_amount": 0
     },
     {
-      "id": "b856cda6-b277-4535-8612-dd88cbf22aa0",
+      "id": "822cb038-9f28-4730-ae9b-deff33893626",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "9bc1b970-4b11-4d12-aebd-3844e1fc73ce",
@@ -2529,7 +2544,7 @@
       "revised_amount": 0
     },
     {
-      "id": "624266bc-ef1d-4a8e-a412-edf4ba502185",
+      "id": "b8f0126e-1a3b-4c5f-8c5d-e6f03078abce",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "691b40dc-0715-4b85-b116-d29dbb10ffc0",
@@ -2539,7 +2554,7 @@
       "revised_amount": 0
     },
     {
-      "id": "7a3f9e3a-514f-4fc0-bdf0-ed14e8da5ff9",
+      "id": "bfbf53f0-3fd3-4193-9129-ac7fccfd630b",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "63cea045-bddb-4416-b289-7c56c52b2f93",
@@ -2549,7 +2564,7 @@
       "revised_amount": 0
     },
     {
-      "id": "0e0be847-907f-4f4a-a6cd-d26e03d0a9bb",
+      "id": "0d96b1c0-64de-4c5b-bc23-1c1997193146",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "f5eabdde-6881-4bfd-835e-8f650438015d",
@@ -2559,7 +2574,7 @@
       "revised_amount": 0
     },
     {
-      "id": "c423e3d5-b70c-46d7-b76c-4ed987021973",
+      "id": "96a1e244-029f-4eb9-b0e4-e7988b60426a",
       "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "c9eca357-3a6f-45d2-b396-d141a9793cb1",
@@ -2569,7 +2584,7 @@
       "revised_amount": 0
     },
     {
-      "id": "428ff9d7-5011-4e71-bbe7-153040568494",
+      "id": "9b1e29a4-63b3-4a74-850e-50683f6607ed",
       "department_id": "8534da53-8575-4b65-8ffc-d4749060409c",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "9d4b11f4-6e72-4d99-b278-1b5b32815357",
@@ -2591,9 +2606,91 @@
       "created_at": "2026-08-25T08:35:07.312Z"
     }
   ],
-  "nfas": [],
-  "nfa_items": [],
-  "approvals": [],
+  "nfas": [
+    {
+      "id": "d8923a10-2b7e-41a4-92e3-982348a21390",
+      "ref_no": "NFA/CU/SoET/CSE/26-27/01",
+      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "8a82532c-e7f4-457a-a8f7-9979f008c616",
+      "budget_subcategory_id": "0c9417d3-e4ee-494f-8f85-2d23de02118d",
+      "budget_subcategory_name": "Adjunct Faculty Honorarium",
+      "title": "Annual Academic Audit & Quality Assurance Review 2026",
+      "purpose": "The Internal Quality Assurance Cell (IQAC), Bangalore Kengeri Campus, proposes to conduct the Annual Academic Audit 2025-2026 to evaluate departmental compliance, academic documentation, and quality benchmarks.\nSchedule: 08th October 2026, 08:30 AM to 05:00 PM",
+      "description": "To ensure smooth execution of the audit and to host the visiting internal auditors from other Bangalore campuses, arrangements need to be made for hospitality, logistics, stationery, and IT infrastructure.",
+      "justification": "In this regard, permission and administrative approval are sought to make the necessary arrangements, including mementos for internal auditors, breakfast, lunch, refreshments, high-speed internet facilities, and stationery kits.",
+      "sdgs": "SDG 4 - Quality Education; SDG 9 - Industry, Innovation and Infrastructure",
+      "total_amount": 32050,
+      "status": "submitted",
+      "created_by": "05fee8aa-7cd5-4168-bc21-3b20ea533f62",
+      "submitted_by_name": "Dr Arul V",
+      "date": "2026-09-28",
+      "created_at": "2026-09-28T10:00:00.000Z",
+      "updated_at": "2026-09-28T10:00:00.000Z"
+    }
+  ],
+  "nfa_items": [
+    {
+      "id": "it-1",
+      "nfa_id": "d8923a10-2b7e-41a4-92e3-982348a21390",
+      "sl_no": 1,
+      "particulars": "Memento (₹500/Person)",
+      "quantity": "32",
+      "rate": "500",
+      "amount": 16000
+    },
+    {
+      "id": "it-2",
+      "nfa_id": "d8923a10-2b7e-41a4-92e3-982348a21390",
+      "sl_no": 2,
+      "particulars": "Breakfast (₹150 / Person)",
+      "quantity": "33",
+      "rate": "150",
+      "amount": 4950
+    },
+    {
+      "id": "it-3",
+      "nfa_id": "d8923a10-2b7e-41a4-92e3-982348a21390",
+      "sl_no": 3,
+      "particulars": "Lunch (₹300 /Person)",
+      "quantity": "33",
+      "rate": "300",
+      "amount": 9900
+    },
+    {
+      "id": "it-4",
+      "nfa_id": "d8923a10-2b7e-41a4-92e3-982348a21390",
+      "sl_no": 4,
+      "particulars": "After Noon Refreshments (₹30 / Person)",
+      "quantity": "40",
+      "rate": "30",
+      "amount": 1200
+    }
+  ],
+  "approvals": [
+    {
+      "id": "app-1",
+      "nfa_id": "d8923a10-2b7e-41a4-92e3-982348a21390",
+      "approver_role": "hod",
+      "approver_id": "53709076-c3be-46eb-a123-0be426a086ee",
+      "approver_name": "Dr Michael Moses T",
+      "decision": "approved",
+      "comments": "Recommended for sanction.",
+      "level": 1,
+      "created_at": "2026-09-29T14:30:00.000Z"
+    },
+    {
+      "id": "app-2",
+      "nfa_id": "d8923a10-2b7e-41a4-92e3-982348a21390",
+      "approver_role": "dean",
+      "approver_id": "7a91c842-15f3-4e89-a2e1-456987410231",
+      "approver_name": "Dr Mary Anita E A",
+      "decision": "approved",
+      "comments": "Endorsed.",
+      "level": 2,
+      "created_at": "2026-10-01T09:15:00.000Z"
+    }
+  ],
   "budget_transactions": [
     {
       "id": "49d6b9c0-43ba-48f9-9aa2-8956f1a01a73",
@@ -2803,6 +2900,21 @@
       "source": "portal",
       "approval_status": "approved",
       "created_at": "2026-10-30T09:29:24.630Z"
+    },
+    {
+      "id": "8c70734a-f72b-4c9c-bfa0-e8d074588f37",
+      "entity_type": "department_budget",
+      "entity_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "department_id": "ALL",
+      "old_amount": null,
+      "new_amount": 62042016,
+      "difference": 62042016,
+      "changed_by": "5bc13647-3a05-4705-b376-19ffaeed45c2",
+      "role": "super_admin",
+      "reason": "Private University Budget Master Upload (replace mode): Processed 200 items across 3 departments and 0 categories. Total allocation: ₹6,20,42,016",
+      "source": "excel",
+      "approval_status": "approved",
+      "created_at": "2026-10-30T11:26:09.258Z"
     }
   ],
   "excel_sync_records": [

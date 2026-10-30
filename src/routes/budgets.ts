@@ -40,6 +40,9 @@ budgetsRouter.get('/departments', (_req, res) => res.json(store.data.departments
 /** GET /api/budgets/financial-years - reference data */
 budgetsRouter.get('/financial-years', (_req, res) => res.json(store.data.financial_years));
 
+/** GET /api/budgets/budget-types - reference data */
+budgetsRouter.get('/budget-types', (_req, res) => res.json(store.data.budget_types || []));
+
 /** GET /api/budgets/categories - reference data with subcategories */
 budgetsRouter.get('/categories', (_req, res) => {
   const subcats = store.data.budget_subcategories || [];

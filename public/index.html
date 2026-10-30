@@ -167,6 +167,22 @@
     color: var(--text);
     transition: border-color 0.15s, box-shadow 0.15s;
     font-size: 13.5px;
+    box-sizing: border-box;
+  }
+  select {
+    height: 42px;
+    min-height: 42px;
+    max-height: 42px;
+    line-height: 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  select option {
+    white-space: normal;
+    padding: 7px 10px;
+    font-size: 13px;
+    line-height: 1.4;
   }
   input:focus, select:focus, textarea:focus {
     outline: none;
@@ -612,6 +628,71 @@
     border-color: var(--primary);
   }
 
+  /* BUDGET ITEM CHIPS IN APPLY NFA */
+  .budget-items-chip-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+    margin-bottom: 14px;
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 10px;
+    background: #fbfbfc;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+  .budget-item-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 13px;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.18s ease;
+    user-select: none;
+    line-height: 1.3;
+    text-align: left;
+  }
+  .budget-item-chip:hover {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    color: var(--primary);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(107, 23, 53, 0.08);
+  }
+  .budget-item-chip.active {
+    background: var(--primary);
+    color: #ffffff;
+    border-color: var(--primary);
+    box-shadow: 0 3px 8px var(--primary-glow);
+  }
+  .budget-item-chip .chip-bal {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 10px;
+    background: #eef2f6;
+    color: var(--text-muted);
+  }
+  .budget-item-chip.active .chip-bal {
+    background: rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+  }
+  @keyframes focusPulse {
+    0% { box-shadow: 0 0 0 0 rgba(107, 23, 53, 0.5); }
+    50% { box-shadow: 0 0 0 5px rgba(107, 23, 53, 0.25); }
+    100% { box-shadow: 0 0 0 3px var(--primary-glow); }
+  }
+  .auto-focused {
+    animation: focusPulse 0.8s ease;
+  }
+
   /* WORKFLOW STEPPER TIMELINE */
   .stepper {
     display: flex;
@@ -910,13 +991,13 @@ function logout(){
 }
 
 const TABS_BY_ROLE = {
-  faculty: ['dashboard', 'inbox', 'nfas', 'projects', 'budgets', 'audit'],
-  hod: ['dashboard', 'inbox', 'nfas', 'projects', 'budgets', 'excel', 'audit'],
-  dean: ['dashboard', 'inbox', 'nfas', 'projects', 'budgets', 'audit'],
-  associate_dean: ['dashboard', 'inbox', 'nfas', 'projects', 'budgets', 'audit'],
+  faculty: ['dashboard', 'inbox', 'nfas', 'budgets', 'audit'],
+  hod: ['dashboard', 'inbox', 'nfas', 'budgets', 'excel', 'audit'],
+  dean: ['dashboard', 'inbox', 'nfas', 'budgets', 'audit'],
+  associate_dean: ['dashboard', 'inbox', 'nfas', 'budgets', 'audit'],
   finance: ['dashboard', 'inbox', 'nfas', 'budgets', 'audit'],
   director: ['dashboard', 'inbox', 'nfas', 'budgets', 'audit'],
-  super_admin: ['dashboard', 'inbox', 'nfas', 'projects', 'budgets', 'excel', 'audit', 'admin'],
+  super_admin: ['dashboard', 'inbox', 'nfas', 'budgets', 'excel', 'audit', 'admin'],
   it_admin: ['dashboard', 'nfas', 'budgets', 'audit'],
 };
 
@@ -938,16 +1019,18 @@ async function boot(){
   document.getElementById('whoamiName').textContent = USER ? USER.name : '';
   document.getElementById('whoamiRole').textContent = USER && USER.role ? String(USER.role).replace('_', ' ') : '';
 
-  const [depts, cats, subcats, fys] = await Promise.all([
+  const [depts, cats, subcats, fys, btypes] = await Promise.all([
     api('/budgets/departments'),
     api('/budgets/categories'),
     api('/budgets/subcategories'),
-    api('/budgets/financial-years')
+    api('/budgets/financial-years'),
+    api('/budgets/budget-types').catch(() => [])
   ]);
   REF.departments = depts;
   REF.categories = cats;
   REF.subcategories = subcats;
   REF.financialYears = fys;
+  REF.budgetTypes = btypes || [];
 
   const activeFyObj = activeFy();
   currentActiveFyId = activeFyObj.id;
@@ -1553,8 +1636,6 @@ async function newNfaModal(){
     if (refData.ref_no) autoRef = refData.ref_no;
   } catch(e) {}
 
-  const projects = await api('/projects' + (deptId ? `?department=${deptId}` : ''));
-
   openModal(`
     <button class="close-btn" onclick="closeModal()">✕</button>
     <h2>Request Note For Approval (NFA)</h2>
@@ -1592,38 +1673,37 @@ async function newNfaModal(){
       </div>
     </div>
 
-    <div class="row">
-      <div style="flex:1">
-        <label class="field-label">Project (Optional)</label>
-        <select id="nfaProject">
-          <option value="">— None / Direct Department NFA (No Specific Project) —</option>
-          ${projects.map(p=>`<option value="${p.id}">${p.name}</option>`).join('')}
-        </select>
-      </div>
-      <div style="flex:1">
-        <label class="field-label">Budget Nature / Classification</label>
-        <select id="nfaBudgetType" onchange="filterModalCategories(this.value)">
-          <option value="all">All Budget Types</option>
+    <div style="margin-top:12px;padding:14px;background:var(--section-bg);border:1px solid var(--border);border-radius:var(--radius-sm);">
+      <div>
+        <label class="field-label" style="font-weight:700;color:var(--primary)">1. Budget Nature / Classification</label>
+        <select id="nfaBudgetType" onchange="filterModalCategories(this.value)" style="margin-bottom:10px;">
+          <option value="">— Select Budget Nature / Classification —</option>
           <option value="revenue">Revenue Expenditure (Operating / Departmental)</option>
           <option value="capex">Capital Expenditure (CAPEX - Computing, Lab, Software, Equipment)</option>
           <option value="earnings">Revenue / Earnings (Grants, Consultancy, Registrations)</option>
+          <option value="all">All Classifications</option>
         </select>
+      </div>
+
+      <div>
+        <label class="field-label" style="font-weight:700;color:var(--primary)">2. Budget Main Category</label>
+        <select id="nfaCat" onchange="onCategorySelect(this.value)" style="margin-bottom:10px;">
+          <option value="">— Select Budget Nature above first —</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="field-label" style="font-weight:700;color:var(--primary)">3. Available Budget Items</label>
+        <div class="field-help" id="budgetItemsHelp" style="margin-bottom:6px;">Select a Budget Main Category above to view and select individual budget items.</div>
+        <select id="nfaSubcat" onchange="onBudgetItemSelect(this.value)" style="margin-bottom:6px;">
+          <option value="">— Select a Budget Main Category above first —</option>
+        </select>
+        <div id="budgetItemsGrid" class="budget-items-chip-grid" style="display:none;"></div>
       </div>
     </div>
 
-    <label class="field-label">Budget Main Category</label>
-    <select id="nfaCat" onchange="onCategorySelect(this.value)">
-      <option value="">Select Category...</option>
-      ${REF.categories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}
-    </select>
-
-    <label class="field-label">Budget Subcategory</label>
-    <select id="nfaSubcat">
-      <option value="">Select subcategory after choosing category above...</option>
-    </select>
-
-    <label class="field-label">Title of Proposal</label>
-    <input id="nfaTitle" placeholder="e.g. Procurement of Research GPU Servers / Academic Hackathon / FDP" />
+    <label class="field-label" style="margin-top:14px;font-weight:700">Title of Proposal</label>
+    <input id="nfaTitle" class="field-focus-pulse" placeholder="e.g. Procurement of Research GPU Servers / Academic Hackathon / FDP" />
 
     <label class="field-label">Purpose &amp; Objective</label>
     <textarea id="nfaPurpose" rows="2" placeholder="Explain the specific purpose and outcome of this proposal"></textarea>
@@ -1696,28 +1776,191 @@ async function onNfaFyOrDeptChange(){
   }
 }
 
+function formatCategoryOptionLabel(rawName, maxLen = 80){
+  if (!rawName) return '';
+  const singleLine = String(rawName).replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+  if (singleLine.length <= maxLen) return singleLine;
+  return singleLine.slice(0, maxLen - 3).trim() + '...';
+}
+
+function escapeHtmlAttr(str){
+  return String(str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 function filterModalCategories(type){
   const catSelect = document.getElementById('nfaCat');
-  let list = REF.categories;
-  if (type === 'capex') {
-    list = list.filter(c => c.name.toLowerCase().includes('capex') || c.name.toLowerCase().includes('server') || c.name.toLowerCase().includes('equipment') || c.name.toLowerCase().includes('license'));
-  } else if (type === 'earnings') {
-    list = list.filter(c => c.name.toLowerCase().includes('grant') || c.name.toLowerCase().includes('consultancy') || c.name.toLowerCase().includes('conference'));
-  } else if (type === 'revenue') {
-    list = list.filter(c => !c.name.toLowerCase().includes('capex') && !c.name.toLowerCase().includes('grant'));
+  const subcatSelect = document.getElementById('nfaSubcat');
+  const itemsGrid = document.getElementById('budgetItemsGrid');
+  const itemsHelp = document.getElementById('budgetItemsHelp');
+
+  if (!catSelect) return;
+
+  if (!type) {
+    catSelect.innerHTML = '<option value="">— Select Budget Nature above first —</option>';
+    if (subcatSelect) subcatSelect.innerHTML = '<option value="">— Select a Budget Main Category first —</option>';
+    if (itemsGrid) { itemsGrid.innerHTML = ''; itemsGrid.style.display = 'none'; }
+    if (itemsHelp) itemsHelp.textContent = 'Select a Budget Main Category above to view and choose individual budget items.';
+    return;
   }
-  catSelect.innerHTML = '<option value="">Select Category...</option>' + list.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-  document.getElementById('nfaSubcat').innerHTML = '<option value="">Select subcategory after choosing category above...</option>';
+
+  const revType = REF.budgetTypes?.find(b => b.name.toLowerCase().includes('revenue') && !b.name.toLowerCase().includes('earning'));
+  const capexType = REF.budgetTypes?.find(b => b.name.toLowerCase().includes('capex'));
+  const earnType = REF.budgetTypes?.find(b => b.name.toLowerCase().includes('earning') || b.name.toLowerCase().includes('grant'));
+
+  let list = REF.categories || [];
+  if (type === 'capex') {
+    list = list.filter(c => (capexType && c.budget_type_id === capexType.id) || c.name.toLowerCase().includes('capex') || c.name.toLowerCase().includes('server') || c.name.toLowerCase().includes('equipment') || c.name.toLowerCase().includes('license') || c.name.toLowerCase().includes('computing'));
+  } else if (type === 'earnings') {
+    list = list.filter(c => (earnType && c.budget_type_id === earnType.id) || c.name.toLowerCase().includes('grant') || c.name.toLowerCase().includes('consultancy') || c.name.toLowerCase().includes('conference'));
+  } else if (type === 'revenue') {
+    list = list.filter(c => (revType && c.budget_type_id === revType.id) || (!c.name.toLowerCase().includes('capex') && !c.name.toLowerCase().includes('grant') && !c.name.toLowerCase().includes('consultancy') && !c.name.toLowerCase().includes('conference')));
+  }
+
+  catSelect.innerHTML = `<option value="">— Select Budget Main Category (${list.length} available) —</option>` +
+    list.map(c => {
+      const cleanFull = String(c.name || '').replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+      const shortDisplay = formatCategoryOptionLabel(c.name, 78);
+      return `<option value="${c.id}" title="${escapeHtmlAttr(cleanFull)}">${escapeHtmlAttr(shortDisplay)}</option>`;
+    }).join('');
+
+  if (subcatSelect) subcatSelect.innerHTML = '<option value="">— Select a Budget Main Category above first —</option>';
+  if (itemsGrid) { itemsGrid.innerHTML = ''; itemsGrid.style.display = 'none'; }
+  if (itemsHelp) itemsHelp.textContent = 'Now select a Budget Main Category above to view its available budget items.';
+
+  // Focus directly moves to Budget Main Category for seamless sequence
+  setTimeout(() => {
+    catSelect.focus();
+  }, 50);
 }
 
 function onCategorySelect(catId){
   const subcatSelect = document.getElementById('nfaSubcat');
-  const subs = REF.subcategories.filter(s => s.budget_category_id === catId);
+  const itemsGrid = document.getElementById('budgetItemsGrid');
+  const itemsHelp = document.getElementById('budgetItemsHelp');
+
+  if (!catId) {
+    if (subcatSelect) subcatSelect.innerHTML = '<option value="">— Select a Budget Main Category above first —</option>';
+    if (itemsGrid) { itemsGrid.innerHTML = ''; itemsGrid.style.display = 'none'; }
+    if (itemsHelp) itemsHelp.textContent = 'Select a Budget Main Category above to view available budget items.';
+    return;
+  }
+
+  const subs = (REF.subcategories || []).filter(s => s.budget_category_id === catId);
+  const selectedCat = (REF.categories || []).find(c => c.id === catId);
+  const catNameStr = selectedCat ? formatCategoryOptionLabel(selectedCat.name, 50) : 'Category';
+
   if (subs.length === 0) {
-    subcatSelect.innerHTML = '<option value="">No subcategories registered (Direct Category Allocation)</option>';
+    if (subcatSelect) subcatSelect.innerHTML = '<option value="">Direct Category Allocation (No pre-set budget items)</option>';
+    if (itemsGrid) {
+      itemsGrid.innerHTML = `<div style="font-size:12px;color:var(--text-muted);padding:8px 4px;">Direct allocation under <strong>${escapeHtmlAttr(catNameStr)}</strong> — no pre-set items. You may enter particulars directly in the item rows below.</div>`;
+      itemsGrid.style.display = 'block';
+    }
+    if (itemsHelp) itemsHelp.textContent = `Direct allocation under ${catNameStr}: enter particulars directly in item rows below.`;
+    // If no sub-items, automatically advance cursor to Proposal Title
+    setTimeout(() => {
+      const titleEl = document.getElementById('nfaTitle');
+      if (titleEl) {
+        titleEl.focus();
+        titleEl.classList.add('auto-focused');
+        setTimeout(() => titleEl.classList.remove('auto-focused'), 1000);
+      }
+    }, 50);
   } else {
-    subcatSelect.innerHTML = '<option value="">Select Subcategory...</option>' +
-      subs.map(s => `<option value="${s.id}" data-name="${s.name}">${s.name} (Available: ${inr(s.allocated_amount - s.approved_amount - s.pending_amount)})</option>`).join('');
+    if (subcatSelect) {
+      subcatSelect.innerHTML = `<option value="">— Select an available Budget Item (${subs.length} items) —</option>` +
+        subs.map(s => {
+          const bal = (s.allocated_amount || 0) - (s.approved_amount || 0) - (s.pending_amount || 0);
+          const balText = bal > 0 ? ` (Available: ${inr(bal)})` : '';
+          const cleanFull = String(s.name || '').replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+          const shortDisplay = formatCategoryOptionLabel(s.name, 75);
+          return `<option value="${s.id}" data-name="${escapeHtmlAttr(cleanFull)}" title="${escapeHtmlAttr(cleanFull)}">${escapeHtmlAttr(shortDisplay)}${balText}</option>`;
+        }).join('');
+    }
+
+    if (itemsGrid) {
+      itemsGrid.innerHTML = subs.map(s => {
+        const bal = (s.allocated_amount || 0) - (s.approved_amount || 0) - (s.pending_amount || 0);
+        const balHtml = bal > 0 ? `<span class="chip-bal">${inr(bal)}</span>` : '';
+        const cleanFull = String(s.name || '').replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+        const shortDisplay = formatCategoryOptionLabel(s.name, 55);
+        return `
+          <button type="button" class="budget-item-chip" data-id="${s.id}" data-name="${escapeHtmlAttr(cleanFull)}" title="${escapeHtmlAttr(cleanFull)}" onclick="onBudgetItemSelect('${s.id}')">
+            <span>${escapeHtmlAttr(shortDisplay)}</span>
+            ${balHtml}
+          </button>
+        `;
+      }).join('');
+      itemsGrid.style.display = 'flex';
+    }
+
+    if (itemsHelp) itemsHelp.textContent = `Select a budget item below or from dropdown (${subs.length} items under ${catNameStr}):`;
+
+    // Move focus to budget item dropdown so user can immediately choose
+    setTimeout(() => {
+      if (subcatSelect) subcatSelect.focus();
+    }, 50);
+  }
+}
+
+function onBudgetItemSelect(itemId){
+  const subcatSelect = document.getElementById('nfaSubcat');
+  if (subcatSelect && itemId && subcatSelect.value !== itemId) {
+    subcatSelect.value = itemId;
+  }
+
+  // Visual active chip selection
+  document.querySelectorAll('.budget-item-chip').forEach(chip => {
+    chip.classList.toggle('active', chip.dataset.id === itemId);
+  });
+
+  // Get selected item name
+  let itemName = '';
+  if (subcatSelect && subcatSelect.selectedOptions && subcatSelect.selectedOptions[0]) {
+    itemName = subcatSelect.selectedOptions[0].dataset.name || '';
+  }
+  if (!itemName && itemId) {
+    const foundSub = (REF.subcategories || []).find(s => s.id === itemId);
+    if (foundSub) itemName = foundSub.name;
+  }
+
+  // Pre-fill the first Item Row particulars if blank
+  const firstParticulars = document.querySelector('#itemsWrap .it-p');
+  if (firstParticulars && !firstParticulars.value.trim() && itemName) {
+    firstParticulars.value = itemName;
+  }
+
+  // Requirement 3: Automatic Cursor / Focus Movement
+  // When the user selects a Budget Item:
+  // - Automatically move the cursor/focus to the appropriate next input field.
+  // - The user should not need to manually click the next field.
+  // - Ensure the focus movement follows the correct form-filling sequence.
+  // Form Sequence:
+  // Budget Item -> Title of Proposal -> Purpose -> Justification -> Item details (Qty)
+  const titleInput = document.getElementById('nfaTitle');
+  const purposeInput = document.getElementById('nfaPurpose');
+  const justInput = document.getElementById('nfaJust');
+
+  let nextTarget = null;
+  if (titleInput && !titleInput.value.trim()) {
+    nextTarget = titleInput;
+  } else if (purposeInput && !purposeInput.value.trim()) {
+    nextTarget = purposeInput;
+  } else if (justInput && !justInput.value.trim()) {
+    nextTarget = justInput;
+  } else {
+    const firstQty = document.querySelector('#itemsWrap .it-q');
+    nextTarget = firstQty || titleInput;
+  }
+
+  if (nextTarget) {
+    setTimeout(() => {
+      nextTarget.focus();
+      nextTarget.classList.add('auto-focused');
+      setTimeout(() => nextTarget.classList.remove('auto-focused'), 1000);
+      if (typeof nextTarget.scrollIntoView === 'function') {
+        nextTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 60);
   }
 }
 
@@ -1771,11 +2014,11 @@ async function createNfa(andSubmit){
 
   const fyId = document.getElementById('nfaFy').value;
   const refNo = document.getElementById('nfaRefNo').value.trim();
-  const projId = document.getElementById('nfaProject').value || null;
+  const projId = document.getElementById('nfaProject')?.value || null;
   const catId = document.getElementById('nfaCat').value;
   const subcatSelect = document.getElementById('nfaSubcat');
-  const subcatId = subcatSelect.value || null;
-  const subcatName = subcatSelect.selectedOptions[0]?.dataset.name || '';
+  const subcatId = subcatSelect?.value || null;
+  const subcatName = subcatSelect?.selectedOptions?.[0]?.dataset?.name || '';
   const title = document.getElementById('nfaTitle').value.trim();
   const purpose = document.getElementById('nfaPurpose').value.trim();
   const justification = document.getElementById('nfaJust').value.trim();

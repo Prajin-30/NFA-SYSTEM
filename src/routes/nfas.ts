@@ -91,11 +91,76 @@ nfasRouter.get('/:id', (req, res) => {
 nfasRouter.get('/:id/pdf', (req, res) => {
   const nfa = store.data.nfas.find((n) => n.id === req.params.id);
   if (!nfa) return res.status(404).json({ error: 'NFA not found' });
-  const dept = store.data.departments.find((d) => d.id === nfa.department_id)!;
-  const cat = store.data.budget_categories.find((c) => c.id === nfa.budget_category_id)!;
+  const dept = store.data.departments.find((d) => d.id === nfa.department_id) || {
+    id: nfa.department_id,
+    name: (nfa as any).custom_department_name || 'Department',
+    code: (nfa as any).custom_department_code || 'DEPT',
+    hod_name: nfa.hod_name || '',
+  };
+  const cat = store.data.budget_categories.find((c) => c.id === nfa.budget_category_id) || {
+    id: nfa.budget_category_id,
+    name: 'General Budget',
+    budget_type_id: '',
+  };
   const project = store.data.projects.find((p) => p.id === nfa.project_id);
   const creator = store.data.users.find((u) => u.id === nfa.created_by);
-  renderNfaPdf(res, { ...nfa, submitted_by_name: creator?.name || nfa.submitted_by_name, hod_name: dept.hod_name || nfa.hod_name }, withItems(nfa.id), dept, cat, project?.name);
+  const fy = store.data.financial_years.find((f) => f.id === nfa.financial_year_id);
+  const budgetType = store.data.budget_types.find((b) => b.id === (nfa.budget_type_id || cat.budget_type_id));
+  const subcat = store.data.budget_subcategories?.find((s) => s.id === nfa.budget_subcategory_id);
+  const budgetLine = store.data.department_budgets.find(
+    (b) => b.department_id === nfa.department_id && b.financial_year_id === nfa.financial_year_id && b.budget_category_id === nfa.budget_category_id
+  );
+
+  let currentAvailable = 0;
+  if (subcat && subcat.allocated_amount > 0) {
+    currentAvailable = subcat.allocated_amount - subcat.approved_amount - subcat.pending_amount;
+  } else if (budgetLine && budgetLine.allocated_amount > 0) {
+    currentAvailable = budgetLine.allocated_amount - budgetLine.approved_amount - budgetLine.pending_amount;
+  } else if (subcat) {
+    currentAvailable = subcat.allocated_amount - subcat.approved_amount - subcat.pending_amount;
+  } else if (budgetLine) {
+    currentAvailable = budgetLine.allocated_amount - budgetLine.approved_amount - budgetLine.pending_amount;
+  }
+
+  // Determine if NFA total_amount was already deducted in pending or approved
+  const isAlreadyDeducted = ['pending_director_approval', 'pending_higher_approval', 'approved'].includes(nfa.status);
+  let availableBudget = 0;
+  let balanceAfter = 0;
+
+  if (isAlreadyDeducted) {
+    balanceAfter = Math.max(0, currentAvailable);
+    availableBudget = balanceAfter + nfa.total_amount;
+  } else {
+    availableBudget = Math.max(0, currentAvailable);
+    balanceAfter = Math.max(0, availableBudget - nfa.total_amount);
+  }
+
+  const budgetDetails = {
+    classification: budgetType?.name || (cat.name.includes('CAPEX') ? 'Capital Expenditure (CAPEX)' : 'Revenue Expenditure (Operating / Departmental)'),
+    categoryName: cat.name || 'General Category',
+    subcategoryName: nfa.budget_subcategory_name || subcat?.name || 'General Allocation',
+    availableBudget,
+    amountRequested: nfa.total_amount,
+    balanceAfter,
+  };
+
+  renderNfaPdf(
+    res,
+    {
+      ...nfa,
+      submitted_by_name: creator?.name || nfa.submitted_by_name,
+      hod_name: dept.hod_name || nfa.hod_name,
+      budget_subcategory_name: nfa.budget_subcategory_name || subcat?.name,
+    },
+    withItems(nfa.id),
+    dept,
+    cat,
+    project?.name,
+    withApprovals(nfa.id),
+    fy?.label,
+    budgetType?.name,
+    budgetDetails
+  );
 });
 
 /** DELETE /api/nfas/:id — remove an NFA and its draft data when authorized. */

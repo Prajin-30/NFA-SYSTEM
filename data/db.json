@@ -102,17 +102,432 @@
       "name": "Department of Robotics and Autonomous Systems",
       "code": "DRAS",
       "hod_name": ""
+    },
+    {
+      "id": "7ba9fa0a-ae10-47cf-acf2-b5ba39dc8859",
+      "name": "HOD:",
+      "code": "HOD:"
+    },
+    {
+      "id": "1185b9f4-2a85-4efe-90b3-a9fb7380a5d1",
+      "name": "EARNINGS (in Rs.):",
+      "code": "EARNIN"
+    },
+    {
+      "id": "b8649d8a-3457-40ae-b5d6-ac53d63ff739",
+      "name": "TOTAL EARNINGS",
+      "code": "TOTAL "
+    },
+    {
+      "id": "2413162d-9f55-45d0-831f-fb1f581d51ca",
+      "name": "DATE:",
+      "code": "DATE:"
+    },
+    {
+      "id": "c2f1c26d-b062-411e-abee-664a1c107f3b",
+      "name": "HOD",
+      "code": "HOD"
+    },
+    {
+      "id": "4439a95e-353e-4fea-8d9b-7ec7618d934c",
+      "name": "Note:",
+      "code": "NOTE:"
+    },
+    {
+      "id": "acfcd8ad-b8f7-48cd-ab8b-5262a4cbff0e",
+      "name": "1. The above statement is the Consolidated Budget for the department which will indicate Budgeted Income & Expenses.",
+      "code": "1. THE"
+    },
+    {
+      "id": "3fa043b8-f182-4649-88c5-9ff8b5c8a62c",
+      "name": "2. DO NOT input any values in this worksheet. All inputs should be provided in subsequent worksheets.",
+      "code": "2. DO "
+    },
+    {
+      "id": "04a28c74-832b-4454-bb5d-e905a7f19619",
+      "name": "3. As all the values are formula driven, please cross verify the balances appearing above with the corresponding",
+      "code": "3. AS "
+    },
+    {
+      "id": "9c72cf33-bb25-40dd-82e6-56fcd291c2d1",
+      "name": "workings to ensure the accuracy of this Budget statement.",
+      "code": "WORKIN"
+    },
+    {
+      "id": "4ebd2c91-b82b-443a-83f5-bee304f895a6",
+      "name": "4. Only provide inputs for Department, HOD and Dean above highlighted.",
+      "code": "4. ONL"
+    },
+    {
+      "id": "837ec895-dfd0-48bc-bf3b-d21a25cd3190",
+      "name": "5. DO NOT merge/delete any worksheets. Each worksheet should be populated individually and the balances from those",
+      "code": "5. DO "
+    },
+    {
+      "id": "1d7bafad-7dd9-4b37-80e9-a41582da3122",
+      "name": "worksheets will be brought above with the help of formulas set above. Additionally, no formulas should be added.",
+      "code": "WORKSH"
+    },
+    {
+      "id": "91f0a08a-0b19-4f94-8760-02dcbcfd633b",
+      "name": "6. In case if any particular worksheet is not applicable or we do not have either revenue and/or expenses, DO NOT",
+      "code": "6. IN "
+    },
+    {
+      "id": "8e5b1f53-b4bc-4eb1-8eff-18a1183fe0d5",
+      "name": "delete the respective worksheet, please leave the respective worksheet as blank.",
+      "code": "DELETE"
+    },
+    {
+      "id": "c0d2e17e-a5f0-45f1-a60a-9bbb316b5354",
+      "name": "SL NO.",
+      "code": "SL NO."
+    },
+    {
+      "id": "51c60256-948e-4013-8ccc-8c084cab45e2",
+      "name": "1",
+      "code": "1"
+    },
+    {
+      "id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
+      "name": "[object Object]",
+      "code": "[OBJEC"
+    },
+    {
+      "id": "8c013c40-7d46-4dbb-83cc-26dece257838",
+      "name": "9",
+      "code": "9"
+    },
+    {
+      "id": "512ae22a-f256-4659-bb7f-4f46f2f66cc7",
+      "name": "1. In case of multiple Fests/Seminars/Workshops/Conferences/Events/Value Added Courses or Specialisation, please ensure that",
+      "code": "1. IN "
+    },
+    {
+      "id": "8b4e6dda-fb84-4e82-8c74-9d590938d028",
+      "name": "each Fest/Seminar/Workshop etc is given above separately by adding additional lines under the respective categories.",
+      "code": "EACH F"
+    },
+    {
+      "id": "a9e0086d-d0a6-4722-aaf4-91b393816231",
+      "name": "agreed either through no of registrations or fixed revenue agreed to be received, please mention \"No. of Registrations\" or \"Fixed",
+      "code": "AGREED"
+    },
+    {
+      "id": "79262fc9-653e-4396-9dc5-c7e16a4eb060",
+      "name": "Revenue agreed\" respectively under Basis of Budget.)",
+      "code": "REVENU"
+    },
+    {
+      "id": "8d776c12-8de9-4dd0-a728-8a3f5d62d963",
+      "name": "3. In case a particular category has multiple revenue and/or expenses, please prepare a separate worksheet and link the revenue total from",
+      "code": "3. IN "
+    },
+    {
+      "id": "48bde8a7-58ea-4541-9c99-4fb07d259deb",
+      "name": "the worksheet above.",
+      "code": "THE WO"
+    },
+    {
+      "id": "ec5395e7-1b94-4680-9777-2c1d82a0473b",
+      "name": "4. The earnings mentioned above should be matching with the \"Fests and Other Events\" worksheet that is created for each such category.",
+      "code": "4. THE"
+    },
+    {
+      "id": "cbdbd057-eb24-434a-9c09-6b5d6f32b74b",
+      "name": "5. The cells highlighted in Orange are SUM formulas. Please check the accuracy of such totals after completing the working. Ensure that",
+      "code": "5. THE"
+    },
+    {
+      "id": "4887d464-9024-4dd3-9ce1-5ce8fab96f2c",
+      "name": "the total computed in those cells are capturing the entire total and is 100% complete and accurate.",
+      "code": "THE TO"
+    },
+    {
+      "id": "bca314b3-94ba-4153-87ac-7dab0b54a279",
+      "name": "Leave this worksheet as blank.",
+      "code": "LEAVE "
+    },
+    {
+      "id": "c394e90e-9aec-4e6a-839f-196eda0b76ce",
+      "name": "4",
+      "code": "4"
+    },
+    {
+      "id": "17cf89fa-1730-491e-8a9c-ea7ccf0f4862",
+      "name": "5",
+      "code": "5"
+    },
+    {
+      "id": "795737b6-6268-49c1-86ce-79671e55b871",
+      "name": "6",
+      "code": "6"
+    },
+    {
+      "id": "4461c5a9-6ab0-4272-90a8-0656404548c1",
+      "name": "7",
+      "code": "7"
+    },
+    {
+      "id": "c2c88693-5b59-41e7-9dc2-f489df48722c",
+      "name": "8",
+      "code": "8"
+    },
+    {
+      "id": "aa2a3f71-8d28-4025-add5-f14f5433b8b2",
+      "name": "40",
+      "code": "40"
+    },
+    {
+      "id": "9bf19ba6-320c-4a52-aa90-543ffefe9ddd",
+      "name": "16",
+      "code": "16"
+    },
+    {
+      "id": "3b331638-8ba9-4394-9d6a-62466b67e195",
+      "name": "17",
+      "code": "17"
+    },
+    {
+      "id": "14df92ec-8eb7-4281-97e8-9a2bcccd6639",
+      "name": "25",
+      "code": "25"
+    },
+    {
+      "id": "3d320ae9-38be-4945-a522-8537a0dcf99f",
+      "name": "26",
+      "code": "26"
+    },
+    {
+      "id": "e733bbe0-9adf-437b-956a-f4f3733faf3c",
+      "name": "27",
+      "code": "27"
+    },
+    {
+      "id": "9f941e3c-4c6d-4733-8d77-c1dc8f29dfc4",
+      "name": "TOTAL REVENUE EXPENSES",
+      "code": "TOTAL "
+    },
+    {
+      "id": "6549019f-024c-4d3c-b40b-3b87c7a973a9",
+      "name": "with the Vendor, please mention \"Price negotiated with the Vendor\" or in case where expense is estimated using market value of similar items,",
+      "code": "WITH T"
+    },
+    {
+      "id": "26e152d3-fbab-45dd-8af4-5080b6e73bac",
+      "name": "please mention \"Price is equivalent to Market Value\" and so on under Basis of Budget)",
+      "code": "PLEASE"
+    },
+    {
+      "id": "8f9e61dc-be31-4d38-b339-dc4c53d506f5",
+      "name": "2. Guest Faculty Honorarium must be as per Man Power Budget.",
+      "code": "2. GUE"
+    },
+    {
+      "id": "5caea629-a5c7-43ea-b09a-ac5cd36b3788",
+      "name": "3. Budget should be shown separately for EACH FEST, SEMINAR, WORKSHOP, EVENT & MEETING under separate worksheets. The total of all the",
+      "code": "3. BUD"
+    },
+    {
+      "id": "d8749e40-3c1e-492b-b77b-19c57c092de0",
+      "name": "expenses from the separate worksheet should be linked above.",
+      "code": "EXPENS"
+    },
+    {
+      "id": "f1617984-b4c9-4992-8c02-2cd548e788ef",
+      "name": "4. Mention all items not falling under any previous category like Lab Consumables, Accreditation, Industrial Visit etc.",
+      "code": "4. MEN"
+    },
+    {
+      "id": "07575e83-c6f2-4d6e-b023-d60617c1dda3",
+      "name": "6. The cells highlighted in Orange are SUM formulas. Please check the accuracy of such totals after completing the working. Ensure that the total computed",
+      "code": "6. THE"
+    },
+    {
+      "id": "48a4f757-c0ae-4048-9bd8-de38cac5b801",
+      "name": "in those cells are capturing the entire total and is 100% complete and accurate.",
+      "code": "IN THO"
+    },
+    {
+      "id": "2425423b-97bd-423f-a3f0-8f25ae20a8c3",
+      "name": "7. In case where this worksheet is not applicable or the department does not have any revenue expenditure, DO NOT delete this worksheet.",
+      "code": "7. IN "
+    },
+    {
+      "id": "00bfab5a-6f9d-4f93-a0b1-9b7f0613b199",
+      "name": "8. Any deviation in the Budget needs to be approved by the Finance Commitee",
+      "code": "8. ANY"
+    },
+    {
+      "id": "7da73643-455e-4dfa-97af-407d430d1670",
+      "name": "3",
+      "code": "3"
+    },
+    {
+      "id": "6f5cb64f-f047-4a03-9e26-0b4eab6fffc6",
+      "name": "TOTAL CAPEX",
+      "code": "TOTAL "
+    },
+    {
+      "id": "8f221956-181c-4abe-9229-c80875dc906e",
+      "name": "1. Provide a brief about the underline assumption used for the respective Budget number. (For example: In case where the expense is already negotiated",
+      "code": "1. PRO"
+    },
+    {
+      "id": "2ce59c13-be09-4c94-8e65-8b09784c253f",
+      "name": "2. Items which are in the nature of capital/investment where the usage is for period(s) more than a year should be mentioned above.",
+      "code": "2. ITE"
+    },
+    {
+      "id": "ab016c26-ecc2-4f83-8360-42ffd3a72bd3",
+      "name": "3. In case of additional items, add additional lines as needed.",
+      "code": "3. IN "
+    },
+    {
+      "id": "642e857c-f5b4-4842-949b-1492c1756134",
+      "name": "4. The cells highlighted in Orange are SUM formulas. Please check the accuracy of such totals after completing the working. Ensure that the total computed",
+      "code": "4. THE"
+    },
+    {
+      "id": "5f285494-26b2-42cb-805d-fd9461c63132",
+      "name": "5. In case where this worksheet is not applicable or the department does not have any capital expenditure, DO NOT delete this worksheet.",
+      "code": "5. IN "
+    },
+    {
+      "id": "851a95e4-b00b-46bd-849a-de4785eef60d",
+      "name": "7. This budget must be submitted to the CHIEF FINANCE OFFICER / ASSITANT FINANCE OFFICER by 31.12.2023 , duly recommended by the DEAN / Directors",
+      "code": "7. THI"
+    },
+    {
+      "id": "59d5c5ae-a8d1-4989-9bf7-28e2f4b3b852",
+      "name": "Semester: Odd /Even:",
+      "code": "DEPART"
+    },
+    {
+      "id": "537cd94f-ba0f-43fb-85f4-7c1f3e6bfe65",
+      "name": "Remarks (if any)",
+      "code": "COURSE"
+    },
+    {
+      "id": "d84f6656-e6ea-491d-8bab-938ba315989a",
+      "name": "Remarks (if any)",
+      "code": "COURSE"
+    },
+    {
+      "id": "7a83c4bb-8a1a-4202-9448-46080ba0c31c",
+      "name": "Total",
+      "code": "TOTAL"
+    },
+    {
+      "id": "ba918f12-2f78-42cb-a0d2-af8ef8e7cd1b",
+      "name": "Position",
+      "code": "POSITI"
+    },
+    {
+      "id": "3536768a-caf3-4679-9636-32acfb0a2305",
+      "name": "Teaching (Regular)",
+      "code": "TEACHI"
+    },
+    {
+      "id": "f41a79ae-da0d-40dc-9543-fc4709fa6013",
+      "name": "Teaching (Guest)",
+      "code": "TEACHI"
+    },
+    {
+      "id": "a95a391c-3034-4422-b705-fe57a7b01d71",
+      "name": "Admin. Staff",
+      "code": "ADMIN."
+    },
+    {
+      "id": "b9725cf0-fc11-44b0-8e92-406ac6499b6d",
+      "name": "Support Staff",
+      "code": "SUPPOR"
+    },
+    {
+      "id": "7ae50ab6-6232-42e4-b93e-b1de02882bde",
+      "name": "*Approved + New = Total = existing + Required",
+      "code": "*APPRO"
+    },
+    {
+      "id": "26c6736e-2ebd-49b2-bd7d-b94ea1768300",
+      "name": "Signature of the Head of the Department/Center:",
+      "code": "SIGNAT"
+    },
+    {
+      "id": "6e0c4765-4a89-4a00-97ce-445121bfdd46",
+      "name": "Recommendation of the Dean/director:",
+      "code": "RECOMM"
+    },
+    {
+      "id": "f6ff6274-c20c-4ca7-b04a-5db3bcd3f002",
+      "name": "Signature:",
+      "code": "SIGNAT"
+    },
+    {
+      "id": "7b5b32b4-01c2-4a9f-999a-783b6faf00fb",
+      "name": "Remarks by Personnel Officer:",
+      "code": "REMARK"
+    },
+    {
+      "id": "de44ec4c-69a8-4f66-9f56-10138ac984d1",
+      "name": "Approval by CFO:",
+      "code": "APPROV"
+    },
+    {
+      "id": "41d1afa7-27e0-4f01-86fd-153b190041be",
+      "name": "Department",
+      "code": "DEPART"
+    },
+    {
+      "id": "2a6c3a01-8c80-43d3-96df-a6a09d1aea2c",
+      "name": "Nature of Program / Event (Date)",
+      "code": "NATURE"
+    },
+    {
+      "id": "8aec87d4-fc8b-4ccc-b84f-9c8267c60566",
+      "name": "Details of Income to be generated",
+      "code": "DETAIL"
+    },
+    {
+      "id": "ef2bf604-e5ee-4d0c-96e6-ac6fdd7361ed",
+      "name": "Sponsorship",
+      "code": "2"
+    },
+    {
+      "id": "05022e15-a0b5-4662-a564-b9257ca10720",
+      "name": "TOTAL INCOME",
+      "code": "TOTAL "
+    },
+    {
+      "id": "5af5484c-373f-4642-8e8f-448b95a88a18",
+      "name": "Details of Expenses to be incurred (inclusive of GST)",
+      "code": "DETAIL"
+    },
+    {
+      "id": "8534da53-8575-4b65-8ffc-d4749060409c",
+      "name": "TOTAL EXPENDITURE",
+      "code": "TOTAL "
     }
   ],
   "financial_years": [
     {
       "id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "label": "2026-27",
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "6986edcf-0285-46c0-bd17-1076f299dc98",
       "label": "2027-28",
+      "is_active": true
+    },
+    {
+      "id": "c25e67a4-7bfd-4ec1-b695-7fefca2549a2",
+      "label": "2027-28",
+      "is_active": false
+    },
+    {
+      "id": "136d2c5f-1055-457a-a157-adc87255574b",
+      "label": "2028-29",
       "is_active": false
     }
   ],
@@ -205,755 +620,1960 @@
       "id": "a01f789f-c2ad-4799-87de-4bcd11d4e4c5",
       "budget_type_id": "53aa7a65-a652-4e86-beef-c7acf806a48c",
       "name": "Seed Grants for Faculty Projects"
+    },
+    {
+      "id": "91b25772-973a-4b6b-a199-729d6803d3c8",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Input"
+    },
+    {
+      "id": "2d729702-80b7-40db-8793-ac0ec82a9afa",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "2026-27"
+    },
+    {
+      "id": "3975b808-c399-468c-9343-4f0a2af3d70d",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Dr M Balamurugan"
+    },
+    {
+      "id": "a5c8c790-3f07-419b-8dd5-58ae61b12d0f",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "[object Object]"
+    },
+    {
+      "id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "General Department Expenditure"
+    },
+    {
+      "id": "243db335-d058-4587-95c3-95ae585f3d9c",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "DEAN"
+    },
+    {
+      "id": "7e24ed9c-5af6-4fdf-94c5-0110de1f7ff8",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Comments"
+    },
+    {
+      "id": "83ba2613-e615-410f-8027-0cdb535098ed",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "This is the total funds sanctioned from external agencies to all the faculties of the department."
+    },
+    {
+      "id": "e5ad2341-7801-453b-9e1d-94bfb992ef31",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "This is the amount estimated to be earned through consulatncy projects"
+    },
+    {
+      "id": "f911aa6e-9494-4052-b317-cf0152a3be5d",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "This is the amount estimated to be earned through conduct of various training programmes"
+    },
+    {
+      "id": "67a62538-ed38-4df0-929f-d526b56c14a1",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "This is total income earned through various fest of the department. Kindly mention the income earned from fest separately. Example: If the department/ Centre has 7 events, then there should be 7 rows and each row the respective event income has to be mentioned and the budget for that event has to be mentioned separately."
+    },
+    {
+      "id": "c894d28e-6822-479a-9567-d6046339cf69",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Departments have to price the registration fee which covers the cost of providing Kits, Lunch and Snacks at the minimum. This should be the minimum fee and department is free to charge more."
+    },
+    {
+      "id": "1cae1016-7835-4bc2-8311-0b8d6085726b",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Department have to ensure that for internal fests and events, atleast 50% of the cost of the fest and event has to be raised through Sponsorships. In case of extenral events, workshops, seminars etc, the event has to be 100% sourced through Sponsoships."
+    },
+    {
+      "id": "91c2cddd-537c-4726-94a1-bdcfc58902d6",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "This is the amount estimated to be earned through conduct of various Seminars/ Workshops/Conference/ Events"
+    },
+    {
+      "id": "a31ed1b6-67ae-4cc7-b02e-2426603169a2",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "International Conference"
+    },
+    {
+      "id": "bb22f67a-b22c-46b3-b7f6-40f01370cc6c",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "FDPs"
+    },
+    {
+      "id": "21d372fd-f048-416c-b6fa-4aac4618d26f",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Workshops"
+    },
+    {
+      "id": "34da5248-1866-4027-9f5e-c9dc38674ff7",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "This is the amount estimated to be earned through conduct of various value added courses"
+    },
+    {
+      "id": "2dd58195-917c-41d5-bbbb-46652be867b3",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Certifications Courses (no of courses and no of students will be decided once department gets input from students), As of now, approximately 10 courses can be offered to 150 stduents @ the cost of Rs 1000 each student"
+    },
+    {
+      "id": "1810eae7-846e-4d8e-8516-091f3d0e7a8a",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Departments are encouraged to provide students with gold medals for their outstanding academic performances. Kindly note that these gold medals will be full sourced from sponsorships raised by the departments from external organisations or individuals."
+    },
+    {
+      "id": "f000f877-3a00-4da1-9f45-8157b836e222",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Department is offering honors courses in Cyber Security & Quantum Computing domains.\n2nd Year : 130 x 4000 = 520000\n3rd Year : 130 x 4000 = 520000\n3rd Year : 100 x 4000 = 400000 (Cyber Security Project)"
+    },
+    {
+      "id": "54676fcd-73f6-4b6e-887d-9144ec21ce7d",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Each Fest/ Seminar/ Workshop or any other Event has to be separately budgeted considering the various activities under each of them. Each Fest, Seminar, Workshop and other event has to be mentioned separately. Example: If the department/ Centre has 7 events, then there should be 7 rows and each row the respective event has to be mentioned and the budget for that event has to be mentioned separately."
+    },
+    {
+      "id": "1ce2e272-c949-4ccd-b15c-5fb3f8d4a5f1",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "This pertains to the amount which will be spent for taking students for social sentisation to various sites"
+    },
+    {
+      "id": "fe925e01-1bda-4029-9358-8be2b8fa91ff",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "This pertains to the various external trainings which will be given to students. A separate list of all such trainings have to be provided along with the budget for each training"
+    },
+    {
+      "id": "d022320d-3a98-4917-951a-214e5b513a53",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "If the department is conducting various exhibitions then amount shoulod be budgeted for the same.\n(No. of exhibitions planned X Amount spent per exhibition)"
+    },
+    {
+      "id": "ae9591a2-d908-46c9-bfe3-247d538c883d",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Each club and cells has to be mentioned separately and budgeted for that."
+    },
+    {
+      "id": "394f8e95-d360-4dcd-ba98-186f6fd38b6a",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Students Researcch promotion scheme."
+    },
+    {
+      "id": "c394f809-33fd-4840-aedc-049f6497ce5f",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Budget for postage, stamps and courier (in any). Actuals of previous year can be taken and a 10-15% increase can be considered if the postage, stamps and couriers is expected to be same as last year."
+    },
+    {
+      "id": "389a1e85-ad48-4f41-acc7-e59c18ab5b6d",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Printings for the department activities or any other printing requirements."
+    },
+    {
+      "id": "5873017e-a4cf-41c5-8d90-eda0f100e8b9",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Photocopying & binding for the department activities"
+    },
+    {
+      "id": "18d4d8a3-c579-4587-96e9-f118b455f29f",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Stationaries required for the department"
+    },
+    {
+      "id": "5e0a2dba-fb84-48ee-b4fd-e6a20d766165",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "No of Department Meetings  : 50 Meetings Expenses / Meeting : 2500  -- 125000\nBoS Meeting : 1 Expenses : 25000\nDAC Meeting: 2 Nos Meeting Expenses : 30000 / Meeting - 60000"
+    },
+    {
+      "id": "8eb80dd6-bafe-450a-a275-58a19dc72dc5",
+      "budget_type_id": "ecdfc569-50b7-4242-adf2-102a8a3ff266",
+      "name": "This will be the AMC for the various equipments of the department except IT assets. AMC for IT assets will be budgeted by the Office of IT Services."
+    },
+    {
+      "id": "139e3174-7912-45ca-bf5d-59aea38df57d",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Amount needed for maintenance of Lab (if any)"
+    },
+    {
+      "id": "9432c937-620e-4099-8966-319e55b566c2",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "This will be a pass through cost. This will be the same amount as the amount mentioned as funding received from External Projects"
+    },
+    {
+      "id": "7e0da474-de3e-426c-97e8-9dd443263df7",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "This is the targeted amount to be spent by the faculties of the department on Seed money projects."
+    },
+    {
+      "id": "acde4888-b42f-4bfd-81ae-fcad47b55c37",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "If the department have renewals for accreditation like AICTE/AIMA etc upcoming in the Academic year. Each accreditation has to be budgeted separately."
+    },
+    {
+      "id": "6192678c-1441-4c64-b575-a16c728d7307",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "If departments have expenses related to rankings like NIRF, NBA, AACSB etc. Budget for each of them to be done separtely."
+    },
+    {
+      "id": "390ee00e-2dee-484e-8e2f-51993202aae5",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "QTY"
+    },
+    {
+      "id": "8fe70e8d-8581-4733-b99e-afc15d1e69e1",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "1"
+    },
+    {
+      "id": "b2e85c8b-272f-4e28-9209-2f9345fbc643",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "5"
+    },
+    {
+      "id": "2744af89-23b2-4f85-be96-4e79daaba535",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "60"
+    },
+    {
+      "id": "2dae266e-1f48-4d1b-ac77-21925805f4bb",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "10"
+    },
+    {
+      "id": "b0782a12-26f5-4a21-91ec-556a7fe7b5b1",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "50"
+    },
+    {
+      "id": "b41112b5-3082-47df-91fc-40545ee555c1",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "2"
+    },
+    {
+      "id": "1b9a4e0e-19b9-4f3f-81c9-44b72ff0d873",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "HOD"
+    },
+    {
+      "id": "23799228-30c8-4cd9-96c1-9a802e3e5496",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Theory workload"
+    },
+    {
+      "id": "5a61aa69-a757-447b-a226-8ae642a0cf73",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "S×P×H="
+    },
+    {
+      "id": "34248de5-a175-4b31-a0b8-9759fbc047b2",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "No. of Positions"
+    },
+    {
+      "id": "1f2982ea-3057-4385-9998-2815247ee282",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Approved"
+    },
+    {
+      "id": "c71c5572-0ff3-42d6-9363-c2f9b6dc9f00",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Recommendation of the Dean/director:"
+    },
+    {
+      "id": "554a0b0b-0c35-4027-97db-cf889494265a",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Signature:"
+    },
+    {
+      "id": "587167fa-5b7f-4f02-94f5-b8e9e266d56f",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Remarks by Personnel Officer:"
+    },
+    {
+      "id": "73ddff8a-f9c0-4ccf-bbb0-d0128ba2ecc6",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Approval by CFO:"
+    },
+    {
+      "id": "599a8ecf-dfc9-469f-95cf-38917f680793",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Computer Science and Engineering"
+    },
+    {
+      "id": "2af3e823-e5b7-4a9d-842d-d3defe79e0e8",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "National Seminar, International Conference, Workshops and ASCII activities"
+    },
+    {
+      "id": "b9ccdcab-2c13-4c48-aaf8-06133937db6d",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "CATEGORIES"
+    },
+    {
+      "id": "268f59a0-f35c-4322-bdf8-c82ed2b41158",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Participation Fee"
+    },
+    {
+      "id": "c46daf75-3c51-483b-87d5-4a2ddb2176cc",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Sponsorship"
+    },
+    {
+      "id": "dcd21946-f89f-45d0-aa71-b43b29030f94",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "TOTAL INCOME"
+    },
+    {
+      "id": "baee58cd-d406-480a-a0f9-3f9cdb42096a",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "PARTICULARS"
+    },
+    {
+      "id": "a35a344a-12f0-44c6-938c-a253c50d9f71",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Workshop on Emerging Trends"
+    },
+    {
+      "id": "b968abae-9b68-4ffa-a739-6ca3b62531b3",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Conferences"
+    },
+    {
+      "id": "97a25d2e-3ba1-4f20-921a-a8af45c05313",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "ASCII Peer Events  & Foobar Fest"
+    },
+    {
+      "id": "f46ad227-d8ad-4e27-92ec-762130cd65b8",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Seminar on Industry Practises"
+    },
+    {
+      "id": "8addb174-ddd5-4e01-935f-36f9d046d82e",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Sports Day (Tableau)"
+    },
+    {
+      "id": "2096be77-199f-4109-afd6-40d2631e96f4",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "IEEE / ACM Student Branch Events"
+    },
+    {
+      "id": "8cc7d107-5b7a-4949-be66-85c33272141d",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "CSA"
+    },
+    {
+      "id": "9dfd4ae4-b62b-4612-87df-2f8b2360fc85",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Experience Engineering Programme"
+    },
+    {
+      "id": "469e140c-e766-4419-8f07-28d81f56bb69",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Magnovite"
+    },
+    {
+      "id": "d930e1a4-410d-46fc-945d-6fd14e962447",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "ICETech"
+    },
+    {
+      "id": "9b8160aa-9ad4-4226-8bc2-e9c797e6f06a",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Daksh"
+    },
+    {
+      "id": "791fb2ab-17de-4474-a0c7-3b022b37df19",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Ideathon -  Projects _ State wide"
+    },
+    {
+      "id": "7bd1beb1-e137-48da-9ba7-ffdf970fef33",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Tech Utsav"
+    },
+    {
+      "id": "ff9143f5-08d9-483e-839f-c073a8a811a7",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "SDG Cell Activities"
+    },
+    {
+      "id": "9bc1b970-4b11-4d12-aebd-3844e1fc73ce",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Research Colloquium"
+    },
+    {
+      "id": "691b40dc-0715-4b85-b116-d29dbb10ffc0",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Research Seminar"
+    },
+    {
+      "id": "63cea045-bddb-4416-b289-7c56c52b2f93",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Prizes for 'participate and win contests' - News Letter & Magzine"
+    },
+    {
+      "id": "f5eabdde-6881-4bfd-835e-8f650438015d",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "III Cell Related events"
+    },
+    {
+      "id": "c9eca357-3a6f-45d2-b396-d141a9793cb1",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "Entruperenuership Event"
+    },
+    {
+      "id": "9d4b11f4-6e72-4d99-b278-1b5b32815357",
+      "budget_type_id": "4639d09e-a045-4618-a289-c99488741d31",
+      "name": "TOTAL EXPENDITURE"
     }
   ],
   "department_budgets": [
     {
-      "id": "48e8349e-83ac-46f5-8f86-e86757e7d267",
+      "id": "c9e1bc86-dbca-43d0-b1a5-e05f611b0886",
       "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "8a82532c-e7f4-457a-a8f7-9979f008c616",
-      "allocated_amount": 6530000,
-      "approved_amount": 6530000,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "78801a97-786d-4109-8541-74a5a45e5efe",
-      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
-      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "e8b44f98-cbe2-4713-baa3-88e06abd2c2d",
-      "allocated_amount": 2585000,
-      "approved_amount": 2585000,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "644c301d-8aef-4b89-b533-33512bc13d2b",
-      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
-      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "a7c78e5e-4ced-46f8-b6f3-09687bad9ef5",
-      "allocated_amount": 13978700,
-      "approved_amount": 13861000,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "5f447282-d881-4357-8a38-ea80cca9d7e0",
-      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
-      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "2e3e2f81-ebfa-432c-a9c7-49e09b0ddc02",
-      "allocated_amount": 745000,
-      "approved_amount": 745000,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "c6bff7df-5be9-4d31-9f84-5e25be5e2bc7",
-      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
-      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "5990ce8a-25a2-4a53-a736-49169c5f2053",
-      "allocated_amount": 7300000,
-      "approved_amount": 7300000,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "13b7b39e-c4eb-4a0f-af46-c402cd2088fb",
-      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
-      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "8a82532c-e7f4-457a-a8f7-9979f008c616",
-      "allocated_amount": 1306000,
-      "approved_amount": 653000,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "f05a08b7-197d-4293-8e7d-f1888160cb4d",
-      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
-      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "e8b44f98-cbe2-4713-baa3-88e06abd2c2d",
-      "allocated_amount": 517000,
-      "approved_amount": 258500,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "43e4cb33-e02d-46dd-85e6-513fec376676",
-      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
-      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "a7c78e5e-4ced-46f8-b6f3-09687bad9ef5",
-      "allocated_amount": 2795740,
-      "approved_amount": 2678040,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "f3a60fd5-238e-4bc0-95ee-4cf448435b2f",
-      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
-      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "2e3e2f81-ebfa-432c-a9c7-49e09b0ddc02",
-      "allocated_amount": 149000,
-      "approved_amount": 74500,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "058c2abb-f1e8-4133-9727-179d1b828c95",
-      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
-      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "5990ce8a-25a2-4a53-a736-49169c5f2053",
-      "allocated_amount": 1460000,
-      "approved_amount": 730000,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "a5dd1e28-d3b2-44b5-9d14-1c717a757425",
-      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
-      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "a5f5d778-d56a-4deb-b585-9aa0bb997afd",
-      "allocated_amount": 9110000,
+      "budget_category_id": "91b25772-973a-4b6b-a199-729d6803d3c8",
+      "allocated_amount": 0,
       "approved_amount": 0,
       "pending_amount": 0,
       "revised_amount": 0
     },
     {
-      "id": "388b41e7-116b-4583-8c33-f4b2d13af60d",
+      "id": "3c1e9488-f5d0-457c-8903-ca40c80dcf0a",
       "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "500aefed-32d4-457b-8360-ae6fc9a38333",
-      "allocated_amount": 8000000,
+      "budget_category_id": "2d729702-80b7-40db-8793-ac0ec82a9afa",
+      "allocated_amount": 0,
       "approved_amount": 0,
       "pending_amount": 0,
       "revised_amount": 0
     },
     {
-      "id": "17ba59c9-4d24-4f42-82fd-08568168205e",
-      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
+      "id": "0856c85b-2bac-4f8a-a0c6-fe2aeae8c15c",
+      "department_id": "7ba9fa0a-ae10-47cf-acf2-b5ba39dc8859",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "b8e70686-2c92-4050-8fd4-78d68b301731",
-      "allocated_amount": 1510000,
+      "budget_category_id": "3975b808-c399-468c-9343-4f0a2af3d70d",
+      "allocated_amount": 0,
       "approved_amount": 0,
       "pending_amount": 0,
       "revised_amount": 0
     },
     {
-      "id": "35ee6829-e879-4e4a-972d-a8ff83b4bc22",
-      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
+      "id": "132517d2-41a4-4af8-bf29-eb7668d5900c",
+      "department_id": "1185b9f4-2a85-4efe-90b3-a9fb7380a5d1",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "fcbc69b8-a884-4527-8b68-bdc3679b74dc",
-      "allocated_amount": 1100000,
+      "budget_category_id": "a5c8c790-3f07-419b-8dd5-58ae61b12d0f",
+      "allocated_amount": 0,
       "approved_amount": 0,
       "pending_amount": 0,
       "revised_amount": 0
     },
     {
-      "id": "244ab3f1-82f5-4324-8e2c-20c66c4f336e",
-      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
+      "id": "d3cf9dc0-1499-4b09-8c6d-076fe8ec976a",
+      "department_id": "b8649d8a-3457-40ae-b5d6-ac53d63ff739",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "9b97b3ab-080d-47ed-ba7e-c8632463c2de",
-      "allocated_amount": 2500000,
+      "budget_category_id": "a5c8c790-3f07-419b-8dd5-58ae61b12d0f",
+      "allocated_amount": 0,
       "approved_amount": 0,
       "pending_amount": 0,
       "revised_amount": 0
     },
     {
-      "id": "6498b977-dee1-4212-9463-0ae8e30509ff",
-      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
+      "id": "fce16606-006c-4a74-a6e6-cf679bba0726",
+      "department_id": "2413162d-9f55-45d0-831f-fb1f581d51ca",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "d50f31d5-009d-4b3d-ba7e-691893d2abd2",
-      "allocated_amount": 1000000,
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
       "approved_amount": 0,
       "pending_amount": 0,
       "revised_amount": 0
     },
     {
-      "id": "344a4b71-738f-49d3-85ce-ac94ab768581",
-      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
+      "id": "3a4c67af-44a6-49da-9c6d-07368e0e8ef9",
+      "department_id": "c2f1c26d-b062-411e-abee-664a1c107f3b",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "058eb340-4f64-44da-93b3-dfdc37756f19",
-      "allocated_amount": 350000,
+      "budget_category_id": "243db335-d058-4587-95c3-95ae585f3d9c",
+      "allocated_amount": 0,
       "approved_amount": 0,
       "pending_amount": 0,
       "revised_amount": 0
     },
     {
-      "id": "1423e8ff-e980-4cdf-ba9b-174a3872472e",
-      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
+      "id": "eefdc81b-092c-4097-abb4-9f5ee93bd66a",
+      "department_id": "4439a95e-353e-4fea-8d9b-7ec7618d934c",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "a5f5d778-d56a-4deb-b585-9aa0bb997afd",
-      "allocated_amount": 1822000,
-      "approved_amount": 150000,
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
       "pending_amount": 0,
       "revised_amount": 0
     },
     {
-      "id": "891efcc6-4157-4eba-9a83-720890a60943",
-      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
+      "id": "0ffe0268-8bed-4e55-8e84-f4518f2e9be2",
+      "department_id": "acfcd8ad-b8f7-48cd-ab8b-5262a4cbff0e",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "500aefed-32d4-457b-8360-ae6fc9a38333",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "296d9745-d2a4-454a-9084-c2a8af686ad9",
+      "department_id": "3fa043b8-f182-4649-88c5-9ff8b5c8a62c",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "e327e669-ed3f-42b3-9705-da1164dc45da",
+      "department_id": "04a28c74-832b-4454-bb5d-e905a7f19619",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "a5f94960-e041-4c23-b41d-7990c42abb59",
+      "department_id": "9c72cf33-bb25-40dd-82e6-56fcd291c2d1",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "a903780d-8570-46fe-8747-74a130f8c6b2",
+      "department_id": "4ebd2c91-b82b-443a-83f5-bee304f895a6",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "a23a3e09-1339-4147-bbd7-8c9159775892",
+      "department_id": "837ec895-dfd0-48bc-bf3b-d21a25cd3190",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "7bd7e0a8-b7a0-4cb5-842b-451e244f0f7d",
+      "department_id": "1d7bafad-7dd9-4b37-80e9-a41582da3122",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "1dec232b-28fa-4a5e-8633-9534e74228e8",
+      "department_id": "91f0a08a-0b19-4f94-8760-02dcbcfd633b",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "6b73fb2e-c410-424b-8043-9254d2774a98",
+      "department_id": "8e5b1f53-b4bc-4eb1-8eff-18a1183fe0d5",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "42fdf765-2779-4fbc-8362-45b57ce4f2f4",
+      "department_id": "c0d2e17e-a5f0-45f1-a60a-9bbb316b5354",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "7e24ed9c-5af6-4fdf-94c5-0110de1f7ff8",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "3996f57a-20b5-4438-9e07-58574132f318",
+      "department_id": "51c60256-948e-4013-8ccc-8c084cab45e2",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "83ba2613-e615-410f-8027-0cdb535098ed",
+      "allocated_amount": 15,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "98244cd2-fad5-4cf4-a9f2-26c8c5130a54",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "e5ad2341-7801-453b-9e1d-94bfb992ef31",
+      "allocated_amount": 1,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "eb3b77b0-9624-460a-a990-9876304f6ca5",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "f911aa6e-9494-4052-b317-cf0152a3be5d",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "f90b01dc-29b6-483c-acbf-ba35f5648765",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "67a62538-ed38-4df0-929f-d526b56c14a1",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "7143b9bc-826f-48ab-babe-4117cc474a73",
+      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "c894d28e-6822-479a-9567-d6046339cf69",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "838205e8-8d96-420f-8fbc-1b98859a9574",
+      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "1cae1016-7835-4bc2-8311-0b8d6085726b",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "01e1f626-86b5-4b77-9e52-fe5452dd937a",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "91c2cddd-537c-4726-94a1-bdcfc58902d6",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "d0e5094a-a4d4-48c3-97c4-506af7112706",
+      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "a31ed1b6-67ae-4cc7-b02e-2426603169a2",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "9cba41ce-9afa-4fb8-ab77-9a1ea2bdd81b",
+      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "bb22f67a-b22c-46b3-b7f6-40f01370cc6c",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "aca12f2f-6ffe-4e78-97dd-ea2021aac43c",
+      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "21d372fd-f048-416c-b6fa-4aac4618d26f",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "c1035565-67cb-4d70-ab61-9499aad7311c",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "34da5248-1866-4027-9f5e-c9dc38674ff7",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "263a8565-8a52-40f3-97d9-9f068c7fa436",
+      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "2dd58195-917c-41d5-bbbb-46652be867b3",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "0e2b4953-f1e5-4372-ad3c-222f3248a3ed",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "a5c8c790-3f07-419b-8dd5-58ae61b12d0f",
+      "allocated_amount": 11300000,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "315dc2db-66d9-4af8-ad1a-a99365cc6b42",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "1810eae7-846e-4d8e-8516-091f3d0e7a8a",
+      "allocated_amount": 450000,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "29eaacdb-008d-4165-a4c9-d978608eba14",
+      "department_id": "8c013c40-7d46-4dbb-83cc-26dece257838",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "f000f877-3a00-4da1-9f45-8157b836e222",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "115c0efc-841b-4082-8feb-c1f02261f2f4",
+      "department_id": "b8649d8a-3457-40ae-b5d6-ac53d63ff739",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "dc141f68-207d-4281-b965-1103b5a48dae",
+      "department_id": "c2f1c26d-b062-411e-abee-664a1c107f3b",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "9b787fce-9fea-488a-9b1f-9f264f35d0fc",
+      "department_id": "512ae22a-f256-4659-bb7f-4f46f2f66cc7",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "f1f05630-e3b9-477e-9d7e-3dd3925f3206",
+      "department_id": "8b4e6dda-fb84-4e82-8c74-9d590938d028",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "6fbe5d25-2ba4-4a8a-8599-813d06cc15ef",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "c3cfd9cd-a208-48e3-b5ca-3cbaa0587afd",
+      "department_id": "a9e0086d-d0a6-4722-aaf4-91b393816231",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "c220e6a5-e825-4ff3-a874-2f9d7f227d39",
+      "department_id": "79262fc9-653e-4396-9dc5-c7e16a4eb060",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "0c632edf-a72a-4673-ad41-a2c5a728fda7",
+      "department_id": "8d776c12-8de9-4dd0-a728-8a3f5d62d963",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "d52591e0-6ff6-4e56-bd2f-d1d056d5b4e2",
+      "department_id": "48bde8a7-58ea-4541-9c99-4fb07d259deb",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "14f990ab-5e49-4e03-a795-581a3a6cf5f9",
+      "department_id": "ec5395e7-1b94-4680-9777-2c1d82a0473b",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "d6d85e18-de39-42b6-860a-aaab6bc03720",
+      "department_id": "cbdbd057-eb24-434a-9c09-6b5d6f32b74b",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "b23a73b3-d168-4952-8697-eb83268939c2",
+      "department_id": "4887d464-9024-4dd3-9ce1-5ce8fab96f2c",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "c8a48493-1aeb-4f31-a709-ca48593c22f5",
+      "department_id": "bca314b3-94ba-4153-87ac-7dab0b54a279",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "842fe7ef-59f0-427f-ac3c-fa04cdd965a2",
+      "department_id": "51c60256-948e-4013-8ccc-8c084cab45e2",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "a5c8c790-3f07-419b-8dd5-58ae61b12d0f",
+      "allocated_amount": 4680000,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "b2a36c8d-5278-46c0-a677-03e024d62bc6",
+      "department_id": "c394e90e-9aec-4e6a-839f-196eda0b76ce",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "a5c8c790-3f07-419b-8dd5-58ae61b12d0f",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "5064cef8-fd69-44f6-89d5-d9dee7afed44",
+      "department_id": "17cf89fa-1730-491e-8a9c-ea7ccf0f4862",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "a5c8c790-3f07-419b-8dd5-58ae61b12d0f",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "c3dc183b-4dbc-43b1-907d-a8a8af57b7c2",
+      "department_id": "795737b6-6268-49c1-86ce-79671e55b871",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "a5c8c790-3f07-419b-8dd5-58ae61b12d0f",
       "allocated_amount": 1600000,
       "approved_amount": 0,
       "pending_amount": 0,
       "revised_amount": 0
     },
     {
-      "id": "247c3613-5a4b-47e1-9411-3f3df81c8a9b",
-      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
+      "id": "40ea50b6-8925-4ef1-ba25-a4370c2654f9",
+      "department_id": "4461c5a9-6ab0-4272-90a8-0656404548c1",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "b8e70686-2c92-4050-8fd4-78d68b301731",
-      "allocated_amount": 302000,
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 75000,
       "approved_amount": 0,
       "pending_amount": 0,
       "revised_amount": 0
     },
     {
-      "id": "6846f9e0-7363-4103-a93e-d5b9b3bbad0f",
-      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
+      "id": "e2171f5e-bee2-45d1-87b6-43aeda4a2aa2",
+      "department_id": "c2c88693-5b59-41e7-9dc2-f489df48722c",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "fcbc69b8-a884-4527-8b68-bdc3679b74dc",
-      "allocated_amount": 220000,
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 125000,
       "approved_amount": 0,
       "pending_amount": 0,
       "revised_amount": 0
     },
     {
-      "id": "37edc808-9977-486f-b54d-4d9b9128fd9e",
-      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
+      "id": "3bb20367-536b-4979-8f5b-25e976e1fac7",
+      "department_id": "8c013c40-7d46-4dbb-83cc-26dece257838",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "9b97b3ab-080d-47ed-ba7e-c8632463c2de",
-      "allocated_amount": 500000,
+      "budget_category_id": "a5c8c790-3f07-419b-8dd5-58ae61b12d0f",
+      "allocated_amount": 400000,
       "approved_amount": 0,
       "pending_amount": 0,
       "revised_amount": 0
     },
     {
-      "id": "d53f5253-2084-47c5-9d02-03d70e8124f7",
-      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
+      "id": "26901261-52ad-4f32-804f-2929a087e508",
+      "department_id": "aa2a3f71-8d28-4025-add5-f14f5433b8b2",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "d50f31d5-009d-4b3d-ba7e-691893d2abd2",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 280000,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "fe6d544b-a67d-4bb8-aa66-cd063b82ff05",
+      "department_id": "9bf19ba6-320c-4a52-aa90-543ffefe9ddd",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 180000,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "393b6a63-43bc-4de1-bfd8-f3b897f4f264",
+      "department_id": "3b331638-8ba9-4394-9d6a-62466b67e195",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 150000,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "caa59f31-e969-4883-a390-b38c442d96d9",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "54676fcd-73f6-4b6e-887d-9144ec21ce7d",
+      "allocated_amount": 2261000,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "df1d2304-e290-453f-97fe-ffd2d56d0ad2",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "1ce2e272-c949-4ccd-b15c-5fb3f8d4a5f1",
+      "allocated_amount": 100000,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "9bd7f4bc-42b0-4e67-9bd5-e921a94d4bd0",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "fe925e01-1bda-4029-9358-8be2b8fa91ff",
+      "allocated_amount": 1000000,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "2b1c2efe-7785-40e9-a032-049e5ed5fcaf",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "d022320d-3a98-4917-951a-214e5b513a53",
+      "allocated_amount": 100000,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "9262bd08-f72b-4f8f-a262-eb64836a5645",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "ae9591a2-d908-46c9-bfe3-247d538c883d",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "fe3e2d57-268c-4267-983a-48a0cf742c01",
+      "department_id": "14df92ec-8eb7-4281-97e8-9a2bcccd6639",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
       "allocated_amount": 200000,
       "approved_amount": 0,
       "pending_amount": 0,
       "revised_amount": 0
     },
     {
-      "id": "a1193283-abb5-4ce5-9750-7781edac7c85",
-      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
+      "id": "a5e46212-e30c-4b0d-a0a7-bb9ec409e132",
+      "department_id": "3d320ae9-38be-4945-a522-8537a0dcf99f",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "058eb340-4f64-44da-93b3-dfdc37756f19",
-      "allocated_amount": 70000,
+      "budget_category_id": "394f8e95-d360-4dcd-ba98-186f6fd38b6a",
+      "allocated_amount": 150000,
       "approved_amount": 0,
       "pending_amount": 0,
       "revised_amount": 0
     },
     {
-      "id": "0178f92b-0e5c-42e4-8ba3-bd311e5c4ad4",
-      "department_id": "5d7b435a-35cf-4970-b2ff-85b1646efa88",
+      "id": "65a31494-e060-4dbe-a6e6-55bbc63fc42d",
+      "department_id": "e733bbe0-9adf-437b-956a-f4f3733faf3c",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "8a82532c-e7f4-457a-a8f7-9979f008c616",
-      "allocated_amount": 1500000,
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 150000,
       "approved_amount": 0,
       "pending_amount": 0,
       "revised_amount": 0
     },
     {
-      "id": "98f456cd-7832-4bbe-8c51-e8af4163e10a",
-      "department_id": "5d7b435a-35cf-4970-b2ff-85b1646efa88",
+      "id": "dcdd7aa0-1766-492b-96ce-f3f3413e255e",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "e8b44f98-cbe2-4713-baa3-88e06abd2c2d",
-      "allocated_amount": 1500000,
+      "budget_category_id": "c394f809-33fd-4840-aedc-049f6497ce5f",
+      "allocated_amount": 10000,
       "approved_amount": 0,
       "pending_amount": 0,
       "revised_amount": 0
     },
     {
-      "id": "15bdedde-58ab-4311-beb0-e4807edb01a5",
-      "department_id": "5d7b435a-35cf-4970-b2ff-85b1646efa88",
+      "id": "d39e6ebd-6b03-4fc8-9db6-07801f3db5b3",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "a7c78e5e-4ced-46f8-b6f3-09687bad9ef5",
-      "allocated_amount": 1500000,
+      "budget_category_id": "389a1e85-ad48-4f41-acc7-e59c18ab5b6d",
+      "allocated_amount": 100000,
       "approved_amount": 0,
       "pending_amount": 0,
       "revised_amount": 0
     },
     {
-      "id": "76c4e7ba-df79-4410-a922-a144890115e4",
-      "department_id": "5d7b435a-35cf-4970-b2ff-85b1646efa88",
+      "id": "ae6e7068-5db2-4ac7-9b98-d814064a9a4c",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "2e3e2f81-ebfa-432c-a9c7-49e09b0ddc02",
-      "allocated_amount": 1500000,
+      "budget_category_id": "5873017e-a4cf-41c5-8d90-eda0f100e8b9",
+      "allocated_amount": 100000,
       "approved_amount": 0,
       "pending_amount": 0,
       "revised_amount": 0
     },
     {
-      "id": "e49ef8ee-f7f4-4a1d-b283-1a8a5dbb32ca",
-      "department_id": "5d7b435a-35cf-4970-b2ff-85b1646efa88",
+      "id": "a03941ea-6acf-4a38-8e7e-bd2bc1224194",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "18d4d8a3-c579-4587-96e9-f118b455f29f",
+      "allocated_amount": 100000,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "9a63b08d-815e-4a35-a37b-08283fdf8e01",
+      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "5e0a2dba-fb84-48ee-b4fd-e6a20d766165",
+      "allocated_amount": 210000,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "5a2ae595-d3a7-4c81-86c6-ddcc88ecd8e1",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "8eb80dd6-bafe-450a-a275-58a19dc72dc5",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "d88a385a-9715-41f4-9af7-74e2345150be",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "139e3174-7912-45ca-bf5d-59aea38df57d",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "c5ee3bca-6a63-4aec-a438-0b5cf5a2332b",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "9432c937-620e-4099-8966-319e55b566c2",
+      "allocated_amount": 2500000,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "ca44f7f3-7c00-49e9-afa0-0baaf69c3172",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "7e0da474-de3e-426c-97e8-9dd443263df7",
+      "allocated_amount": 4000000,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "5d1fab3f-ce4a-4714-8f3d-c009c4fe8ee4",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "acde4888-b42f-4bfd-81ae-fcad47b55c37",
+      "allocated_amount": 300000,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "3e5088b4-df21-4f60-9e63-6ad5918da113",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "6192678c-1441-4c64-b575-a16c728d7307",
+      "allocated_amount": 500000,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "5de1d7da-510a-4a81-b514-a493d0f9b283",
+      "department_id": "9f941e3c-4c6d-4733-8d77-c1dc8f29dfc4",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 31021000,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "0d072c40-3a36-4aeb-8030-1decdbafba34",
+      "department_id": "6549019f-024c-4d3c-b40b-3b87c7a973a9",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "809098f7-b465-4c7a-99b6-ae9d91496444",
+      "department_id": "26e152d3-fbab-45dd-8af4-5080b6e73bac",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "93072dc7-b4c4-42fd-9e04-cb5734210cd5",
+      "department_id": "8f9e61dc-be31-4d38-b339-dc4c53d506f5",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "1695526f-79e9-4baf-b031-fa0ef817d9cb",
+      "department_id": "5caea629-a5c7-43ea-b09a-ac5cd36b3788",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "3458f488-2502-4da4-8372-73b9af715171",
+      "department_id": "d8749e40-3c1e-492b-b77b-19c57c092de0",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "0c523189-3e1a-4a01-92db-2e11e055ecc4",
+      "department_id": "f1617984-b4c9-4992-8c02-2cd548e788ef",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "67c2558c-cdc1-4a6d-a8c7-5faa135eb230",
+      "department_id": "07575e83-c6f2-4d6e-b023-d60617c1dda3",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "dd3b359a-b0e2-4fb3-8d23-ae77a678dd4d",
+      "department_id": "48a4f757-c0ae-4048-9bd8-de38cac5b801",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "5fa08ba1-0c0b-4685-9372-cb66e0eac1e3",
+      "department_id": "2425423b-97bd-423f-a3f0-8f25ae20a8c3",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "dfea0d78-a6ba-4b43-96a3-87776ece29ad",
+      "department_id": "00bfab5a-6f9d-4f93-a0b1-9b7f0613b199",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "d03aafca-3f48-4318-bfbb-3fba2ceae9ee",
+      "department_id": "c0d2e17e-a5f0-45f1-a60a-9bbb316b5354",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "390ee00e-2dee-484e-8e2f-51993202aae5",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "5a83f80e-f4cb-4f93-b81c-14c56faaaab8",
+      "department_id": "51c60256-948e-4013-8ccc-8c084cab45e2",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "8fe70e8d-8581-4733-b99e-afc15d1e69e1",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "5e7824c5-4f9e-4373-95a8-ce0593605f93",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "b2e85c8b-272f-4e28-9209-2f9345fbc643",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "27c48b3b-643e-4a50-b552-1c4c5e254d49",
+      "department_id": "7da73643-455e-4dfa-97af-407d430d1670",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "2744af89-23b2-4f85-be96-4e79daaba535",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "fc149a6d-75d7-40f5-b149-5bf76f836cab",
+      "department_id": "c394e90e-9aec-4e6a-839f-196eda0b76ce",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "8fe70e8d-8581-4733-b99e-afc15d1e69e1",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "a92b04b4-ef3f-450e-b95e-b157a0dd6b97",
+      "department_id": "17cf89fa-1730-491e-8a9c-ea7ccf0f4862",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "8fe70e8d-8581-4733-b99e-afc15d1e69e1",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "16ddf6e6-842a-4256-ae0c-41cfd687f7d8",
+      "department_id": "795737b6-6268-49c1-86ce-79671e55b871",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "8fe70e8d-8581-4733-b99e-afc15d1e69e1",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "37aceef3-b2a5-4355-8626-c0d97be67ed9",
+      "department_id": "4461c5a9-6ab0-4272-90a8-0656404548c1",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "8fe70e8d-8581-4733-b99e-afc15d1e69e1",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "f7d374ce-d38e-49f1-b8bd-525634a2f3b6",
+      "department_id": "c2c88693-5b59-41e7-9dc2-f489df48722c",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "8fe70e8d-8581-4733-b99e-afc15d1e69e1",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "58e82b57-03cb-4c93-94ed-0e94857873ba",
+      "department_id": "8c013c40-7d46-4dbb-83cc-26dece257838",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "7d6a6059-0656-4da2-b51b-3de0d003e0f1",
+      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "8fe70e8d-8581-4733-b99e-afc15d1e69e1",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "a53dd5d1-cc6f-4039-a98e-6df72f4bb007",
+      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "2dae266e-1f48-4d1b-ac77-21925805f4bb",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "51598672-7aa4-4b82-99df-f646ca46b528",
+      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "b0782a12-26f5-4a21-91ec-556a7fe7b5b1",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "ecf52d17-f769-414a-96af-b14ca1c62b42",
+      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "b41112b5-3082-47df-91fc-40545ee555c1",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "25964e8d-4c8d-47c4-a39f-41111de5eaf1",
+      "department_id": "6f5cb64f-f047-4a03-9e26-0b4eab6fffc6",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "61a87fa7-e0a2-45b0-93d4-08b45a0c143d",
+      "department_id": "2413162d-9f55-45d0-831f-fb1f581d51ca",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "1b9a4e0e-19b9-4f3f-81c9-44b72ff0d873",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "34b54d6c-fab0-4c13-8f87-c6d5c26b2ea4",
+      "department_id": "8f221956-181c-4abe-9229-c80875dc906e",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "ca01cedf-4efd-465f-9be8-d02dbb123262",
+      "department_id": "2ce59c13-be09-4c94-8e65-8b09784c253f",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "7cb13422-69e5-4d5b-bda1-e355d843117d",
+      "department_id": "ab016c26-ecc2-4f83-8360-42ffd3a72bd3",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "c6af3ba5-1276-4357-9b3d-b0a362132ae0",
+      "department_id": "642e857c-f5b4-4842-949b-1492c1756134",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "a94771f6-9ee4-49d6-b4d1-916fd725f98f",
+      "department_id": "5f285494-26b2-42cb-805d-fd9461c63132",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "b5c697f6-833f-4027-a92b-ba322f1a302a",
+      "department_id": "851a95e4-b00b-46bd-849a-de4785eef60d",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "8737a862-4b32-4127-b2b9-afb8e7f32db5",
+      "department_id": "59d5c5ae-a8d1-4989-9bf7-28e2f4b3b852",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "bb8d3f71-cb8f-4ade-ab50-474ab423579c",
+      "department_id": "537cd94f-ba0f-43fb-85f4-7c1f3e6bfe65",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "23799228-30c8-4cd9-96c1-9a802e3e5496",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "95471d05-6485-4735-9903-8cdeb4bcb966",
+      "department_id": "d84f6656-e6ea-491d-8bab-938ba315989a",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "23799228-30c8-4cd9-96c1-9a802e3e5496",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "5be9eb00-456f-48e9-90ed-b92750ae75c1",
+      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "5a61aa69-a757-447b-a226-8ae642a0cf73",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "8c34fe00-a433-423a-8040-b820b55f8049",
+      "department_id": "7a83c4bb-8a1a-4202-9448-46080ba0c31c",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "4d7f7d6e-4598-40c1-9f73-3d01c2e0cd3c",
+      "department_id": "ba918f12-2f78-42cb-a0d2-af8ef8e7cd1b",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "34248de5-a175-4b31-a0b8-9759fbc047b2",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "63b68116-1f3a-41db-b620-6eb500be7878",
+      "department_id": "ba918f12-2f78-42cb-a0d2-af8ef8e7cd1b",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "1f2982ea-3057-4385-9998-2815247ee282",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "0ec63627-e140-46f5-988a-de3354da9b8b",
+      "department_id": "3536768a-caf3-4679-9636-32acfb0a2305",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "c85bc65c-33fd-4540-9afd-6f8cca53b953",
+      "department_id": "f41a79ae-da0d-40dc-9543-fc4709fa6013",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "6416d1d0-a757-402e-9f1a-38d02e500015",
+      "department_id": "a95a391c-3034-4422-b705-fe57a7b01d71",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "06e25663-2e27-4696-bc4e-1c6279049a34",
+      "department_id": "b9725cf0-fc11-44b0-8e92-406ac6499b6d",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "e3d9dde5-ecce-470c-8133-986b3c1cac63",
+      "department_id": "7ae50ab6-6232-42e4-b93e-b1de02882bde",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "dc45081f-3a80-4a6f-8ff7-218c9fb38a04",
+      "department_id": "26c6736e-2ebd-49b2-bd7d-b94ea1768300",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "c1394116-1500-4751-a5fe-0d41dbbd6d8f",
+      "department_id": "6e0c4765-4a89-4a00-97ce-445121bfdd46",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "c71c5572-0ff3-42d6-9363-c2f9b6dc9f00",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "f53b7ba0-be8b-4078-9257-5d955e611107",
+      "department_id": "f6ff6274-c20c-4ca7-b04a-5db3bcd3f002",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "554a0b0b-0c35-4027-97db-cf889494265a",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "0acbecd3-349d-47e5-b654-6f03614eae1e",
+      "department_id": "7b5b32b4-01c2-4a9f-999a-783b6faf00fb",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "587167fa-5b7f-4f02-94f5-b8e9e266d56f",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "2cf7777a-de01-48f2-b8f2-df5a3668ba8d",
+      "department_id": "de44ec4c-69a8-4f66-9f56-10138ac984d1",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "73ddff8a-f9c0-4ccf-bbb0-d0128ba2ecc6",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "5c3c68df-7534-409d-923e-21df60be4c81",
+      "department_id": "41d1afa7-27e0-4f01-86fd-153b190041be",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "599a8ecf-dfc9-469f-95cf-38917f680793",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "8193e8b2-e12f-4e79-9c75-1188b046c232",
+      "department_id": "2a6c3a01-8c80-43d3-96df-a6a09d1aea2c",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "2af3e823-e5b7-4a9d-842d-d3defe79e0e8",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "bbec0a6f-d02e-4ff1-8b83-b90b54ff3786",
+      "department_id": "8aec87d4-fc8b-4ccc-b84f-9c8267c60566",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "700d5539-001f-4a59-babc-1e8ae53f54bd",
+      "department_id": "c0d2e17e-a5f0-45f1-a60a-9bbb316b5354",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "b9ccdcab-2c13-4c48-aaf8-06133937db6d",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "2f27350d-39c9-4549-a4dc-c6a2aef9c9df",
+      "department_id": "51c60256-948e-4013-8ccc-8c084cab45e2",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "268f59a0-f35c-4322-bdf8-c82ed2b41158",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "676aaecd-2902-4cec-8ff3-52c341fdd4dd",
+      "department_id": "ef2bf604-e5ee-4d0c-96e6-ac6fdd7361ed",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "c46daf75-3c51-483b-87d5-4a2ddb2176cc",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "18347032-1435-4d37-b740-0765bde4cee3",
+      "department_id": "7da73643-455e-4dfa-97af-407d430d1670",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
       "budget_category_id": "5990ce8a-25a2-4a53-a736-49169c5f2053",
-      "allocated_amount": 1500000,
+      "allocated_amount": 0,
       "approved_amount": 0,
       "pending_amount": 0,
       "revised_amount": 0
     },
     {
-      "id": "844e28cd-c03a-444f-8282-cabbd38d1f1b",
-      "department_id": "5d7b435a-35cf-4970-b2ff-85b1646efa88",
+      "id": "62496ed7-c93d-4caa-bb7e-1311fd7ebfbe",
+      "department_id": "05022e15-a0b5-4662-a564-b9257ca10720",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "a5f5d778-d56a-4deb-b585-9aa0bb997afd",
-      "allocated_amount": 1500000,
+      "budget_category_id": "dcd21946-f89f-45d0-aa71-b43b29030f94",
+      "allocated_amount": 0,
       "approved_amount": 0,
       "pending_amount": 0,
       "revised_amount": 0
     },
     {
-      "id": "83d6e154-4a2a-4183-83e6-1e269737d121",
-      "department_id": "5d7b435a-35cf-4970-b2ff-85b1646efa88",
+      "id": "584828a2-6538-4766-8fdf-a98144d6efe3",
+      "department_id": "5af5484c-373f-4642-8e8f-448b95a88a18",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "500aefed-32d4-457b-8360-ae6fc9a38333",
-      "allocated_amount": 1500000,
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "allocated_amount": 0,
       "approved_amount": 0,
       "pending_amount": 0,
       "revised_amount": 0
     },
     {
-      "id": "caec4ab7-bf0b-4f67-bf29-9703b22a39ba",
-      "department_id": "5d7b435a-35cf-4970-b2ff-85b1646efa88",
+      "id": "01ce7d80-ba9c-454c-acbb-088ec321e6a5",
+      "department_id": "c0d2e17e-a5f0-45f1-a60a-9bbb316b5354",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "b8e70686-2c92-4050-8fd4-78d68b301731",
-      "allocated_amount": 1500000,
+      "budget_category_id": "baee58cd-d406-480a-a0f9-3f9cdb42096a",
+      "allocated_amount": 0,
       "approved_amount": 0,
       "pending_amount": 0,
       "revised_amount": 0
     },
     {
-      "id": "b49d3637-015f-4af1-a9b7-441525d6f9b1",
-      "department_id": "5d7b435a-35cf-4970-b2ff-85b1646efa88",
+      "id": "e36d0a1b-a086-407d-bec6-ccd488885016",
+      "department_id": "51c60256-948e-4013-8ccc-8c084cab45e2",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "fcbc69b8-a884-4527-8b68-bdc3679b74dc",
-      "allocated_amount": 1500000,
+      "budget_category_id": "a35a344a-12f0-44c6-938c-a253c50d9f71",
+      "allocated_amount": 0,
       "approved_amount": 0,
       "pending_amount": 0,
       "revised_amount": 0
     },
     {
-      "id": "22b9cf6a-5f79-4d27-94b3-f75e4319978e",
-      "department_id": "5d7b435a-35cf-4970-b2ff-85b1646efa88",
+      "id": "c17c4d13-474b-4046-a45c-523afc1c373e",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "9b97b3ab-080d-47ed-ba7e-c8632463c2de",
-      "allocated_amount": 1500000,
+      "budget_category_id": "b968abae-9b68-4ffa-a739-6ca3b62531b3",
+      "allocated_amount": 0,
       "approved_amount": 0,
       "pending_amount": 0,
       "revised_amount": 0
     },
     {
-      "id": "0e5aa55e-c61c-4b39-9c5d-73a1ba0b4f9e",
-      "department_id": "5d7b435a-35cf-4970-b2ff-85b1646efa88",
+      "id": "09a6b57e-68e3-4311-88b7-74e21676c06e",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "d50f31d5-009d-4b3d-ba7e-691893d2abd2",
-      "allocated_amount": 1500000,
+      "budget_category_id": "97a25d2e-3ba1-4f20-921a-a8af45c05313",
+      "allocated_amount": 0,
       "approved_amount": 0,
       "pending_amount": 0,
       "revised_amount": 0
     },
     {
-      "id": "85ca06c1-edc7-482a-84fa-57a65aaa174a",
-      "department_id": "5d7b435a-35cf-4970-b2ff-85b1646efa88",
+      "id": "dbd8b241-d898-4305-8376-88d1c75e63ea",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "058eb340-4f64-44da-93b3-dfdc37756f19",
-      "allocated_amount": 1500000,
+      "budget_category_id": "f46ad227-d8ad-4e27-92ec-762130cd65b8",
+      "allocated_amount": 0,
       "approved_amount": 0,
       "pending_amount": 0,
       "revised_amount": 0
     },
     {
-      "id": "893d3707-7c16-413f-bc5f-747b6e6a1a26",
-      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "8a82532c-e7f4-457a-a8f7-9979f008c616",
-      "allocated_amount": 7052400,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "5018abbf-04ba-4a7a-94ab-643f56da4500",
-      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "e8b44f98-cbe2-4713-baa3-88e06abd2c2d",
-      "allocated_amount": 2791800,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "7df6d0a3-d7f5-41c9-a7bf-fb7cde840bdd",
-      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "a7c78e5e-4ced-46f8-b6f3-09687bad9ef5",
-      "allocated_amount": 15214696,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "14d5e067-63de-4792-85e0-44d77827f6e3",
-      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "2e3e2f81-ebfa-432c-a9c7-49e09b0ddc02",
-      "allocated_amount": 804600,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "df66074c-346d-4203-b9ce-61fd29118f0b",
-      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "5990ce8a-25a2-4a53-a736-49169c5f2053",
-      "allocated_amount": 7884000,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "9e93d8d6-ee0e-4435-b49a-5d601cadfe91",
-      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "8a82532c-e7f4-457a-a8f7-9979f008c616",
-      "allocated_amount": 2063480,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "fd70d043-2b13-4ae2-8ff5-dfe338215821",
-      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "e8b44f98-cbe2-4713-baa3-88e06abd2c2d",
-      "allocated_amount": 816860,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "e149486e-109f-4e26-97a6-a6c66994acbf",
-      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "a7c78e5e-4ced-46f8-b6f3-09687bad9ef5",
-      "allocated_amount": 3137099,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "1b17cf83-5f60-40b3-8141-99ade719b5ec",
-      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "2e3e2f81-ebfa-432c-a9c7-49e09b0ddc02",
-      "allocated_amount": 235420,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "aff0ea77-dd4b-4d7f-b2ca-80305b319595",
-      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "5990ce8a-25a2-4a53-a736-49169c5f2053",
-      "allocated_amount": 2306800,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "f70fee1a-5abf-4980-bbb5-fe37075df909",
-      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "a5f5d778-d56a-4deb-b585-9aa0bb997afd",
-      "allocated_amount": 18948800,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "e09daca1-28c9-4fbc-b513-1609e00cd027",
-      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "500aefed-32d4-457b-8360-ae6fc9a38333",
-      "allocated_amount": 16640000,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "9db911a9-34aa-42d9-ba8d-9ec244f98391",
-      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "b8e70686-2c92-4050-8fd4-78d68b301731",
-      "allocated_amount": 3140800,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "d47c91f2-d593-4ce6-8e35-1a098929a9e0",
-      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "fcbc69b8-a884-4527-8b68-bdc3679b74dc",
-      "allocated_amount": 2288000,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "fafff45b-a847-47f8-a091-d458936d86fb",
-      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "9b97b3ab-080d-47ed-ba7e-c8632463c2de",
-      "allocated_amount": 5200000,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "20feacc7-b3f9-47b7-86d5-9d5e2254af12",
-      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "d50f31d5-009d-4b3d-ba7e-691893d2abd2",
-      "allocated_amount": 2080000,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "0154784c-20ac-4875-bd43-0837a7e2e636",
-      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "058eb340-4f64-44da-93b3-dfdc37756f19",
-      "allocated_amount": 728000,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "1489b781-cf40-459e-a4e2-bb397a688e95",
-      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "a5f5d778-d56a-4deb-b585-9aa0bb997afd",
-      "allocated_amount": 3639760,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "44734580-1bdb-4d92-b566-b212b92d477d",
-      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "500aefed-32d4-457b-8360-ae6fc9a38333",
-      "allocated_amount": 3328000,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "1bba7f1e-b4b9-4fa3-aa9a-83225def9ff6",
-      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "b8e70686-2c92-4050-8fd4-78d68b301731",
-      "allocated_amount": 628160,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "4996100d-391a-45a6-8c24-c21d15c87a4b",
-      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "fcbc69b8-a884-4527-8b68-bdc3679b74dc",
-      "allocated_amount": 457600,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "a86ac4f4-315c-4b70-a83f-9a5a2bdf699e",
-      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "9b97b3ab-080d-47ed-ba7e-c8632463c2de",
-      "allocated_amount": 1040000,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "37d42449-22a8-4e94-97b8-77065dc259d6",
-      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "d50f31d5-009d-4b3d-ba7e-691893d2abd2",
-      "allocated_amount": 416000,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "e50d6c7b-1cef-4237-94d1-94c1665d0353",
-      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "058eb340-4f64-44da-93b3-dfdc37756f19",
-      "allocated_amount": 145600,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "e68cb4f2-3839-45c5-9e06-99e7aba0330f",
-      "department_id": "5d7b435a-35cf-4970-b2ff-85b1646efa88",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "8a82532c-e7f4-457a-a8f7-9979f008c616",
-      "allocated_amount": 3120000,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "f834b64e-f1e0-4463-9192-7267a391b67f",
-      "department_id": "5d7b435a-35cf-4970-b2ff-85b1646efa88",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "e8b44f98-cbe2-4713-baa3-88e06abd2c2d",
-      "allocated_amount": 3120000,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "703d6873-f115-48ce-95c1-4476f045c7a1",
-      "department_id": "5d7b435a-35cf-4970-b2ff-85b1646efa88",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "a7c78e5e-4ced-46f8-b6f3-09687bad9ef5",
-      "allocated_amount": 3120000,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "32d3b137-cf49-4e12-9130-b3823f819881",
-      "department_id": "5d7b435a-35cf-4970-b2ff-85b1646efa88",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "2e3e2f81-ebfa-432c-a9c7-49e09b0ddc02",
-      "allocated_amount": 3120000,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "29842e5e-2a50-4f6c-a690-a93d400647d3",
-      "department_id": "5d7b435a-35cf-4970-b2ff-85b1646efa88",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "5990ce8a-25a2-4a53-a736-49169c5f2053",
-      "allocated_amount": 3120000,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "705b1fe8-de02-486c-a96a-65d1ae59134e",
-      "department_id": "5d7b435a-35cf-4970-b2ff-85b1646efa88",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "a5f5d778-d56a-4deb-b585-9aa0bb997afd",
-      "allocated_amount": 3120000,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "3f652687-413e-4cbb-a525-5afc0502fc71",
-      "department_id": "5d7b435a-35cf-4970-b2ff-85b1646efa88",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "500aefed-32d4-457b-8360-ae6fc9a38333",
-      "allocated_amount": 3120000,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "4ab871dc-33d4-4b6c-b0e6-a424cef9f0cb",
-      "department_id": "5d7b435a-35cf-4970-b2ff-85b1646efa88",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "b8e70686-2c92-4050-8fd4-78d68b301731",
-      "allocated_amount": 3120000,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "c936b4cc-8688-4bb2-a48b-13978d68de81",
-      "department_id": "5d7b435a-35cf-4970-b2ff-85b1646efa88",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "fcbc69b8-a884-4527-8b68-bdc3679b74dc",
-      "allocated_amount": 3120000,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "3a080b26-3648-4aad-aed3-3a749a893d85",
-      "department_id": "5d7b435a-35cf-4970-b2ff-85b1646efa88",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "9b97b3ab-080d-47ed-ba7e-c8632463c2de",
-      "allocated_amount": 3120000,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "399b1705-3dc2-4c85-937b-4172b349dc6b",
-      "department_id": "5d7b435a-35cf-4970-b2ff-85b1646efa88",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "d50f31d5-009d-4b3d-ba7e-691893d2abd2",
-      "allocated_amount": 3120000,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "e3963cbb-1213-4ada-ace5-38eb2ffa632d",
-      "department_id": "5d7b435a-35cf-4970-b2ff-85b1646efa88",
-      "financial_year_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
-      "budget_category_id": "058eb340-4f64-44da-93b3-dfdc37756f19",
-      "allocated_amount": 3120000,
-      "approved_amount": 0,
-      "pending_amount": 0,
-      "revised_amount": 0
-    },
-    {
-      "id": "5f16b927-a9f7-4e13-98b4-7255666cbf2c",
-      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
+      "id": "337730e7-4997-4bb1-8e22-18ed81b9536a",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "6b3c500f-2cba-4031-9d2a-ef9b7c20148e",
-      "allocated_amount": 550000,
+      "budget_category_id": "8addb174-ddd5-4e01-935f-36f9d046d82e",
+      "allocated_amount": 0,
       "approved_amount": 0,
       "pending_amount": 0,
       "revised_amount": 0
     },
     {
-      "id": "c038032f-ef6f-4e88-96ef-57f0e50035a3",
-      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
+      "id": "6e77b31e-7fb8-423e-a72a-9b59a3f004c1",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "f3febbaf-6c3b-4742-8b85-9064314b8a7d",
-      "allocated_amount": 650000,
+      "budget_category_id": "2096be77-199f-4109-afd6-40d2631e96f4",
+      "allocated_amount": 0,
       "approved_amount": 0,
       "pending_amount": 0,
       "revised_amount": 0
     },
     {
-      "id": "ea899309-2ebd-4b7d-b9bb-e3dd38b78d7d",
-      "department_id": "b5643609-22d9-4b21-9ce0-2f6eb5b9d04e",
+      "id": "c316c726-268b-4bc2-8d3e-7c3e03bd86c1",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
       "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "a01f789f-c2ad-4799-87de-4bcd11d4e4c5",
-      "allocated_amount": 900000,
+      "budget_category_id": "8cc7d107-5b7a-4949-be66-85c33272141d",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "442253a5-3c3d-4203-bd99-b2634c527c6f",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "9dfd4ae4-b62b-4612-87df-2f8b2360fc85",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "edfc1bbe-5f1a-4b6a-9d5c-c2ae3df19185",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "469e140c-e766-4419-8f07-28d81f56bb69",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "0358f952-72fb-45df-abbb-c9afe0375429",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "d930e1a4-410d-46fc-945d-6fd14e962447",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "b2946013-ce84-4c90-b4ff-08d6218e9531",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "9b8160aa-9ad4-4226-8bc2-e9c797e6f06a",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "be8781a4-e30d-446f-afd1-50bf5599b472",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "791fb2ab-17de-4474-a0c7-3b022b37df19",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "d586975f-5830-46e8-b5ad-5a9bac9d73f1",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "7bd1beb1-e137-48da-9ba7-ffdf970fef33",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "60b7ab01-b9b2-4771-9744-50e4acf9d837",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "ff9143f5-08d9-483e-839f-c073a8a811a7",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "b856cda6-b277-4535-8612-dd88cbf22aa0",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "9bc1b970-4b11-4d12-aebd-3844e1fc73ce",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "624266bc-ef1d-4a8e-a412-edf4ba502185",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "691b40dc-0715-4b85-b116-d29dbb10ffc0",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "7a3f9e3a-514f-4fc0-bdf0-ed14e8da5ff9",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "63cea045-bddb-4416-b289-7c56c52b2f93",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "0e0be847-907f-4f4a-a6cd-d26e03d0a9bb",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "f5eabdde-6881-4bfd-835e-8f650438015d",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "c423e3d5-b70c-46d7-b76c-4ed987021973",
+      "department_id": "2215a4be-6dd9-466d-9c48-fc0608adde71",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "c9eca357-3a6f-45d2-b396-d141a9793cb1",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0,
+      "revised_amount": 0
+    },
+    {
+      "id": "428ff9d7-5011-4e71-bbe7-153040568494",
+      "department_id": "8534da53-8575-4b65-8ffc-d4749060409c",
+      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "budget_category_id": "9d4b11f4-6e72-4d99-b278-1b5b32815357",
+      "allocated_amount": 0,
       "approved_amount": 0,
       "pending_amount": 0,
       "revised_amount": 0
@@ -971,239 +2591,9 @@
       "created_at": "2026-08-25T08:35:07.312Z"
     }
   ],
-  "nfas": [
-    {
-      "id": "e8ff6001-0efa-409d-8854-e7cd8ac8ce84",
-      "ref_no": "NFA/CU/SoET/ADSE/2026-27/004",
-      "project_id": "54737b0d-763e-4abe-a5e3-3b49ec5ffb4c",
-      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
-      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "a7c78e5e-4ced-46f8-b6f3-09687bad9ef5",
-      "title": "Server Infrastructure Plan for School of Engineering ERP System",
-      "purpose": "The Department of ADSE seeks approval to design and implement a centralized Server Infrastructure Plan for the School of Engineering's ERP system, serving approx. 2,000 students and faculty across all eight departments.",
-      "description": "Infrastructure deployed on Ubuntu Server 22.04 LTS, secured through Role-Based Access Control (RBAC). Executed with technical support from the department IT Administrator; no external resource person required.",
-      "justification": "Replaces fragmented, manual record-keeping with a scalable, reliable, and secure digital system that improves administrative efficiency across the institution.",
-      "sdgs": "SDG 4 - Quality Education; SDG 9 - Industry, Innovation and Infrastructure",
-      "total_amount": 117700,
-      "status": "draft",
-      "created_by": "05fee8aa-7cd5-4168-bc21-3b20ea533f62",
-      "submitted_by_name": "Dr Arul V, Asst. Professor, Dept. of ADSE",
-      "hod_name": "Dr Michael Moses T, HOD / Coordinator, Dept. of ADSE",
-      "date": "2026-08-01",
-      "created_at": "2026-08-25T08:35:07.312Z",
-      "updated_at": "2026-08-25T08:35:07.312Z"
-    },
-    {
-      "id": "7cece5b9-ad95-4926-b220-2c058a879a08",
-      "ref_no": "NFA/CU/330A/2026/002",
-      "project_id": "54737b0d-763e-4abe-a5e3-3b49ec5ffb4c",
-      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
-      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "a7c78e5e-4ced-46f8-b6f3-09687bad9ef5",
-      "title": "Bootcamp",
-      "purpose": "pvijd df w",
-      "description": "v wrf erwf efpeqfqe wc0ghrwjigjrimi42tj-qecofjcs ḍl̥ṅṇfn vrpigjw cto3jtv rjgioer nvpfgmcpcgerpgrigh vorgr",
-      "justification": "rerpongc,trccgn5 v;rtjwot cpwtpwt w;rjtrnklkf df/b f bwrogwn,aS",
-      "sdgs": "elfeef;enfpe",
-      "requirements": "ef;kfnepf e",
-      "total_amount": 55338,
-      "status": "submitted",
-      "created_by": "53709076-c3be-46eb-a123-0be426a086ee",
-      "submitted_by_name": "Dr Michael Moses T",
-      "hod_name": "",
-      "date": "2026-08-28",
-      "created_at": "2026-08-28T11:30:37.389Z",
-      "updated_at": "2026-08-28T11:30:51.141Z"
-    },
-    {
-      "id": "1a724378-98ab-467f-bd28-5f908db3e76a",
-      "ref_no": "NFA/ADSE/2026-27/0003",
-      "project_id": null,
-      "department_id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
-      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "a5f5d778-d56a-4deb-b585-9aa0bb997afd",
-      "budget_subcategory_id": "437af811-0813-453f-b390-eb66f4cccb6e",
-      "budget_subcategory_name": "GPU Computers - Research Lab (RTX 5060, i7 14th Gen)",
-      "title": "Procurement of High-Performance Research Workstations",
-      "purpose": "Advanced AI research & Capstone projects",
-      "description": "",
-      "justification": "Critical GPU infrastructure for PhD scholars",
-      "sdgs": "SDG 4: Quality Education; SDG 9: Industry & Innovation",
-      "requirements": "",
-      "total_amount": 150000,
-      "status": "approved",
-      "created_by": "05fee8aa-7cd5-4168-bc21-3b20ea533f62",
-      "submitted_by_name": "Dr Arul V",
-      "submitted_by_designation": "Faculty",
-      "hod_name": "Dr Michael Moses T",
-      "date": "2026-10-29",
-      "created_at": "2026-10-29T13:14:00.937Z",
-      "updated_at": "2026-10-29T13:14:01.048Z"
-    },
-    {
-      "id": "fe05e6a0-109b-40f8-b76b-ac044fb94235",
-      "ref_no": "NFA/DRAS/2026-27/0001",
-      "project_id": null,
-      "department_id": "5d7b435a-35cf-4970-b2ff-85b1646efa88",
-      "financial_year_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
-      "budget_category_id": "8a82532c-e7f4-457a-a8f7-9979f008c616",
-      "budget_subcategory_id": null,
-      "budget_subcategory_name": "",
-      "title": "Robotics Assembly Kit Procurement",
-      "purpose": "",
-      "description": "",
-      "justification": "",
-      "sdgs": "",
-      "requirements": "",
-      "total_amount": 50000,
-      "status": "draft",
-      "created_by": "05fee8aa-7cd5-4168-bc21-3b20ea533f62",
-      "submitted_by_name": "Dr Arul V",
-      "submitted_by_designation": "Faculty",
-      "hod_name": "",
-      "date": "2026-10-29",
-      "created_at": "2026-10-29T13:14:41.273Z",
-      "updated_at": "2026-10-29T13:14:41.273Z"
-    }
-  ],
-  "nfa_items": [
-    {
-      "id": "1735b9cb-8664-4739-b9ef-f8664641c4c0",
-      "nfa_id": "e8ff6001-0efa-409d-8854-e7cd8ac8ce84",
-      "sl_no": 1,
-      "particulars": "Server Hardware (8-core CPU, 32 GB RAM, ECC Motherboard, RAID)",
-      "quantity": "1 Unit",
-      "amount": 90000
-    },
-    {
-      "id": "c8047b60-df01-45fb-96be-1d833b939bd3",
-      "nfa_id": "e8ff6001-0efa-409d-8854-e7cd8ac8ce84",
-      "sl_no": 2,
-      "particulars": "Storage - 2 TB SSD",
-      "quantity": "1 Unit",
-      "amount": 5500
-    },
-    {
-      "id": "d045ffbc-bd93-45e7-9f0c-eabc8875e9be",
-      "nfa_id": "e8ff6001-0efa-409d-8854-e7cd8ac8ce84",
-      "sl_no": 3,
-      "particulars": "UPS (Power Backup)",
-      "quantity": "1 Unit",
-      "amount": 11500
-    },
-    {
-      "id": "2b51976b-dcb3-48fd-b9b6-6592bd9b260c",
-      "nfa_id": "e8ff6001-0efa-409d-8854-e7cd8ac8ce84",
-      "sl_no": 4,
-      "particulars": "Network Setup (Gigabit Ethernet, Switches, Cabling)",
-      "quantity": "1 Set",
-      "amount": 7500
-    },
-    {
-      "id": "c888b1ad-9b64-4a5f-ba76-a492afc792bb",
-      "nfa_id": "e8ff6001-0efa-409d-8854-e7cd8ac8ce84",
-      "sl_no": 5,
-      "particulars": "Backup Solution",
-      "quantity": "1 Set",
-      "amount": 2000
-    },
-    {
-      "id": "12707ec8-ec27-4a34-a4b9-84d10f548c1e",
-      "nfa_id": "e8ff6001-0efa-409d-8854-e7cd8ac8ce84",
-      "sl_no": 6,
-      "particulars": "Domain (Annual)",
-      "quantity": "1 Year",
-      "amount": 1200
-    },
-    {
-      "id": "8cd26887-d845-45cd-8f0d-6dae17fc0a2c",
-      "nfa_id": "7cece5b9-ad95-4926-b220-2c058a879a08",
-      "sl_no": 1,
-      "particulars": "868",
-      "quantity": "85",
-      "rate": "457",
-      "amount": 55338,
-      "comments": "",
-      "justification": "86",
-      "basis_of_budget": "",
-      "previous_year_budget": 0,
-      "previous_year_actual": 0
-    },
-    {
-      "id": "b7703e08-d4b9-4406-907a-14ebb27def3e",
-      "nfa_id": "1a724378-98ab-467f-bd28-5f908db3e76a",
-      "sl_no": 1,
-      "particulars": "Nvidia RTX 5060 Workstation",
-      "quantity": "2",
-      "rate": "75000",
-      "amount": 150000,
-      "comments": "",
-      "justification": "Research compute",
-      "basis_of_budget": "",
-      "previous_year_budget": 0,
-      "previous_year_actual": 0
-    },
-    {
-      "id": "eb587a28-418e-481a-a721-63a12e3b7ea3",
-      "nfa_id": "fe05e6a0-109b-40f8-b76b-ac044fb94235",
-      "sl_no": 1,
-      "particulars": "Robotics Sensors Kit",
-      "quantity": "5",
-      "rate": "10000",
-      "amount": 50000,
-      "comments": "",
-      "justification": "",
-      "basis_of_budget": "",
-      "previous_year_budget": 0,
-      "previous_year_actual": 0
-    }
-  ],
-  "approvals": [
-    {
-      "id": "d6be99cd-b268-4173-a529-4578a6948303",
-      "nfa_id": "1a724378-98ab-467f-bd28-5f908db3e76a",
-      "approver_role": "hod",
-      "approver_id": "53709076-c3be-46eb-a123-0be426a086ee",
-      "approver_name": "Dr Michael Moses T",
-      "decision": "recommended",
-      "comments": "Department approves proposal",
-      "level": 1,
-      "created_at": "2026-10-29T13:14:00.971Z"
-    },
-    {
-      "id": "9d1a084f-b621-4c3d-8e0f-8612541120f1",
-      "nfa_id": "1a724378-98ab-467f-bd28-5f908db3e76a",
-      "approver_role": "dean",
-      "approver_id": "7a91c842-15f3-4e89-a2e1-456987410231",
-      "approver_name": "Dr Mary Anita E A",
-      "decision": "recommended",
-      "comments": "Dean endorses proposal",
-      "level": 2,
-      "created_at": "2026-10-29T13:14:00.997Z"
-    },
-    {
-      "id": "2f1066f0-f580-4cad-9717-f536f9ab271f",
-      "nfa_id": "1a724378-98ab-467f-bd28-5f908db3e76a",
-      "approver_role": "finance",
-      "approver_id": "3db93f9d-d4b9-4534-a700-cdba8df2d6a0",
-      "approver_name": "Fr Shijin P J",
-      "decision": "recommended",
-      "comments": "Budget lines verified and sufficient",
-      "level": 3,
-      "created_at": "2026-10-29T13:14:01.022Z"
-    },
-    {
-      "id": "12438e72-98d2-4d13-b7dc-b77738543207",
-      "nfa_id": "1a724378-98ab-467f-bd28-5f908db3e76a",
-      "approver_role": "director",
-      "approver_id": "8b92d953-26a4-4f90-b3f2-567890123456",
-      "approver_name": "Fr Jiby Jose",
-      "decision": "approved",
-      "comments": "Sanctioned by Director",
-      "level": 4,
-      "created_at": "2026-10-29T13:14:01.048Z"
-    }
-  ],
+  "nfas": [],
+  "nfa_items": [],
+  "approvals": [],
   "budget_transactions": [
     {
       "id": "49d6b9c0-43ba-48f9-9aa2-8956f1a01a73",
@@ -1338,6 +2728,81 @@
       "source": "excel",
       "approval_status": "approved",
       "created_at": "2026-10-29T13:46:00.539Z"
+    },
+    {
+      "id": "6815e05e-cf61-448f-884a-d7c1d9939d53",
+      "entity_type": "department_budget",
+      "entity_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
+      "department_id": "ALL",
+      "old_amount": null,
+      "new_amount": 92610475,
+      "difference": 92610475,
+      "changed_by": "5bc13647-3a05-4705-b376-19ffaeed45c2",
+      "role": "super_admin",
+      "reason": "Annual Institutional Budget Rollover: Transitioned to Academic/Financial Year 2027-28 with 8% increment.",
+      "source": "portal",
+      "approval_status": "approved",
+      "created_at": "2026-10-30T09:01:11.492Z"
+    },
+    {
+      "id": "07b1e3c2-7ac5-4ac0-abea-7c9b6efd4a59",
+      "entity_type": "department_budget",
+      "entity_id": "136d2c5f-1055-457a-a157-adc87255574b",
+      "department_id": "ALL",
+      "old_amount": null,
+      "new_amount": 100019314,
+      "difference": 100019314,
+      "changed_by": "5bc13647-3a05-4705-b376-19ffaeed45c2",
+      "role": "super_admin",
+      "reason": "Annual Institutional Budget Rollover: Transitioned to Academic/Financial Year 2028-29 with 8% increment.",
+      "source": "portal",
+      "approval_status": "approved",
+      "created_at": "2026-10-30T09:01:40.710Z"
+    },
+    {
+      "id": "18e82ad2-2931-4430-934e-f34279fee46b",
+      "entity_type": "department_budget",
+      "entity_id": "15fee291-d7c2-46bf-ab8b-352f63074417",
+      "department_id": "ALL",
+      "old_amount": null,
+      "new_amount": 62042016,
+      "difference": 62042016,
+      "changed_by": "5bc13647-3a05-4705-b376-19ffaeed45c2",
+      "role": "super_admin",
+      "reason": "Private University Budget Master Upload (replace mode): Processed 200 items across 81 departments and 81 categories. Total allocation: ₹6,20,42,016",
+      "source": "excel",
+      "approval_status": "approved",
+      "created_at": "2026-10-30T09:02:46.210Z"
+    },
+    {
+      "id": "4e0774ac-1f34-4d21-b76a-1b633d076a5e",
+      "entity_type": "department_budget",
+      "entity_id": "6986edcf-0285-46c0-bd17-1076f299dc98",
+      "department_id": "ALL",
+      "old_amount": null,
+      "new_amount": 0,
+      "difference": 0,
+      "changed_by": "5bc13647-3a05-4705-b376-19ffaeed45c2",
+      "role": "super_admin",
+      "reason": "Budget data cleared for 2027-28 (39 budget lines removed, 1 NFAs cleared)",
+      "source": "portal",
+      "approval_status": "approved",
+      "created_at": "2026-10-30T09:28:31.935Z"
+    },
+    {
+      "id": "a013b100-c9a7-4236-8c6e-d1332eb8fddb",
+      "entity_type": "department_budget",
+      "entity_id": "136d2c5f-1055-457a-a157-adc87255574b",
+      "department_id": "ALL",
+      "old_amount": null,
+      "new_amount": 0,
+      "difference": 0,
+      "changed_by": "5bc13647-3a05-4705-b376-19ffaeed45c2",
+      "role": "super_admin",
+      "reason": "Budget data cleared for 2028-29 (39 budget lines removed, 0 NFAs cleared)",
+      "source": "portal",
+      "approval_status": "approved",
+      "created_at": "2026-10-30T09:29:24.630Z"
     }
   ],
   "excel_sync_records": [
@@ -1445,7 +2910,7 @@
       "id": "0c9417d3-e4ee-494f-8f85-2d23de02118d",
       "budget_category_id": "8a82532c-e7f4-457a-a8f7-9979f008c616",
       "name": "Adjunct Faculty Honorarium",
-      "allocated_amount": 5054400,
+      "allocated_amount": 5895461,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1453,7 +2918,7 @@
       "id": "31f234d5-8321-4c13-846b-388cb21bfb3e",
       "budget_category_id": "8a82532c-e7f4-457a-a8f7-9979f008c616",
       "name": "Guest Lectures",
-      "allocated_amount": 27000,
+      "allocated_amount": 31493,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1461,7 +2926,7 @@
       "id": "a082ccba-7ab3-4132-9540-b5e8fd3f6e55",
       "budget_category_id": "8a82532c-e7f4-457a-a8f7-9979f008c616",
       "name": "Guest Relation",
-      "allocated_amount": 27000,
+      "allocated_amount": 31493,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1485,7 +2950,7 @@
       "id": "8e88efc8-1d7b-42ea-88aa-e49b9809abdd",
       "budget_category_id": "8a82532c-e7f4-457a-a8f7-9979f008c616",
       "name": "Remuneration to Consultants",
-      "allocated_amount": 1728000,
+      "allocated_amount": 2015539,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1493,7 +2958,7 @@
       "id": "9cb68066-a971-454f-84b0-0b37b45fc733",
       "budget_category_id": "8a82532c-e7f4-457a-a8f7-9979f008c616",
       "name": "Project Viva",
-      "allocated_amount": 81000,
+      "allocated_amount": 94478,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1501,7 +2966,7 @@
       "id": "1b5b31af-5531-4c53-b0f5-c74dc8b68b2b",
       "budget_category_id": "8a82532c-e7f4-457a-a8f7-9979f008c616",
       "name": "Professor in Practice",
-      "allocated_amount": 135000,
+      "allocated_amount": 157464,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1509,7 +2974,7 @@
       "id": "7283b2db-c42e-4809-add4-22c3a2ae21a4",
       "budget_category_id": "e8b44f98-cbe2-4713-baa3-88e06abd2c2d",
       "name": "Faculty Development Programme (FDP)",
-      "allocated_amount": 432000,
+      "allocated_amount": 503885,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1517,7 +2982,7 @@
       "id": "3666dec4-9a26-437a-82f4-88875f7103d2",
       "budget_category_id": "e8b44f98-cbe2-4713-baa3-88e06abd2c2d",
       "name": "Seminar",
-      "allocated_amount": 81000,
+      "allocated_amount": 94478,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1525,7 +2990,7 @@
       "id": "70c4a41a-468b-4b0b-b878-6393cc2175d4",
       "budget_category_id": "e8b44f98-cbe2-4713-baa3-88e06abd2c2d",
       "name": "Workshops",
-      "allocated_amount": 108000,
+      "allocated_amount": 125971,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1533,7 +2998,7 @@
       "id": "a74b05fe-8f5c-4822-b596-1a413b7df9ac",
       "budget_category_id": "e8b44f98-cbe2-4713-baa3-88e06abd2c2d",
       "name": "Conference",
-      "allocated_amount": 432000,
+      "allocated_amount": 503885,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1541,7 +3006,7 @@
       "id": "3a649684-2fa8-4c55-80dd-a7b74f5ad920",
       "budget_category_id": "e8b44f98-cbe2-4713-baa3-88e06abd2c2d",
       "name": "Membership Reimbursement",
-      "allocated_amount": 216000,
+      "allocated_amount": 251942,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1549,7 +3014,7 @@
       "id": "2517c8b6-afb6-40ae-8027-f62610120e33",
       "budget_category_id": "e8b44f98-cbe2-4713-baa3-88e06abd2c2d",
       "name": "Travel & Conveyance - Conveyance",
-      "allocated_amount": 432000,
+      "allocated_amount": 503885,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1557,7 +3022,7 @@
       "id": "4d3786f0-e5b1-4ab8-94e0-33e0d7d597f3",
       "budget_category_id": "e8b44f98-cbe2-4713-baa3-88e06abd2c2d",
       "name": "Travel & Conveyance - Domestic Travel",
-      "allocated_amount": 216000,
+      "allocated_amount": 251942,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1565,7 +3030,7 @@
       "id": "ac900cd6-f097-4c92-9bb1-143cc6169b5e",
       "budget_category_id": "e8b44f98-cbe2-4713-baa3-88e06abd2c2d",
       "name": "Travel & Conveyance - International Travel",
-      "allocated_amount": 216000,
+      "allocated_amount": 251942,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1573,7 +3038,7 @@
       "id": "57acb733-9901-49c3-b49c-09c415561310",
       "budget_category_id": "e8b44f98-cbe2-4713-baa3-88e06abd2c2d",
       "name": "Faculty Training in Industry",
-      "allocated_amount": 302400,
+      "allocated_amount": 352719,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1581,7 +3046,7 @@
       "id": "99dbbb7b-8d5c-450e-afe3-e5e27acf1ca8",
       "budget_category_id": "e8b44f98-cbe2-4713-baa3-88e06abd2c2d",
       "name": "Out Bound Training",
-      "allocated_amount": 194400,
+      "allocated_amount": 226748,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1589,7 +3054,7 @@
       "id": "213d90d9-b373-4f5a-9a32-2a47249f87a2",
       "budget_category_id": "e8b44f98-cbe2-4713-baa3-88e06abd2c2d",
       "name": "Remuneration for Instructors (Certification Courses)",
-      "allocated_amount": 162000,
+      "allocated_amount": 188957,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1597,7 +3062,7 @@
       "id": "0234d9be-04ea-4b68-aff1-af48fede45b5",
       "budget_category_id": "a7c78e5e-4ced-46f8-b6f3-09687bad9ef5",
       "name": "Fests / Seminars / Workshops / Events",
-      "allocated_amount": 2441880,
+      "allocated_amount": 2848208,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1605,7 +3070,7 @@
       "id": "6a519e67-effa-4a2e-a098-abfaff1370b5",
       "budget_category_id": "a7c78e5e-4ced-46f8-b6f3-09687bad9ef5",
       "name": "Fee Concession",
-      "allocated_amount": 4536000,
+      "allocated_amount": 5290790,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1613,7 +3078,7 @@
       "id": "d7a798f3-2d27-42eb-bafb-fb787de3b05d",
       "budget_category_id": "a7c78e5e-4ced-46f8-b6f3-09687bad9ef5",
       "name": "Scholarships",
-      "allocated_amount": 4536000,
+      "allocated_amount": 5290790,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1621,7 +3086,7 @@
       "id": "ce0b6254-e371-4527-bdd7-8b2f95abc2e5",
       "budget_category_id": "a7c78e5e-4ced-46f8-b6f3-09687bad9ef5",
       "name": "Contribution for Social Cause (Student Sensitization)",
-      "allocated_amount": 108000,
+      "allocated_amount": 125971,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1629,7 +3094,7 @@
       "id": "a150fce1-1ffd-4947-bef3-f8ee18747918",
       "budget_category_id": "a7c78e5e-4ced-46f8-b6f3-09687bad9ef5",
       "name": "Charges for Placement Training",
-      "allocated_amount": 1080000,
+      "allocated_amount": 1259712,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1637,7 +3102,7 @@
       "id": "47fc06b6-0037-4e66-bc45-c1bfa920644d",
       "budget_category_id": "a7c78e5e-4ced-46f8-b6f3-09687bad9ef5",
       "name": "Inauguration Expenses",
-      "allocated_amount": 54000,
+      "allocated_amount": 62986,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1645,7 +3110,7 @@
       "id": "65552227-cce7-4719-bc1f-b9f6465dc6b9",
       "budget_category_id": "a7c78e5e-4ced-46f8-b6f3-09687bad9ef5",
       "name": "Exhibitions & Hackathons",
-      "allocated_amount": 108000,
+      "allocated_amount": 125971,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1661,7 +3126,7 @@
       "id": "8d4ad52c-6447-47a8-b700-7cf90d10c035",
       "budget_category_id": "a7c78e5e-4ced-46f8-b6f3-09687bad9ef5",
       "name": "Gold Medals to students",
-      "allocated_amount": 486000,
+      "allocated_amount": 566870,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1669,7 +3134,7 @@
       "id": "d7a73869-fcc7-4ea2-98eb-4c8ae998d38e",
       "budget_category_id": "a7c78e5e-4ced-46f8-b6f3-09687bad9ef5",
       "name": "Registration Fee & Travel for External Fests",
-      "allocated_amount": 1080000,
+      "allocated_amount": 1259712,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1677,7 +3142,7 @@
       "id": "edf5ef55-ba7a-49b4-938d-6c6466485190",
       "budget_category_id": "a7c78e5e-4ced-46f8-b6f3-09687bad9ef5",
       "name": "Student Project Development",
-      "allocated_amount": 216000,
+      "allocated_amount": 251942,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1685,7 +3150,7 @@
       "id": "0cf7b41f-5912-40cd-a052-c15438d60ec9",
       "budget_category_id": "a7c78e5e-4ced-46f8-b6f3-09687bad9ef5",
       "name": "Students Research Internship",
-      "allocated_amount": 162000,
+      "allocated_amount": 188957,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1693,7 +3158,7 @@
       "id": "1b636ea9-7301-4a69-b396-2ac4b53b3a7d",
       "budget_category_id": "a7c78e5e-4ced-46f8-b6f3-09687bad9ef5",
       "name": "Travel & Conveyance - International Travel (Students)",
-      "allocated_amount": 162000,
+      "allocated_amount": 188957,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1701,7 +3166,7 @@
       "id": "bf6a5b75-e7fb-4ab1-bc0d-04f94875b9bf",
       "budget_category_id": "a7c78e5e-4ced-46f8-b6f3-09687bad9ef5",
       "name": "Server Infrastructure Plan for ERP System",
-      "allocated_amount": 127116,
+      "allocated_amount": 148268,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1709,7 +3174,7 @@
       "id": "9c9bb3c7-e999-4783-af58-33fbab992927",
       "budget_category_id": "2e3e2f81-ebfa-432c-a9c7-49e09b0ddc02",
       "name": "Membership & Registration Fee for External Agencies",
-      "allocated_amount": 216000,
+      "allocated_amount": 251942,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1717,7 +3182,7 @@
       "id": "26bf282c-9ca2-4932-ae98-29a282fbb12e",
       "budget_category_id": "2e3e2f81-ebfa-432c-a9c7-49e09b0ddc02",
       "name": "Postage, Stamps & Couriers",
-      "allocated_amount": 10800,
+      "allocated_amount": 12597,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1725,7 +3190,7 @@
       "id": "5b316199-e3f5-4ae8-81b5-1bf74dc5f9f5",
       "budget_category_id": "2e3e2f81-ebfa-432c-a9c7-49e09b0ddc02",
       "name": "Printing (Newsletters, Magazines)",
-      "allocated_amount": 108000,
+      "allocated_amount": 125971,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1733,7 +3198,7 @@
       "id": "14e273ac-cc33-4676-b660-c79f33551167",
       "budget_category_id": "2e3e2f81-ebfa-432c-a9c7-49e09b0ddc02",
       "name": "Photocopying & Binding",
-      "allocated_amount": 108000,
+      "allocated_amount": 125971,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1741,7 +3206,7 @@
       "id": "6b31b7b0-783f-4f8b-b648-2d6c09057731",
       "budget_category_id": "2e3e2f81-ebfa-432c-a9c7-49e09b0ddc02",
       "name": "Stationery (Paper, pens, writing pads)",
-      "allocated_amount": 108000,
+      "allocated_amount": 125971,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1749,7 +3214,7 @@
       "id": "cc747fde-1a71-4def-9c70-9bba5514b5a2",
       "budget_category_id": "2e3e2f81-ebfa-432c-a9c7-49e09b0ddc02",
       "name": "Meeting Expenses (Department, BoS, DAC)",
-      "allocated_amount": 226800,
+      "allocated_amount": 264540,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1757,7 +3222,7 @@
       "id": "806f99ae-4b82-48b9-92f5-418c834c96e6",
       "budget_category_id": "2e3e2f81-ebfa-432c-a9c7-49e09b0ddc02",
       "name": "Refreshments to Guests",
-      "allocated_amount": 27000,
+      "allocated_amount": 31493,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1781,7 +3246,7 @@
       "id": "8750e67d-04a6-486e-b06d-7e4dca630621",
       "budget_category_id": "5990ce8a-25a2-4a53-a736-49169c5f2053",
       "name": "External Project Pass-through Expenses",
-      "allocated_amount": 2700000,
+      "allocated_amount": 3149280,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1789,7 +3254,7 @@
       "id": "dd4d1b84-ea3c-43d9-a833-edb18d2d7500",
       "budget_category_id": "5990ce8a-25a2-4a53-a736-49169c5f2053",
       "name": "Internal Projects (Seed Money)",
-      "allocated_amount": 4320000,
+      "allocated_amount": 5038848,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1797,7 +3262,7 @@
       "id": "093d1520-5700-44e6-b045-3101236b5fa3",
       "budget_category_id": "5990ce8a-25a2-4a53-a736-49169c5f2053",
       "name": "Academic Renewals (AICTE, ICT Academy, CISCO)",
-      "allocated_amount": 324000,
+      "allocated_amount": 377914,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1805,7 +3270,7 @@
       "id": "321a7ab9-2f77-4b38-ad24-2cb35aee94ab",
       "budget_category_id": "5990ce8a-25a2-4a53-a736-49169c5f2053",
       "name": "Rankings Related (NIRF, NBA, AACSB)",
-      "allocated_amount": 540000,
+      "allocated_amount": 629856,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1813,7 +3278,7 @@
       "id": "437af811-0813-453f-b390-eb66f4cccb6e",
       "budget_category_id": "a5f5d778-d56a-4deb-b585-9aa0bb997afd",
       "name": "GPU Computers - Research Lab (RTX 5060, i7 14th Gen)",
-      "allocated_amount": 864000,
+      "allocated_amount": 1007770,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1821,7 +3286,7 @@
       "id": "2bbbcb59-bae4-4c25-903a-1baa41fbdb66",
       "budget_category_id": "a5f5d778-d56a-4deb-b585-9aa0bb997afd",
       "name": "Cyber Security Lab Computers (60 Systems)",
-      "allocated_amount": 8424000,
+      "allocated_amount": 9825754,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1829,7 +3294,7 @@
       "id": "f70febf5-0542-47ef-a838-02077302f442",
       "budget_category_id": "a5f5d778-d56a-4deb-b585-9aa0bb997afd",
       "name": "DELL VM Server PowerEdge R550 Rack Server",
-      "allocated_amount": 550800,
+      "allocated_amount": 642453,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1837,7 +3302,7 @@
       "id": "4102525a-cd98-43a1-a5a9-32b50519ff09",
       "budget_category_id": "500aefed-32d4-457b-8360-ae6fc9a38333",
       "name": "Cyber Security Lab Furniture & Networking Components",
-      "allocated_amount": 8640000,
+      "allocated_amount": 10077696,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1845,7 +3310,7 @@
       "id": "bc4b6d32-f8f6-4fe2-bab2-5dfdcd398c95",
       "budget_category_id": "b8e70686-2c92-4050-8fd4-78d68b301731",
       "name": "Canva Team Subscription",
-      "allocated_amount": 10800,
+      "allocated_amount": 12597,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1853,7 +3318,7 @@
       "id": "844c6305-c826-491e-b488-1ee5c38bb132",
       "budget_category_id": "b8e70686-2c92-4050-8fd4-78d68b301731",
       "name": "100 Users Firewall Security Subscription",
-      "allocated_amount": 216000,
+      "allocated_amount": 251942,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1861,7 +3326,7 @@
       "id": "7af10d51-084b-4b0e-8e2a-0b7af0a8b233",
       "budget_category_id": "b8e70686-2c92-4050-8fd4-78d68b301731",
       "name": "Microsoft Purview DLP + Security Onion NDR SIEM IDS",
-      "allocated_amount": 540000,
+      "allocated_amount": 629856,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1869,7 +3334,7 @@
       "id": "8779c894-6920-4399-989c-78bc97eef982",
       "budget_category_id": "b8e70686-2c92-4050-8fd4-78d68b301731",
       "name": "Encase Forensics Suite",
-      "allocated_amount": 864000,
+      "allocated_amount": 1007770,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1877,7 +3342,7 @@
       "id": "5e79c814-cb3d-4b99-87e0-24e6f2b3758b",
       "budget_category_id": "fcbc69b8-a884-4527-8b68-bdc3679b74dc",
       "name": "Quadcopter Assembly & Humanoid Bots",
-      "allocated_amount": 37800,
+      "allocated_amount": 44090,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1885,7 +3350,7 @@
       "id": "e279ffaf-0e8c-4246-bd79-9efe6e98cc8a",
       "budget_category_id": "fcbc69b8-a884-4527-8b68-bdc3679b74dc",
       "name": "RFID NFC Reader Writer & Sensors",
-      "allocated_amount": 5400,
+      "allocated_amount": 6299,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1893,7 +3358,7 @@
       "id": "6703a5e4-b46c-4363-8179-c50932638ab2",
       "budget_category_id": "fcbc69b8-a884-4527-8b68-bdc3679b74dc",
       "name": "C-DAC IoT Controller Module",
-      "allocated_amount": 172800,
+      "allocated_amount": 201554,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1901,7 +3366,7 @@
       "id": "57d089d5-1f1f-4ed7-b6fe-9b625d0962f3",
       "budget_category_id": "fcbc69b8-a884-4527-8b68-bdc3679b74dc",
       "name": "IoT Academic Lab Components & Sensors",
-      "allocated_amount": 864000,
+      "allocated_amount": 1007770,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1909,7 +3374,7 @@
       "id": "82792be4-371d-4dfd-94cc-44de6ae6e94c",
       "budget_category_id": "fcbc69b8-a884-4527-8b68-bdc3679b74dc",
       "name": "Advantech Industry Oriented Lab Components",
-      "allocated_amount": 108000,
+      "allocated_amount": 125971,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1917,7 +3382,7 @@
       "id": "85128714-562f-4cdb-a34c-90f206c30136",
       "budget_category_id": "9b97b3ab-080d-47ed-ba7e-c8632463c2de",
       "name": "External Research Grants (DST, DBT, AICTE, ISRO)",
-      "allocated_amount": 2700000,
+      "allocated_amount": 3149280,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1925,7 +3390,7 @@
       "id": "db731fcd-3c41-4771-832f-3cd2057159f3",
       "budget_category_id": "d50f31d5-009d-4b3d-ba7e-691893d2abd2",
       "name": "Industrial Consultancy Projects",
-      "allocated_amount": 1080000,
+      "allocated_amount": 1259712,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1933,7 +3398,7 @@
       "id": "d4b7d628-cf38-48a4-907e-38c6a057f431",
       "budget_category_id": "058eb340-4f64-44da-93b3-dfdc37756f19",
       "name": "International Conference & FDP Registrations",
-      "allocated_amount": 216000,
+      "allocated_amount": 251942,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1941,7 +3406,7 @@
       "id": "6a2b4a21-5f09-4530-95bf-8d280d587b7f",
       "budget_category_id": "058eb340-4f64-44da-93b3-dfdc37756f19",
       "name": "Value Added Courses & Specializations",
-      "allocated_amount": 162000,
+      "allocated_amount": 188957,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1949,7 +3414,7 @@
       "id": "50d27217-48c2-40ce-8d76-5f036eeae57b",
       "budget_category_id": "6b3c500f-2cba-4031-9d2a-ef9b7c20148e",
       "name": "Guest Lecturers & Visiting Experts",
-      "allocated_amount": 550000,
+      "allocated_amount": 641520,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1957,7 +3422,7 @@
       "id": "6428f4ec-38ee-414d-ae56-fe763b8bc24e",
       "budget_category_id": "f3febbaf-6c3b-4742-8b85-9064314b8a7d",
       "name": "Faculty Development Remuneration",
-      "allocated_amount": 650000,
+      "allocated_amount": 758160,
       "approved_amount": 0,
       "pending_amount": 0
     },
@@ -1965,7 +3430,687 @@
       "id": "953f9737-1ade-4000-8e3c-b7eb54f39eed",
       "budget_category_id": "a01f789f-c2ad-4799-87de-4bcd11d4e4c5",
       "name": "Seed Grants for Faculty Projects",
-      "allocated_amount": 900000,
+      "allocated_amount": 1049760,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "6753dc1f-c4ec-4bd9-a1b5-8ac7b4ff488d",
+      "budget_category_id": "91b25772-973a-4b6b-a199-729d6803d3c8",
+      "name": "Item",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "793703fa-199c-408f-905a-a42840d5f2cb",
+      "budget_category_id": "2d729702-80b7-40db-8793-ac0ec82a9afa",
+      "name": "Academic Year",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "a74b54ef-bfdd-4421-a3ca-fb8f34060c57",
+      "budget_category_id": "3975b808-c399-468c-9343-4f0a2af3d70d",
+      "name": "Dr M Balamurugan",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "c245f646-18df-4ead-bd6d-8fb304e8471d",
+      "budget_category_id": "7e24ed9c-5af6-4fdf-94c5-0110de1f7ff8",
+      "name": "SOURCE",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "ba5a8bb3-e78c-4992-bdbe-8a86eb1c15f7",
+      "budget_category_id": "83ba2613-e615-410f-8027-0cdb535098ed",
+      "name": "Through funding Agencies such as DST, DBT, AICTE etc",
+      "allocated_amount": 15,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "aae43837-5b83-4bfd-a0f6-f84269e43892",
+      "budget_category_id": "e5ad2341-7801-453b-9e1d-94bfb992ef31",
+      "name": "Through industrial consultancy projects",
+      "allocated_amount": 1,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "39b58117-685c-4339-baee-605ebff86559",
+      "budget_category_id": "f911aa6e-9494-4052-b317-cf0152a3be5d",
+      "name": "Registration Fees",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "5424bc08-8b5d-4c3c-80d7-e97530cf9e22",
+      "budget_category_id": "c894d28e-6822-479a-9567-d6046339cf69",
+      "name": "Registration Fees",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "54e78a4f-d7d0-4105-bcae-0a08049c41a6",
+      "budget_category_id": "1cae1016-7835-4bc2-8311-0b8d6085726b",
+      "name": "Sponsorships",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "538d5f1e-4e8a-488a-9dd0-4577f9301c8c",
+      "budget_category_id": "91c2cddd-537c-4726-94a1-bdcfc58902d6",
+      "name": "Registration Fees",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "474b6771-c8ba-4979-a4f7-952d07209d53",
+      "budget_category_id": "a31ed1b6-67ae-4cc7-b02e-2426603169a2",
+      "name": "100000",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "1ab7b02e-94d3-468f-b923-ca8168c64cfe",
+      "budget_category_id": "bb22f67a-b22c-46b3-b7f6-40f01370cc6c",
+      "name": "50000",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "8df580b0-8743-471d-9ca4-e5b811f3de20",
+      "budget_category_id": "21d372fd-f048-416c-b6fa-4aac4618d26f",
+      "name": "50000",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "175e5f4b-a896-4eef-adff-68543b740c4e",
+      "budget_category_id": "34da5248-1866-4027-9f5e-c9dc38674ff7",
+      "name": "Registration Fees",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "86590916-2cd6-4797-835c-9d51d751081e",
+      "budget_category_id": "a5c8c790-3f07-419b-8dd5-58ae61b12d0f",
+      "name": "Approx 500 x 500",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "b9976b3c-eaa3-4f1c-994c-ac50e0b2f941",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "name": "DEAN",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "7a4f65cd-a61a-4126-84bd-8bf5910befb6",
+      "budget_category_id": "7e24ed9c-5af6-4fdf-94c5-0110de1f7ff8",
+      "name": "QTY.\n(Nos./hrs)",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "45d93df4-d2b0-4742-87a7-fff8eedb29c0",
+      "budget_category_id": "a5c8c790-3f07-419b-8dd5-58ae61b12d0f",
+      "name": "6",
+      "allocated_amount": 4680000,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "e041123f-1e2b-4e78-bd91-7d109793813e",
+      "budget_category_id": "a5c8c790-3f07-419b-8dd5-58ae61b12d0f",
+      "name": "10",
+      "allocated_amount": 25000,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "da0ebd1e-6806-4583-a23b-3d8e206572ae",
+      "budget_category_id": "a5c8c790-3f07-419b-8dd5-58ae61b12d0f",
+      "name": "2 Persons",
+      "allocated_amount": 1600000,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "4452d180-0815-4919-ba60-eda36a5d03fa",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "name": "15",
+      "allocated_amount": 75000,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "f3e9ab96-f274-4f17-9a3c-bb25d3dac478",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "name": "1",
+      "allocated_amount": 125000,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "b0f78ad3-8ab5-41cf-a6c2-13f597adedb9",
+      "budget_category_id": "a5c8c790-3f07-419b-8dd5-58ae61b12d0f",
+      "name": "40",
+      "allocated_amount": 200000,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "ffb41581-c4b3-45d9-9dec-f84d8ec86b9e",
+      "budget_category_id": "a5c8c790-3f07-419b-8dd5-58ae61b12d0f",
+      "name": "15",
+      "allocated_amount": 75000,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "d279b613-41f8-4c8a-84c8-2ae10cb1b130",
+      "budget_category_id": "a5c8c790-3f07-419b-8dd5-58ae61b12d0f",
+      "name": "20",
+      "allocated_amount": 100000,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "70391c05-bd27-40bf-8298-04fc221d5ab8",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "name": "40",
+      "allocated_amount": 180000,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "0821aaea-38ea-4160-911e-1d4beb2e2bef",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "name": "6",
+      "allocated_amount": 150000,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "1b88de21-eb9c-4481-94f9-35d2d67b1d52",
+      "budget_category_id": "fe925e01-1bda-4029-9358-8be2b8fa91ff",
+      "name": "500",
+      "allocated_amount": 1000000,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "4e0df552-0883-425c-b91a-a8b210fd5af7",
+      "budget_category_id": "d022320d-3a98-4917-951a-214e5b513a53",
+      "name": "2",
+      "allocated_amount": 100000,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "9bbe2ebb-9d0f-4b0d-b01f-7a45d7af8487",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "name": "20",
+      "allocated_amount": 200000,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "d10e25fb-bd5d-44f6-92fb-3feba7dddb32",
+      "budget_category_id": "394f8e95-d360-4dcd-ba98-186f6fd38b6a",
+      "name": "15",
+      "allocated_amount": 150000,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "f39970ee-c6a8-4ccd-bc1e-43a3e8213551",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "name": "5",
+      "allocated_amount": 150000,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "f8c4f03c-cc14-4966-b59b-0caf35064ddf",
+      "budget_category_id": "a5c8c790-3f07-419b-8dd5-58ae61b12d0f",
+      "name": "50",
+      "allocated_amount": 25000,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "c1b68629-c6f9-4293-954b-3e0ef9906ac6",
+      "budget_category_id": "7e0da474-de3e-426c-97e8-9dd443263df7",
+      "name": "20",
+      "allocated_amount": 4000000,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "61a00880-1191-4f28-8374-ce0191df0f28",
+      "budget_category_id": "6192678c-1441-4c64-b575-a16c728d7307",
+      "name": "2 Programs",
+      "allocated_amount": 500000,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "51e3bb34-ecaa-494c-bdba-502b5858b128",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "name": "HOD",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "d9abdd1e-fa4c-4512-ae10-a4cfc5534ef3",
+      "budget_category_id": "390ee00e-2dee-484e-8e2f-51993202aae5",
+      "name": "APPROX. COST (INC. OF GST)",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "283ba643-2292-4fcf-b08d-e5773e0971be",
+      "budget_category_id": "8fe70e8d-8581-4733-b99e-afc15d1e69e1",
+      "name": "10000",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "ae075bb5-4f06-42c1-be1d-63faab40f9ff",
+      "budget_category_id": "b2e85c8b-272f-4e28-9209-2f9345fbc643",
+      "name": "800000",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "73b947c5-616f-4747-bdbc-76bc5a04c9d4",
+      "budget_category_id": "2744af89-23b2-4f85-be96-4e79daaba535",
+      "name": "7800000",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "41007c1d-51ce-4a0e-83e1-3e9f82b01880",
+      "budget_category_id": "8fe70e8d-8581-4733-b99e-afc15d1e69e1",
+      "name": "200000",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "de741510-5c4c-407a-a9ec-f23dc55dff60",
+      "budget_category_id": "8fe70e8d-8581-4733-b99e-afc15d1e69e1",
+      "name": "510000",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "9b38a7da-49b3-4a98-bdca-a16dfe7d165a",
+      "budget_category_id": "8fe70e8d-8581-4733-b99e-afc15d1e69e1",
+      "name": "8000000",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "b566004f-8897-4a82-9152-c26bbaed3063",
+      "budget_category_id": "8fe70e8d-8581-4733-b99e-afc15d1e69e1",
+      "name": "500000",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "ae22a054-4db1-4039-a819-c27b51b77f9e",
+      "budget_category_id": "8fe70e8d-8581-4733-b99e-afc15d1e69e1",
+      "name": "800000",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "e90dd0c1-ea20-4f06-9400-4314b2a4fbe9",
+      "budget_category_id": "8fe70e8d-8581-4733-b99e-afc15d1e69e1",
+      "name": "15000",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "ff486525-1212-465a-a7a4-b23b2de6a610",
+      "budget_category_id": "8fe70e8d-8581-4733-b99e-afc15d1e69e1",
+      "name": "20000",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "1e78db45-d2c1-4679-a245-b33f2770bbfb",
+      "budget_category_id": "8fe70e8d-8581-4733-b99e-afc15d1e69e1",
+      "name": "5000",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "4a6a281d-fa8e-41fd-a2cd-d419d4a7992d",
+      "budget_category_id": "2dae266e-1f48-4d1b-ac77-21925805f4bb",
+      "name": "160000",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "94b7d08d-3bb1-4c25-be27-cc731ce0c677",
+      "budget_category_id": "b0782a12-26f5-4a21-91ec-556a7fe7b5b1",
+      "name": "800000",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "6e7359ad-2936-429a-8851-fe4e6038b26d",
+      "budget_category_id": "b41112b5-3082-47df-91fc-40545ee555c1",
+      "name": "100000",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "7bdb5f52-46d8-4891-96ed-69ac5493c1b0",
+      "budget_category_id": "43366348-4e89-4d4f-bd79-2ed2c28fb1bc",
+      "name": "[object Object]",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "ab36957b-2dae-4a1b-bfd5-a1191d0db1a7",
+      "budget_category_id": "23799228-30c8-4cd9-96c1-9a802e3e5496",
+      "name": "Practical workload",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "171a2d85-a163-4148-96e1-dd517a090a3f",
+      "budget_category_id": "23799228-30c8-4cd9-96c1-9a802e3e5496",
+      "name": "Batches",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "532c9d5d-37af-4dc7-86c3-11ed416b3f5d",
+      "budget_category_id": "34248de5-a175-4b31-a0b8-9759fbc047b2",
+      "name": "No. of Positions",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "25997510-cdc8-48ae-9804-2c59aaada14e",
+      "budget_category_id": "1f2982ea-3057-4385-9998-2815247ee282",
+      "name": "New",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "431f8712-0f72-401a-94bc-67f0ca02aebc",
+      "budget_category_id": "c71c5572-0ff3-42d6-9363-c2f9b6dc9f00",
+      "name": "Recommendation of the Dean/director:",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "a3ffb856-2422-4d60-ac1d-86eb43f1139e",
+      "budget_category_id": "554a0b0b-0c35-4027-97db-cf889494265a",
+      "name": "Signature:",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "ff7dd438-5a93-45e8-b1a9-236849e6c945",
+      "budget_category_id": "587167fa-5b7f-4f02-94f5-b8e9e266d56f",
+      "name": "Remarks by Personnel Officer:",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "0153cea6-dfd0-4d34-8843-f93efa7b9ea6",
+      "budget_category_id": "73ddff8a-f9c0-4ccf-bbb0-d0128ba2ecc6",
+      "name": "Approval by CFO:",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "7f8c40f9-b04d-47d4-abc5-868d7a989e3e",
+      "budget_category_id": "599a8ecf-dfc9-469f-95cf-38917f680793",
+      "name": "Computer Science and Engineering",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "a89f89bd-b9e8-4672-abc5-27fcba10d7d7",
+      "budget_category_id": "2af3e823-e5b7-4a9d-842d-d3defe79e0e8",
+      "name": "National Seminar, International Conference, Workshops and ASCII activities",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "3f491b29-5dd2-4522-adf1-942cb73ca966",
+      "budget_category_id": "b9ccdcab-2c13-4c48-aaf8-06133937db6d",
+      "name": "CATEGORIES",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "6b4e88fe-7b00-4fc2-a223-1a6016a55e85",
+      "budget_category_id": "dcd21946-f89f-45d0-aa71-b43b29030f94",
+      "name": "TOTAL INCOME",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "dac7bf30-5dab-4981-b017-78484e3e5541",
+      "budget_category_id": "baee58cd-d406-480a-a0f9-3f9cdb42096a",
+      "name": "PARTICULARS",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "86420a86-2634-4bb4-a93a-4c10a5985b29",
+      "budget_category_id": "a35a344a-12f0-44c6-938c-a253c50d9f71",
+      "name": "Workshop on Emerging Trends",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "b3635842-39ee-4e1f-a5c2-d3b76edcaad2",
+      "budget_category_id": "b968abae-9b68-4ffa-a739-6ca3b62531b3",
+      "name": "Conferences",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "0174aa67-31ed-4815-a853-91d14dbb638f",
+      "budget_category_id": "97a25d2e-3ba1-4f20-921a-a8af45c05313",
+      "name": "ASCII Peer Events  & Foobar Fest",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "49388877-1ad4-4aae-b767-4f0b7fa1091e",
+      "budget_category_id": "f46ad227-d8ad-4e27-92ec-762130cd65b8",
+      "name": "Seminar on Industry Practises",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "0dc68761-ee6d-41d7-9a3f-41cbb9c47f58",
+      "budget_category_id": "8addb174-ddd5-4e01-935f-36f9d046d82e",
+      "name": "Sports Day (Tableau)",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "7feb9e6a-f3f0-44e5-b88f-ec20904bbb0b",
+      "budget_category_id": "2096be77-199f-4109-afd6-40d2631e96f4",
+      "name": "IEEE / ACM Student Branch Events",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "7f7456ce-7387-4f79-bbfe-c6c6cc965ac7",
+      "budget_category_id": "8cc7d107-5b7a-4949-be66-85c33272141d",
+      "name": "CSA",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "73aed2dd-61dd-4c8b-8e56-bca089dbc3e7",
+      "budget_category_id": "9dfd4ae4-b62b-4612-87df-2f8b2360fc85",
+      "name": "Experience Engineering Programme",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "d8679ba7-118e-4aee-945a-6a10f950491c",
+      "budget_category_id": "469e140c-e766-4419-8f07-28d81f56bb69",
+      "name": "Magnovite",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "9dc11604-4894-4449-a543-bdc1db713273",
+      "budget_category_id": "d930e1a4-410d-46fc-945d-6fd14e962447",
+      "name": "ICETech",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "ee04952f-d102-4f78-8caf-d79c4c4c1ead",
+      "budget_category_id": "9b8160aa-9ad4-4226-8bc2-e9c797e6f06a",
+      "name": "Daksh",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "97f5e614-e1cc-4b3e-9394-f93b1b0d5e2b",
+      "budget_category_id": "791fb2ab-17de-4474-a0c7-3b022b37df19",
+      "name": "Ideathon -  Projects _ State wide",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "ce1a963f-3a15-4090-bf2e-c00c2ddbb7ff",
+      "budget_category_id": "7bd1beb1-e137-48da-9ba7-ffdf970fef33",
+      "name": "Tech Utsav",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "90c98032-3e43-40dc-a7ed-329b312394db",
+      "budget_category_id": "ff9143f5-08d9-483e-839f-c073a8a811a7",
+      "name": "SDG Cell Activities",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "e55e2ee5-7f20-411c-b1ee-8f2a2f13e706",
+      "budget_category_id": "9bc1b970-4b11-4d12-aebd-3844e1fc73ce",
+      "name": "Research Colloquium",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "9bdfea4e-3478-41c3-9ba4-08abc8d7a23e",
+      "budget_category_id": "691b40dc-0715-4b85-b116-d29dbb10ffc0",
+      "name": "Research Seminar",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "8d2213f6-bdc7-4344-a500-9c3c423c0972",
+      "budget_category_id": "63cea045-bddb-4416-b289-7c56c52b2f93",
+      "name": "Prizes for 'participate and win contests' - News Letter & Magzine",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "3dfcf834-4fb6-41af-a5eb-9f85da0f6f30",
+      "budget_category_id": "f5eabdde-6881-4bfd-835e-8f650438015d",
+      "name": "III Cell Related events",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "61a413fc-e574-443b-b0e0-10dc32e00768",
+      "budget_category_id": "c9eca357-3a6f-45d2-b396-d141a9793cb1",
+      "name": "Entruperenuership Event",
+      "allocated_amount": 0,
+      "approved_amount": 0,
+      "pending_amount": 0
+    },
+    {
+      "id": "8d180309-9b0c-4a50-bba8-12065c3af60b",
+      "budget_category_id": "9d4b11f4-6e72-4d99-b278-1b5b32815357",
+      "name": "TOTAL EXPENDITURE",
+      "allocated_amount": 0,
       "approved_amount": 0,
       "pending_amount": 0
     }

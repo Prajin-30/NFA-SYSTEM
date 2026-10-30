@@ -138,3 +138,97 @@ adminRouter.delete('/users/:id', async (req: AuthedRequest, res) => {
 adminRouter.get('/users', (_req, res) => {
   res.json(store.data.users.map((u) => ({ id: u.id, name: u.name, email: u.email, role: u.role, department_id: u.department_id })));
 });
+
+/**
+ * POST /api/admin/clear-budget — Super admin: clear budget of previous year or specified FY
+ * Allows clearing allocations and optionally associated NFAs so a new year's budget can be uploaded clean.
+ */
+adminRouter.post('/clear-budget', async (req: AuthedRequest, res) => {
+  const { financial_year_id, clear_nfas, reset_mode } = req.body || {};
+  if (!financial_year_id) {
+    return res.status(400).json({ error: 'financial_year_id is required ("all" or a specific FY ID)' });
+  }
+
+  try {
+    const result = await store.transact((db) => {
+      let fyLabel = 'All Years';
+      let clearedBudgetsCount = 0;
+      let clearedNfasCount = 0;
+
+      if (financial_year_id === 'all') {
+        clearedBudgetsCount = db.department_budgets.length;
+        if (reset_mode === 'zero') {
+          db.department_budgets.forEach((b) => {
+            b.allocated_amount = 0;
+            b.approved_amount = 0;
+            b.pending_amount = 0;
+            b.revised_amount = 0;
+          });
+        } else {
+          db.department_budgets = [];
+        }
+
+        if (clear_nfas) {
+          clearedNfasCount = db.nfas.length;
+          db.nfas = [];
+          db.nfa_items = [];
+          db.approvals = [];
+        }
+      } else {
+        const fy = db.financial_years.find((f) => f.id === financial_year_id);
+        if (!fy) throw new Error('Financial year not found');
+        fyLabel = fy.label;
+
+        const targetBudgets = db.department_budgets.filter((b) => b.financial_year_id === financial_year_id);
+        clearedBudgetsCount = targetBudgets.length;
+
+        if (reset_mode === 'zero') {
+          targetBudgets.forEach((b) => {
+            b.allocated_amount = 0;
+            b.approved_amount = 0;
+            b.pending_amount = 0;
+            b.revised_amount = 0;
+          });
+        } else {
+          db.department_budgets = db.department_budgets.filter((b) => b.financial_year_id !== financial_year_id);
+        }
+
+        if (clear_nfas) {
+          const nfasToRemove = db.nfas.filter((n) => n.financial_year_id === financial_year_id);
+          clearedNfasCount = nfasToRemove.length;
+          const removeIds = new Set(nfasToRemove.map((n) => n.id));
+          db.nfas = db.nfas.filter((n) => !removeIds.has(n.id));
+          db.nfa_items = db.nfa_items.filter((i) => !removeIds.has(i.nfa_id));
+          db.approvals = db.approvals.filter((a) => !removeIds.has(a.nfa_id));
+        }
+      }
+
+      db.audit_logs.push({
+        id: uuid(),
+        entity_type: 'department_budget',
+        entity_id: financial_year_id,
+        department_id: 'ALL',
+        old_amount: null,
+        new_amount: 0,
+        difference: 0,
+        changed_by: req.user!.id,
+        role: req.user!.role,
+        reason: `Budget data cleared for ${fyLabel} (${clearedBudgetsCount} budget lines removed, ${clearedNfasCount} NFAs cleared)`,
+        source: 'portal',
+        approval_status: 'approved',
+        created_at: new Date().toISOString(),
+      });
+
+      return {
+        success: true,
+        fyLabel,
+        clearedBudgetsCount,
+        clearedNfasCount,
+      };
+    });
+
+    res.json(result);
+  } catch (error: any) {
+    res.status(400).json({ error: error.message || 'Failed to clear budget' });
+  }
+});

@@ -669,7 +669,7 @@
   /* ITEMS EDITOR IN NFA */
   .item-row {
     display: grid;
-    grid-template-columns: 2fr 75px 95px 110px 1.5fr 36px;
+    grid-template-columns: 3fr 85px 110px 130px 36px;
     gap: 8px;
     align-items: center;
     margin-bottom: 8px;
@@ -1040,8 +1040,8 @@ async function renderHome(main){
         </div>
         <div class="row">
           ${isAdmin ? `
-            <button class="gold" onclick="openPrivateBudgetUploadModal()">📁 Upload Private University Budget (.xlsx)</button>
             <button class="secondary" onclick="exportBudgetReport('${deptId}')">📥 Export Master Budget Excel</button>
+            <button class="secondary" onclick="showTab('admin')">⚙️ Budget Management &amp; Upload in Settings</button>
           ` : ''}
           ${['super_admin', 'director', 'finance'].includes(USER.role) ? `
             <button class="secondary" onclick="openRolloverModal()">Annual Rollover &amp; Next-Year Projection</button>
@@ -1273,33 +1273,38 @@ async function saveSubcategoryEdit(subId){
   } catch(e) { toast(e.message); }
 }
 
-// ---------------- ADMIN PRIVATE MASTER BUDGET UPLOAD MODAL ----------------
+// ---------------- ADMIN PRIVATE MASTER BUDGET UPLOAD & CLEAR MODALS ----------------
 function openPrivateBudgetUploadModal(){
   const fy = activeFy();
   openModal(`
     <button class="close-btn" onclick="closeModal()">✕</button>
-    <h2>Private University Budget Master Upload</h2>
-    <div class="field-help">Admin-only secure upload. Upload your private university Excel budget sheet (.xlsx) to automatically configure departments, categories, subcategories, and allocations.</div>
+    <h2>Upload New Academic Year Master Budget (.xlsx)</h2>
+    <div class="field-help">Super Admin secure upload. Upload your official university Excel budget workbook (.xlsx) to configure departments, categories, subcategories, and live budget allocations for the academic year.</div>
 
     <div class="card" style="background:var(--section-bg);margin:16px 0;padding:16px;">
-      <div class="row" style="justify-content:space-between;">
+      <div class="row" style="justify-content:space-between;align-items:center;">
         <div>
-          <strong>Need a standard template?</strong>
-          <div class="card-sub">Download our clean pre-formatted official Excel template with sample rows.</div>
+          <strong>Need an official standard template?</strong>
+          <div class="card-sub">Download our clean pre-formatted official Excel template with verified sample rows.</div>
         </div>
         <button class="secondary" onclick="downloadBudgetTemplate()">📥 Download Template (.xlsx)</button>
       </div>
     </div>
 
-    <label class="field-label">Select Private University Excel Workbook (.xlsx)</label>
+    <label class="field-label">Select University Excel Workbook (.xlsx)</label>
     <input type="file" id="masterExcelFileInput" accept=".xlsx" />
 
     <label class="field-label">Target Academic / Financial Year</label>
-    <select id="masterUploadFy">${REF.financialYears.map(f => `<option value="${f.id}" ${f.id === fy.id ? 'selected' : ''}>${f.label}</option>`).join('')}</select>
+    <div class="row" style="gap:10px;margin-bottom:12px;">
+      <select id="masterUploadFy" style="flex:1;margin-bottom:0;">
+        ${REF.financialYears.map(f => `<option value="${f.id}" ${f.id === fy.id ? 'selected' : ''}>${f.label}${f.is_active ? ' (Active)' : ''}</option>`).join('')}
+      </select>
+      <button class="secondary" type="button" onclick="promptAddNewFyInModal()" style="white-space:nowrap;">+ Add New Year</button>
+    </div>
 
     <label class="field-label">Initialization Mode</label>
     <select id="masterUploadMode">
-      <option value="replace">Clean Slate: Replace &amp; Initialize Entire University Budget (Wipes sample data)</option>
+      <option value="replace">Clean Slate: Replace &amp; Initialize Entire Budget (Recommended for new year)</option>
       <option value="merge">Merge: Update &amp; Add to Existing Allocations</option>
     </select>
 
@@ -1308,6 +1313,75 @@ function openPrivateBudgetUploadModal(){
       <button class="gold" onclick="submitPrivateBudgetExcel()">Upload &amp; Auto-Configure Website</button>
     </div>
   `);
+}
+
+async function promptAddNewFyInModal(){
+  const label = prompt('Enter new Academic / Financial Year label (e.g. 2027-28):');
+  if (!label || !label.trim()) return;
+  try {
+    const newFy = await api('/admin/financial-years', { method:'POST', body:{ label: label.trim() } });
+    REF.financialYears = await api('/budgets/financial-years');
+    toast(`Added Academic Year ${label.trim()}`);
+    openPrivateBudgetUploadModal();
+    const sel = document.getElementById('masterUploadFy');
+    if (sel) sel.value = newFy.id;
+  } catch(e) { toast(e.message); }
+}
+
+function openClearBudgetModal(){
+  const fy = activeFy();
+  openModal(`
+    <button class="close-btn" onclick="closeModal()">✕</button>
+    <h2 style="color:var(--danger)">🗑️ Clear Previous Year / Historical Budget Data</h2>
+    <div class="field-help">Super Admin tool: Reset or wipe previous year budget allocations and test NFAs before uploading a new financial year's master budget sheet.</div>
+
+    <label class="field-label">Select Academic / Financial Year to Clear</label>
+    <select id="clearBudgetFy">
+      ${REF.financialYears.map(f => `<option value="${f.id}" ${f.id === fy.id ? 'selected' : ''}>${f.label}${f.is_active ? ' (Active)' : ''}</option>`).join('')}
+      <option value="all">⚠️ All Financial Years (Complete System Budget Wipe)</option>
+    </select>
+
+    <label class="field-label">Budget Reset Mode</label>
+    <select id="clearResetMode">
+      <option value="delete">Remove Budget Allocations Completely (Recommended before fresh upload)</option>
+      <option value="zero">Zero Out Allocations (Keep category rows, set all amounts to ₹0)</option>
+    </select>
+
+    <div style="margin:16px 0;padding:12px;background:var(--danger-bg);border:1px solid #fca5a5;border-radius:var(--radius-sm)">
+      <label style="cursor:pointer;display:flex;align-items:flex-start;gap:10px;font-weight:600;color:var(--danger);font-size:13px;">
+        <input type="checkbox" id="clearNfasCheck" checked style="width:auto;margin-top:2px;" />
+        <span>Also clear associated Notes for Approval (NFAs) for this academic year to prevent orphaned proposals</span>
+      </label>
+    </div>
+
+    <div class="row" style="justify-content:flex-end;margin-top:20px;gap:12px;">
+      <button class="secondary" onclick="closeModal()">Cancel</button>
+      <button class="danger" onclick="executeClearBudget()">Confirm &amp; Clear Budget Data</button>
+    </div>
+  `);
+}
+
+async function executeClearBudget(){
+  const fySelect = document.getElementById('clearBudgetFy');
+  const fyId = fySelect.value;
+  const resetMode = document.getElementById('clearResetMode').value;
+  const clearNfas = document.getElementById('clearNfasCheck').checked;
+  const fyText = fySelect.selectedOptions[0]?.text || fyId;
+
+  if (!confirm(`Are you SURE you want to clear budget data for "${fyText}"? This action cannot be undone.`)) return;
+
+  try {
+    toast('Clearing budget data...');
+    const res = await api('/admin/clear-budget', {
+      method: 'POST',
+      body: { financial_year_id: fyId, reset_mode: resetMode, clear_nfas: clearNfas }
+    });
+    toast(`✅ Cleared ${res.clearedBudgetsCount} budget lines and ${res.clearedNfasCount} NFAs for ${res.fyLabel}!`);
+    closeModal();
+    boot();
+  } catch(e) {
+    toast(e.message);
+  }
 }
 
 async function downloadBudgetTemplate(){
@@ -1577,7 +1651,6 @@ async function newNfaModal(){
       <div>Qty</div>
       <div>Rate (₹)</div>
       <div>Amount (₹)</div>
-      <div>Justification</div>
       <div></div>
     </div>
     
@@ -1658,7 +1731,7 @@ function toggleSdg(sdg, el){
   }
 }
 
-function addItemRow(p='', q='', r='', a='', j=''){
+function addItemRow(p='', q='', r='', a=''){
   const wrap = document.getElementById('itemsWrap');
   const row = document.createElement('div');
   row.className = 'item-row';
@@ -1667,7 +1740,6 @@ function addItemRow(p='', q='', r='', a='', j=''){
     <input placeholder="Qty" class="it-q" type="number" min="1" value="${q}" oninput="calcRow(this)" />
     <input placeholder="Rate (₹)" class="it-r" type="number" min="0" value="${r}" oninput="calcRow(this)" />
     <input placeholder="Amount (₹)" class="it-a" type="number" min="0" value="${a}" oninput="calcTotal()" style="font-weight:700" />
-    <input placeholder="Justification of need" class="it-j" value="${j}" />
     <button class="del-item" type="button" onclick="this.parentElement.remove();calcTotal()">✕</button>
   `;
   wrap.appendChild(row);
@@ -1718,7 +1790,7 @@ async function createNfa(andSubmit){
     quantity: r.querySelector('.it-q').value.trim(),
     rate: r.querySelector('.it-r').value.trim(),
     amount: Number(r.querySelector('.it-a').value) || 0,
-    justification: r.querySelector('.it-j').value.trim()
+    justification: r.querySelector('.it-j')?.value?.trim() || ''
   })).filter(i => i.particulars && i.amount > 0);
 
   if (items.length === 0) return toast('Add at least one item with particulars and amount');
@@ -1989,6 +2061,14 @@ async function editNfaModal(id){
       <button class="secondary" type="button" onclick="addItemRow()">+ Add Item Row</button>
     </div>
     
+    <div id="itemsHeader" class="item-row muted" style="font-size:11px;font-weight:700">
+      <div>Particulars</div>
+      <div>Qty</div>
+      <div>Rate (₹)</div>
+      <div>Amount (₹)</div>
+      <div></div>
+    </div>
+
     <div id="itemsWrap"></div>
 
     <div class="row" style="justify-content:flex-end;margin:14px 0 20px;font-size:16px;">
@@ -2003,7 +2083,7 @@ async function editNfaModal(id){
   `);
 
   if (n.items && n.items.length > 0) {
-    n.items.forEach(it => addItemRow(it.particulars, it.quantity, it.rate, it.amount, it.justification));
+    n.items.forEach(it => addItemRow(it.particulars, it.quantity, it.rate, it.amount));
   } else {
     addItemRow();
   }
@@ -2019,7 +2099,7 @@ async function saveNfaEdits(id){
     quantity: r.querySelector('.it-q').value.trim(),
     rate: r.querySelector('.it-r').value.trim(),
     amount: Number(r.querySelector('.it-a').value) || 0,
-    justification: r.querySelector('.it-j').value.trim()
+    justification: r.querySelector('.it-j')?.value?.trim() || ''
   })).filter(i => i.particulars && i.amount > 0);
 
   try {
@@ -2536,13 +2616,18 @@ async function renderAdmin(main){
   const departments = await api('/budgets/departments');
   const users = await api('/admin/users');
   let html = `
-    <div class="card">
-      <h2 class="card-title" style="margin-bottom:12px">Private Master Budget Management (Admin Only)</h2>
-      <div class="card-sub" style="margin-bottom:16px">Upload your private university Excel budget workbook or download the official template.</div>
-      <div class="row" style="gap:12px;">
-        <button class="gold" onclick="openPrivateBudgetUploadModal()">📁 Upload Private University Budget (.xlsx)</button>
+    <div class="card" style="border: 2px solid var(--accent); background: linear-gradient(to bottom right, #ffffff, var(--accent-light));">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title" style="margin-bottom:4px">🏛️ Master Budget Management &amp; Fiscal Year Transition</h2>
+          <div class="card-sub">Super Admin tools: upload new academic year budget workbook (.xlsx), clear previous year allocations, or download official budget templates.</div>
+        </div>
+      </div>
+      <div class="row" style="gap:12px;flex-wrap:wrap;margin-top:14px;">
+        <button class="gold" onclick="openPrivateBudgetUploadModal()">📁 Upload New Academic Year Budget (.xlsx)</button>
+        <button class="danger" onclick="openClearBudgetModal()">🗑️ Clear Previous Year / Budget Data</button>
         <button class="secondary" onclick="downloadBudgetTemplate()">📥 Download Blank Template (.xlsx)</button>
-        <button class="secondary" onclick="exportBudgetReport('')">📥 Export Entire University Master Workbook</button>
+        <button class="secondary" onclick="exportBudgetReport('')">📥 Export Entire Master Workbook</button>
       </div>
     </div>
 

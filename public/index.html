@@ -940,6 +940,16 @@ function fmtStatus(s){
   return map[s] || (s ? String(s).replace(/_/g, ' ') : '');
 }
 
+function escapeHtml(str){
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 async function api(path, opts={}){
   const res = await fetch(API+path, {
     ...opts,
@@ -1037,7 +1047,7 @@ async function boot(){
 
   const fySelect = document.getElementById('headerFySelect');
   fySelect.innerHTML = REF.financialYears.map(f => 
-    `<option value="${f.id}" ${f.id === currentActiveFyId ? 'selected' : ''}>${f.label}${f.is_active ? ' (Active)' : ''}</option>`
+    `<option value="${f.id}" ${f.id === currentActiveFyId ? 'selected' : ''}>${escapeHtml(f.label)}${f.is_active ? ' (Active)' : ''}</option>`
   ).join('');
 
   const tabs = TABS_BY_ROLE[USER.role] || ['dashboard', 'nfas', 'budgets'];
@@ -1200,7 +1210,7 @@ async function renderHome(main){
         <div class="category-header" onclick="toggleAccordion('cat-acc-${line.id}')">
           <div class="category-name-group">
             <span class="category-chevron">▶</span>
-            <span class="category-title">${line.category_name}</span>
+            <span class="category-title">${escapeHtml(line.category_name)}</span>
             ${isCapex ? `<span class="category-type-tag" style="background:#fce7ba;color:#8c6827;border-color:#e6cf9b;">CAPEX</span>` : ''}
             ${isEarnings ? `<span class="category-type-tag" style="background:#e0f2fe;color:#0369a1;border-color:#bae6fd;">EARNINGS</span>` : ''}
             <span class="badge ${line.status === 'exceeded' ? 'b-rejected' : 'b-approved'}">${line.utilization_pct}%</span>
@@ -1231,7 +1241,7 @@ async function renderHome(main){
             <tbody>
               ${subcats.length > 0 ? subcats.map(sub => `
                 <tr>
-                  <td><strong>${sub.name || 'Particulars'}</strong></td>
+                  <td><strong>${escapeHtml(sub.name || 'Particulars')}</strong></td>
                   <td>${inr(sub.allocated_amount)}</td>
                   <td style="color:var(--success)">${inr(sub.approved_amount)}</td>
                   <td style="color:var(--warning)">${inr(sub.pending_amount)}</td>
@@ -1293,7 +1303,7 @@ function openEditCategoryModal(lineId, catName, currentAlloc){
     <div class="field-help">Admin direct update for department budget ceiling. Changes reflect immediately across all views.</div>
 
     <label class="field-label">Category Name</label>
-    <input id="editCatName" value="${catName}" />
+    <input id="editCatName" value="${escapeHtml(catName)}" />
 
     <label class="field-label">Allocated Annual Ceiling (₹)</label>
     <input id="editCatAlloc" type="number" value="${currentAlloc}" min="0" />
@@ -1328,7 +1338,7 @@ function openEditSubcategoryModal(subId, subName, currentAlloc){
     <div class="field-help">Admin direct update for subcategory particulars and allocation.</div>
 
     <label class="field-label">Subcategory Name</label>
-    <input id="editSubName" value="${subName}" />
+    <input id="editSubName" value="${escapeHtml(subName)}" />
 
     <label class="field-label">Allocated Budget (₹)</label>
     <input id="editSubAlloc" type="number" value="${currentAlloc}" min="0" />
@@ -1552,12 +1562,12 @@ async function renderInbox(main){
   inboxItems.forEach(n => {
     html += `
       <tr>
-        <td><strong>${n.ref_no}</strong><div class="muted">${n.date}</div></td>
-        <td><strong>${n.title}</strong><div class="muted">${n.submitted_by_name || 'Faculty'}</div></td>
-        <td>${deptName(n.department_id)}</td>
+        <td><strong>${escapeHtml(n.ref_no)}</strong><div class="muted">${escapeHtml(n.date)}</div></td>
+        <td><strong>${escapeHtml(n.title)}</strong><div class="muted">${escapeHtml(n.submitted_by_name || 'Faculty')}</div></td>
+        <td>${escapeHtml(deptName(n.department_id))}</td>
         <td>
-          <strong>${catName(n.budget_category_id)}</strong>
-          ${n.budget_subcategory_name ? `<div class="muted">↳ ${n.budget_subcategory_name}</div>` : ''}
+          <strong>${escapeHtml(catName(n.budget_category_id))}</strong>
+          ${n.budget_subcategory_name ? `<div class="muted">↳ ${escapeHtml(n.budget_subcategory_name)}</div>` : ''}
         </td>
         <td><strong style="color:var(--primary);font-size:14px">${inr(n.total_amount)}</strong></td>
         <td><span class="badge b-${n.status}">${fmtStatus(n.status)}</span></td>
@@ -1603,12 +1613,12 @@ async function renderNfas(main){
     list.forEach(n => {
       html += `
         <tr>
-          <td><strong>${n.ref_no}</strong><div class="muted">${n.date}</div></td>
-          <td><strong>${n.title}</strong><div class="muted">${n.submitted_by_name || 'Faculty'}</div></td>
-          <td>${deptName(n.department_id)}</td>
+          <td><strong>${escapeHtml(n.ref_no)}</strong><div class="muted">${escapeHtml(n.date)}</div></td>
+          <td><strong>${escapeHtml(n.title)}</strong><div class="muted">${escapeHtml(n.submitted_by_name || 'Faculty')}</div></td>
+          <td>${escapeHtml(deptName(n.department_id))}</td>
           <td>
-            <strong>${catName(n.budget_category_id)}</strong>
-            ${n.budget_subcategory_name ? `<div class="muted">↳ ${n.budget_subcategory_name}</div>` : ''}
+            <strong>${escapeHtml(catName(n.budget_category_id))}</strong>
+            ${n.budget_subcategory_name ? `<div class="muted">↳ ${escapeHtml(n.budget_subcategory_name)}</div>` : ''}
           </td>
           <td><strong>${inr(n.total_amount)}</strong></td>
           <td><span class="badge b-${n.status}">${fmtStatus(n.status)}</span></td>
@@ -1645,7 +1655,7 @@ async function newNfaModal(){
       <div style="flex:1">
         <label class="field-label">Reference Number (Auto-Generated)</label>
         <div class="row" style="gap:6px">
-          <input id="nfaRefNo" value="${autoRef}" style="margin-bottom:0;flex:1;font-weight:700;color:var(--primary)" />
+          <input id="nfaRefNo" value="${escapeHtml(autoRef)}" style="margin-bottom:0;flex:1;font-weight:700;color:var(--primary)" />
           <span class="badge" style="background:var(--accent-light);color:#8c6827;border:1px solid var(--accent-border);">⚡ Auto</span>
         </div>
       </div>
@@ -1669,7 +1679,7 @@ async function newNfaModal(){
       </div>
       <div style="flex:1">
         <label class="field-label">Faculty Proposer Name</label>
-        <input id="nfaFacultyName" value="${USER.name}" />
+        <input id="nfaFacultyName" value="${escapeHtml(USER.name)}" />
       </div>
     </div>
 
@@ -1784,7 +1794,7 @@ function formatCategoryOptionLabel(rawName, maxLen = 80){
 }
 
 function escapeHtmlAttr(str){
-  return String(str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return escapeHtml(str);
 }
 
 function filterModalCategories(type){
@@ -1979,10 +1989,10 @@ function addItemRow(p='', q='', r='', a=''){
   const row = document.createElement('div');
   row.className = 'item-row';
   row.innerHTML = `
-    <input placeholder="Particulars / Item Description" class="it-p" value="${p}" />
-    <input placeholder="Qty" class="it-q" type="number" min="1" value="${q}" oninput="calcRow(this)" />
-    <input placeholder="Rate (₹)" class="it-r" type="number" min="0" value="${r}" oninput="calcRow(this)" />
-    <input placeholder="Amount (₹)" class="it-a" type="number" min="0" value="${a}" oninput="calcTotal()" style="font-weight:700" />
+    <input placeholder="Particulars / Item Description" class="it-p" value="${escapeHtml(p)}" />
+    <input placeholder="Qty" class="it-q" type="number" min="1" value="${escapeHtml(q)}" oninput="calcRow(this)" />
+    <input placeholder="Rate (₹)" class="it-r" type="number" min="0" value="${escapeHtml(r)}" oninput="calcRow(this)" />
+    <input placeholder="Amount (₹)" class="it-a" type="number" min="0" value="${escapeHtml(a)}" oninput="calcTotal()" style="font-weight:700" />
     <button class="del-item" type="button" onclick="this.parentElement.remove();calcTotal()">✕</button>
   `;
   wrap.appendChild(row);
@@ -2123,8 +2133,8 @@ async function openNfa(id){
     <button class="close-btn" onclick="closeModal()">✕</button>
     <div class="row" style="justify-content:space-between;align-items:flex-start">
       <div>
-        <h2 style="margin:0 0 4px">${n.title}</h2>
-        <div class="card-sub">${n.ref_no} · ${deptName(n.department_id)} · ${n.date}</div>
+        <h2 style="margin:0 0 4px">${escapeHtml(n.title)}</h2>
+        <div class="card-sub">${escapeHtml(n.ref_no)} · ${escapeHtml(deptName(n.department_id))} · ${escapeHtml(n.date)}</div>
       </div>
       <span class="badge b-${n.status}" style="font-size:13px;padding:6px 14px;">${fmtStatus(n.status)}</span>
     </div>
@@ -2133,15 +2143,15 @@ async function openNfa(id){
 
     <div class="card" style="padding:16px;background:var(--section-bg);margin:16px 0;border-left:4px solid var(--accent)">
       <div class="row" style="gap:24px;">
-        <div><span class="muted">Main Category:</span> <strong>${catName(n.budget_category_id)}</strong></div>
-        ${n.budget_subcategory_name ? `<div><span class="muted">Subcategory:</span> <strong style="color:var(--primary)">${n.budget_subcategory_name}</strong></div>` : ''}
-        <div><span class="muted">Proposer:</span> <strong>${n.submitted_by_name || 'Faculty'}</strong></div>
+        <div><span class="muted">Main Category:</span> <strong>${escapeHtml(catName(n.budget_category_id))}</strong></div>
+        ${n.budget_subcategory_name ? `<div><span class="muted">Subcategory:</span> <strong style="color:var(--primary)">${escapeHtml(n.budget_subcategory_name)}</strong></div>` : ''}
+        <div><span class="muted">Proposer:</span> <strong>${escapeHtml(n.submitted_by_name || 'Faculty')}</strong></div>
       </div>
-      ${n.sdgs ? `<div style="margin-top:8px"><span class="muted">SDGs:</span> <span style="color:var(--primary);font-weight:600">${n.sdgs}</span></div>` : ''}
+      ${n.sdgs ? `<div style="margin-top:8px"><span class="muted">SDGs:</span> <span style="color:var(--primary);font-weight:600">${escapeHtml(n.sdgs)}</span></div>` : ''}
     </div>
 
-    <p><strong>Purpose:</strong> ${n.purpose || '—'}</p>
-    <p><strong>Justification:</strong> ${n.justification || '—'}</p>
+    <p><strong>Purpose:</strong> ${escapeHtml(n.purpose || '—')}</p>
+    <p><strong>Justification:</strong> ${escapeHtml(n.justification || '—')}</p>
 
     <h3 style="margin-top:20px;font-size:16px;">Budget Items</h3>
     <table>
@@ -2158,8 +2168,8 @@ async function openNfa(id){
         ${n.items.map(it => `
           <tr>
             <td>${it.sl_no}</td>
-            <td><strong>${it.particulars}</strong>${it.justification ? `<div class="muted">${it.justification}</div>` : ''}</td>
-            <td>${it.quantity || '—'}</td>
+            <td><strong>${escapeHtml(it.particulars)}</strong>${it.justification ? `<div class="muted">${escapeHtml(it.justification)}</div>` : ''}</td>
+            <td>${escapeHtml(it.quantity || '—')}</td>
             <td>${it.rate ? inr(it.rate) : '—'}</td>
             <td style="font-weight:700">${inr(it.amount)}</td>
           </tr>
@@ -2189,10 +2199,10 @@ async function openNfa(id){
           ${n.approvals.map(a => `
             <tr>
               <td>${new Date(a.created_at).toLocaleString()}</td>
-              <td><strong>${a.approver_name || a.approver_role || 'Approver'}</strong></td>
+              <td><strong>${escapeHtml(a.approver_name || a.approver_role || 'Approver')}</strong></td>
               <td><span class="role-pill" style="color:#501026;background:var(--accent-light);border:1px solid var(--accent-border)">${String(a.approver_role || '').replace('_',' ')}</span></td>
               <td><span class="badge ${a.decision==='approved'?'b-approved':a.decision==='rejected'?'b-rejected':'b-submitted'}">${a.decision}</span></td>
-              <td>${a.comments || '—'}</td>
+              <td>${escapeHtml(a.comments || '—')}</td>
             </tr>
           `).join('')}
         </tbody>
@@ -2278,17 +2288,17 @@ async function editNfaModal(id){
 
   openModal(`
     <button class="close-btn" onclick="closeModal()">✕</button>
-    <h2>Edit NFA: ${n.ref_no}</h2>
+    <h2>Edit NFA: ${escapeHtml(n.ref_no)}</h2>
     <div class="field-help">Update particulars, items, rates, or justification before next approval.</div>
 
     <label class="field-label">Title</label>
-    <input id="editTitle" value="${n.title}" />
+    <input id="editTitle" value="${escapeHtml(n.title)}" />
 
     <label class="field-label">Purpose</label>
-    <textarea id="editPurpose" rows="2">${n.purpose || ''}</textarea>
+    <textarea id="editPurpose" rows="2">${escapeHtml(n.purpose || '')}</textarea>
 
     <label class="field-label">Justification</label>
-    <textarea id="editJust" rows="2">${n.justification || ''}</textarea>
+    <textarea id="editJust" rows="2">${escapeHtml(n.justification || '')}</textarea>
 
     <label class="field-label">Select Relevant UN SDGs</label>
     <div class="sdg-grid" id="sdgGrid">
@@ -2394,12 +2404,12 @@ async function renderProjects(main){
     projects.forEach(p => {
       html += `
         <tr>
-          <td><strong>${p.name}</strong>${p.description ? `<div class="muted">${p.description}</div>` : ''}</td>
-          <td>${deptName(p.department_id)}</td>
-          <td>${catName(p.budget_category_id)}</td>
+          <td><strong>${escapeHtml(p.name)}</strong>${p.description ? `<div class="muted">${escapeHtml(p.description)}</div>` : ''}</td>
+          <td>${escapeHtml(deptName(p.department_id))}</td>
+          <td>${escapeHtml(catName(p.budget_category_id))}</td>
           <td><strong>${inr(p.budget_amount)}</strong></td>
           <td>
-            ${p.nfas.map(n => `<span class="badge b-${n.status}" style="cursor:pointer" onclick="openNfa('${n.id}')">${n.ref_no}</span>`).join(' ') || 'None'}
+            ${p.nfas.map(n => `<span class="badge b-${n.status}" style="cursor:pointer" onclick="openNfa('${n.id}')">${escapeHtml(n.ref_no)}</span>`).join(' ') || 'None'}
           </td>
         </tr>
       `;
@@ -2496,7 +2506,7 @@ async function renderBudgets(main){
         <div class="category-header" onclick="toggleAccordion('bgt-acc-${line.id}')">
           <div class="category-name-group">
             <span class="category-chevron">▶</span>
-            <span class="category-title">${line.category_name}</span>
+            <span class="category-title">${escapeHtml(line.category_name)}</span>
             ${isCapex ? `<span class="category-type-tag" style="background:#fce7ba;color:#8c6827;border-color:#e6cf9b;">CAPEX</span>` : ''}
             <span class="badge ${line.status === 'exceeded' ? 'b-rejected' : 'b-approved'}">${line.utilization_pct}%</span>
           </div>
@@ -2527,7 +2537,7 @@ async function renderBudgets(main){
             <tbody>
               ${subcats.length > 0 ? subcats.map(sub => `
                 <tr>
-                  <td><strong>${sub.name || 'Particulars'}</strong></td>
+                  <td><strong>${escapeHtml(sub.name || 'Particulars')}</strong></td>
                   <td>${inr(sub.allocated_amount)}</td>
                   <td style="color:var(--success)">${inr(sub.approved_amount)}</td>
                   <td style="color:var(--warning)">${inr(sub.pending_amount)}</td>
@@ -2637,7 +2647,7 @@ async function loadRolloverPreview(){
         <tbody>
           ${data.departments.map(d => `
             <tr>
-              <td><strong>${d.department_name}</strong> (${d.department_code})</td>
+              <td><strong>${escapeHtml(d.department_name)}</strong> (${escapeHtml(d.department_code)})</td>
               <td>${inr(d.current_allocated)}</td>
               <td style="font-weight:700;color:var(--primary)">${inr(d.projected_allocated)}</td>
               <td style="color:var(--success)">+${inr(d.difference)}</td>
@@ -2769,7 +2779,7 @@ async function renderExcel(main){
         <tbody>
           ${records.map(r=>`
             <tr>
-              <td><strong>${r.filename}</strong></td>
+              <td><strong>${escapeHtml(r.filename)}</strong></td>
               <td><span class="badge ${r.status==='confirmed'?'b-approved':'b-submitted'}">${r.status}</span></td>
               <td>${r.diff.length}</td>
               <td>${new Date(r.created_at).toLocaleString()}</td>
@@ -2796,7 +2806,7 @@ async function previewExcel(dept){
     else {
       h += `<table><thead><tr><th>Change</th><th>Particulars</th><th>Current Amount</th><th>Workbook Amount</th><th>Difference</th></tr></thead><tbody>`;
       r.diffs.forEach(d => {
-        h += `<tr><td>${d.change_type==='new'?'New row':'Changed'}</td><td>${d.particulars}</td><td>${d.old_amount===null?'(new)':inr(d.old_amount)}</td><td>${inr(d.new_amount)}</td><td style="color:${d.difference<0?'var(--success)':'var(--warning)'}">${inr(d.difference)}</td></tr>`;
+        h += `<tr><td>${d.change_type==='new'?'New row':'Changed'}</td><td>${escapeHtml(d.particulars)}</td><td>${d.old_amount===null?'(new)':inr(d.old_amount)}</td><td>${inr(d.new_amount)}</td><td style="color:${d.difference<0?'var(--success)':'var(--warning)'}">${inr(d.difference)}</td></tr>`;
       });
       h += `</tbody></table><button style="margin-top:12px" onclick="confirmExcel('${r.sync_record_id}')">Confirm and Apply Changes</button>`;
     }
@@ -2844,7 +2854,7 @@ async function renderAudit(main){
               <td style="font-weight:700">${l.new_amount !== null ? inr(l.new_amount) : '—'}</td>
               <td style="color:${l.difference > 0 ? 'var(--warning)' : 'var(--success)'}">${l.difference !== null ? inr(l.difference) : '—'}</td>
               <td><span class="role-pill" style="color:#501026;background:var(--accent-light);border:1px solid var(--accent-border)">${String(l.role || '').replace('_',' ')}</span></td>
-              <td class="muted">${l.reason}</td>
+              <td class="muted">${escapeHtml(l.reason)}</td>
             </tr>
           `).join('') || '<tr><td colspan="7" class="muted" style="text-align:center;padding:30px;">No audit events recorded</td></tr>'}
         </tbody>
@@ -2885,7 +2895,7 @@ async function renderAdmin(main){
         <tbody>
           ${REF.financialYears.map(f => `
             <tr>
-              <td><strong>${f.label}</strong></td>
+              <td><strong>${escapeHtml(f.label)}</strong></td>
               <td>${f.is_active ? '<span class="badge b-approved">Active Year</span>' : '<span class="badge b-draft">Inactive</span>'}</td>
               <td>${!f.is_active ? `<button class="secondary" style="padding:5px 10px;font-size:12px" onclick="activateFy('${f.id}')">Set Active</button>` : ''}</td>
             </tr>
@@ -2916,11 +2926,11 @@ async function renderAdmin(main){
         <tbody>
           ${users.map(u => `
             <tr>
-              <td><strong>${u.name}</strong></td>
-              <td>${u.email}</td>
+              <td><strong>${escapeHtml(u.name)}</strong></td>
+              <td>${escapeHtml(u.email)}</td>
               <td><span class="role-pill" style="color:#501026;background:var(--accent-light);border:1px solid var(--accent-border)">${String(u.role || '').replace('_',' ')}</span></td>
-              <td>${u.department_id ? deptName(u.department_id) : 'Institution-wide'}</td>
-              <td><button class="danger" style="padding:4px 8px;font-size:11px" onclick="removeUser('${u.id}', '${u.name}')">Remove</button></td>
+              <td>${u.department_id ? escapeHtml(deptName(u.department_id)) : 'Institution-wide'}</td>
+              <td><button class="danger" style="padding:4px 8px;font-size:11px" data-id="${u.id}" data-name="${escapeHtml(u.name)}" onclick="removeUser(this.getAttribute('data-id'), this.getAttribute('data-name'))">Remove</button></td>
             </tr>
           `).join('')}
         </tbody>

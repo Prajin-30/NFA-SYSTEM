@@ -20,12 +20,19 @@ authRouter.post('/login', (req, res) => {
   res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role, department_id: user.department_id } });
 });
 
-/** GET /api/auth/embedded — session bootstrap for the host website integration. */
+/**
+ * GET /api/auth/embedded
+ * Insecure embedded session bootstrap is permanently disabled.
+ * Returns 404 without exposing user details, tokens, or internal configuration.
+ *
+ * Preserved reference implementation for potential future secured integration:
+ * const embeddedEmail = process.env.EMBEDDED_USER_EMAIL || 'hod@christ.edu';
+ * const user = store.data.users.find((u) => u.email.toLowerCase() === embeddedEmail.toLowerCase());
+ * if (!user) return res.status(503).json({ error: 'Embedded user not found' });
+ * const token = signToken({ id: user.id, role: user.role, department_id: user.department_id, name: user.name, email: user.email });
+ * res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role, department_id: user.department_id } });
+ */
 authRouter.get('/embedded', (_req, res) => {
-  const embeddedEmail = process.env.EMBEDDED_USER_EMAIL || 'hod@christ.edu';
-  const user = store.data.users.find((u) => u.email.toLowerCase() === embeddedEmail.toLowerCase());
-  if (!user) return res.status(503).json({ error: `Embedded user '${embeddedEmail}' was not found` });
-  const token = signToken({ id: user.id, role: user.role, department_id: user.department_id, name: user.name, email: user.email });
-  res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role, department_id: user.department_id } });
+  res.status(404).json({ error: 'Not found' });
 });
 

@@ -25,7 +25,7 @@ function formatDate(value?: string | null): string {
 }
 
 function formatAmount(value: number): string {
-  return `₹ ${Number(value || 0).toLocaleString('en-IN')}`;
+  return `Rs. ${Number(value || 0).toLocaleString('en-IN')}`;
 }
 
 function safeFileName(value: string): string {
@@ -194,7 +194,7 @@ export function renderNfaPdf(
 
   // Bullet 5: Annexure-I Reference & Total Amount
   renderBullet(
-    `The estimated expenditure details are attached as Annexure-I. (₹ ${Number(nfa.total_amount || 0).toLocaleString('en-IN')})`
+    `The estimated expenditure details are attached as Annexure-I. (Rs. ${Number(nfa.total_amount || 0).toLocaleString('en-IN')})`
   );
 
   // 6. Approval & Signature Area on Page 1
@@ -233,13 +233,13 @@ export function renderNfaPdf(
     doc.text(`HOD, Dept. of ${dept.code || dept.name}`, hodX, doc.y + 2, { width: colHalfWidth });
     doc.text(`Approved Date: ${formatDate(hodApproval.created_at)}`, hodX, doc.y + 2, { width: colHalfWidth });
     doc.font(fontBold).fontSize(10).fillColor('#000000');
-    doc.text('Status: Approved', hodX, doc.y + 2, { width: colHalfWidth });
+    doc.text('Approved', hodX, doc.y + 2, { width: colHalfWidth });
   } else {
     doc.font(fontBold).fontSize(11.5).fillColor('#000000');
     doc.text('Head of Department', hodX, submitY, { width: colHalfWidth });
     doc.font(fontRegular).fontSize(10.5).fillColor('#000000');
     doc.text(`Dept. of ${dept.code || dept.name}`, hodX, doc.y + 2, { width: colHalfWidth });
-    doc.text('Status: Pending Approval', hodX, doc.y + 2, { width: colHalfWidth });
+    doc.text('Pending Approval', hodX, doc.y + 2, { width: colHalfWidth });
   }
 
   // Level 2: Management Approval Row (Dean, Director, Finance Officer)
@@ -255,14 +255,14 @@ export function renderNfaPdf(
     doc.text('Dean, SoET & SoA', deanX, doc.y + 2, { width: colThirdWidth });
     doc.text('Bangalore Kengeri Campus', deanX, doc.y + 2, { width: colThirdWidth });
     doc.text(`Approved: ${formatDate(deanApproval.created_at)}`, deanX, doc.y + 2, { width: colThirdWidth });
-    doc.font(fontBold).fontSize(9.5).text('Status: Approved', deanX, doc.y + 2, { width: colThirdWidth });
+    doc.font(fontBold).fontSize(9.5).text('Approved', deanX, doc.y + 2, { width: colThirdWidth });
   } else {
     doc.font(fontBold).fontSize(11).fillColor('#000000');
     doc.text('Dean / Associate Dean', deanX, mgmtY, { width: colThirdWidth });
     doc.font(fontRegular).fontSize(10).fillColor('#000000');
     doc.text('School of Engineering & Tech', deanX, doc.y + 2, { width: colThirdWidth });
     doc.text('Bangalore Kengeri Campus', deanX, doc.y + 2, { width: colThirdWidth });
-    doc.text('Status: Pending Approval', deanX, doc.y + 2, { width: colThirdWidth });
+    doc.text('Pending Approval', deanX, doc.y + 2, { width: colThirdWidth });
   }
 
   // Authority 2: Director (Center)
@@ -274,13 +274,13 @@ export function renderNfaPdf(
     doc.text('Director,', dirX, doc.y + 2, { width: colThirdWidth });
     doc.text('Bangalore Kengeri Campus', dirX, doc.y + 2, { width: colThirdWidth });
     doc.text(`Approved: ${formatDate(directorApproval.created_at)}`, dirX, doc.y + 2, { width: colThirdWidth });
-    doc.font(fontBold).fontSize(9.5).text('Status: Approved', dirX, doc.y + 2, { width: colThirdWidth });
+    doc.font(fontBold).fontSize(9.5).text('Approved', dirX, doc.y + 2, { width: colThirdWidth });
   } else {
     doc.font(fontBold).fontSize(11).fillColor('#000000');
     doc.text('Director', dirX, mgmtY, { width: colThirdWidth });
     doc.font(fontRegular).fontSize(10).fillColor('#000000');
     doc.text('Bangalore Kengeri Campus', dirX, doc.y + 2, { width: colThirdWidth });
-    doc.text('Status: Pending Approval', dirX, doc.y + 3, { width: colThirdWidth });
+    doc.text('Pending Approval', dirX, doc.y + 3, { width: colThirdWidth });
   }
 
   // Authority 3: Finance Officer (Right)
@@ -292,13 +292,13 @@ export function renderNfaPdf(
     doc.text('Finance Officer,', finX, doc.y + 2, { width: colThirdWidth });
     doc.text('Bangalore Kengeri Campus', finX, doc.y + 2, { width: colThirdWidth });
     doc.text(`Approved: ${formatDate(financeApproval.created_at)}`, finX, doc.y + 2, { width: colThirdWidth });
-    doc.font(fontBold).fontSize(9.5).text('Status: Approved', finX, doc.y + 2, { width: colThirdWidth });
+    doc.font(fontBold).fontSize(9.5).text('Approved', finX, doc.y + 2, { width: colThirdWidth });
   } else {
     doc.font(fontBold).fontSize(11).fillColor('#000000');
     doc.text('Finance Officer', finX, mgmtY, { width: colThirdWidth });
     doc.font(fontRegular).fontSize(10).fillColor('#000000');
     doc.text('Bangalore Kengeri Campus', finX, doc.y + 2, { width: colThirdWidth });
-    doc.text('Status: Pending Approval', finX, doc.y + 3, { width: colThirdWidth });
+    doc.text('Pending Approval', finX, doc.y + 3, { width: colThirdWidth });
   }
 
   // =========================================================================
@@ -327,18 +327,25 @@ export function renderNfaPdf(
     { key: 'sl', label: 'Sl. No', x: leftMargin, width: 45, align: 'center' as const },
     { key: 'particulars', label: 'Particulars', x: leftMargin + 45, width: 230, align: 'left' as const },
     { key: 'quantity', label: 'Quantity', x: leftMargin + 275, width: 60, align: 'center' as const },
-    { key: 'rate', label: 'Rate Per Quantity (₹)', x: leftMargin + 335, width: 85, align: 'right' as const },
-    { key: 'amount', label: 'Estimated Amount (₹)', x: leftMargin + 420, width: 85, align: 'right' as const },
+    { key: 'rate', label: 'Rate Per Quantity (Rs.)', x: leftMargin + 335, width: 85, align: 'right' as const },
+    { key: 'amount', label: 'Estimated Amount (Rs.)', x: leftMargin + 420, width: 85, align: 'right' as const },
   ];
 
-  const headerHeight = 24;
+  const headerFontSize = 10.5;
+  doc.font(fontBold).fontSize(headerFontSize);
+  const maxHeaderHeight = Math.max(
+    ...tableColumns.map((c) => doc.heightOfString(c.label, { width: c.width - 6 }))
+  );
+  const headerHeight = Math.max(34, Math.ceil(maxHeaderHeight + 10));
 
   const renderTableHeader = (currentY: number) => {
     doc.lineWidth(0.8).strokeColor('#000000');
     tableColumns.forEach((c) => {
       doc.rect(c.x, currentY, c.width, headerHeight).stroke();
-      doc.font(fontBold).fontSize(11).fillColor('#000000');
-      doc.text(c.label, c.x + 3, currentY + 6, { width: c.width - 6, align: c.align });
+      doc.font(fontBold).fontSize(headerFontSize).fillColor('#000000');
+      const textH = doc.heightOfString(c.label, { width: c.width - 6 });
+      const textY = currentY + Math.max(3, (headerHeight - textH) / 2);
+      doc.text(c.label, c.x + 3, textY, { width: c.width - 6, align: c.align });
     });
     return currentY + headerHeight;
   };
@@ -420,7 +427,7 @@ export function renderNfaPdf(
 
   // Box for Total Amount Value
   doc.rect(amountCol.x, currentTableY, amountCol.width, totalRowHeight).stroke();
-  doc.text(`₹${Number(nfa.total_amount || 0).toLocaleString('en-IN')}`, amountCol.x + 3, currentTableY + 6, {
+  doc.text(`Rs. ${Number(nfa.total_amount || 0).toLocaleString('en-IN')}`, amountCol.x + 3, currentTableY + 6, {
     width: amountCol.width - 6,
     align: 'right',
   });

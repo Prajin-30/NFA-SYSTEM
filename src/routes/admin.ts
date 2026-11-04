@@ -136,7 +136,14 @@ adminRouter.delete('/users/:id', async (req: AuthedRequest, res) => {
 
 /** GET /api/admin/users */
 adminRouter.get('/users', (_req, res) => {
-  res.json(store.data.users.map((u) => ({ id: u.id, name: u.name, email: u.email, role: u.role, department_id: u.department_id })));
+  res.json(store.data.users.map((u) => ({
+    id: u.id,
+    name: u.name,
+    email: u.email,
+    role: u.role,
+    department_id: u.department_id,
+    signature_image: u.signature_image || undefined,
+  })));
 });
 
 /**

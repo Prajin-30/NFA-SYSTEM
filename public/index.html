@@ -828,6 +828,38 @@
     margin: -2px 0 12px;
   }
   .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .word-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 12px;
+    background: #E8F5EE;
+    color: #1E7E51;
+    border: 1px solid #B8E2CB;
+    transition: all 0.2s ease;
+  }
+  .word-badge.over-limit {
+    background: #FEE2E2;
+    color: #991B1B;
+    border: 1px solid #FCA5A5;
+  }
+  .nfa-type-card {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 600;
+    background: #fff;
+    transition: all 0.2s ease;
+  }
+  .nfa-type-card.active {
+    border-color: #274897;
+    background: #EEF3FA;
+    color: #274897;
+  }
 </style>
 </head>
 <body>
@@ -880,6 +912,7 @@
         <span style="font-size:11px;font-weight:700;color:#fce7ba;text-transform:uppercase;">Academic Year:</span>
         <select id="headerFySelect" class="fy-pill-select" onchange="onHeaderFyChange(this.value)"></select>
       </div>
+      <button class="secondary" style="padding:5px 11px;font-size:12px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.12);color:#fff;cursor:pointer;border-radius:4px;" onclick="openProfileModal()">✍️ Digital Signature</button>
       <span id="whoamiName" style="font-weight:700"></span>
       <span id="whoamiRole" class="role-pill"></span>
       <button class="secondary" style="padding:6px 12px;font-size:12px;border:none;" onclick="logout()">Log Out</button>
@@ -948,6 +981,178 @@ function escapeHtml(str){
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+function countWords(str) {
+  if (!str) return 0;
+  return str.trim().split(/\s+/).filter(Boolean).length;
+}
+
+function updateWordCount(inputId, badgeId, maxWords = 50) {
+  const el = document.getElementById(inputId);
+  const badge = document.getElementById(badgeId);
+  if (!el || !badge) return;
+  const count = countWords(el.value);
+  badge.textContent = `${count} / ${maxWords} words`;
+  if (count > maxWords) {
+    badge.className = 'word-badge over-limit';
+  } else {
+    badge.className = 'word-badge';
+  }
+}
+
+function onNfaTypeChange(type) {
+  const eventSection = document.getElementById('eventDetailsSection');
+  const purchaseSection = document.getElementById('purchaseDetailsSection');
+  const eventCard = document.getElementById('nfaTypeCardEvent');
+  const purchaseCard = document.getElementById('nfaTypeCardPurchase');
+
+  if (type === 'purchase') {
+    if (eventSection) eventSection.style.display = 'none';
+    if (purchaseSection) purchaseSection.style.display = 'block';
+    if (eventCard) eventCard.classList.remove('active');
+    if (purchaseCard) purchaseCard.classList.add('active');
+  } else {
+    if (eventSection) eventSection.style.display = 'block';
+    if (purchaseSection) purchaseSection.style.display = 'none';
+    if (eventCard) eventCard.classList.add('active');
+    if (purchaseCard) purchaseCard.classList.remove('active');
+  }
+}
+
+async function openProfileModal() {
+  try {
+    const me = await api('/users/me');
+    let sigHtml = '';
+    if (me.has_signature) {
+      sigHtml = `
+        <div style="margin:12px 0;padding:12px;background:#f8fafc;border:1px solid var(--border);border-radius:var(--radius-sm);text-align:center;">
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;">Current Registered Signature:</div>
+          <div style="background:#fff;border:1px dashed #cbd5e1;padding:12px;display:inline-block;border-radius:4px;">
+            <img src="${me.signature_url}?v=${Date.now()}" alt="Signature" style="max-height:60px;max-width:240px;display:block;" />
+          </div>
+          <div style="margin-top:10px;">
+            <button class="danger" style="padding:4px 10px;font-size:11px;" onclick="removeMySignature()">Remove Signature</button>
+          </div>
+        </div>
+      `;
+    } else {
+      sigHtml = `
+        <div style="margin:12px 0;padding:12px;background:#fff8ee;border:1px solid #fce7ba;border-radius:var(--radius-sm);font-size:12px;color:#92400e;">
+          ⚠️ No digital signature registered yet. Upload your official signature in PNG format (transparent background recommended) below.
+        </div>
+      `;
+    }
+
+    openModal(`
+      <button class="close-btn" onclick="closeModal()">✕</button>
+      <h2>User Profile &amp; Digital Signature</h2>
+      <div class="field-help">Manage your account details and upload an official digital signature for NFA approvals.</div>
+
+      <div class="card" style="margin:14px 0;padding:16px;background:var(--section-bg);">
+        <div class="row" style="gap:20px;flex-wrap:wrap;">
+          <div><span class="muted">Name:</span> <strong>${escapeHtml(me.name)}</strong></div>
+          <div><span class="muted">Email:</span> <strong>${escapeHtml(me.email)}</strong></div>
+          <div><span class="muted">Role:</span> <span class="role-pill" style="color:#501026;background:var(--accent-light);border:1px solid var(--accent-border)">${String(me.role).replace('_', ' ')}</span></div>
+          <div><span class="muted">Department:</span> <strong>${me.department_id ? escapeHtml(deptName(me.department_id)) : 'Institution-wide'}</strong></div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:16px;">
+        <h3 style="margin:0 0 8px;font-size:15px;color:var(--primary);">✍️ Official Digital Signature</h3>
+        <p style="font-size:12px;color:var(--text-muted);margin:0 0 10px;">
+          When you approve an NFA, your registered signature will automatically be embedded into the official generated PDF.
+        </p>
+
+        ${sigHtml}
+
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">
+          <label class="field-label" style="font-weight:700;">Upload New Signature (PNG format only)</label>
+          <div class="field-help" style="margin-bottom:8px;">Max file size: 2MB. Transparent background PNG recommended for best PDF appearance.</div>
+          <div class="row" style="gap:10px;">
+            <input type="file" id="sigFileInput" accept="image/png" style="flex:1;margin-bottom:0;" />
+            <button onclick="uploadMySignature()">Upload Signature</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="row" style="justify-content:flex-end;margin-top:16px;">
+        <button class="secondary" onclick="closeModal()">Close</button>
+      </div>
+    `);
+  } catch (e) {
+    toast(e.message);
+  }
+}
+
+async function uploadMySignature(targetUserId = null) {
+  const fileInput = document.getElementById('sigFileInput');
+  if (!fileInput || !fileInput.files[0]) {
+    return toast('Please select a PNG signature file to upload');
+  }
+  const file = fileInput.files[0];
+  if (!file.name.toLowerCase().endsWith('.png') && file.type !== 'image/png') {
+    return toast('Only PNG images are supported');
+  }
+
+  const formData = new FormData();
+  formData.append('signature', file);
+
+  const uid = targetUserId || USER.id;
+  try {
+    const res = await fetch(`/api/users/${uid}/signature`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${TOKEN}`
+      },
+      body: formData
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || 'Failed to upload signature');
+    toast('✅ Digital signature uploaded successfully!');
+    if (targetUserId) {
+      closeModal();
+      showTab('admin');
+    } else {
+      openProfileModal();
+    }
+  } catch (e) {
+    toast(e.message);
+  }
+}
+
+async function removeMySignature(targetUserId = null) {
+  if (!confirm('Are you sure you want to remove this digital signature?')) return;
+  const uid = targetUserId || USER.id;
+  try {
+    await api(`/users/${uid}/signature`, { method: 'DELETE' });
+    toast('Signature removed');
+    if (targetUserId) {
+      closeModal();
+      showTab('admin');
+    } else {
+      openProfileModal();
+    }
+  } catch (e) {
+    toast(e.message);
+  }
+}
+
+function adminManageSignature(targetUserId, targetUserName) {
+  openModal(`
+    <button class="close-btn" onclick="closeModal()">✕</button>
+    <h2>Manage Digital Signature: ${escapeHtml(targetUserName)}</h2>
+    <div class="field-help">Upload or update official digital signature for this user (PNG format only, transparent recommended).</div>
+
+    <div style="margin:16px 0;">
+      <label class="field-label" style="font-weight:700;">Select Signature File (.png)</label>
+      <input type="file" id="sigFileInput" accept="image/png" style="margin-bottom:12px;" />
+      <div class="row" style="gap:10px;">
+        <button onclick="uploadMySignature('${targetUserId}')">Upload Signature</button>
+        <button class="danger" onclick="removeMySignature('${targetUserId}')">Remove Signature</button>
+      </div>
+    </div>
+  `);
 }
 
 async function api(path, opts={}){
@@ -1058,6 +1263,30 @@ async function boot(){
 }
 
 function deptName(id){ return REF.departments.find(d => d.id === id)?.name || id; }
+
+function renderDeptSelectOptions(selectedId, includeCustom = false) {
+  const activeAcademic = (REF.departments || []).filter(d => d.is_active && d.category === 'academic');
+  const activeCoes = (REF.departments || []).filter(d => d.is_active && d.category === 'coe');
+
+  let html = `<optgroup label="Academic Departments">`;
+  activeAcademic.forEach(d => {
+    html += `<option value="${d.id}" ${d.id === selectedId ? 'selected' : ''}>${escapeHtml(d.name)}</option>`;
+  });
+  html += `</optgroup>`;
+
+  html += `<optgroup label="Centres of Excellence (CoE)">`;
+  activeCoes.forEach(d => {
+    html += `<option value="${d.id}" ${d.id === selectedId ? 'selected' : ''}>${escapeHtml(d.name)}</option>`;
+  });
+  html += `</optgroup>`;
+
+  if (includeCustom) {
+    html += `<optgroup label="Other">
+      <option value="__custom__">➕ Other / Enter Custom Department Name...</option>
+    </optgroup>`;
+  }
+  return html;
+}
 function catName(id){ return REF.categories.find(c => c.id === id)?.name || id; }
 function subcatName(id){ return REF.subcategories.find(s => s.id === id)?.name || id; }
 function activeFy(){
@@ -1637,6 +1866,7 @@ let selectedSdgs = [];
 
 async function newNfaModal(){
   selectedSdgs = [];
+  activeModalType = 'new_nfa';
   const deptId = USER.department_id || REF.departments[0]?.id;
   const fy = activeFy();
   
@@ -1647,7 +1877,7 @@ async function newNfaModal(){
   } catch(e) {}
 
   openModal(`
-    <button class="close-btn" onclick="closeModal()">✕</button>
+    <button class="close-btn" type="button" onclick="handleCloseApplyNfa()">✕</button>
     <h2>Request Note For Approval (NFA)</h2>
     <div class="field-help">Institutional workflow: Proposer (Faculty) $\\rightarrow$ HOD $\\rightarrow$ Dean $\\rightarrow$ Accounts Verification $\\rightarrow$ Director Final Approval.</div>
 
@@ -1667,10 +1897,9 @@ async function newNfaModal(){
 
     <div class="row" style="margin-top:10px;">
       <div style="flex:1">
-        <label class="field-label">Department</label>
+        <label class="field-label">Department / Centre of Excellence</label>
         <select id="nfaDept" onchange="onNfaDeptSelect(this.value)">
-          ${REF.departments.map(d=>`<option value="${d.id}" ${d.id===deptId?'selected':''}>${d.name}</option>`).join('')}
-          <option value="__custom__">➕ Other / Enter Custom Department Name...</option>
+          ${renderDeptSelectOptions(deptId, true)}
         </select>
         <div id="customDeptWrap" style="display:none;margin-top:8px;">
           <input id="customDeptName" placeholder="Enter Full Department Name (e.g. Dept. of Data Science)" style="margin-bottom:6px;" />
@@ -1712,16 +1941,125 @@ async function newNfaModal(){
       </div>
     </div>
 
+    <div style="margin-top:14px;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);">
+      <label class="field-label" style="font-weight:700;color:var(--primary);margin:0 0 8px;">Select NFA Category Type</label>
+      <div class="row" style="gap:14px;">
+        <label id="nfaTypeCardEvent" class="nfa-type-card active">
+          <input type="radio" name="nfaType" id="nfaTypeEvent" value="event" checked onchange="onNfaTypeChange('event')" />
+          📅 Event NFA (Seminars, Conferences, Workshops, Fests, Guest Lectures)
+        </label>
+        <label id="nfaTypeCardPurchase" class="nfa-type-card">
+          <input type="radio" name="nfaType" id="nfaTypePurchase" value="purchase" onchange="onNfaTypeChange('purchase')" />
+          🛒 Purchase NFA (Equipment, Lab Components, Hardware, Software, Services)
+        </label>
+      </div>
+    </div>
+
     <label class="field-label" style="margin-top:14px;font-weight:700">Title of Proposal</label>
-    <input id="nfaTitle" class="field-focus-pulse" placeholder="e.g. Procurement of Research GPU Servers / Academic Hackathon / FDP" />
+    <input id="nfaTitle" class="field-focus-pulse" placeholder="e.g. Procurement of Research GPU Servers / National Conference on AI" />
 
-    <label class="field-label">Purpose &amp; Objective</label>
-    <textarea id="nfaPurpose" rows="2" placeholder="Explain the specific purpose and outcome of this proposal"></textarea>
+    <!-- FOUR DESCRIPTION POINTS (MAX 50 WORDS EACH) -->
+    <div style="margin-top:14px;padding:14px;background:#FAFBFC;border:1px solid var(--border);border-radius:var(--radius-sm);">
+      <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <label class="field-label" style="font-weight:700;color:var(--primary);margin:0;">Four NFA Description Points (Max 50 Words Each)</label>
+        <span class="field-help" style="margin:0;">Strict limit: 50 words per point</span>
+      </div>
 
-    <label class="field-label">Justification of Need</label>
-    <textarea id="nfaJust" rows="2" placeholder="Institutional impact and rationale for sanctioning this budget"></textarea>
+      <div style="margin-bottom:10px;">
+        <div class="row" style="justify-content:space-between;margin-bottom:3px;">
+          <span style="font-size:12px;font-weight:600;">1. Proposal Purpose &amp; Objective</span>
+          <span id="p1CountBadge" class="word-badge">0 / 50 words</span>
+        </div>
+        <textarea id="nfaPoint1" rows="2" placeholder="Explain the specific purpose, target audience, and outcome of this proposal (max 50 words)" oninput="updateWordCount('nfaPoint1', 'p1CountBadge', 50)"></textarea>
+      </div>
 
-    <label class="field-label">Select Relevant UN Sustainable Development Goals (SDGs)</label>
+      <div style="margin-bottom:10px;">
+        <div class="row" style="justify-content:space-between;margin-bottom:3px;">
+          <span style="font-size:12px;font-weight:600;">2. Operational Logistics &amp; Arrangements</span>
+          <span id="p2CountBadge" class="word-badge">0 / 50 words</span>
+        </div>
+        <textarea id="nfaPoint2" rows="2" placeholder="Outline operational execution, infrastructure, venue, or technical arrangements (max 50 words)" oninput="updateWordCount('nfaPoint2', 'p2CountBadge', 50)"></textarea>
+      </div>
+
+      <div style="margin-bottom:10px;">
+        <div class="row" style="justify-content:space-between;margin-bottom:3px;">
+          <span style="font-size:12px;font-weight:600;">3. Justification of Need &amp; Institutional Value</span>
+          <span id="p3CountBadge" class="word-badge">0 / 50 words</span>
+        </div>
+        <textarea id="nfaPoint3" rows="2" placeholder="Institutional impact, academic relevance, and rationale for sanctioning (max 50 words)" oninput="updateWordCount('nfaPoint3', 'p3CountBadge', 50)"></textarea>
+      </div>
+
+      <div>
+        <div class="row" style="justify-content:space-between;margin-bottom:3px;">
+          <span style="font-size:12px;font-weight:600;">4. Financial Implication &amp; Annexure Statement</span>
+          <span id="p4CountBadge" class="word-badge">8 / 50 words</span>
+        </div>
+        <textarea id="nfaPoint4" rows="2" placeholder="The estimated expenditure details are attached as Annexure-I. (max 50 words)" oninput="updateWordCount('nfaPoint4', 'p4CountBadge', 50)">The estimated expenditure details are attached as Annexure-I.</textarea>
+      </div>
+    </div>
+
+    <!-- DYNAMIC EVENT / PURCHASE DETAILS -->
+    <div id="eventDetailsSection" style="margin-top:14px;padding:14px;background:#F0F4FA;border:1px solid #CCD6E8;border-radius:var(--radius-sm);">
+      <h3 style="margin:0 0 10px;font-size:14px;color:#274897;">Event / Resource Person Details</h3>
+      <div class="row" style="gap:10px;margin-bottom:8px;">
+        <div style="flex:1">
+          <label class="field-label">Resource Person Name</label>
+          <input id="eventResourcePerson" placeholder="Full name of speaker / trainer" />
+        </div>
+        <div style="flex:1">
+          <label class="field-label">Designation</label>
+          <input id="eventDesignation" placeholder="e.g. Professor / Lead AI Engineer" />
+        </div>
+      </div>
+      <div class="row" style="gap:10px;margin-bottom:8px;">
+        <div style="flex:1">
+          <label class="field-label">Organization / Institution</label>
+          <input id="eventOrganization" placeholder="Affiliated University or Corporate Entity" />
+        </div>
+        <div style="flex:1">
+          <label class="field-label">Event Date</label>
+          <input id="eventDate" type="date" />
+        </div>
+      </div>
+      <div class="row" style="gap:10px;margin-bottom:8px;">
+        <div style="flex:1">
+          <label class="field-label">Venue</label>
+          <input id="eventVenue" placeholder="e.g. Kengeri Auditorium / Lab 304" />
+        </div>
+      </div>
+      <div>
+        <label class="field-label">Additional Relevant Information</label>
+        <textarea id="eventAdditionalInfo" rows="2" placeholder="Any further details regarding schedule, session tracks, travel, or accommodations"></textarea>
+      </div>
+    </div>
+
+    <div id="purchaseDetailsSection" style="display:none;margin-top:14px;padding:14px;background:#F0F4FA;border:1px solid #CCD6E8;border-radius:var(--radius-sm);">
+      <h3 style="margin:0 0 10px;font-size:14px;color:#274897;">Purchase / Item Details</h3>
+      <div class="row" style="gap:10px;margin-bottom:8px;">
+        <div style="flex:2">
+          <label class="field-label">Item / Product Name</label>
+          <input id="purchaseItemName" placeholder="Full product or equipment name" />
+        </div>
+        <div style="flex:1">
+          <label class="field-label">Quantity</label>
+          <input id="purchaseQuantity" placeholder="e.g. 2 Units / 1 License" />
+        </div>
+      </div>
+      <div style="margin-bottom:8px;">
+        <label class="field-label">Description / Specifications</label>
+        <textarea id="purchaseDescription" rows="2" placeholder="Detailed technical specifications, model, make, or configurations"></textarea>
+      </div>
+      <div style="margin-bottom:8px;">
+        <label class="field-label">Purpose / Justification</label>
+        <textarea id="purchasePurpose" rows="2" placeholder="Why this item is needed and how it will be utilized"></textarea>
+      </div>
+      <div>
+        <label class="field-label">Additional Relevant Information</label>
+        <textarea id="purchaseAdditionalInfo" rows="2" placeholder="Warranty, installation, delivery timeline, or vendor details"></textarea>
+      </div>
+    </div>
+
+    <label class="field-label" style="margin-top:14px;">Select Relevant UN Sustainable Development Goals (SDGs)</label>
     <div class="field-help">Click to highlight all sustainable development goals addressed:</div>
     <div class="sdg-grid" id="sdgGrid">
       ${SDG_LIST.map(sdg => `
@@ -1752,13 +2090,19 @@ async function newNfaModal(){
     </div>
 
     <div class="row" style="justify-content:flex-end;gap:12px">
-      <button class="secondary" onclick="closeModal()">Cancel</button>
-      <button onclick="createNfa(false)">💾 Save as Draft</button>
-      <button class="green" onclick="createNfa(true)">🚀 Submit to HOD</button>
+      <button class="secondary" type="button" onclick="handleCloseApplyNfa()">Cancel</button>
+      <button type="button" onclick="createNfa(false)">💾 Save as Draft</button>
+      <button type="button" class="green" onclick="createNfa(true)">🚀 Submit to HOD</button>
     </div>
   `);
 
   addItemRow();
+  initialApplyNfaSnapshot = captureApplyNfaSnapshot();
+  setTimeout(() => {
+    if (!initialApplyNfaSnapshot || initialApplyNfaSnapshot === captureApplyNfaSnapshot()) {
+      initialApplyNfaSnapshot = captureApplyNfaSnapshot();
+    }
+  }, 100);
 }
 
 async function onNfaDeptSelect(val){
@@ -2030,13 +2374,38 @@ async function createNfa(andSubmit){
   const subcatId = subcatSelect?.value || null;
   const subcatName = subcatSelect?.selectedOptions?.[0]?.dataset?.name || '';
   const title = document.getElementById('nfaTitle').value.trim();
-  const purpose = document.getElementById('nfaPurpose').value.trim();
-  const justification = document.getElementById('nfaJust').value.trim();
+  const nfaType = document.getElementById('nfaTypePurchase')?.checked ? 'purchase' : 'event';
+  const point1 = document.getElementById('nfaPoint1')?.value?.trim() || '';
+  const point2 = document.getElementById('nfaPoint2')?.value?.trim() || '';
+  const point3 = document.getElementById('nfaPoint3')?.value?.trim() || '';
+  const point4 = document.getElementById('nfaPoint4')?.value?.trim() || '';
   const submittedByName = document.getElementById('nfaFacultyName').value.trim();
 
   if (deptId === '__custom__' && !customDeptName) return toast('Please enter the custom department name');
   if (!title) return toast('Proposal title is required');
   if (!catId) return toast('Please select a Budget Main Category');
+
+  if (countWords(point1) > 50) return toast(`Point 1 (Purpose) exceeds the 50-word limit (${countWords(point1)}/50). Please shorten.`);
+  if (countWords(point2) > 50) return toast(`Point 2 (Logistics) exceeds the 50-word limit (${countWords(point2)}/50). Please shorten.`);
+  if (countWords(point3) > 50) return toast(`Point 3 (Justification) exceeds the 50-word limit (${countWords(point3)}/50). Please shorten.`);
+  if (countWords(point4) > 50) return toast(`Point 4 (Expenditure Statement) exceeds the 50-word limit (${countWords(point4)}/50). Please shorten.`);
+
+  const eventDetails = {
+    resource_person_name: document.getElementById('eventResourcePerson')?.value?.trim() || '',
+    designation: document.getElementById('eventDesignation')?.value?.trim() || '',
+    organization: document.getElementById('eventOrganization')?.value?.trim() || '',
+    event_date: document.getElementById('eventDate')?.value?.trim() || '',
+    venue: document.getElementById('eventVenue')?.value?.trim() || '',
+    additional_info: document.getElementById('eventAdditionalInfo')?.value?.trim() || '',
+  };
+
+  const purchaseDetails = {
+    item_name: document.getElementById('purchaseItemName')?.value?.trim() || '',
+    description: document.getElementById('purchaseDescription')?.value?.trim() || '',
+    quantity: document.getElementById('purchaseQuantity')?.value?.trim() || '',
+    purpose: document.getElementById('purchasePurpose')?.value?.trim() || '',
+    additional_info: document.getElementById('purchaseAdditionalInfo')?.value?.trim() || '',
+  };
 
   const items = [...document.querySelectorAll('#itemsWrap .item-row')].map(r => ({
     particulars: r.querySelector('.it-p').value.trim(),
@@ -2062,8 +2431,16 @@ async function createNfa(andSubmit){
         budget_subcategory_id: subcatId,
         budget_subcategory_name: subcatName,
         title,
-        purpose,
-        justification,
+        nfa_type: nfaType,
+        point1,
+        point2,
+        point3,
+        point4,
+        purpose: point1,
+        description: point2,
+        justification: point3,
+        event_details: eventDetails,
+        purchase_details: purchaseDetails,
         sdgs: selectedSdgs.join('; '),
         submitted_by_name: submittedByName,
         items
@@ -2078,6 +2455,7 @@ async function createNfa(andSubmit){
     } else {
       toast('💾 NFA draft saved successfully!');
     }
+    activeModalType = null;
     closeModal();
     openNfa(nfa.id);
   } catch(e){
@@ -2087,7 +2465,14 @@ async function createNfa(andSubmit){
 
 // ---------------- NFA DETAILS & WORKFLOW STEPPER ----------------
 async function openNfa(id){
-  const n = await api(`/nfas/${id}`);
+  activeModalType = 'nfa_preview';
+  let n;
+  try {
+    n = await api(`/nfas/${id}`);
+  } catch(e) {
+    activeModalType = null;
+    return toast(e.message);
+  }
   
   const isOwner = n.created_by === USER.id;
   const canOwnerEdit = isOwner && ['draft', 'submitted', 'revision_required'].includes(n.status);
@@ -2133,7 +2518,12 @@ async function openNfa(id){
     <button class="close-btn" onclick="closeModal()">✕</button>
     <div class="row" style="justify-content:space-between;align-items:flex-start">
       <div>
-        <h2 style="margin:0 0 4px">${escapeHtml(n.title)}</h2>
+        <div class="row" style="align-items:center;gap:8px;margin-bottom:4px;">
+          <h2 style="margin:0">${escapeHtml(n.title)}</h2>
+          <span class="badge" style="background:${n.nfa_type === 'purchase' ? '#dcfce7' : '#dbeafe'};color:${n.nfa_type === 'purchase' ? '#166534' : '#1e40af'};font-weight:700;font-size:11px;">
+            ${n.nfa_type === 'purchase' ? '🛒 Purchase NFA' : '📅 Event NFA'}
+          </span>
+        </div>
         <div class="card-sub">${escapeHtml(n.ref_no)} · ${escapeHtml(deptName(n.department_id))} · ${escapeHtml(n.date)}</div>
       </div>
       <span class="badge b-${n.status}" style="font-size:13px;padding:6px 14px;">${fmtStatus(n.status)}</span>
@@ -2142,16 +2532,50 @@ async function openNfa(id){
     ${stepperHtml}
 
     <div class="card" style="padding:16px;background:var(--section-bg);margin:16px 0;border-left:4px solid var(--accent)">
-      <div class="row" style="gap:24px;">
+      <div class="row" style="gap:24px;flex-wrap:wrap;">
         <div><span class="muted">Main Category:</span> <strong>${escapeHtml(catName(n.budget_category_id))}</strong></div>
         ${n.budget_subcategory_name ? `<div><span class="muted">Subcategory:</span> <strong style="color:var(--primary)">${escapeHtml(n.budget_subcategory_name)}</strong></div>` : ''}
-        <div><span class="muted">Proposer:</span> <strong>${escapeHtml(n.submitted_by_name || 'Faculty')}</strong></div>
+        <div><span class="muted">Proposer:</span> <strong>${escapeHtml(n.submitted_by_name || 'Faculty')}</strong> ${n.proposer_signature ? '<span class="badge b-approved" style="font-size:10px;margin-left:4px">✍️ Digitally Signed</span>' : ''}</div>
       </div>
       ${n.sdgs ? `<div style="margin-top:8px"><span class="muted">SDGs:</span> <span style="color:var(--primary);font-weight:600">${escapeHtml(n.sdgs)}</span></div>` : ''}
     </div>
 
-    <p><strong>Purpose:</strong> ${escapeHtml(n.purpose || '—')}</p>
-    <p><strong>Justification:</strong> ${escapeHtml(n.justification || '—')}</p>
+    <!-- Institutional Description Points -->
+    <div class="card" style="padding:16px;margin:16px 0;background:#fafafa;border:1px solid #e2e8f0;border-radius:6px;">
+      <h4 style="margin:0 0 10px;color:var(--primary);font-size:14px;text-transform:uppercase;letter-spacing:0.5px;">Institutional Description Points (CHRIST Format)</h4>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:13.5px;line-height:1.5;">
+        <div style="display:flex;gap:10px;"><strong style="min-width:20px;color:#274897;">1.</strong><div><strong style="color:#334155;">Purpose of Proposal:</strong> ${escapeHtml(n.point1 || n.purpose || '—')}</div></div>
+        <div style="display:flex;gap:10px;"><strong style="min-width:20px;color:#274897;">2.</strong><div><strong style="color:#334155;">Logistics &amp; Scheduling:</strong> ${escapeHtml(n.point2 || n.description || '—')}</div></div>
+        <div style="display:flex;gap:10px;"><strong style="min-width:20px;color:#274897;">3.</strong><div><strong style="color:#334155;">Justification &amp; Expected Outcomes:</strong> ${escapeHtml(n.point3 || n.justification || '—')}</div></div>
+        <div style="display:flex;gap:10px;"><strong style="min-width:20px;color:#274897;">4.</strong><div><strong style="color:#334155;">Statement of Expenditure:</strong> ${escapeHtml(n.point4 || ('The total estimated expenditure for this proposal is ₹ ' + inr(n.total_amount) + ' as itemized in the annexure.'))}</div></div>
+      </div>
+    </div>
+
+    <!-- Dynamic Event / Purchase Details Section -->
+    ${n.nfa_type === 'purchase' ? `
+      <div class="card" style="padding:16px;margin:16px 0;background:#f8fafc;border:1px solid #cbd5e1;border-radius:6px;">
+        <h4 style="margin:0 0 10px;color:#166534;font-size:14px;">🛒 Purchase &amp; Procurement Details</h4>
+        <div class="grid2" style="gap:12px;font-size:13.5px;">
+          <div><span class="muted">Item Name:</span> <strong>${escapeHtml(n.purchase_details?.item_name || '—')}</strong></div>
+          <div><span class="muted">Quantity:</span> <strong>${escapeHtml(n.purchase_details?.quantity || '—')}</strong></div>
+          <div style="grid-column:1/-1"><span class="muted">Description / Specifications:</span> ${escapeHtml(n.purchase_details?.description || '—')}</div>
+          <div style="grid-column:1/-1"><span class="muted">Purpose / Justification:</span> ${escapeHtml(n.purchase_details?.purpose || '—')}</div>
+          ${n.purchase_details?.additional_info ? `<div style="grid-column:1/-1"><span class="muted">Additional Info:</span> ${escapeHtml(n.purchase_details.additional_info)}</div>` : ''}
+        </div>
+      </div>
+    ` : `
+      <div class="card" style="padding:16px;margin:16px 0;background:#f8fafc;border:1px solid #cbd5e1;border-radius:6px;">
+        <h4 style="margin:0 0 10px;color:#1e40af;font-size:14px;">📅 Event &amp; Resource Person Details</h4>
+        <div class="grid2" style="gap:12px;font-size:13.5px;">
+          <div><span class="muted">Resource Person:</span> <strong>${escapeHtml(n.event_details?.resource_person_name || '—')}</strong></div>
+          <div><span class="muted">Designation:</span> <strong>${escapeHtml(n.event_details?.designation || '—')}</strong></div>
+          <div><span class="muted">Organization:</span> <strong>${escapeHtml(n.event_details?.organization || '—')}</strong></div>
+          <div><span class="muted">Event Date:</span> <strong>${escapeHtml(n.event_details?.event_date || '—')}</strong></div>
+          <div><span class="muted">Venue:</span> <strong>${escapeHtml(n.event_details?.venue || '—')}</strong></div>
+          ${n.event_details?.additional_info ? `<div style="grid-column:1/-1"><span class="muted">Additional Info:</span> ${escapeHtml(n.event_details.additional_info)}</div>` : ''}
+        </div>
+      </div>
+    `}
 
     <h3 style="margin-top:20px;font-size:16px;">Budget Items</h3>
     <table>
@@ -2165,7 +2589,7 @@ async function openNfa(id){
         </tr>
       </thead>
       <tbody>
-        ${n.items.map(it => `
+        ${(n.items || []).map(it => `
           <tr>
             <td>${it.sl_no}</td>
             <td><strong>${escapeHtml(it.particulars)}</strong>${it.justification ? `<div class="muted">${escapeHtml(it.justification)}</div>` : ''}</td>
@@ -2192,6 +2616,7 @@ async function openNfa(id){
             <th>Approver Name</th>
             <th>Role</th>
             <th>Decision</th>
+            <th>Signature</th>
             <th>Comments</th>
           </tr>
         </thead>
@@ -2202,6 +2627,7 @@ async function openNfa(id){
               <td><strong>${escapeHtml(a.approver_name || a.approver_role || 'Approver')}</strong></td>
               <td><span class="role-pill" style="color:#501026;background:var(--accent-light);border:1px solid var(--accent-border)">${String(a.approver_role || '').replace('_',' ')}</span></td>
               <td><span class="badge ${a.decision==='approved'?'b-approved':a.decision==='rejected'?'b-rejected':'b-submitted'}">${a.decision}</span></td>
+              <td>${a.signature_image ? '<span class="badge b-approved" style="font-size:10.5px">✍️ Digitally Signed</span>' : '<span class="muted" style="font-size:11px">None</span>'}</td>
               <td>${escapeHtml(a.comments || '—')}</td>
             </tr>
           `).join('')}
@@ -2213,6 +2639,7 @@ async function openNfa(id){
       <div class="row">
         <button class="secondary" onclick="downloadPdf('${n.id}')">📄 Download Official PDF</button>
         ${canEdit ? `<button class="secondary" onclick="editNfaModal('${n.id}')">✏️ Edit Details</button>` : ''}
+        <button class="secondary" type="button" onclick="closeModal()">Close</button>
       </div>
       <div class="row">
   `;
@@ -2282,23 +2709,152 @@ async function decideReview(id, decision, promptTitle){
 }
 
 // ---------------- EDIT NFA MODAL ----------------
+function onEditNfaTypeChange(type) {
+  const evCard = document.getElementById('editEventCard');
+  const purCard = document.getElementById('editPurchaseCard');
+  if (type === 'event') {
+    if (evCard) evCard.style.display = 'block';
+    if (purCard) purCard.style.display = 'none';
+  } else {
+    if (evCard) evCard.style.display = 'none';
+    if (purCard) purCard.style.display = 'block';
+  }
+}
+
 async function editNfaModal(id){
-  const n = await api(`/nfas/${id}`);
+  activeModalType = 'edit_nfa';
+  let n;
+  try {
+    n = await api(`/nfas/${id}`);
+  } catch(e) {
+    activeModalType = null;
+    return toast(e.message);
+  }
   selectedSdgs = n.sdgs ? n.sdgs.split(';').map(s=>s.trim()).filter(Boolean) : [];
+  const isPurchase = n.nfa_type === 'purchase';
+
+  const p1 = n.point1 || n.purpose || '';
+  const p2 = n.point2 || n.description || '';
+  const p3 = n.point3 || n.justification || '';
+  const p4 = n.point4 || `The total estimated expenditure for this proposal is ₹ ${inr(n.total_amount)} as itemized in the annexure.`;
+
+  const ed = n.event_details || {};
+  const pd = n.purchase_details || {};
 
   openModal(`
-    <button class="close-btn" onclick="closeModal()">✕</button>
+    <button class="close-btn" type="button" onclick="handleCloseEditNfa('${n.id}', true)">✕</button>
     <h2>Edit NFA: ${escapeHtml(n.ref_no)}</h2>
-    <div class="field-help">Update particulars, items, rates, or justification before next approval.</div>
+    <div class="field-help">Update proposal details, 4 description points (max 50 words each), and budget items.</div>
 
-    <label class="field-label">Title</label>
+    <label class="field-label">Proposal Title</label>
     <input id="editTitle" value="${escapeHtml(n.title)}" />
 
-    <label class="field-label">Purpose</label>
-    <textarea id="editPurpose" rows="2">${escapeHtml(n.purpose || '')}</textarea>
+    <label class="field-label" style="font-weight:700;margin-top:16px;">NFA Category Type</label>
+    <div class="row" style="gap:24px;margin-bottom:12px;">
+      <label style="cursor:pointer;display:flex;align-items:center;gap:8px;font-weight:600;">
+        <input type="radio" name="editNfaType" id="editNfaTypeEvent" value="event" ${!isPurchase ? 'checked' : ''} onchange="onEditNfaTypeChange('event')">
+        📅 Event / Conference / Guest Lecture NFA
+      </label>
+      <label style="cursor:pointer;display:flex;align-items:center;gap:8px;font-weight:600;">
+        <input type="radio" name="editNfaType" id="editNfaTypePurchase" value="purchase" ${isPurchase ? 'checked' : ''} onchange="onEditNfaTypeChange('purchase')">
+        🛒 Purchase / Equipment / Procurement NFA
+      </label>
+    </div>
 
-    <label class="field-label">Justification</label>
-    <textarea id="editJust" rows="2">${escapeHtml(n.justification || '')}</textarea>
+    <!-- 4 Description Points -->
+    <div class="card" style="padding:16px;background:var(--section-bg);border:1px solid var(--accent-border);margin:16px 0;">
+      <h3 style="margin-top:0;font-size:15px;color:var(--primary);font-weight:700;">Four Institutional Description Points (Strict 50 words limit per point)</h3>
+
+      <div style="margin-bottom:12px;">
+        <div class="row" style="justify-content:space-between;align-items:center;">
+          <label class="field-label" style="margin:0;font-weight:600;">1. Purpose of the Proposal</label>
+          <span class="word-badge" id="editPoint1Badge">${countWords(p1)}/50 words</span>
+        </div>
+        <textarea id="editPoint1" rows="2" oninput="updateWordCount('editPoint1', 'editPoint1Badge')">${escapeHtml(p1)}</textarea>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <div class="row" style="justify-content:space-between;align-items:center;">
+          <label class="field-label" style="margin:0;font-weight:600;">2. Logistics &amp; Scheduling Details</label>
+          <span class="word-badge" id="editPoint2Badge">${countWords(p2)}/50 words</span>
+        </div>
+        <textarea id="editPoint2" rows="2" oninput="updateWordCount('editPoint2', 'editPoint2Badge')">${escapeHtml(p2)}</textarea>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <div class="row" style="justify-content:space-between;align-items:center;">
+          <label class="field-label" style="margin:0;font-weight:600;">3. Justification &amp; Expected Outcomes</label>
+          <span class="word-badge" id="editPoint3Badge">${countWords(p3)}/50 words</span>
+        </div>
+        <textarea id="editPoint3" rows="2" oninput="updateWordCount('editPoint3', 'editPoint3Badge')">${escapeHtml(p3)}</textarea>
+      </div>
+
+      <div style="margin-bottom:6px;">
+        <div class="row" style="justify-content:space-between;align-items:center;">
+          <label class="field-label" style="margin:0;font-weight:600;">4. Statement of Total Expenditure</label>
+          <span class="word-badge" id="editPoint4Badge">${countWords(p4)}/50 words</span>
+        </div>
+        <textarea id="editPoint4" rows="2" oninput="updateWordCount('editPoint4', 'editPoint4Badge')">${escapeHtml(p4)}</textarea>
+      </div>
+    </div>
+
+    <!-- Event Details Card -->
+    <div id="editEventCard" class="card nfa-type-card" style="padding:16px;background:linear-gradient(to right, #eff6ff, #f8fafc);border:1px solid #bfdbfe;margin-bottom:16px;${isPurchase ? 'display:none;' : ''}">
+      <h3 style="margin-top:0;font-size:15px;color:#1e3a8a;font-weight:700;">📅 Event &amp; Resource Person Details</h3>
+      <div class="grid2" style="gap:12px;">
+        <div>
+          <label class="field-label" style="margin-top:0">Resource Person Name</label>
+          <input id="editEventResourcePerson" value="${escapeHtml(ed.resource_person_name || '')}" placeholder="e.g. Dr. Jane Smith" />
+        </div>
+        <div>
+          <label class="field-label" style="margin-top:0">Designation</label>
+          <input id="editEventDesignation" value="${escapeHtml(ed.designation || '')}" placeholder="e.g. Senior Research Scientist" />
+        </div>
+        <div>
+          <label class="field-label" style="margin-top:0">Organization / Affiliation</label>
+          <input id="editEventOrganization" value="${escapeHtml(ed.organization || '')}" placeholder="e.g. IISc Bangalore / Tech Corp" />
+        </div>
+        <div>
+          <label class="field-label" style="margin-top:0">Event Date(s)</label>
+          <input id="editEventDate" value="${escapeHtml(ed.event_date || '')}" placeholder="e.g. 15-16 Nov 2026" />
+        </div>
+        <div style="grid-column: 1 / -1;">
+          <label class="field-label" style="margin-top:0">Event Venue</label>
+          <input id="editEventVenue" value="${escapeHtml(ed.venue || '')}" placeholder="e.g. Central Auditorium / Room 402, Block II" />
+        </div>
+        <div style="grid-column: 1 / -1;">
+          <label class="field-label" style="margin-top:0">Additional Info</label>
+          <textarea id="editEventAdditionalInfo" rows="2" placeholder="Target audience, expected attendees, etc.">${escapeHtml(ed.additional_info || '')}</textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Purchase Details Card -->
+    <div id="editPurchaseCard" class="card nfa-type-card" style="padding:16px;background:linear-gradient(to right, #f0fdf4, #f8fafc);border:1px solid #bbf7d0;margin-bottom:16px;${!isPurchase ? 'display:none;' : ''}">
+      <h3 style="margin-top:0;font-size:15px;color:#14532d;font-weight:700;">🛒 Purchase &amp; Procurement Details</h3>
+      <div class="grid2" style="gap:12px;">
+        <div>
+          <label class="field-label" style="margin-top:0">Item Name / Equipment</label>
+          <input id="editPurchaseItemName" value="${escapeHtml(pd.item_name || '')}" placeholder="e.g. 4K Ultra-HD Projector" />
+        </div>
+        <div>
+          <label class="field-label" style="margin-top:0">Quantity</label>
+          <input id="editPurchaseQuantity" value="${escapeHtml(pd.quantity || '')}" placeholder="e.g. 2 Units" />
+        </div>
+        <div style="grid-column: 1 / -1;">
+          <label class="field-label" style="margin-top:0">Description &amp; Specifications</label>
+          <textarea id="editPurchaseDescription" rows="2" placeholder="Technical specifications, brand, model, warranty requirements...">${escapeHtml(pd.description || '')}</textarea>
+        </div>
+        <div style="grid-column: 1 / -1;">
+          <label class="field-label" style="margin-top:0">Purpose / Justification of Purchase</label>
+          <textarea id="editPurchasePurpose" rows="2" placeholder="Why this equipment is required and how it supports departmental academic activities...">${escapeHtml(pd.purpose || '')}</textarea>
+        </div>
+        <div style="grid-column: 1 / -1;">
+          <label class="field-label" style="margin-top:0">Additional Info</label>
+          <textarea id="editPurchaseAdditionalInfo" rows="2" placeholder="Vendor quotes received, maintenance requirements, etc.">${escapeHtml(pd.additional_info || '')}</textarea>
+        </div>
+      </div>
+    </div>
 
     <label class="field-label">Select Relevant UN SDGs</label>
     <div class="sdg-grid" id="sdgGrid">
@@ -2330,7 +2886,7 @@ async function editNfaModal(id){
     </div>
 
     <div class="row" style="justify-content:flex-end;gap:12px">
-      <button class="secondary" onclick="openNfa('${n.id}')">Cancel</button>
+      <button class="secondary" type="button" onclick="handleCloseEditNfa('${n.id}', false)">Cancel</button>
       <button class="green" onclick="saveNfaEdits('${n.id}')">💾 Save Changes</button>
     </div>
   `);
@@ -2340,12 +2896,40 @@ async function editNfaModal(id){
   } else {
     addItemRow();
   }
+  initialApplyNfaSnapshot = captureApplyNfaSnapshot();
 }
 
 async function saveNfaEdits(id){
   const title = document.getElementById('editTitle').value.trim();
-  const purpose = document.getElementById('editPurpose').value.trim();
-  const justification = document.getElementById('editJust').value.trim();
+  const nfaType = document.getElementById('editNfaTypePurchase')?.checked ? 'purchase' : 'event';
+  const point1 = document.getElementById('editPoint1')?.value?.trim() || '';
+  const point2 = document.getElementById('editPoint2')?.value?.trim() || '';
+  const point3 = document.getElementById('editPoint3')?.value?.trim() || '';
+  const point4 = document.getElementById('editPoint4')?.value?.trim() || '';
+
+  if (!title) return toast('Proposal title is required');
+
+  if (countWords(point1) > 50) return toast(`Point 1 (Purpose) exceeds the 50-word limit (${countWords(point1)}/50). Please shorten.`);
+  if (countWords(point2) > 50) return toast(`Point 2 (Logistics) exceeds the 50-word limit (${countWords(point2)}/50). Please shorten.`);
+  if (countWords(point3) > 50) return toast(`Point 3 (Justification) exceeds the 50-word limit (${countWords(point3)}/50). Please shorten.`);
+  if (countWords(point4) > 50) return toast(`Point 4 (Expenditure Statement) exceeds the 50-word limit (${countWords(point4)}/50). Please shorten.`);
+
+  const eventDetails = {
+    resource_person_name: document.getElementById('editEventResourcePerson')?.value?.trim() || '',
+    designation: document.getElementById('editEventDesignation')?.value?.trim() || '',
+    organization: document.getElementById('editEventOrganization')?.value?.trim() || '',
+    event_date: document.getElementById('editEventDate')?.value?.trim() || '',
+    venue: document.getElementById('editEventVenue')?.value?.trim() || '',
+    additional_info: document.getElementById('editEventAdditionalInfo')?.value?.trim() || '',
+  };
+
+  const purchaseDetails = {
+    item_name: document.getElementById('editPurchaseItemName')?.value?.trim() || '',
+    description: document.getElementById('editPurchaseDescription')?.value?.trim() || '',
+    quantity: document.getElementById('editPurchaseQuantity')?.value?.trim() || '',
+    purpose: document.getElementById('editPurchasePurpose')?.value?.trim() || '',
+    additional_info: document.getElementById('editPurchaseAdditionalInfo')?.value?.trim() || '',
+  };
 
   const items = [...document.querySelectorAll('#itemsWrap .item-row')].map(r => ({
     particulars: r.querySelector('.it-p').value.trim(),
@@ -2355,13 +2939,23 @@ async function saveNfaEdits(id){
     justification: r.querySelector('.it-j')?.value?.trim() || ''
   })).filter(i => i.particulars && i.amount > 0);
 
+  if (items.length === 0) return toast('Add at least one item with particulars and amount');
+
   try {
     await api(`/nfas/${id}`, {
       method: 'PUT',
       body: {
         title,
-        purpose,
-        justification,
+        nfa_type: nfaType,
+        point1,
+        point2,
+        point3,
+        point4,
+        purpose: point1,
+        description: point2,
+        justification: point3,
+        event_details: eventDetails,
+        purchase_details: purchaseDetails,
         sdgs: selectedSdgs.join('; '),
         items
       }
@@ -2428,8 +3022,8 @@ function newProjectModal(){
     <input id="pjName" placeholder="e.g. Cyber Security Lab Upgrade / Cloud VM Cluster" />
     <label class="field-label">Description</label>
     <textarea id="pjDesc" rows="2"></textarea>
-    <label class="field-label">Department</label>
-    <select id="pjDept">${REF.departments.map(d=>`<option value="${d.id}">${d.name}</option>`).join('')}</select>
+    <label class="field-label">Department / Centre</label>
+    <select id="pjDept">${renderDeptSelectOptions(USER.department_id || REF.departments[0]?.id, false)}</select>
     <label class="field-label">Budget Main Category</label>
     <select id="pjCat">${REF.categories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}</select>
     <label class="field-label">Planned Budget (₹)</label>
@@ -2483,7 +3077,7 @@ async function renderBudgets(main){
         </div>
         <div class="row">
           <select style="max-width:280px;margin-bottom:0;" onchange="changeBudgetDept(this.value)">
-            ${REF.departments.map(d=>`<option value="${d.id}" ${d.id===deptId?'selected':''}>${d.name}</option>`).join('')}
+            ${renderDeptSelectOptions(deptId, false)}
           </select>
           ${isAdmin ? `
             <button class="gold" onclick="openPrivateBudgetUploadModal()">📁 Upload Private University Budget (.xlsx)</button>
@@ -2922,7 +3516,7 @@ async function renderAdmin(main){
       </div>
       <h3 style="margin-top:20px;margin-bottom:8px">Registered System Users</h3>
       <table>
-        <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Department</th><th>Action</th></tr></thead>
+        <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Department</th><th>Digital Signature</th><th>Action</th></tr></thead>
         <tbody>
           ${users.map(u => `
             <tr>
@@ -2930,7 +3524,11 @@ async function renderAdmin(main){
               <td>${escapeHtml(u.email)}</td>
               <td><span class="role-pill" style="color:#501026;background:var(--accent-light);border:1px solid var(--accent-border)">${String(u.role || '').replace('_',' ')}</span></td>
               <td>${u.department_id ? escapeHtml(deptName(u.department_id)) : 'Institution-wide'}</td>
-              <td><button class="danger" style="padding:4px 8px;font-size:11px" data-id="${u.id}" data-name="${escapeHtml(u.name)}" onclick="removeUser(this.getAttribute('data-id'), this.getAttribute('data-name'))">Remove</button></td>
+              <td>${u.signature_image ? `<span class="badge b-approved" style="font-size:11px">✓ Active Signature</span>` : `<span class="muted" style="font-size:11px">Not Uploaded</span>`}</td>
+              <td>
+                <button class="secondary" style="padding:4px 8px;font-size:11px;margin-right:6px" onclick="adminManageSignature('${u.id}', '${escapeHtml(u.name)}')">✍️ Manage</button>
+                <button class="danger" style="padding:4px 8px;font-size:11px" data-id="${u.id}" data-name="${escapeHtml(u.name)}" onclick="removeUser(this.getAttribute('data-id'), this.getAttribute('data-name'))">Remove</button>
+              </td>
             </tr>
           `).join('')}
         </tbody>
@@ -2987,15 +3585,124 @@ async function removeUser(id, name){
 }
 
 // ---------------- MODAL UTILITIES ----------------
+let activeModalType = null;
+let initialApplyNfaSnapshot = '';
+let pendingDiscardAction = null;
+
+function captureApplyNfaSnapshot() {
+  const modal = document.getElementById('modalBody');
+  if (!modal) return '';
+  const fields = [...modal.querySelectorAll('input, textarea, select')].map(el => {
+    if (el.type === 'radio' || el.type === 'checkbox') return `${el.id || el.name}:${el.checked}`;
+    return `${el.id || el.className}:${el.value.trim()}`;
+  });
+  return fields.join('|') + '|sdgs:' + (selectedSdgs || []).join(',');
+}
+
+function handleCloseApplyNfa() {
+  const currentSnap = captureApplyNfaSnapshot();
+  if (currentSnap !== initialApplyNfaSnapshot) {
+    showUnsavedChangesConfirmation();
+  } else {
+    activeModalType = null;
+    closeModal();
+  }
+}
+
+function handleCloseEditNfa(nfaId, isDirectClose = false) {
+  const currentSnap = captureApplyNfaSnapshot();
+  if (currentSnap !== initialApplyNfaSnapshot) {
+    showUnsavedChangesConfirmation(() => {
+      if (isDirectClose) {
+        closeModal();
+      } else {
+        openNfa(nfaId);
+      }
+    });
+  } else {
+    if (isDirectClose) {
+      closeModal();
+    } else {
+      openNfa(nfaId);
+    }
+  }
+}
+
+function showUnsavedChangesConfirmation(onDiscard) {
+  pendingDiscardAction = typeof onDiscard === 'function' ? onDiscard : null;
+  const existing = document.getElementById('unsavedConfirmDialog');
+  if (existing) existing.remove();
+
+  const dialog = document.createElement('div');
+  dialog.id = 'unsavedConfirmDialog';
+  dialog.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.65);z-index:999999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px);';
+  dialog.innerHTML = `
+    <div style="background:#ffffff;border-radius:12px;padding:24px 28px;max-width:440px;width:90%;box-shadow:0 25px 50px -12px rgba(0,0,0,0.35);border-top:5px solid #ea580c;text-align:left;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+        <span style="font-size:26px;">⚠️</span>
+        <h3 style="margin:0;font-size:18px;font-weight:700;color:#0f172a;">Unsaved Changes</h3>
+      </div>
+      <p style="margin:0 0 22px;font-size:14.5px;color:#334155;line-height:1.55;">
+        <strong>You have unsaved changes. Are you sure you want to close this form?</strong>
+      </p>
+      <div style="display:flex;justify-content:flex-end;gap:12px;">
+        <button type="button" class="secondary" style="padding:9px 18px;font-size:13.5px;font-weight:600;" onclick="dismissUnsavedConfirmation()">Continue Editing</button>
+        <button type="button" class="danger" style="padding:9px 18px;font-size:13.5px;font-weight:600;" onclick="confirmDiscardChanges()">Discard Changes</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(dialog);
+}
+
+function dismissUnsavedConfirmation() {
+  pendingDiscardAction = null;
+  const dialog = document.getElementById('unsavedConfirmDialog');
+  if (dialog) dialog.remove();
+}
+
+function confirmDiscardChanges() {
+  const action = pendingDiscardAction;
+  dismissUnsavedConfirmation();
+  if (typeof action === 'function') {
+    action();
+  } else {
+    discardAndCloseApplyNfa();
+  }
+}
+
+function discardAndCloseApplyNfa() {
+  dismissUnsavedConfirmation();
+  activeModalType = null;
+  closeModal();
+}
+
 function openModal(html){
   document.getElementById('modalBody').innerHTML = html;
   document.getElementById('modalBg').style.display = 'flex';
 }
 function closeModal(){
+  activeModalType = null;
+  dismissUnsavedConfirmation();
   document.getElementById('modalBg').style.display = 'none';
 }
 document.getElementById('modalBg').addEventListener('click', e => {
-  if (e.target.id === 'modalBg') closeModal();
+  if (e.target.id === 'modalBg') {
+    if (activeModalType === 'new_nfa' || activeModalType === 'nfa_preview' || activeModalType === 'edit_nfa') {
+      // Apply NFA and NFA Preview modals must NOT close when clicking outside or darkened background
+      return;
+    }
+    closeModal();
+  }
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' || e.key === 'Esc') {
+    if (activeModalType === 'new_nfa' || activeModalType === 'nfa_preview' || activeModalType === 'edit_nfa') {
+      // Prevent Escape key from accidentally closing Apply NFA or NFA Preview modals
+      e.preventDefault();
+      return;
+    }
+  }
 });
 
 // Auto-boot if logged in

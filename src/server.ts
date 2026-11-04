@@ -10,6 +10,7 @@ import { projectsRouter } from './routes/projects.js';
 import { auditRouter } from './routes/audit.js';
 import { excelRouter } from './routes/excel.js';
 import { adminRouter } from './routes/admin.js';
+import { usersRouter } from './routes/users.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -17,8 +18,10 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '5mb' }));
 app.use(express.static(path.join(__dirname, '..', 'public')));
+app.use('/api/signatures', express.static(path.join(__dirname, '..', 'data', 'signatures')));
 
 app.use('/api/auth', authRouter);
+app.use('/api/users', usersRouter);
 app.use('/api/nfas', nfasRouter);
 app.use('/api/budgets', excelRouter); // /api/budgets/import/* (mounted first so it isn't shadowed)
 app.use('/api/budgets', budgetsRouter);

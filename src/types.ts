@@ -29,6 +29,7 @@ export interface User {
   password_hash: string;
   role: Role;
   department_id: string | null;
+  signature_image?: string;
   created_at: string;
 }
 
@@ -36,6 +37,8 @@ export interface Department {
   id: string;
   name: string;
   code: string;
+  category?: 'academic' | 'coe';
+  is_active?: boolean;
   hod_name?: string;
   dean_name?: string;
   faculty_name?: string;
@@ -112,6 +115,23 @@ export interface NfaItem {
   previous_year_actual?: number;
 }
 
+export interface EventDetails {
+  resource_person_name?: string;
+  designation?: string;
+  organization?: string;
+  event_date?: string;
+  venue?: string;
+  additional_info?: string;
+}
+
+export interface PurchaseDetails {
+  item_name?: string;
+  description?: string;
+  quantity?: string;
+  purpose?: string;
+  additional_info?: string;
+}
+
 export interface Nfa {
   id: string;
   ref_no: string;
@@ -137,6 +157,16 @@ export interface Nfa {
   date: string;
   created_at: string;
   updated_at: string;
+  // Four Description Points (max 50 words each)
+  point1?: string;
+  point2?: string;
+  point3?: string;
+  point4?: string;
+  // Event vs Purchase details
+  nfa_type?: 'event' | 'purchase';
+  event_details?: EventDetails;
+  purchase_details?: PurchaseDetails;
+  proposer_signature?: string;
   // set while a revision to an already-approved NFA awaits Finance sign-off
   pending_revision_amount?: number;
   pending_revision_reason?: string;
@@ -151,6 +181,7 @@ export interface Approval {
   decision: 'approved' | 'rejected' | 'revision_required' | 'recommended';
   comments: string;
   level: number;
+  signature_image?: string;
   created_at: string;
 }
 

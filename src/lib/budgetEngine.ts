@@ -33,11 +33,16 @@ export function availableAmount(b: DepartmentBudget) {
 /** Requirement #17: validate requested amount against available budget. Never silently over-allocate. */
 export function validateBudget(b: DepartmentBudget, requestedAmount: number) {
   const available = availableAmount(b);
+  const financialRemaining = b.allocated_amount - b.approved_amount;
   const sufficient = requestedAmount <= available;
   const totalAllocated = b.allocated_amount > 0 ? b.allocated_amount : 1;
-  const utilizedPct = Math.round(((b.approved_amount + b.pending_amount) / totalAllocated) * 100);
-  const postRequestedPct = Math.round(((b.approved_amount + b.pending_amount + requestedAmount) / totalAllocated) * 100);
+  const utilizedPct = b.allocated_amount > 0 ? Math.round((b.approved_amount / totalAllocated) * 100) : 0;
+  const postRequestedPct = b.allocated_amount > 0 ? Math.round(((b.approved_amount + requestedAmount) / totalAllocated) * 100) : 0;
   return {
+    allocated: b.allocated_amount,
+    approved: b.approved_amount,
+    reserved: b.pending_amount,
+    financialRemaining,
     available,
     requested: requestedAmount,
     sufficient,
@@ -47,6 +52,106 @@ export function validateBudget(b: DepartmentBudget, requestedAmount: number) {
     postRequestedPct,
     warningLevel: postRequestedPct >= 100 ? 'danger' : postRequestedPct >= 80 ? 'warning' : 'safe',
   };
+}
+
+/**
+ * Reserve budget for a newly submitted NFA (under review).
+ * Deducts from Available for New NFAs without increasing Approved Commitments.
+ */
+export function reserveNfaBudget(
+  db: DB,
+  nfa: { id: string; department_id: string; financial_year_id: string; budget_category_id: string; budget_subcategory_id?: string | null; total_amount: number; ref_no?: string },
+  ctx: { changed_by: string; role: Role }
+) {
+  const line = findBudgetLine(db, nfa.department_id, nfa.financial_year_id, nfa.budget_category_id);
+  const available = availableAmount(line);
+  if (nfa.total_amount > available) {
+    throw new BudgetError(`Insufficient available budget in category. Requested ₹${nfa.total_amount.toLocaleString('en-IN')}, but only ₹${available.toLocaleString('en-IN')} is available.`);
+  }
+
+  // Check subcategory allocation if specified and has individual allocation
+  if (nfa.budget_subcategory_id && db.budget_subcategories) {
+    const subcat = db.budget_subcategories.find((s) => s.id === nfa.budget_subcategory_id);
+    if (subcat && subcat.allocated_amount > 0) {
+      const subAvailable = Math.max(0, subcat.allocated_amount - subcat.approved_amount - subcat.pending_amount);
+      if (nfa.total_amount > subAvailable) {
+        throw new BudgetError(`Insufficient available budget in subcategory '${subcat.name}'. Requested ₹${nfa.total_amount.toLocaleString('en-IN')}, but only ₹${subAvailable.toLocaleString('en-IN')} is available.`);
+      }
+    }
+  }
+
+  line.pending_amount += nfa.total_amount;
+
+  if (nfa.budget_subcategory_id && db.budget_subcategories) {
+    const subcat = db.budget_subcategories.find((s) => s.id === nfa.budget_subcategory_id);
+    if (subcat) {
+      subcat.pending_amount += nfa.total_amount;
+    }
+  }
+
+  db.audit_logs.push({
+    id: uuid(),
+    entity_type: 'nfa',
+    entity_id: nfa.id,
+    department_id: nfa.department_id,
+    old_amount: line.allocated_amount - line.approved_amount,
+    new_amount: line.allocated_amount - line.approved_amount - line.pending_amount,
+    difference: -nfa.total_amount,
+    changed_by: ctx.changed_by,
+    role: ctx.role,
+    reason: `NFA ${nfa.ref_no || nfa.id} submitted - reserved ₹${nfa.total_amount.toLocaleString('en-IN')} for active proposal`,
+    source: 'portal',
+    approval_status: 'submitted',
+    created_at: new Date().toISOString(),
+  });
+
+  return line;
+}
+
+/**
+ * Release active reservation for an NFA (e.g. upon rejection or withdrawal).
+ * Restores the amount available for new NFAs.
+ */
+export function releaseNfaReservation(
+  db: DB,
+  nfa: { id: string; department_id: string; financial_year_id: string; budget_category_id: string; budget_subcategory_id?: string | null; total_amount: number; ref_no?: string },
+  ctx: { changed_by: string; role: Role; reason: string }
+) {
+  let line: DepartmentBudget | undefined;
+  try {
+    line = findBudgetLine(db, nfa.department_id, nfa.financial_year_id, nfa.budget_category_id);
+  } catch (e) {
+    line = undefined;
+  }
+
+  if (line) {
+    line.pending_amount = Math.max(0, line.pending_amount - nfa.total_amount);
+  }
+
+  if (nfa.budget_subcategory_id && db.budget_subcategories) {
+    const subcat = db.budget_subcategories.find((s) => s.id === nfa.budget_subcategory_id);
+    if (subcat) {
+      subcat.pending_amount = Math.max(0, subcat.pending_amount - nfa.total_amount);
+    }
+  }
+
+  db.audit_logs.push({
+    id: uuid(),
+    entity_type: 'nfa',
+    entity_id: nfa.id,
+    department_id: nfa.department_id,
+    old_amount: line ? line.allocated_amount - line.approved_amount - line.pending_amount - nfa.total_amount : null,
+    new_amount: line ? line.allocated_amount - line.approved_amount - line.pending_amount : null,
+    difference: nfa.total_amount,
+    changed_by: ctx.changed_by,
+    role: ctx.role,
+    reason: `NFA ${nfa.ref_no || nfa.id} reservation released: ${ctx.reason}`,
+    source: 'portal',
+    approval_status: 'released',
+    created_at: new Date().toISOString(),
+  });
+
+  return line;
 }
 
 /**

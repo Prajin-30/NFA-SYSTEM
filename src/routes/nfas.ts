@@ -11,6 +11,8 @@ import {
   applyNewApproval,
   reviseApprovedAmount,
   finalizePendingRevision,
+  reserveNfaBudget,
+  releaseNfaReservation,
   BudgetError,
 } from '../lib/budgetEngine.js';
 import { renderNfaPdf } from '../lib/pdf.js';
@@ -218,6 +220,12 @@ nfasRouter.delete('/:id', async (req: AuthedRequest, res) => {
     if (!nfa) return { error: 404 as const };
     const canDelete = req.user!.role === 'super_admin' || nfa.created_by === req.user!.id || (['faculty', 'hod'].includes(req.user!.role) && nfa.department_id === req.user!.department_id);
     if (!canDelete) return { error: 403 as const };
+
+    // If deleting an NFA that has an active reservation, release the reserved funds
+    if (['submitted', 'dean_review', 'accounts_review', 'pending_director_approval', 'under_review'].includes(nfa.status)) {
+      releaseNfaReservation(db, nfa, { changed_by: req.user!.id, role: req.user!.role, reason: 'NFA deleted / withdrawn by user' });
+    }
+
     db.nfas = db.nfas.filter((item) => item.id !== nfa.id);
     db.nfa_items = db.nfa_items.filter((item) => item.nfa_id !== nfa.id);
     db.approvals = db.approvals.filter((approval) => approval.nfa_id !== nfa.id);
@@ -494,13 +502,23 @@ nfasRouter.post('/:id/submit', async (req: AuthedRequest, res) => {
       nfa.proposer_signature = creatorUser?.signature_image || (fs.existsSync(path.join(signaturesDir, `${req.user!.id}.png`)) ? `${req.user!.id}.png` : undefined);
     }
 
-    // Submitting draft always moves to HOD review (submitted)
+    // Reserve budget for this active proposal
+    try {
+      reserveNfaBudget(db, nfa, { changed_by: req.user!.id, role: req.user!.role });
+    } catch (e: any) {
+      return { error: 'budget_error' as const, msg: e.message || 'Budget reservation failed' };
+    }
+
+    // Submitting draft moves to HOD review (submitted)
     nfa.status = 'submitted';
     nfa.updated_at = new Date().toISOString();
     return { nfa };
   });
 
   if ('error' in result) {
+    if (result.error === 'budget_error') {
+      return res.status(400).json({ error: (result as any).msg });
+    }
     const map: Record<string, [number, string]> = {
       404: [404, 'NFA not found'],
       403: [403, 'Only the creator can submit this NFA'],
@@ -577,11 +595,13 @@ nfasRouter.post('/:id/review', async (req: AuthedRequest, res) => {
     });
 
     if (decision === 'reject') {
+      releaseNfaReservation(db, nfa, { changed_by: req.user!.id, role, reason: comments || 'Proposal rejected during review' });
       nfa.status = 'rejected';
       nfa.updated_at = new Date().toISOString();
       return { nfa, validation: null };
     }
     if (decision === 'revision_required') {
+      releaseNfaReservation(db, nfa, { changed_by: req.user!.id, role, reason: comments || 'Revision requested by reviewer' });
       nfa.status = 'revision_required';
       nfa.updated_at = new Date().toISOString();
       return { nfa, validation: null };
@@ -589,7 +609,7 @@ nfasRouter.post('/:id/review', async (req: AuthedRequest, res) => {
 
     // decision === 'approve'
     if (level === 1) {
-      // HOD recommended -> moves to Dean & Associate Dean
+      // HOD recommended -> moves to Dean & Associate Dean (reservation maintained)
       nfa.status = 'dean_review';
       nfa.hod_name = req.user!.name;
       nfa.updated_at = new Date().toISOString();
@@ -597,14 +617,14 @@ nfasRouter.post('/:id/review', async (req: AuthedRequest, res) => {
     }
 
     if (level === 2) {
-      // Dean recommended -> moves to Accounts Officer
+      // Dean recommended -> moves to Accounts Officer (reservation maintained)
       nfa.status = 'accounts_review';
       nfa.updated_at = new Date().toISOString();
       return { nfa, validation: null };
     }
 
     if (level === 3) {
-      // Accounts Officer validated -> stages budget & moves to University Director
+      // Accounts Officer validated -> moves to University Director (reservation maintained, no duplicate reservation)
       let line;
       try {
         line = findBudgetLine(db, nfa.department_id, nfa.financial_year_id, nfa.budget_category_id);
@@ -612,11 +632,6 @@ nfasRouter.post('/:id/review', async (req: AuthedRequest, res) => {
         return { error: 400 as const, msg: (e as BudgetError).message };
       }
       const validation = validateBudget(line, nfa.total_amount);
-      line.pending_amount += nfa.total_amount;
-      if (nfa.budget_subcategory_id && db.budget_subcategories) {
-        const subcat = db.budget_subcategories.find((s) => s.id === nfa.budget_subcategory_id);
-        if (subcat) subcat.pending_amount += nfa.total_amount;
-      }
       nfa.status = 'pending_director_approval';
       nfa.updated_at = new Date().toISOString();
       return { nfa, validation, escalated: true };
@@ -679,11 +694,7 @@ nfasRouter.post('/:id/finance-decision', requireRole('director', 'finance', 'sup
     const line = findBudgetLine(db, nfa.department_id, nfa.financial_year_id, nfa.budget_category_id);
 
     if (decision === 'reject') {
-      line.pending_amount = Math.max(0, line.pending_amount - nfa.total_amount);
-      if (nfa.budget_subcategory_id && db.budget_subcategories) {
-        const subcat = db.budget_subcategories.find((s) => s.id === nfa.budget_subcategory_id);
-        if (subcat) subcat.pending_amount = Math.max(0, subcat.pending_amount - nfa.total_amount);
-      }
+      releaseNfaReservation(db, nfa, { changed_by: req.user!.id, role: req.user!.role, reason: comments || 'Rejected by Director' });
       nfa.status = 'rejected';
       nfa.updated_at = new Date().toISOString();
       return { nfa };

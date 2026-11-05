@@ -64,6 +64,14 @@ export interface BudgetCategory {
   name: string; // External Remuneration, Staff Development & Welfare, Student Related Expenses, Administrative Expenses, Others...
 }
 
+export interface ExcelCellMapping {
+  sheet_name: string;
+  cell_address: string;
+  row: number;
+  col: number;
+  original_value?: number;
+}
+
 export interface BudgetSubcategory {
   id: string;
   budget_category_id: string;
@@ -72,6 +80,7 @@ export interface BudgetSubcategory {
   allocated_amount: number;
   approved_amount: number;
   pending_amount: number;
+  cell_mapping?: ExcelCellMapping;
 }
 
 export interface DepartmentBudget {
@@ -81,8 +90,9 @@ export interface DepartmentBudget {
   budget_category_id: string;
   allocated_amount: number;
   approved_amount: number; // sum of approved NFAs/items charged to this category
-  pending_amount: number; // sum awaiting approval
+  pending_amount: number; // sum awaiting approval (Reserved for active NFAs)
   revised_amount: number; // net effect of revisions (can be +/-), informational
+  cell_mapping?: ExcelCellMapping;
 }
 
 export interface Project {
@@ -233,7 +243,56 @@ export interface BudgetUpload {
   stored_filename: string;
   uploaded_by: string;
   uploaded_at: string;
-  status: 'original';
+  status: 'original' | 'active' | 'archived';
+  is_master?: boolean;
+  sheets_info?: any[];
+  cell_mappings?: Array<{
+    sheet_name: string;
+    cell_address: string;
+    category_id?: string;
+    subcategory_id?: string;
+    field: string;
+  }>;
+}
+
+export interface MasterBudgetSubcategoryPreview {
+  name: string;
+  allocated_amount: number;
+  cell_address: string;
+  row: number;
+  col: number;
+}
+
+export interface MasterBudgetCategoryPreview {
+  category_name: string;
+  budget_type_name: string;
+  allocated_amount: number;
+  cell_address?: string;
+  subcategories: MasterBudgetSubcategoryPreview[];
+}
+
+export interface MasterBudgetSheetPreview {
+  name: string;
+  sheet_type: 'financial' | 'summary' | 'skipped';
+  reason?: string;
+  budget_type_name?: string;
+  declared_total?: number;
+  extracted_total: number;
+  variance?: number;
+  categories_count: number;
+  items_count: number;
+}
+
+export interface MasterBudgetPreviewResponse {
+  preview_id: string;
+  filename: string;
+  detected_department?: { id?: string; code?: string; name?: string };
+  detected_financial_year?: { id?: string; label?: string };
+  sheets: MasterBudgetSheetPreview[];
+  categories: MasterBudgetCategoryPreview[];
+  total_allocated: number;
+  warnings: string[];
+  errors: string[];
 }
 
 export interface BudgetChange {

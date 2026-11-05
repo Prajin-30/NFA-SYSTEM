@@ -9,26 +9,35 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    /* Institutional Deep Maroon & Muted Gold Palette */
-    --primary: #6B1735;             /* Deep Maroon */
-    --primary-hover: #531028;       /* Darker Maroon */
-    --primary-light: #fbf2f5;       /* Soft maroon tint */
-    --primary-glow: rgba(107, 23, 53, 0.15);
+    /* Official CHRIST University Blue & Gold Palette */
+    --primary-blue: #003D8F;        /* CHRIST University Blue */
+    --primary: #003D8F;
+    --dark-blue: #002D70;           /* Header & Navigation Dark Blue */
+    --hover-blue: #1554A5;          /* Hover & Active States */
+    --primary-hover: #1554A5;
+    --light-blue: #EAF2FF;          /* Selected Backgrounds / Soft Blue Tint */
+    --primary-light: #EAF2FF;
+    --primary-glow: rgba(0, 61, 143, 0.18);
     
-    --accent: #C6A15B;              /* Muted Gold */
-    --accent-hover: #b58f48;
-    --accent-light: #fdfaf3;        /* Warm gold tint */
-    --accent-border: #e6cf9b;
+    --accent: #D4AF37;              /* University Gold Accent */
+    --gold-accent: #D4AF37;
+    --accent-hover: #bfa02e;
+    --accent-light: #fefcf3;        /* Warm Gold Tint */
+    --accent-border: #e8d78d;
     
+    --page-background: #F5F7FA;     /* Page Background Light Grey */
+    --section-bg: #F5F7FA;          /* Section Background */
     --bg: #FFFFFF;                  /* Clean White */
-    --section-bg: #F5F6F8;          /* Light Grey Section Background */
     --card: #FFFFFF;                /* White Card */
+    --card-background: #FFFFFF;
+    
+    --text-primary: #1F2937;        /* Main Text Dark Grey */
+    --text: #1F2937;
+    --text-muted: #4B5563;          /* Medium Grey */
+    --text-subtle: #9CA3AF;
+    
     --border: #E2E6ED;              /* Refined border */
     --border-light: #EEF1F5;
-    
-    --text: #252A34;                /* Charcoal */
-    --text-muted: #5A6275;          /* Muted Charcoal */
-    --text-subtle: #8792A2;
     
     --success: #1E7E51;
     --success-bg: #E8F5EE;
@@ -41,34 +50,47 @@
     --radius: 10px;
     --radius-lg: 14px;
     
-    --shadow-sm: 0 1px 3px rgba(37, 42, 52, 0.05);
-    --shadow: 0 4px 10px -2px rgba(37, 42, 52, 0.08), 0 2px 4px -2px rgba(37, 42, 52, 0.04);
-    --shadow-lg: 0 14px 28px -5px rgba(37, 42, 52, 0.12), 0 6px 12px -4px rgba(37, 42, 52, 0.06);
+    --shadow-sm: 0 1px 3px rgba(31, 41, 55, 0.05);
+    --shadow: 0 4px 10px -2px rgba(31, 41, 55, 0.08), 0 2px 4px -2px rgba(31, 41, 55, 0.04);
+    --shadow-lg: 0 14px 28px -5px rgba(31, 41, 55, 0.12), 0 6px 12px -4px rgba(31, 41, 55, 0.06);
   }
   
-  * { box-sizing: border-box; }
+  * {
+    box-sizing: border-box;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
   body {
     margin: 0;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: var(--section-bg);
-    color: var(--text);
+    background: var(--page-background);
+    color: var(--text-primary);
     -webkit-font-smoothing: antialiased;
     font-size: 14px;
     line-height: 1.5;
+    min-height: 100vh;
+  }
+  body.modal-open {
+    overflow: hidden;
   }
   
   h1, h2, h3, h4, .brand-title {
     font-family: 'Outfit', sans-serif;
-    color: var(--text);
+    color: var(--dark-blue);
     letter-spacing: -0.01em;
   }
   
   /* LOGIN PAGE */
   #login {
-    max-width: 500px;
+    max-width: 480px;
+    width: 90%;
     margin: 40px auto;
     background: var(--card);
-    padding: 36px 40px;
+    padding: 36px 36px;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
     border: 1px solid var(--border);
@@ -80,7 +102,8 @@
     margin-bottom: 18px;
   }
   .login-crest-wrap img {
-    max-width: 260px;
+    max-width: 250px;
+    width: 100%;
     height: auto;
     display: block;
     object-fit: contain;
@@ -101,7 +124,7 @@
   #login h1 {
     font-size: 24px;
     margin: 0 0 6px;
-    color: var(--primary);
+    color: var(--primary-blue);
     text-align: center;
   }
   #login p {
@@ -121,7 +144,7 @@
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
-    color: var(--text-muted);
+    color: var(--dark-blue);
     letter-spacing: 0.05em;
     margin-bottom: 10px;
     display: flex;
@@ -136,10 +159,10 @@
   .demo-btn {
     background: #fff;
     border: 1px solid var(--border);
-    color: var(--text);
+    color: var(--text-primary);
     font-size: 11.5px;
     font-weight: 600;
-    padding: 8px 10px;
+    padding: 9px 10px;
     border-radius: var(--radius-sm);
     cursor: pointer;
     text-align: left;
@@ -147,11 +170,13 @@
     display: flex;
     align-items: center;
     gap: 6px;
+    width: 100%;
+    min-height: 38px;
   }
   .demo-btn:hover {
-    background: var(--primary-light);
-    border-color: var(--primary);
-    color: var(--primary);
+    background: var(--light-blue);
+    border-color: var(--primary-blue);
+    color: var(--primary-blue);
     transform: translateY(-1px);
   }
 
@@ -164,7 +189,7 @@
     border-radius: var(--radius-sm);
     margin-bottom: 12px;
     background: #fff;
-    color: var(--text);
+    color: var(--text-primary);
     transition: border-color 0.15s, box-shadow 0.15s;
     font-size: 13.5px;
     box-sizing: border-box;
@@ -186,7 +211,7 @@
   }
   input:focus, select:focus, textarea:focus {
     outline: none;
-    border-color: var(--primary);
+    border-color: var(--primary-blue);
     box-shadow: 0 0 0 3px var(--primary-glow);
   }
   button {
@@ -194,7 +219,7 @@
     border: none;
     border-radius: var(--radius-sm);
     padding: 9px 16px;
-    background: var(--primary);
+    background: var(--primary-blue);
     color: #fff;
     font-weight: 600;
     font-size: 13px;
@@ -203,35 +228,39 @@
     justify-content: center;
     gap: 6px;
     transition: all 0.15s ease;
+    min-height: 38px;
+    white-space: nowrap;
   }
   button:hover {
-    background: var(--primary-hover);
+    background: var(--hover-blue);
     transform: translateY(-1px);
     box-shadow: var(--shadow-sm);
   }
   button.secondary {
     background: #fff;
     border: 1px solid var(--border);
-    color: var(--text);
+    color: var(--text-primary);
   }
   button.secondary:hover {
-    background: var(--section-bg);
-    border-color: #cbd5e1;
-    color: var(--primary);
+    background: var(--light-blue);
+    border-color: var(--primary-blue);
+    color: var(--primary-blue);
   }
   button.gold {
-    background: var(--accent);
-    color: #fff;
+    background: var(--gold-accent);
+    color: var(--dark-blue);
+    font-weight: 700;
   }
   button.gold:hover {
-    background: var(--accent-hover);
+    background: #bfa02e;
+    color: var(--dark-blue);
   }
   button.danger {
     background: var(--danger);
     color: #fff;
   }
   button.danger:hover {
-    background: #801414;
+    background: #7f1d1d;
   }
   button.green {
     background: var(--success);
@@ -257,19 +286,20 @@
   /* HEADER & NAVIGATION */
   #app { display: none; }
   header {
-    background: var(--primary);
+    background: var(--dark-blue);
     color: #fff;
-    padding: 10px 24px;
+    padding: 12px 24px;
     display: flex;
     align-items: center;
     gap: 20px;
-    border-bottom: 2px solid var(--accent);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-bottom: 2px solid var(--gold-accent);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
   }
   header .brand {
     display: flex;
     align-items: center;
     gap: 14px;
+    flex-shrink: 0;
   }
   header .brand img {
     height: 44px;
@@ -293,8 +323,8 @@
     gap: 8px;
   }
   header .brand-pill {
-    background: rgba(198, 161, 91, 0.25);
-    border: 1px solid var(--accent);
+    background: rgba(212, 175, 55, 0.2);
+    border: 1px solid var(--gold-accent);
     color: #fce7ba;
     font-size: 9.5px;
     padding: 1px 6px;
@@ -304,7 +334,7 @@
   }
   header .brand-sub {
     font-size: 11.5px;
-    color: #f7d8e2;
+    color: #D6E4FF;
     font-weight: 500;
   }
   header .user-info {
@@ -313,6 +343,7 @@
     align-items: center;
     gap: 12px;
     font-size: 13px;
+    flex-wrap: wrap;
   }
   .role-pill {
     background: rgba(255,255,255,0.15);
@@ -324,10 +355,11 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    white-space: nowrap;
   }
   .fy-pill-select {
     background: rgba(0,0,0,0.25);
-    border: 1px solid rgba(198, 161, 91, 0.6);
+    border: 1px solid rgba(212, 175, 55, 0.6);
     color: #fce7ba;
     padding: 4px 8px;
     border-radius: 6px;
@@ -335,39 +367,45 @@
     font-weight: 700;
     margin-bottom: 0;
     cursor: pointer;
+    height: auto;
+    min-height: 32px;
   }
 
   nav {
     display: flex;
     gap: 2px;
-    background: #501026;
+    background: var(--dark-blue);
     padding: 0 24px;
     overflow-x: auto;
-    border-bottom: 1px solid rgba(0,0,0,0.12);
+    -webkit-overflow-scrolling: touch;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    scrollbar-width: thin;
   }
   nav button {
     background: transparent;
-    color: #f2cdd9;
+    color: #D6E4FF;
     border-radius: 0;
     padding: 12px 18px;
     font-size: 13px;
     font-weight: 600;
     border-bottom: 3px solid transparent;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
   nav button:hover {
-    background: rgba(255,255,255,0.06);
+    background: var(--hover-blue);
     color: #fff;
     transform: none;
     box-shadow: none;
   }
   nav button.active {
     color: #fff;
-    border-bottom-color: var(--accent);
-    background: rgba(255,255,255,0.1);
+    border-bottom-color: var(--gold-accent);
+    background: var(--hover-blue);
   }
   .inbox-badge {
-    background: var(--accent);
-    color: #3f101f;
+    background: var(--gold-accent);
+    color: var(--dark-blue);
     padding: 2px 7px;
     border-radius: 10px;
     font-size: 11px;
@@ -378,8 +416,10 @@
   /* MAIN CONTENT */
   main {
     max-width: 1240px;
-    margin: 28px auto;
+    margin: 24px auto;
     padding: 0 20px 80px;
+    width: 100%;
+    min-width: 0;
   }
   .card {
     background: var(--card);
@@ -401,7 +441,7 @@
     font-size: 18px;
     font-weight: 700;
     margin: 0;
-    color: var(--primary);
+    color: var(--primary-blue);
   }
   .card-sub {
     font-size: 12.5px;
@@ -426,10 +466,18 @@
     box-shadow: var(--shadow);
     transform: translateY(-2px);
   }
-  .stat-card.primary { border-top-color: var(--primary); }
+  .stat-card.primary { border-top-color: var(--primary-blue); }
   .stat-card.success { border-top-color: var(--success); }
   .stat-card.warning { border-top-color: var(--warning); }
-  .stat-card.accent { border-top-color: var(--accent); }
+  .stat-card.accent { border-top-color: var(--gold-accent); }
+  .stat-card.info { border-top-color: #0284c7; }
+  .stat-card.purple { border-top-color: #7c3aed; }
+
+  .grid-6 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+  }
 
   .stat-label {
     font-size: 11.5px;
@@ -442,7 +490,7 @@
     font-size: 23px;
     font-weight: 800;
     margin: 8px 0 4px;
-    color: var(--text);
+    color: var(--text-primary);
     font-family: 'Outfit', sans-serif;
   }
   .stat-desc {
@@ -462,19 +510,20 @@
     border-radius: 20px;
     border: 1px solid var(--border);
     background: #fff;
-    color: var(--text);
+    color: var(--text-primary);
     font-size: 12.5px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.15s ease;
   }
   .type-pill:hover {
-    border-color: var(--primary);
-    color: var(--primary);
+    border-color: var(--primary-blue);
+    color: var(--primary-blue);
+    background: var(--light-blue);
   }
   .type-pill.active {
-    background: var(--primary);
-    border-color: var(--primary);
+    background: var(--primary-blue);
+    border-color: var(--primary-blue);
     color: #fff;
   }
 
@@ -499,9 +548,10 @@
     cursor: pointer;
     background: #fff;
     user-select: none;
+    transition: background 0.15s ease;
   }
   .category-header:hover {
-    background: #fdfafb;
+    background: var(--light-blue);
   }
   .category-name-group {
     display: flex;
@@ -510,7 +560,7 @@
   }
   .category-chevron {
     font-size: 13px;
-    color: var(--accent);
+    color: var(--primary-blue);
     transition: transform 0.2s;
   }
   .category-accordion.open .category-chevron {
@@ -519,7 +569,7 @@
   .category-title {
     font-size: 15px;
     font-weight: 700;
-    color: var(--text);
+    color: var(--text-primary);
   }
   .category-type-tag {
     font-size: 10.5px;
@@ -541,6 +591,8 @@
     border-top: 1px solid var(--border);
     background: #fafbfc;
     padding: 18px 20px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
   .category-accordion.open .category-subtable {
     display: block;
@@ -564,9 +616,27 @@
   .progress-fill.warning { background: var(--warning); }
   .progress-fill.danger { background: var(--danger); }
 
-  /* TABLES */
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--border); }
+  /* TABLES & RESPONSIVE CONTAINER */
+  .table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: var(--radius-sm);
+    margin-bottom: 12px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: 580px;
+  }
+  th, td {
+    text-align: left;
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--border);
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
   th {
     color: var(--text-muted);
     font-weight: 700;
@@ -574,9 +644,10 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
     background: var(--section-bg);
+    white-space: nowrap;
   }
   tbody tr:nth-child(even) td { background: #fafbfc; }
-  tbody tr:hover td { background: #fbf5f7; }
+  tbody tr:hover td { background: var(--light-blue); }
 
   /* BADGES */
   .badge {
@@ -588,9 +659,10 @@
     font-size: 11px;
     font-weight: 700;
     text-transform: capitalize;
+    white-space: nowrap;
   }
   .b-draft { background: #f1f5f9; color: #475569; }
-  .b-submitted { background: #e0f2fe; color: #0369a1; }
+  .b-submitted { background: var(--light-blue); color: var(--primary-blue); }
   .b-under_review { background: #f3e8ff; color: #7e22ce; }
   .b-dean_review { background: #fef3c7; color: #92400e; }
   .b-accounts_review { background: #ede9fe; color: #5b21b6; }
@@ -623,9 +695,9 @@
     transition: all 0.15s ease;
   }
   .sdg-chip.active {
-    background: var(--primary);
+    background: var(--primary-blue);
     color: #fff;
-    border-color: var(--primary);
+    border-color: var(--primary-blue);
   }
 
   /* BUDGET ITEM CHIPS IN APPLY NFA */
@@ -652,7 +724,7 @@
     border-radius: 20px;
     font-size: 12px;
     font-weight: 600;
-    color: var(--text);
+    color: var(--text-primary);
     cursor: pointer;
     transition: all 0.18s ease;
     user-select: none;
@@ -660,16 +732,16 @@
     text-align: left;
   }
   .budget-item-chip:hover {
-    border-color: var(--primary);
-    background: var(--primary-light);
-    color: var(--primary);
+    border-color: var(--primary-blue);
+    background: var(--light-blue);
+    color: var(--primary-blue);
     transform: translateY(-1px);
-    box-shadow: 0 2px 5px rgba(107, 23, 53, 0.08);
+    box-shadow: 0 2px 5px rgba(0, 61, 143, 0.08);
   }
   .budget-item-chip.active {
-    background: var(--primary);
+    background: var(--primary-blue);
     color: #ffffff;
-    border-color: var(--primary);
+    border-color: var(--primary-blue);
     box-shadow: 0 3px 8px var(--primary-glow);
   }
   .budget-item-chip .chip-bal {
@@ -685,8 +757,8 @@
     color: #ffffff;
   }
   @keyframes focusPulse {
-    0% { box-shadow: 0 0 0 0 rgba(107, 23, 53, 0.5); }
-    50% { box-shadow: 0 0 0 5px rgba(107, 23, 53, 0.25); }
+    0% { box-shadow: 0 0 0 0 rgba(0, 61, 143, 0.5); }
+    50% { box-shadow: 0 0 0 5px rgba(0, 61, 143, 0.25); }
     100% { box-shadow: 0 0 0 3px var(--primary-glow); }
   }
   .auto-focused {
@@ -698,20 +770,23 @@
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    margin: 20px 0 24px;
-    padding: 18px 20px;
+    margin: 18px 0 22px;
+    padding: 16px 18px;
     background: var(--section-bg);
     border-radius: var(--radius);
     border: 1px solid var(--border);
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    gap: 12px;
   }
   .step-node {
     display: flex;
     flex-direction: column;
     align-items: center;
     position: relative;
-    min-width: 110px;
+    min-width: 105px;
     text-align: center;
+    flex-shrink: 0;
   }
   .step-circle {
     width: 32px;
@@ -732,14 +807,14 @@
     color: #fff;
   }
   .step-node.active .step-circle {
-    background: var(--primary);
+    background: var(--primary-blue);
     color: #fff;
     box-shadow: 0 0 0 4px var(--primary-glow);
   }
   .step-label {
     font-size: 12px;
     font-weight: 700;
-    color: var(--text);
+    color: var(--text-primary);
   }
   .step-sub {
     font-size: 10.5px;
@@ -762,6 +837,7 @@
     padding: 9px;
     border-radius: var(--radius-sm);
     justify-content: center;
+    min-height: 38px;
   }
   .item-row button.del-item:hover { background: #fca5a5; }
 
@@ -770,7 +846,7 @@
     position: fixed;
     top: 20px;
     right: 20px;
-    background: var(--primary);
+    background: var(--dark-blue);
     color: #fff;
     padding: 12px 22px;
     border-radius: var(--radius-sm);
@@ -779,16 +855,17 @@
     z-index: 1000;
     display: none;
     box-shadow: var(--shadow-lg);
-    border-left: 4px solid var(--accent);
+    border-left: 4px solid var(--gold-accent);
+    max-width: 90vw;
   }
   .modal-bg {
     position: fixed;
     inset: 0;
-    background: rgba(37, 42, 52, 0.65);
+    background: rgba(0, 45, 112, 0.55);
     display: none;
     align-items: flex-start;
     justify-content: center;
-    padding: 40px 16px;
+    padding: 30px 14px;
     overflow-y: auto;
     z-index: 500;
     backdrop-filter: blur(3px);
@@ -796,11 +873,14 @@
   .modal {
     background: #fff;
     border-radius: var(--radius-lg);
-    padding: 30px 32px;
+    padding: 28px 30px;
     max-width: 820px;
     width: 100%;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
     box-shadow: var(--shadow-lg);
     border: 1px solid var(--border);
+    margin: auto;
   }
   .close-btn {
     float: right;
@@ -811,13 +891,16 @@
     background: none;
     border: none;
     padding: 0;
+    min-height: auto;
+    width: auto;
+    line-height: 1;
   }
-  .close-btn:hover { color: var(--primary); background: none; }
+  .close-btn:hover { color: var(--primary-blue); background: none; }
   .field-label {
     display: block;
     font-size: 11.5px;
     font-weight: 700;
-    color: var(--text);
+    color: var(--text-primary);
     margin: 10px 0 4px;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -856,9 +939,170 @@
     transition: all 0.2s ease;
   }
   .nfa-type-card.active {
-    border-color: #274897;
-    background: #EEF3FA;
-    color: #274897;
+    border-color: var(--primary-blue);
+    background: var(--light-blue);
+    color: var(--primary-blue);
+  }
+
+  /* ==========================================================================
+     RESPONSIVE BREAKPOINTS (Mobile: 320px-480px, Tablet: 768px, Laptop: 1024px+)
+     ========================================================================== */
+  @media (max-width: 992px) {
+    header {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 12px;
+      padding: 12px 18px;
+    }
+    header .user-info {
+      margin-left: 0;
+      width: 100%;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .grid-6 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (max-width: 768px) {
+    main {
+      padding: 0 12px 60px;
+      margin: 16px auto;
+    }
+    .card {
+      padding: 18px 16px;
+      margin-bottom: 16px;
+    }
+    .grid-6 {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    .grid-4 {
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .category-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 14px 16px;
+    }
+    .category-stats-summary {
+      flex-wrap: wrap;
+      gap: 6px 12px;
+      width: 100%;
+      justify-content: space-between;
+    }
+    .category-subtable {
+      padding: 14px 12px;
+    }
+    .stepper {
+      justify-content: flex-start;
+      gap: 8px;
+      padding: 12px;
+    }
+    .step-node {
+      min-width: 90px;
+    }
+    .item-row {
+      grid-template-columns: 1fr 1fr;
+      background: var(--section-bg);
+      border: 1px solid var(--border);
+      padding: 10px;
+      border-radius: var(--radius-sm);
+    }
+    .item-row input.it-p {
+      grid-column: span 2;
+    }
+    .item-row button.del-item {
+      grid-column: span 2;
+      width: 100%;
+    }
+    #itemsHeader {
+      display: none;
+    }
+  }
+
+  @media (max-width: 540px) {
+    header .user-info {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+    header .user-info > * {
+      width: 100%;
+      justify-content: space-between;
+    }
+    .grid-6 {
+      grid-template-columns: 1fr;
+    }
+    .grid-4 {
+      grid-template-columns: 1fr;
+    }
+    .card-header {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+    }
+    .card-header > div:last-child {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 100%;
+    }
+    .card-header > div:last-child button {
+      width: 100%;
+    }
+    .row {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+    .row > div, .row > button, .row > select, .row > input {
+      width: 100%;
+    }
+    .modal-bg {
+      padding: 10px 6px;
+    }
+    .modal {
+      padding: 18px 14px;
+      max-height: calc(100vh - 16px);
+      border-radius: var(--radius);
+    }
+    .modal .row {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .modal .row button {
+      width: 100%;
+    }
+    .demo-grid {
+      grid-template-columns: 1fr !important;
+    }
+    #login {
+      width: 94%;
+      padding: 24px 18px;
+      margin: 20px auto;
+    }
+    .nfa-type-card {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 360px) {
+    body {
+      font-size: 13px;
+    }
+    header .brand img {
+      height: 34px;
+    }
+    header .brand-title {
+      font-size: 13.5px;
+    }
+    .stat-val {
+      font-size: 18px;
+    }
   }
 </style>
 </head>
@@ -875,14 +1119,14 @@
   <p>Hierarchical NFA Workflow &amp; Annual Budget Management System</p>
   
   <div class="demo-accounts">
-    <div class="demo-title">⚡ 1-Click Quick Demo Sign-In</div>
+    <div class="demo-title">Quick Demo Sign-In</div>
     <div class="demo-grid">
-      <button class="demo-btn" onclick="quickLogin('faculty@christ.edu')">👨‍🏫 Faculty (Dr. Arul)</button>
-      <button class="demo-btn" onclick="quickLogin('hod@christ.edu')">🎓 HOD (Dr. Moses)</button>
-      <button class="demo-btn" onclick="quickLogin('dean@christ.edu')">🏛️ Dean (Dr. Mary Anita)</button>
-      <button class="demo-btn" onclick="quickLogin('finance@christ.edu')">💼 Accounts (Fr. Shijin)</button>
-      <button class="demo-btn" onclick="quickLogin('director@christ.edu')">👑 Director (Fr. Jiby)</button>
-      <button class="demo-btn" onclick="quickLogin('admin@christ.edu')">⚙️ Super Admin</button>
+      <button class="demo-btn" onclick="quickLogin('faculty@christ.edu')">Faculty (Dr. Arul)</button>
+      <button class="demo-btn" onclick="quickLogin('hod@christ.edu')">HOD (Dr. Moses)</button>
+      <button class="demo-btn" onclick="quickLogin('dean@christ.edu')">Dean (Dr. Mary Anita)</button>
+      <button class="demo-btn" onclick="quickLogin('finance@christ.edu')">Accounts (Fr. Shijin)</button>
+      <button class="demo-btn" onclick="quickLogin('director@christ.edu')">Director (Fr. Jiby)</button>
+      <button class="demo-btn" onclick="quickLogin('admin@christ.edu')">Super Admin</button>
     </div>
   </div>
 
@@ -912,7 +1156,7 @@
         <span style="font-size:11px;font-weight:700;color:#fce7ba;text-transform:uppercase;">Academic Year:</span>
         <select id="headerFySelect" class="fy-pill-select" onchange="onHeaderFyChange(this.value)"></select>
       </div>
-      <button class="secondary" style="padding:5px 11px;font-size:12px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.12);color:#fff;cursor:pointer;border-radius:4px;" onclick="openProfileModal()">✍️ Digital Signature</button>
+      <button class="secondary" style="padding:5px 11px;font-size:12px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.12);color:#fff;cursor:pointer;border-radius:4px;" onclick="openProfileModal()">Digital Signature</button>
       <span id="whoamiName" style="font-weight:700"></span>
       <span id="whoamiRole" class="role-pill"></span>
       <button class="secondary" style="padding:6px 12px;font-size:12px;border:none;" onclick="logout()">Log Out</button>
@@ -936,6 +1180,8 @@ let REF = { departments:[], categories:[], subcategories:[], financialYears:[], 
 let currentTab = 'dashboard';
 let currentActiveFyId = '';
 let activeBudgetTypeFilter = 'all';
+let activeMasterBudgetPreview = null;
+let currentSelectedAvailableBudget = null;
 
 // SDG 17 List
 const SDG_LIST = [
@@ -1039,7 +1285,7 @@ async function openProfileModal() {
     } else {
       sigHtml = `
         <div style="margin:12px 0;padding:12px;background:#fff8ee;border:1px solid #fce7ba;border-radius:var(--radius-sm);font-size:12px;color:#92400e;">
-          ⚠️ No digital signature registered yet. Upload your official signature in PNG format (transparent background recommended) below.
+          No digital signature registered yet. Upload your official signature in PNG format (transparent background recommended) below.
         </div>
       `;
     }
@@ -1053,13 +1299,13 @@ async function openProfileModal() {
         <div class="row" style="gap:20px;flex-wrap:wrap;">
           <div><span class="muted">Name:</span> <strong>${escapeHtml(me.name)}</strong></div>
           <div><span class="muted">Email:</span> <strong>${escapeHtml(me.email)}</strong></div>
-          <div><span class="muted">Role:</span> <span class="role-pill" style="color:#501026;background:var(--accent-light);border:1px solid var(--accent-border)">${String(me.role).replace('_', ' ')}</span></div>
+          <div><span class="muted">Role:</span> <span class="role-pill" style="color:var(--dark-blue);background:var(--light-blue);border:1px solid #BFDBFE">${String(me.role).replace('_', ' ')}</span></div>
           <div><span class="muted">Department:</span> <strong>${me.department_id ? escapeHtml(deptName(me.department_id)) : 'Institution-wide'}</strong></div>
         </div>
       </div>
 
       <div class="card" style="padding:16px;">
-        <h3 style="margin:0 0 8px;font-size:15px;color:var(--primary);">✍️ Official Digital Signature</h3>
+        <h3 style="margin:0 0 8px;font-size:15px;color:var(--primary);">Official Digital Signature</h3>
         <p style="font-size:12px;color:var(--text-muted);margin:0 0 10px;">
           When you approve an NFA, your registered signature will automatically be embedded into the official generated PDF.
         </p>
@@ -1109,7 +1355,7 @@ async function uploadMySignature(targetUserId = null) {
     });
     const json = await res.json();
     if (!res.ok) throw new Error(json.error || 'Failed to upload signature');
-    toast('✅ Digital signature uploaded successfully!');
+    toast('Digital signature uploaded successfully!');
     if (targetUserId) {
       closeModal();
       showTab('admin');
@@ -1282,7 +1528,7 @@ function renderDeptSelectOptions(selectedId, includeCustom = false) {
 
   if (includeCustom) {
     html += `<optgroup label="Other">
-      <option value="__custom__">➕ Other / Enter Custom Department Name...</option>
+      <option value="__custom__">Other / Enter Custom Department Name...</option>
     </optgroup>`;
   }
   return html;
@@ -1362,8 +1608,8 @@ async function renderHome(main){
         </div>
         <div class="row">
           ${isAdmin ? `
-            <button class="secondary" onclick="exportBudgetReport('${deptId}')">📥 Export Master Budget Excel</button>
-            <button class="secondary" onclick="showTab('admin')">⚙️ Budget Management &amp; Upload in Settings</button>
+            <button class="secondary" onclick="exportBudgetReport('${deptId}')">Export Master Budget Excel</button>
+            <button class="secondary" onclick="showTab('admin')">Budget Management &amp; Upload in Settings</button>
           ` : ''}
           ${['super_admin', 'director', 'finance'].includes(USER.role) ? `
             <button class="secondary" onclick="openRolloverModal()">Annual Rollover &amp; Next-Year Projection</button>
@@ -1388,7 +1634,7 @@ async function renderHome(main){
         </div>
         <div class="stat-card accent">
           <div class="stat-label">Remaining Balance</div>
-          <div class="stat-val" style="color:${totals.available_amount < 0 ? 'var(--danger)' : '#6B1735'}">
+          <div class="stat-val" style="color:${totals.available_amount < 0 ? 'var(--danger)' : 'var(--primary-blue)'}">
             ${inr(totals.available_amount)}
           </div>
           <div class="stat-desc">Available for New Proposals</div>
@@ -1450,7 +1696,7 @@ async function renderHome(main){
             <div><span class="muted">Available:</span> <strong style="color:${line.available_amount < 0 ? 'var(--danger)' : 'var(--primary)'}">${inr(line.available_amount)}</strong></div>
             <div class="progress-wrap"><div class="progress-fill ${utilClass}" style="width:${Math.min(100, line.utilization_pct)}%"></div></div>
             ${isAdmin ? `
-              <button class="secondary" style="padding:4px 8px;font-size:11px;" data-line-id="${line.id}" data-cat-name="${encodeURIComponent(line.category_name || '')}" data-alloc="${line.allocated_amount || 0}" onclick="event.stopPropagation(); onEditCategoryClick(this)">✏️ Edit</button>
+              <button class="secondary" style="padding:4px 8px;font-size:11px;" data-line-id="${line.id}" data-cat-name="${encodeURIComponent(line.category_name || '')}" data-alloc="${line.allocated_amount || 0}" onclick="event.stopPropagation(); onEditCategoryClick(this)">Edit</button>
             ` : ''}
           </div>
         </div>
@@ -1483,7 +1729,7 @@ async function renderHome(main){
                   </td>
                   ${isAdmin ? `
                     <td>
-                      <button class="secondary" style="padding:3px 7px;font-size:11px;" data-sub-id="${sub.id}" data-sub-name="${encodeURIComponent(sub.name || '')}" data-alloc="${sub.allocated_amount || 0}" onclick="onEditSubcategoryClick(this)">✏️ Edit</button>
+                      <button class="secondary" style="padding:3px 7px;font-size:11px;" data-sub-id="${sub.id}" data-sub-name="${encodeURIComponent(sub.name || '')}" data-alloc="${sub.allocated_amount || 0}" onclick="onEditSubcategoryClick(this)">Edit</button>
                     </td>
                   ` : ''}
                 </tr>
@@ -1598,43 +1844,271 @@ async function saveSubcategoryEdit(subId){
 // ---------------- ADMIN PRIVATE MASTER BUDGET UPLOAD & CLEAR MODALS ----------------
 function openPrivateBudgetUploadModal(){
   const fy = activeFy();
+  activeMasterBudgetPreview = null;
   openModal(`
     <button class="close-btn" onclick="closeModal()">✕</button>
-    <h2>Upload New Academic Year Master Budget (.xlsx)</h2>
-    <div class="field-help">Super Admin secure upload. Upload your official university Excel budget workbook (.xlsx) to configure departments, categories, subcategories, and live budget allocations for the academic year.</div>
+    <h2>Upload &amp; Analyze University Master Budget Workbook (.xlsx)</h2>
+    <div class="field-help">Super Admin Multi-Sheet Ingestion: Upload your official university Excel budget workbook (.xlsx). The engine automatically analyzes worksheet structure, verifies declared totals against calculated sums, and generates an interactive preview before applying allocations.</div>
 
-    <div class="card" style="background:var(--section-bg);margin:16px 0;padding:16px;">
+    <div class="card" style="background:var(--section-bg);margin:14px 0;padding:12px 16px;">
       <div class="row" style="justify-content:space-between;align-items:center;">
         <div>
-          <strong>Need an official standard template?</strong>
-          <div class="card-sub">Download our clean pre-formatted official Excel template with verified sample rows.</div>
+          <strong>Need an official blank template?</strong>
+          <div class="card-sub">Download our verified standard multi-sheet university budget template (.xlsx).</div>
         </div>
-        <button class="secondary" onclick="downloadBudgetTemplate()">📥 Download Template (.xlsx)</button>
+        <button class="secondary" onclick="downloadBudgetTemplate()">Download Template (.xlsx)</button>
       </div>
     </div>
 
-    <label class="field-label">Select University Excel Workbook (.xlsx)</label>
-    <input type="file" id="masterExcelFileInput" accept=".xlsx" />
+    <div id="masterUploadFormSection">
+      <div class="row" style="gap:12px;margin-bottom:12px;">
+        <div style="flex:1">
+          <label class="field-label">Target Department / Unit</label>
+          <select id="masterUploadDept">
+            ${REF.departments.map(d => `<option value="${d.id}">${escapeHtml(d.name)} (${escapeHtml(d.code)})</option>`).join('')}
+          </select>
+        </div>
+        <div style="flex:1">
+          <label class="field-label">Target Academic / Financial Year</label>
+          <div class="row" style="gap:6px">
+            <select id="masterUploadFy" style="flex:1;margin-bottom:0;">
+              ${REF.financialYears.map(f => `<option value="${f.id}" ${f.id === fy.id ? 'selected' : ''}>${f.label}${f.is_active ? ' (Active)' : ''}</option>`).join('')}
+            </select>
+            <button class="secondary" type="button" onclick="promptAddNewFyInModal()" style="white-space:nowrap;">+ Add Year</button>
+          </div>
+        </div>
+      </div>
 
-    <label class="field-label">Target Academic / Financial Year</label>
-    <div class="row" style="gap:10px;margin-bottom:12px;">
-      <select id="masterUploadFy" style="flex:1;margin-bottom:0;">
-        ${REF.financialYears.map(f => `<option value="${f.id}" ${f.id === fy.id ? 'selected' : ''}>${f.label}${f.is_active ? ' (Active)' : ''}</option>`).join('')}
-      </select>
-      <button class="secondary" type="button" onclick="promptAddNewFyInModal()" style="white-space:nowrap;">+ Add New Year</button>
+      <label class="field-label">Select Multi-Sheet Excel Workbook (.xlsx)</label>
+      <input type="file" id="masterExcelFileInput" accept=".xlsx" onchange="onMasterExcelFileSelected(this)" />
     </div>
 
-    <label class="field-label">Initialization Mode</label>
-    <select id="masterUploadMode">
-      <option value="replace">Clean Slate: Replace &amp; Initialize Entire Budget (Recommended for new year)</option>
-      <option value="merge">Merge: Update &amp; Add to Existing Allocations</option>
-    </select>
+    <!-- Preview Container -->
+    <div id="masterUploadPreviewArea" style="margin-top:16px;"></div>
 
     <div class="row" style="justify-content:flex-end;margin-top:20px;gap:12px;">
       <button class="secondary" onclick="closeModal()">Cancel</button>
-      <button class="gold" onclick="submitPrivateBudgetExcel()">Upload &amp; Auto-Configure Website</button>
+      <button id="btnAnalyzeBudget" class="gold" onclick="analyzeUploadedMasterBudget()">Analyze Workbook &amp; Preview</button>
+      <button id="btnConfirmBudget" class="green" style="display:none;" onclick="confirmMasterBudgetImport()">Confirm &amp; Apply Import</button>
+      <button id="btnBackBudget" class="secondary" style="display:none;" onclick="resetMasterBudgetUpload()">Choose Another File</button>
     </div>
   `);
+}
+
+function onMasterExcelFileSelected(input){
+  if (input.files && input.files[0]) {
+    const btn = document.getElementById('btnAnalyzeBudget');
+    if (btn) btn.textContent = `Analyze "${input.files[0].name}" & Preview`;
+  }
+}
+
+async function analyzeUploadedMasterBudget(){
+  const fileInput = document.getElementById('masterExcelFileInput');
+  if (!fileInput.files || !fileInput.files[0]) return toast('Please select your Excel workbook (.xlsx)');
+  
+  const deptId = document.getElementById('masterUploadDept').value;
+  const fyId = document.getElementById('masterUploadFy').value;
+  const analyzeBtn = document.getElementById('btnAnalyzeBudget');
+
+  analyzeBtn.disabled = true;
+  analyzeBtn.textContent = '⏳ Analyzing Multi-Sheet Structure & Formulas...';
+
+  const fd = new FormData();
+  fd.append('file', fileInput.files[0]);
+  fd.append('department_id', deptId);
+  fd.append('financial_year_id', fyId);
+
+  try {
+    const res = await fetch(`${API}/budgets/master-excel/preview`, {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + TOKEN },
+      body: fd
+    });
+    const preview = await res.json();
+    if (!res.ok) throw new Error(preview.error || 'Analysis failed');
+
+    activeMasterBudgetPreview = preview;
+    renderMasterBudgetPreview(preview);
+  } catch(e) {
+    toast(e.message);
+    analyzeBtn.disabled = false;
+    analyzeBtn.textContent = 'Analyze Workbook & Preview';
+  }
+}
+
+function renderMasterBudgetPreview(preview){
+  const previewArea = document.getElementById('masterUploadPreviewArea');
+  const analyzeBtn = document.getElementById('btnAnalyzeBudget');
+  const confirmBtn = document.getElementById('btnConfirmBudget');
+  const backBtn = document.getElementById('btnBackBudget');
+
+  if (analyzeBtn) analyzeBtn.style.display = 'none';
+  if (confirmBtn) confirmBtn.style.display = 'inline-block';
+  if (backBtn) backBtn.style.display = 'inline-block';
+
+  let html = `
+    <div style="border:1px solid var(--border);border-radius:var(--radius-sm);background:#fff;padding:16px;">
+      <div class="row" style="justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:12px;margin-bottom:14px;">
+        <div>
+          <h3 style="margin:0;font-size:16px;color:var(--primary);">Workbook Analysis: ${escapeHtml(preview.workbook_name)}</h3>
+          <div class="card-sub">Analyzed ${preview.sheets.length} worksheets | Total Valid Budget: <strong style="color:var(--success)">${inr(preview.total_allocated)}</strong></div>
+        </div>
+        <span class="badge b-approved">Analysis Complete</span>
+      </div>
+  `;
+
+  // Warnings / Notices
+  if (preview.warnings && preview.warnings.length > 0) {
+    html += `
+      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:14px;font-size:12px;color:#92400e;">
+        <strong>Notices &amp; Skipped Sections:</strong>
+        <ul style="margin:4px 0 0 16px;padding:0;">
+          ${preview.warnings.map(w => `<li>${escapeHtml(w)}</li>`).join('')}
+        </ul>
+      </div>
+    `;
+  }
+
+  // Worksheets Verification Table
+  html += `
+    <h4 style="margin:12px 0 6px;font-size:13px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;">Worksheet Structure &amp; Variance Verification</h4>
+    <div class="table-wrap">
+    <table style="margin-bottom:16px;font-size:12px;">
+      <thead>
+        <tr>
+          <th>Worksheet Name</th>
+          <th>Classification</th>
+          <th>Extracted Total</th>
+          <th>Declared Sheet Total</th>
+          <th>Variance</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${preview.sheets.map(s => {
+          const isFinancial = s.sheet_type === 'financial';
+          const isSummary = s.sheet_type === 'summary';
+          const typeBadge = isFinancial ? '<span class="badge b-approved">Financial Data</span>' : isSummary ? '<span class="badge" style="background:#e0f2fe;color:#0369a1;">Summary Sheet</span>' : '<span class="badge b-draft">Skipped (Metadata)</span>';
+          const varianceBadge = isFinancial ? (s.variance === 0 ? '<span class="badge b-approved">0 (Exact Match)</span>' : `<span class="badge b-rejected">${inr(s.variance || 0)}</span>`) : '<span class="muted">—</span>';
+          const statusText = isFinancial ? (s.variance === 0 ? '✓ Verified' : 'Total Variance') : (isSummary ? 'Executive Overview' : 'Excluded from Allocations');
+          return `
+            <tr>
+              <td><strong>${escapeHtml(s.name)}</strong></td>
+              <td>${typeBadge}</td>
+              <td>${isFinancial ? inr(s.extracted_total) : '—'}</td>
+              <td>${s.declared_total !== undefined ? inr(s.declared_total) : '—'}</td>
+              <td>${varianceBadge}</td>
+              <td class="muted">${statusText}</td>
+            </tr>
+          `;
+        }).join('')}
+      </tbody>
+    </table>
+    </div>
+  `;
+
+  // Categories & Subcategories Extracted Hierarchy
+  html += `
+    <h4 style="margin:16px 0 6px;font-size:13px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;">Extracted Hierarchical Categories (${preview.categories.length}) &amp; Cell References</h4>
+    <div style="max-height:260px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:16px;">
+      ${preview.categories.map((c, i) => `
+        <div style="border-bottom:1px solid var(--border);padding:10px 14px;background:${i % 2 === 0 ? '#fdfdfd' : '#f9fafb'};">
+          <div class="row" style="justify-content:space-between;align-items:center;">
+            <div>
+              <strong style="color:var(--primary)">${escapeHtml(c.category_name)}</strong>
+              <span class="muted" style="font-size:11px;margin-left:8px;">[${escapeHtml(c.budget_type_name)}]</span>
+              <span class="muted" style="font-size:11px;margin-left:6px;">(${c.subcategories.length} subcategories)</span>
+            </div>
+            <strong style="color:var(--success)">${inr(c.allocated_amount)}</strong>
+          </div>
+          <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;">
+            ${c.subcategories.map(sub => `
+              <span style="font-size:11px;background:#fff;border:1px solid var(--border);padding:3px 8px;border-radius:4px;display:inline-flex;gap:6px;align-items:center;">
+                <span>${escapeHtml(sub.name)}</span>
+                ${sub.cell_address ? `<span style="font-family:monospace;color:var(--primary);background:#f3f4f6;padding:1px 4px;border-radius:3px;">${escapeHtml(sub.cell_address)}</span>` : ''}
+                <strong style="color:#374151;">${inr(sub.allocated_amount)}</strong>
+              </span>
+            `).join('')}
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  // Mode Selection
+  html += `
+    <div style="padding:12px;background:var(--section-bg);border:1px solid var(--border);border-radius:var(--radius-sm);">
+      <label class="field-label" style="margin-top:0;font-weight:700;">Select Import Commitment Mode:</label>
+      <div class="row" style="gap:16px;">
+        <label style="cursor:pointer;display:flex;align-items:center;gap:6px;">
+          <input type="radio" name="masterImportModeRadio" value="replace" checked style="width:auto;margin:0;" />
+          <span><strong>Replace Mode (Recommended)</strong>: Cleanly initialize budget lines from workbook. <em>All existing NFAs and approvals are preserved.</em></span>
+        </label>
+        <label style="cursor:pointer;display:flex;align-items:center;gap:6px;">
+          <input type="radio" name="masterImportModeRadio" value="merge" style="width:auto;margin:0;" />
+          <span><strong>Merge Mode</strong>: Update matching items and add new lines without replacing.</span>
+        </label>
+      </div>
+    </div>
+  `;
+
+  html += `</div>`;
+  previewArea.innerHTML = html;
+}
+
+function resetMasterBudgetUpload(){
+  activeMasterBudgetPreview = null;
+  const previewArea = document.getElementById('masterUploadPreviewArea');
+  const analyzeBtn = document.getElementById('btnAnalyzeBudget');
+  const confirmBtn = document.getElementById('btnConfirmBudget');
+  const backBtn = document.getElementById('btnBackBudget');
+
+  if (previewArea) previewArea.innerHTML = '';
+  if (analyzeBtn) {
+    analyzeBtn.disabled = false;
+    analyzeBtn.style.display = 'inline-block';
+    analyzeBtn.textContent = 'Analyze Workbook & Preview';
+  }
+  if (confirmBtn) confirmBtn.style.display = 'none';
+  if (backBtn) backBtn.style.display = 'none';
+}
+
+async function confirmMasterBudgetImport(){
+  if (!activeMasterBudgetPreview || !activeMasterBudgetPreview.preview_id) {
+    return toast('No active preview available. Please analyze the workbook first.');
+  }
+
+  const deptId = document.getElementById('masterUploadDept').value;
+  const fyId = document.getElementById('masterUploadFy').value;
+  const modeRadio = document.querySelector('input[name="masterImportModeRadio"]:checked');
+  const mode = modeRadio ? modeRadio.value : 'replace';
+
+  const confirmBtn = document.getElementById('btnConfirmBudget');
+  confirmBtn.disabled = true;
+  confirmBtn.textContent = '⏳ Applying Budget Allocations & Cell Mappings...';
+
+  try {
+    const res = await api('/budgets/master-excel/confirm', {
+      method: 'POST',
+      body: {
+        preview_id: activeMasterBudgetPreview.preview_id,
+        mode,
+        department_id: deptId,
+        financial_year_id: fyId
+      }
+    });
+
+    toast(`Successfully imported master budget! Total: ${inr(res.total_allocated)} across ${res.categories_count} categories & ${res.subcategories_count} subcategories.`);
+    closeModal();
+    REF.departments = await api('/budgets/departments');
+    REF.categories = await api('/budgets/categories');
+    REF.subcategories = await api('/budgets/subcategories');
+    boot();
+  } catch(e) {
+    toast(e.message);
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = 'Confirm & Apply Import';
+  }
 }
 
 async function promptAddNewFyInModal(){
@@ -1654,13 +2128,13 @@ function openClearBudgetModal(){
   const fy = activeFy();
   openModal(`
     <button class="close-btn" onclick="closeModal()">✕</button>
-    <h2 style="color:var(--danger)">🗑️ Clear Previous Year / Historical Budget Data</h2>
+    <h2 style="color:var(--danger)">Clear Previous Year / Historical Budget Data</h2>
     <div class="field-help">Super Admin tool: Reset or wipe previous year budget allocations and test NFAs before uploading a new financial year's master budget sheet.</div>
 
     <label class="field-label">Select Academic / Financial Year to Clear</label>
     <select id="clearBudgetFy">
       ${REF.financialYears.map(f => `<option value="${f.id}" ${f.id === fy.id ? 'selected' : ''}>${f.label}${f.is_active ? ' (Active)' : ''}</option>`).join('')}
-      <option value="all">⚠️ All Financial Years (Complete System Budget Wipe)</option>
+      <option value="all">All Financial Years (Complete System Budget Wipe)</option>
     </select>
 
     <label class="field-label">Budget Reset Mode</label>
@@ -1698,7 +2172,7 @@ async function executeClearBudget(){
       method: 'POST',
       body: { financial_year_id: fyId, reset_mode: resetMode, clear_nfas: clearNfas }
     });
-    toast(`✅ Cleared ${res.clearedBudgetsCount} budget lines and ${res.clearedNfasCount} NFAs for ${res.fyLabel}!`);
+    toast(`Cleared ${res.clearedBudgetsCount} budget lines and ${res.clearedNfasCount} NFAs for ${res.fyLabel}!`);
     closeModal();
     boot();
   } catch(e) {
@@ -1729,7 +2203,7 @@ async function submitPrivateBudgetExcel(){
   const fileInput = document.getElementById('masterExcelFileInput');
   if (!fileInput.files || !fileInput.files[0]) return toast('Please select your private Excel workbook (.xlsx)');
   const fyId = document.getElementById('masterUploadFy').value;
-  const mode = document.getElementById('masterUploadMode').value;
+  const mode = document.getElementById('masterUploadMode')?.value || 'replace';
 
   const fd = new FormData();
   fd.append('file', fileInput.files[0]);
@@ -1745,7 +2219,7 @@ async function submitPrivateBudgetExcel(){
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Upload failed');
-    toast(`🎉 Successfully initialized budget! Processed ${data.items_processed} items. Total: ${inr(data.total_allocated)}`);
+    toast(`Successfully initialized budget! Processed ${data.items_processed} items. Total: ${inr(data.total_allocated)}`);
     closeModal();
     boot();
   } catch(e) {
@@ -1773,6 +2247,7 @@ async function renderInbox(main){
   }
 
   html += `
+    <div class="table-wrap">
     <table>
       <thead>
         <tr>
@@ -1805,7 +2280,7 @@ async function renderInbox(main){
     `;
   });
 
-  html += `</tbody></table></div>`;
+  html += `</tbody></table></div></div>`;
   main.innerHTML = html;
 }
 
@@ -1821,6 +2296,7 @@ async function renderNfas(main){
         </div>
         <button onclick="newNfaModal()">+ Request New NFA</button>
       </div>
+      <div class="table-wrap">
       <table>
         <thead>
           <tr>
@@ -1886,7 +2362,7 @@ async function newNfaModal(){
         <label class="field-label">Reference Number (Auto-Generated)</label>
         <div class="row" style="gap:6px">
           <input id="nfaRefNo" value="${escapeHtml(autoRef)}" style="margin-bottom:0;flex:1;font-weight:700;color:var(--primary)" />
-          <span class="badge" style="background:var(--accent-light);color:#8c6827;border:1px solid var(--accent-border);">⚡ Auto</span>
+          <span class="badge" style="background:var(--accent-light);color:#8c6827;border:1px solid var(--accent-border);">Auto</span>
         </div>
       </div>
       <div style="flex:1">
@@ -1941,16 +2417,19 @@ async function newNfaModal(){
       </div>
     </div>
 
+    <!-- Live Budget Availability Card -->
+    <div id="nfaBudgetStatusCard" style="display:none;margin-top:10px;padding:10px 14px;border-radius:var(--radius-sm);font-size:13px;border:1px solid #86efac;background:#f0fdf4;"></div>
+
     <div style="margin-top:14px;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);">
       <label class="field-label" style="font-weight:700;color:var(--primary);margin:0 0 8px;">Select NFA Category Type</label>
       <div class="row" style="gap:14px;">
         <label id="nfaTypeCardEvent" class="nfa-type-card active">
           <input type="radio" name="nfaType" id="nfaTypeEvent" value="event" checked onchange="onNfaTypeChange('event')" />
-          📅 Event NFA (Seminars, Conferences, Workshops, Fests, Guest Lectures)
+          Event NFA (Seminars, Conferences, Workshops, Fests, Guest Lectures)
         </label>
         <label id="nfaTypeCardPurchase" class="nfa-type-card">
           <input type="radio" name="nfaType" id="nfaTypePurchase" value="purchase" onchange="onNfaTypeChange('purchase')" />
-          🛒 Purchase NFA (Equipment, Lab Components, Hardware, Software, Services)
+          Purchase NFA (Equipment, Lab Components, Hardware, Software, Services)
         </label>
       </div>
     </div>
@@ -2000,7 +2479,7 @@ async function newNfaModal(){
 
     <!-- DYNAMIC EVENT / PURCHASE DETAILS -->
     <div id="eventDetailsSection" style="margin-top:14px;padding:14px;background:#F0F4FA;border:1px solid #CCD6E8;border-radius:var(--radius-sm);">
-      <h3 style="margin:0 0 10px;font-size:14px;color:#274897;">Event / Resource Person Details</h3>
+      <h3 style="margin:0 0 10px;font-size:14px;color:var(--primary-blue);">Event / Resource Person Details</h3>
       <div class="row" style="gap:10px;margin-bottom:8px;">
         <div style="flex:1">
           <label class="field-label">Resource Person Name</label>
@@ -2034,7 +2513,7 @@ async function newNfaModal(){
     </div>
 
     <div id="purchaseDetailsSection" style="display:none;margin-top:14px;padding:14px;background:#F0F4FA;border:1px solid #CCD6E8;border-radius:var(--radius-sm);">
-      <h3 style="margin:0 0 10px;font-size:14px;color:#274897;">Purchase / Item Details</h3>
+      <h3 style="margin:0 0 10px;font-size:14px;color:var(--primary-blue);">Purchase / Item Details</h3>
       <div class="row" style="gap:10px;margin-bottom:8px;">
         <div style="flex:2">
           <label class="field-label">Item / Product Name</label>
@@ -2091,8 +2570,8 @@ async function newNfaModal(){
 
     <div class="row" style="justify-content:flex-end;gap:12px">
       <button class="secondary" type="button" onclick="handleCloseApplyNfa()">Cancel</button>
-      <button type="button" onclick="createNfa(false)">💾 Save as Draft</button>
-      <button type="button" class="green" onclick="createNfa(true)">🚀 Submit to HOD</button>
+      <button type="button" onclick="createNfa(false)">Save as Draft</button>
+      <button type="button" class="green" onclick="createNfa(true)">Submit to HOD</button>
     </div>
   `);
 
@@ -2196,6 +2675,7 @@ function onCategorySelect(catId){
     if (subcatSelect) subcatSelect.innerHTML = '<option value="">— Select a Budget Main Category above first —</option>';
     if (itemsGrid) { itemsGrid.innerHTML = ''; itemsGrid.style.display = 'none'; }
     if (itemsHelp) itemsHelp.textContent = 'Select a Budget Main Category above to view available budget items.';
+    updateNfaBudgetStatusBanner();
     return;
   }
 
@@ -2254,6 +2734,7 @@ function onCategorySelect(catId){
       if (subcatSelect) subcatSelect.focus();
     }, 50);
   }
+  updateNfaBudgetStatusBanner();
 }
 
 function onBudgetItemSelect(itemId){
@@ -2282,6 +2763,8 @@ function onBudgetItemSelect(itemId){
   if (firstParticulars && !firstParticulars.value.trim() && itemName) {
     firstParticulars.value = itemName;
   }
+
+  updateNfaBudgetStatusBanner();
 
   // Requirement 3: Automatic Cursor / Focus Movement
   // When the user selects a Budget Item:
@@ -2316,6 +2799,67 @@ function onBudgetItemSelect(itemId){
       }
     }, 60);
   }
+}
+
+function updateNfaBudgetStatusBanner(){
+  const statusEl = document.getElementById('nfaBudgetStatusCard');
+  if (!statusEl) return;
+  const catId = document.getElementById('nfaCat')?.value;
+  const subcatId = document.getElementById('nfaSubcat')?.value;
+  if (!catId) {
+    statusEl.style.display = 'none';
+    currentSelectedAvailableBudget = null;
+    return;
+  }
+  
+  let alloc = 0, apprv = 0, pend = 0, avail = 0, label = '';
+  if (subcatId && subcatId !== '__direct__') {
+    const sub = (REF.subcategories || []).find(s => s.id === subcatId);
+    if (sub) {
+      alloc = sub.allocated_amount || 0;
+      apprv = sub.approved_amount || 0;
+      pend = sub.pending_amount || 0;
+      avail = Math.max(0, alloc - apprv - pend);
+      label = `Selected Budget Item: <strong>${escapeHtml(sub.name)}</strong>`;
+      currentSelectedAvailableBudget = avail;
+    }
+  } else {
+    const cat = (REF.categories || []).find(c => c.id === catId);
+    const catSubs = (REF.subcategories || []).filter(s => s.budget_category_id === catId);
+    if (catSubs.length > 0) {
+      alloc = catSubs.reduce((s, x) => s + (x.allocated_amount || 0), 0);
+      apprv = catSubs.reduce((s, x) => s + (x.approved_amount || 0), 0);
+      pend = catSubs.reduce((s, x) => s + (x.pending_amount || 0), 0);
+    }
+    avail = Math.max(0, alloc - apprv - pend);
+    label = `Main Category: <strong>${escapeHtml(cat?.name || 'Category')}</strong>`;
+    currentSelectedAvailableBudget = avail;
+  }
+
+  const amounts = [...document.querySelectorAll('#itemsWrap .it-a')].map(i => Number(i.value) || 0);
+  const total = amounts.reduce((s, a) => s + a, 0);
+  const isOver = currentSelectedAvailableBudget !== null && total > currentSelectedAvailableBudget;
+
+  statusEl.style.display = 'block';
+  statusEl.style.background = isOver ? 'var(--danger-bg)' : '#f0fdf4';
+  statusEl.style.borderColor = isOver ? '#fca5a5' : '#86efac';
+  statusEl.style.color = isOver ? '#991b1b' : '#166534';
+  statusEl.innerHTML = `
+    <div class="row" style="justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+      <div>
+        <span>${label}</span>
+        <div style="font-size:12px;margin-top:2px;">
+          Allocated: <strong>${inr(alloc)}</strong> | 
+          Approved: <strong style="color:var(--success)">${inr(apprv)}</strong> | 
+          Reserved: <strong style="color:var(--warning)">${inr(pend)}</strong> | 
+          Available: <strong style="color:${avail <= 0 ? 'var(--danger)' : '#166534'}">${inr(avail)}</strong>
+        </div>
+      </div>
+      <div>
+        ${isOver ? `<span class="badge b-rejected">Over-budget by ${inr(total - avail)}</span>` : `<span class="badge b-approved">Funds Available</span>`}
+      </div>
+    </div>
+  `;
 }
 
 function toggleSdg(sdg, el){
@@ -2358,6 +2902,7 @@ function calcTotal(){
   const total = amounts.reduce((s, a) => s + a, 0);
   const totalEl = document.getElementById('grandTotalText');
   if (totalEl) totalEl.textContent = inr(total);
+  updateNfaBudgetStatusBanner();
 }
 
 async function createNfa(andSubmit){
@@ -2417,6 +2962,11 @@ async function createNfa(andSubmit){
 
   if (items.length === 0) return toast('Add at least one item with particulars and amount');
 
+  const totalReq = items.reduce((s, it) => s + (it.amount || 0), 0);
+  if (andSubmit && currentSelectedAvailableBudget !== null && currentSelectedAvailableBudget >= 0 && totalReq > currentSelectedAvailableBudget) {
+    return toast(`Cannot submit NFA: Requested amount (${inr(totalReq)}) exceeds available budget (${inr(currentSelectedAvailableBudget)}).`);
+  }
+
   try {
     const nfa = await api('/nfas', {
       method: 'POST',
@@ -2451,9 +3001,9 @@ async function createNfa(andSubmit){
 
     if (andSubmit) {
       await api(`/nfas/${nfa.id}/submit`, { method:'POST' });
-      toast('🚀 NFA submitted to HOD for review!');
+      toast('NFA submitted to HOD for review!');
     } else {
-      toast('💾 NFA draft saved successfully!');
+      toast('NFA draft saved successfully!');
     }
     activeModalType = null;
     closeModal();
@@ -2521,7 +3071,7 @@ async function openNfa(id){
         <div class="row" style="align-items:center;gap:8px;margin-bottom:4px;">
           <h2 style="margin:0">${escapeHtml(n.title)}</h2>
           <span class="badge" style="background:${n.nfa_type === 'purchase' ? '#dcfce7' : '#dbeafe'};color:${n.nfa_type === 'purchase' ? '#166534' : '#1e40af'};font-weight:700;font-size:11px;">
-            ${n.nfa_type === 'purchase' ? '🛒 Purchase NFA' : '📅 Event NFA'}
+            ${n.nfa_type === 'purchase' ? 'Purchase NFA' : 'Event NFA'}
           </span>
         </div>
         <div class="card-sub">${escapeHtml(n.ref_no)} · ${escapeHtml(deptName(n.department_id))} · ${escapeHtml(n.date)}</div>
@@ -2535,7 +3085,7 @@ async function openNfa(id){
       <div class="row" style="gap:24px;flex-wrap:wrap;">
         <div><span class="muted">Main Category:</span> <strong>${escapeHtml(catName(n.budget_category_id))}</strong></div>
         ${n.budget_subcategory_name ? `<div><span class="muted">Subcategory:</span> <strong style="color:var(--primary)">${escapeHtml(n.budget_subcategory_name)}</strong></div>` : ''}
-        <div><span class="muted">Proposer:</span> <strong>${escapeHtml(n.submitted_by_name || 'Faculty')}</strong> ${n.proposer_signature ? '<span class="badge b-approved" style="font-size:10px;margin-left:4px">✍️ Digitally Signed</span>' : ''}</div>
+        <div><span class="muted">Proposer:</span> <strong>${escapeHtml(n.submitted_by_name || 'Faculty')}</strong> ${n.proposer_signature ? '<span class="badge b-approved" style="font-size:10px;margin-left:4px">Digitally Signed</span>' : ''}</div>
       </div>
       ${n.sdgs ? `<div style="margin-top:8px"><span class="muted">SDGs:</span> <span style="color:var(--primary);font-weight:600">${escapeHtml(n.sdgs)}</span></div>` : ''}
     </div>
@@ -2544,17 +3094,17 @@ async function openNfa(id){
     <div class="card" style="padding:16px;margin:16px 0;background:#fafafa;border:1px solid #e2e8f0;border-radius:6px;">
       <h4 style="margin:0 0 10px;color:var(--primary);font-size:14px;text-transform:uppercase;letter-spacing:0.5px;">Institutional Description Points (CHRIST Format)</h4>
       <div style="display:flex;flex-direction:column;gap:10px;font-size:13.5px;line-height:1.5;">
-        <div style="display:flex;gap:10px;"><strong style="min-width:20px;color:#274897;">1.</strong><div><strong style="color:#334155;">Purpose of Proposal:</strong> ${escapeHtml(n.point1 || n.purpose || '—')}</div></div>
-        <div style="display:flex;gap:10px;"><strong style="min-width:20px;color:#274897;">2.</strong><div><strong style="color:#334155;">Logistics &amp; Scheduling:</strong> ${escapeHtml(n.point2 || n.description || '—')}</div></div>
-        <div style="display:flex;gap:10px;"><strong style="min-width:20px;color:#274897;">3.</strong><div><strong style="color:#334155;">Justification &amp; Expected Outcomes:</strong> ${escapeHtml(n.point3 || n.justification || '—')}</div></div>
-        <div style="display:flex;gap:10px;"><strong style="min-width:20px;color:#274897;">4.</strong><div><strong style="color:#334155;">Statement of Expenditure:</strong> ${escapeHtml(n.point4 || ('The total estimated expenditure for this proposal is ₹ ' + inr(n.total_amount) + ' as itemized in the annexure.'))}</div></div>
+        <div style="display:flex;gap:10px;"><strong style="min-width:20px;color:var(--primary-blue);">1.</strong><div><strong style="color:#334155;">Purpose of Proposal:</strong> ${escapeHtml(n.point1 || n.purpose || '—')}</div></div>
+        <div style="display:flex;gap:10px;"><strong style="min-width:20px;color:var(--primary-blue);">2.</strong><div><strong style="color:#334155;">Logistics &amp; Scheduling:</strong> ${escapeHtml(n.point2 || n.description || '—')}</div></div>
+        <div style="display:flex;gap:10px;"><strong style="min-width:20px;color:var(--primary-blue);">3.</strong><div><strong style="color:#334155;">Justification &amp; Expected Outcomes:</strong> ${escapeHtml(n.point3 || n.justification || '—')}</div></div>
+        <div style="display:flex;gap:10px;"><strong style="min-width:20px;color:var(--primary-blue);">4.</strong><div><strong style="color:#334155;">Statement of Expenditure:</strong> ${escapeHtml(n.point4 || ('The total estimated expenditure for this proposal is ₹ ' + inr(n.total_amount) + ' as itemized in the annexure.'))}</div></div>
       </div>
     </div>
 
     <!-- Dynamic Event / Purchase Details Section -->
     ${n.nfa_type === 'purchase' ? `
       <div class="card" style="padding:16px;margin:16px 0;background:#f8fafc;border:1px solid #cbd5e1;border-radius:6px;">
-        <h4 style="margin:0 0 10px;color:#166534;font-size:14px;">🛒 Purchase &amp; Procurement Details</h4>
+        <h4 style="margin:0 0 10px;color:#166534;font-size:14px;">Purchase &amp; Procurement Details</h4>
         <div class="grid2" style="gap:12px;font-size:13.5px;">
           <div><span class="muted">Item Name:</span> <strong>${escapeHtml(n.purchase_details?.item_name || '—')}</strong></div>
           <div><span class="muted">Quantity:</span> <strong>${escapeHtml(n.purchase_details?.quantity || '—')}</strong></div>
@@ -2565,7 +3115,7 @@ async function openNfa(id){
       </div>
     ` : `
       <div class="card" style="padding:16px;margin:16px 0;background:#f8fafc;border:1px solid #cbd5e1;border-radius:6px;">
-        <h4 style="margin:0 0 10px;color:#1e40af;font-size:14px;">📅 Event &amp; Resource Person Details</h4>
+        <h4 style="margin:0 0 10px;color:#1e40af;font-size:14px;">Event &amp; Resource Person Details</h4>
         <div class="grid2" style="gap:12px;font-size:13.5px;">
           <div><span class="muted">Resource Person:</span> <strong>${escapeHtml(n.event_details?.resource_person_name || '—')}</strong></div>
           <div><span class="muted">Designation:</span> <strong>${escapeHtml(n.event_details?.designation || '—')}</strong></div>
@@ -2578,6 +3128,7 @@ async function openNfa(id){
     `}
 
     <h3 style="margin-top:20px;font-size:16px;">Budget Items</h3>
+    <div class="table-wrap">
     <table>
       <thead>
         <tr>
@@ -2606,9 +3157,11 @@ async function openNfa(id){
         </tr>
       </tfoot>
     </table>
+    </div>
 
     ${n.approvals && n.approvals.length > 0 ? `
       <h3 style="margin-top:24px;font-size:16px;">Approvals &amp; Institutional Signatures</h3>
+      <div class="table-wrap">
       <table>
         <thead>
           <tr>
@@ -2625,50 +3178,51 @@ async function openNfa(id){
             <tr>
               <td>${new Date(a.created_at).toLocaleString()}</td>
               <td><strong>${escapeHtml(a.approver_name || a.approver_role || 'Approver')}</strong></td>
-              <td><span class="role-pill" style="color:#501026;background:var(--accent-light);border:1px solid var(--accent-border)">${String(a.approver_role || '').replace('_',' ')}</span></td>
+              <td><span class="role-pill" style="color:var(--dark-blue);background:var(--light-blue);border:1px solid #BFDBFE">${String(a.approver_role || '').replace('_',' ')}</span></td>
               <td><span class="badge ${a.decision==='approved'?'b-approved':a.decision==='rejected'?'b-rejected':'b-submitted'}">${a.decision}</span></td>
-              <td>${a.signature_image ? '<span class="badge b-approved" style="font-size:10.5px">✍️ Digitally Signed</span>' : '<span class="muted" style="font-size:11px">None</span>'}</td>
+              <td>${a.signature_image ? '<span class="badge b-approved" style="font-size:10.5px">Digitally Signed</span>' : '<span class="muted" style="font-size:11px">None</span>'}</td>
               <td>${escapeHtml(a.comments || '—')}</td>
             </tr>
           `).join('')}
         </tbody>
       </table>
+      </div>
     ` : ''}
 
     <div class="row" style="margin-top:24px;justify-content:space-between">
       <div class="row">
-        <button class="secondary" onclick="downloadPdf('${n.id}')">📄 Download Official PDF</button>
-        ${canEdit ? `<button class="secondary" onclick="editNfaModal('${n.id}')">✏️ Edit Details</button>` : ''}
+        <button class="secondary" onclick="downloadPdf('${n.id}')">Download Official PDF</button>
+        ${canEdit ? `<button class="secondary" onclick="editNfaModal('${n.id}')">Edit Details</button>` : ''}
         <button class="secondary" type="button" onclick="closeModal()">Close</button>
       </div>
       <div class="row">
   `;
 
   if (canSubmit) {
-    html += `<button class="green" onclick="submitNfa('${n.id}')">🚀 Submit to HOD</button>`;
+    html += `<button class="green" onclick="submitNfa('${n.id}')">Submit to HOD</button>`;
   }
 
   if (canHodReview) {
     html += `
-      <button class="green" onclick="decideReview('${n.id}', 'approve', 'Recommend to Dean & Associate Dean')">✓ Recommend to Dean</button>
+      <button class="green" onclick="decideReview('${n.id}', 'approve', 'Recommend to Dean & Associate Dean')">Recommend to Dean</button>
       <button class="amber" onclick="decideReview('${n.id}', 'revision_required')">Request Revision</button>
       <button class="danger" onclick="decideReview('${n.id}', 'reject')">Reject</button>
     `;
   } else if (canDeanReview) {
     html += `
-      <button class="green" onclick="decideReview('${n.id}', 'approve', 'Endorse to Accounts Officer')">✓ Endorse to Accounts</button>
+      <button class="green" onclick="decideReview('${n.id}', 'approve', 'Endorse to Accounts Officer')">Endorse to Accounts</button>
       <button class="amber" onclick="decideReview('${n.id}', 'revision_required')">Request Revision</button>
       <button class="danger" onclick="decideReview('${n.id}', 'reject')">Reject</button>
     `;
   } else if (canAccountsReview) {
     html += `
-      <button class="green" onclick="decideReview('${n.id}', 'approve', 'Verify budget & forward to Director')">✓ Verify &amp; Forward to Director</button>
+      <button class="green" onclick="decideReview('${n.id}', 'approve', 'Verify budget & forward to Director')">Verify & Forward to Director</button>
       <button class="amber" onclick="decideReview('${n.id}', 'revision_required')">Request Revision</button>
       <button class="danger" onclick="decideReview('${n.id}', 'reject')">Reject</button>
     `;
   } else if (canDirectorApprove) {
     html += `
-      <button class="green" style="font-size:13.5px;padding:11px 20px;" onclick="decideReview('${n.id}', 'approve', 'Sanction Proposal & Auto-Debit Department Budget')">👑 Final Director Approval (Auto-Debit)</button>
+      <button class="green" style="font-size:13.5px;padding:11px 20px;" onclick="decideReview('${n.id}', 'approve', 'Sanction Proposal & Auto-Debit Department Budget')">Final Director Approval (Auto-Debit)</button>
       <button class="danger" onclick="decideReview('${n.id}', 'reject')">Reject Proposal</button>
     `;
   }
@@ -2680,7 +3234,7 @@ async function openNfa(id){
 async function submitNfa(id){
   try {
     await api(`/nfas/${id}/submit`, { method:'POST' });
-    toast('🚀 NFA submitted to HOD!');
+    toast('NFA submitted to HOD!');
     openNfa(id);
     if (currentTab === 'nfas') showTab('nfas');
   } catch(e){ toast(e.message); }
@@ -2753,11 +3307,11 @@ async function editNfaModal(id){
     <div class="row" style="gap:24px;margin-bottom:12px;">
       <label style="cursor:pointer;display:flex;align-items:center;gap:8px;font-weight:600;">
         <input type="radio" name="editNfaType" id="editNfaTypeEvent" value="event" ${!isPurchase ? 'checked' : ''} onchange="onEditNfaTypeChange('event')">
-        📅 Event / Conference / Guest Lecture NFA
+        Event / Conference / Guest Lecture NFA
       </label>
       <label style="cursor:pointer;display:flex;align-items:center;gap:8px;font-weight:600;">
         <input type="radio" name="editNfaType" id="editNfaTypePurchase" value="purchase" ${isPurchase ? 'checked' : ''} onchange="onEditNfaTypeChange('purchase')">
-        🛒 Purchase / Equipment / Procurement NFA
+        Purchase / Equipment / Procurement NFA
       </label>
     </div>
 
@@ -2800,7 +3354,7 @@ async function editNfaModal(id){
 
     <!-- Event Details Card -->
     <div id="editEventCard" class="card nfa-type-card" style="padding:16px;background:linear-gradient(to right, #eff6ff, #f8fafc);border:1px solid #bfdbfe;margin-bottom:16px;${isPurchase ? 'display:none;' : ''}">
-      <h3 style="margin-top:0;font-size:15px;color:#1e3a8a;font-weight:700;">📅 Event &amp; Resource Person Details</h3>
+      <h3 style="margin-top:0;font-size:15px;color:#1e3a8a;font-weight:700;">Event &amp; Resource Person Details</h3>
       <div class="grid2" style="gap:12px;">
         <div>
           <label class="field-label" style="margin-top:0">Resource Person Name</label>
@@ -2831,7 +3385,7 @@ async function editNfaModal(id){
 
     <!-- Purchase Details Card -->
     <div id="editPurchaseCard" class="card nfa-type-card" style="padding:16px;background:linear-gradient(to right, #f0fdf4, #f8fafc);border:1px solid #bbf7d0;margin-bottom:16px;${!isPurchase ? 'display:none;' : ''}">
-      <h3 style="margin-top:0;font-size:15px;color:#14532d;font-weight:700;">🛒 Purchase &amp; Procurement Details</h3>
+      <h3 style="margin-top:0;font-size:15px;color:#14532d;font-weight:700;">Purchase &amp; Procurement Details</h3>
       <div class="grid2" style="gap:12px;">
         <div>
           <label class="field-label" style="margin-top:0">Item Name / Equipment</label>
@@ -2887,7 +3441,7 @@ async function editNfaModal(id){
 
     <div class="row" style="justify-content:flex-end;gap:12px">
       <button class="secondary" type="button" onclick="handleCloseEditNfa('${n.id}', false)">Cancel</button>
-      <button class="green" onclick="saveNfaEdits('${n.id}')">💾 Save Changes</button>
+      <button class="green" onclick="saveNfaEdits('${n.id}')">Save Changes</button>
     </div>
   `);
 
@@ -2960,7 +3514,7 @@ async function saveNfaEdits(id){
         items
       }
     });
-    toast('💾 NFA changes saved successfully!');
+    toast('NFA changes saved successfully!');
     openNfa(id);
     if (currentTab === 'nfas') showTab('nfas');
   } catch(e){ toast(e.message); }
@@ -2979,6 +3533,7 @@ async function renderProjects(main){
         </div>
         <button onclick="newProjectModal()">+ Add New Project</button>
       </div>
+      <div class="table-wrap">
       <table>
         <thead>
           <tr>
@@ -3080,8 +3635,8 @@ async function renderBudgets(main){
             ${renderDeptSelectOptions(deptId, false)}
           </select>
           ${isAdmin ? `
-            <button class="gold" onclick="openPrivateBudgetUploadModal()">📁 Upload Private University Budget (.xlsx)</button>
-            <button class="secondary" onclick="exportBudgetReport('${deptId}')">📥 Export Excel</button>
+            <button class="gold" onclick="openPrivateBudgetUploadModal()">Upload Private University Budget (.xlsx)</button>
+            <button class="secondary" onclick="exportBudgetReport('${deptId}')">Export Excel</button>
           ` : ''}
           ${['super_admin', 'director', 'finance'].includes(USER.role) ? `
             <button class="secondary" onclick="openRolloverModal()">Annual Rollover</button>
@@ -3111,7 +3666,7 @@ async function renderBudgets(main){
             <div><span class="muted">Available:</span> <strong style="color:${line.available_amount < 0 ? 'var(--danger)' : 'var(--primary)'}">${inr(line.available_amount)}</strong></div>
             <div class="progress-wrap"><div class="progress-fill ${utilClass}" style="width:${Math.min(100, line.utilization_pct)}%"></div></div>
             ${isAdmin ? `
-              <button class="secondary" style="padding:4px 8px;font-size:11px;" data-line-id="${line.id}" data-cat-name="${encodeURIComponent(line.category_name || '')}" data-alloc="${line.allocated_amount || 0}" onclick="event.stopPropagation(); onEditCategoryClick(this)">✏️ Edit</button>
+              <button class="secondary" style="padding:4px 8px;font-size:11px;" data-line-id="${line.id}" data-cat-name="${encodeURIComponent(line.category_name || '')}" data-alloc="${line.allocated_amount || 0}" onclick="event.stopPropagation(); onEditCategoryClick(this)">Edit</button>
             ` : ''}
           </div>
         </div>
@@ -3144,7 +3699,7 @@ async function renderBudgets(main){
                   </td>
                   ${isAdmin ? `
                     <td>
-                      <button class="secondary" style="padding:3px 7px;font-size:11px;" data-sub-id="${sub.id}" data-sub-name="${encodeURIComponent(sub.name || '')}" data-alloc="${sub.allocated_amount || 0}" onclick="onEditSubcategoryClick(this)">✏️ Edit</button>
+                      <button class="secondary" style="padding:3px 7px;font-size:11px;" data-sub-id="${sub.id}" data-sub-name="${encodeURIComponent(sub.name || '')}" data-alloc="${sub.allocated_amount || 0}" onclick="onEditSubcategoryClick(this)">Edit</button>
                     </td>
                   ` : ''}
                 </tr>
@@ -3210,7 +3765,7 @@ async function openRolloverModal(){
       </label>
       <div class="row" style="gap:10px;">
         <button class="secondary" onclick="closeModal()">Cancel</button>
-        <button class="green" onclick="executeRollover()">🚀 Apply Next Year Budget Rollover</button>
+        <button class="green" onclick="executeRollover()">Apply Next Year Budget Rollover</button>
       </div>
     </div>
   `);
@@ -3229,6 +3784,7 @@ async function loadRolloverPreview(){
     document.getElementById('rollTargetLabel').value = data.target_label;
 
     let h = `
+      <div class="table-wrap">
       <table>
         <thead>
           <tr>
@@ -3257,6 +3813,7 @@ async function loadRolloverPreview(){
           </tr>
         </tfoot>
       </table>
+      </div>
     `;
     wrap.innerHTML = h;
   } catch(e) {
@@ -3285,7 +3842,7 @@ async function executeRollover(){
       }
     });
 
-    toast(`🎉 Successfully rolled over to Academic Year ${res.target_fy.label}!`);
+    toast(`Successfully rolled over to Academic Year ${res.target_fy.label}!`);
     REF.financialYears = await api('/budgets/financial-years');
     if (setActive) {
       currentActiveFyId = res.target_fy.id;
@@ -3361,6 +3918,7 @@ async function renderExcel(main){
     </div>
     <div class="card">
       <h2 class="card-title" style="margin-bottom:12px">Sync Audit Records</h2>
+      <div class="table-wrap">
       <table>
         <thead>
           <tr>
@@ -3381,6 +3939,7 @@ async function renderExcel(main){
           `).join('') || '<tr><td colspan="4" class="muted">No synchronization records</td></tr>'}
         </tbody>
       </table>
+      </div>
     </div>
   `;
   main.innerHTML = html;
@@ -3398,11 +3957,11 @@ async function previewExcel(dept){
     let h = `<h3>Detected Differences (${r.diffs.length})</h3>`;
     if (!r.diffs.length) h += `<div class="muted">No differences detected between workbook and system database.</div>`;
     else {
-      h += `<table><thead><tr><th>Change</th><th>Particulars</th><th>Current Amount</th><th>Workbook Amount</th><th>Difference</th></tr></thead><tbody>`;
+      h += `<div class="table-wrap"><table><thead><tr><th>Change</th><th>Particulars</th><th>Current Amount</th><th>Workbook Amount</th><th>Difference</th></tr></thead><tbody>`;
       r.diffs.forEach(d => {
         h += `<tr><td>${d.change_type==='new'?'New row':'Changed'}</td><td>${escapeHtml(d.particulars)}</td><td>${d.old_amount===null?'(new)':inr(d.old_amount)}</td><td>${inr(d.new_amount)}</td><td style="color:${d.difference<0?'var(--success)':'var(--warning)'}">${inr(d.difference)}</td></tr>`;
       });
-      h += `</tbody></table><button style="margin-top:12px" onclick="confirmExcel('${r.sync_record_id}')">Confirm and Apply Changes</button>`;
+      h += `</tbody></table></div><button style="margin-top:12px" onclick="confirmExcel('${r.sync_record_id}')">Confirm and Apply Changes</button>`;
     }
     document.getElementById('excelResult').innerHTML = h;
   } catch(e){ toast(e.message); }
@@ -3427,6 +3986,7 @@ async function renderAudit(main){
           <div class="card-sub">Real-time trace of every approval, budget debit, and status transition</div>
         </div>
       </div>
+      <div class="table-wrap">
       <table>
         <thead>
           <tr>
@@ -3447,12 +4007,13 @@ async function renderAudit(main){
               <td>${l.old_amount !== null ? inr(l.old_amount) : '—'}</td>
               <td style="font-weight:700">${l.new_amount !== null ? inr(l.new_amount) : '—'}</td>
               <td style="color:${l.difference > 0 ? 'var(--warning)' : 'var(--success)'}">${l.difference !== null ? inr(l.difference) : '—'}</td>
-              <td><span class="role-pill" style="color:#501026;background:var(--accent-light);border:1px solid var(--accent-border)">${String(l.role || '').replace('_',' ')}</span></td>
+              <td><span class="role-pill" style="color:var(--dark-blue);background:var(--light-blue);border:1px solid #BFDBFE">${String(l.role || '').replace('_',' ')}</span></td>
               <td class="muted">${escapeHtml(l.reason)}</td>
             </tr>
           `).join('') || '<tr><td colspan="7" class="muted" style="text-align:center;padding:30px;">No audit events recorded</td></tr>'}
         </tbody>
       </table>
+      </div>
     </div>
   `;
   main.innerHTML = html;
@@ -3466,15 +4027,15 @@ async function renderAdmin(main){
     <div class="card" style="border: 2px solid var(--accent); background: linear-gradient(to bottom right, #ffffff, var(--accent-light));">
       <div class="card-header">
         <div>
-          <h2 class="card-title" style="margin-bottom:4px">🏛️ Master Budget Management &amp; Fiscal Year Transition</h2>
+          <h2 class="card-title" style="margin-bottom:4px">Master Budget Management &amp; Fiscal Year Transition</h2>
           <div class="card-sub">Super Admin tools: upload new academic year budget workbook (.xlsx), clear previous year allocations, or download official budget templates.</div>
         </div>
       </div>
       <div class="row" style="gap:12px;flex-wrap:wrap;margin-top:14px;">
-        <button class="gold" onclick="openPrivateBudgetUploadModal()">📁 Upload New Academic Year Budget (.xlsx)</button>
-        <button class="danger" onclick="openClearBudgetModal()">🗑️ Clear Previous Year / Budget Data</button>
-        <button class="secondary" onclick="downloadBudgetTemplate()">📥 Download Blank Template (.xlsx)</button>
-        <button class="secondary" onclick="exportBudgetReport('')">📥 Export Entire Master Workbook</button>
+        <button class="gold" onclick="openPrivateBudgetUploadModal()">Upload New Academic Year Budget (.xlsx)</button>
+        <button class="danger" onclick="openClearBudgetModal()">Clear Previous Year / Budget Data</button>
+        <button class="secondary" onclick="downloadBudgetTemplate()">Download Blank Template (.xlsx)</button>
+        <button class="secondary" onclick="exportBudgetReport('')">Export Entire Master Workbook</button>
       </div>
     </div>
 
@@ -3484,6 +4045,7 @@ async function renderAdmin(main){
         <input id="fyLabel" placeholder="e.g. 2027-28" style="max-width:220px;margin-bottom:0" />
         <button onclick="addFy()">Add Financial Year</button>
       </div>
+      <div class="table-wrap">
       <table>
         <thead><tr><th>Label</th><th>Status</th><th>Action</th></tr></thead>
         <tbody>
@@ -3496,6 +4058,7 @@ async function renderAdmin(main){
           `).join('')}
         </tbody>
       </table>
+      </div>
     </div>
 
     <div class="card">
@@ -3515,6 +4078,7 @@ async function renderAdmin(main){
         <button onclick="addUser()">Create Account</button>
       </div>
       <h3 style="margin-top:20px;margin-bottom:8px">Registered System Users</h3>
+      <div class="table-wrap">
       <table>
         <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Department</th><th>Digital Signature</th><th>Action</th></tr></thead>
         <tbody>
@@ -3522,17 +4086,18 @@ async function renderAdmin(main){
             <tr>
               <td><strong>${escapeHtml(u.name)}</strong></td>
               <td>${escapeHtml(u.email)}</td>
-              <td><span class="role-pill" style="color:#501026;background:var(--accent-light);border:1px solid var(--accent-border)">${String(u.role || '').replace('_',' ')}</span></td>
+              <td><span class="role-pill" style="color:var(--dark-blue);background:var(--light-blue);border:1px solid #BFDBFE">${String(u.role || '').replace('_',' ')}</span></td>
               <td>${u.department_id ? escapeHtml(deptName(u.department_id)) : 'Institution-wide'}</td>
-              <td>${u.signature_image ? `<span class="badge b-approved" style="font-size:11px">✓ Active Signature</span>` : `<span class="muted" style="font-size:11px">Not Uploaded</span>`}</td>
+              <td>${u.signature_image ? `<span class="badge b-approved" style="font-size:11px">Active Signature</span>` : `<span class="muted" style="font-size:11px">Not Uploaded</span>`}</td>
               <td>
-                <button class="secondary" style="padding:4px 8px;font-size:11px;margin-right:6px" onclick="adminManageSignature('${u.id}', '${escapeHtml(u.name)}')">✍️ Manage</button>
+                <button class="secondary" style="padding:4px 8px;font-size:11px;margin-right:6px" onclick="adminManageSignature('${u.id}', '${escapeHtml(u.name)}')">Manage Signature</button>
                 <button class="danger" style="padding:4px 8px;font-size:11px" data-id="${u.id}" data-name="${escapeHtml(u.name)}" onclick="removeUser(this.getAttribute('data-id'), this.getAttribute('data-name'))">Remove</button>
               </td>
             </tr>
           `).join('')}
         </tbody>
       </table>
+      </div>
     </div>
   `;
   main.innerHTML = html;
@@ -3639,7 +4204,7 @@ function showUnsavedChangesConfirmation(onDiscard) {
   dialog.innerHTML = `
     <div style="background:#ffffff;border-radius:12px;padding:24px 28px;max-width:440px;width:90%;box-shadow:0 25px 50px -12px rgba(0,0,0,0.35);border-top:5px solid #ea580c;text-align:left;">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-        <span style="font-size:26px;">⚠️</span>
+        
         <h3 style="margin:0;font-size:18px;font-weight:700;color:#0f172a;">Unsaved Changes</h3>
       </div>
       <p style="margin:0 0 22px;font-size:14.5px;color:#334155;line-height:1.55;">
@@ -3679,11 +4244,13 @@ function discardAndCloseApplyNfa() {
 function openModal(html){
   document.getElementById('modalBody').innerHTML = html;
   document.getElementById('modalBg').style.display = 'flex';
+  document.body.classList.add('modal-open');
 }
 function closeModal(){
   activeModalType = null;
   dismissUnsavedConfirmation();
   document.getElementById('modalBg').style.display = 'none';
+  document.body.classList.remove('modal-open');
 }
 document.getElementById('modalBg').addEventListener('click', e => {
   if (e.target.id === 'modalBg') {

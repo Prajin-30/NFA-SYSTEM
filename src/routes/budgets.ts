@@ -47,19 +47,21 @@ budgetsRouter.get('/financial-years', (_req, res) => res.json(store.data.financi
 budgetsRouter.get('/budget-types', (_req, res) => res.json(store.data.budget_types || []));
 
 /** GET /api/budgets/categories - reference data with subcategories */
-budgetsRouter.get('/categories', (_req, res) => {
+budgetsRouter.get('/categories', (req, res) => {
+  const deptId = req.query.department_id ? String(req.query.department_id) : undefined;
   const subcats = store.data.budget_subcategories || [];
   const list = store.data.budget_categories.map((c) => ({
     ...c,
-    subcategories: subcats.filter((s) => s.budget_category_id === c.id),
+    subcategories: subcats.filter((s) => s.budget_category_id === c.id && (!deptId || s.department_id === deptId || !s.department_id)),
   }));
   res.json(list);
 });
 
-/** GET /api/budgets/subcategories?category= */
+/** GET /api/budgets/subcategories?category=&department_id= */
 budgetsRouter.get('/subcategories', (req, res) => {
   let list = store.data.budget_subcategories || [];
   if (req.query.category) list = list.filter((s) => s.budget_category_id === req.query.category);
+  if (req.query.department_id) list = list.filter((s) => s.department_id === req.query.department_id || !s.department_id);
   res.json(list);
 });
 
@@ -408,12 +410,12 @@ budgetsRouter.put('/subcategory/:id', requireRole('super_admin'), async (req: Au
     if (typeof allocated_amount === 'number' && allocated_amount >= 0) sub.allocated_amount = allocated_amount;
     if (name && typeof name === 'string') sub.name = name.trim();
 
-    // Recalculate parent category's allocated amount as sum of all subcategories
+    // Recalculate parent category's allocated amount as sum of all subcategories FOR THIS DEPARTMENT
     const cat = db.budget_categories.find((c) => c.id === sub.budget_category_id);
     if (cat) {
-      const sisterSubcats = db.budget_subcategories.filter((s) => s.budget_category_id === cat.id);
+      const sisterSubcats = db.budget_subcategories.filter((s) => s.budget_category_id === cat.id && (s.department_id === sub.department_id || !s.department_id));
       const newCatTotal = sisterSubcats.reduce((sum, s) => sum + (s.allocated_amount || 0), 0);
-      const budgetLines = db.department_budgets.filter((b) => b.budget_category_id === cat.id);
+      const budgetLines = db.department_budgets.filter((b) => b.budget_category_id === cat.id && b.department_id === sub.department_id);
       budgetLines.forEach((b) => {
         b.allocated_amount = newCatTotal;
       });
@@ -482,7 +484,7 @@ budgetsRouter.get('/:department/summary', (req: AuthedRequest, res) => {
     const utilPct = line.allocated_amount > 0 ? Math.round((line.approved_amount / line.allocated_amount) * 10000) / 100 : 0;
 
     const subcats = allSubcats
-      .filter((s) => s.budget_category_id === line.budget_category_id)
+      .filter((s) => s.budget_category_id === line.budget_category_id && (s.department_id === deptId || (!s.department_id && deptId === 'b5643609-22d9-4b21-9ce0-2f6eb5b9d04e')))
       .map((s) => {
         const subAvail = Math.max(0, s.allocated_amount - s.approved_amount - s.pending_amount);
         const subFinRem = Math.max(0, s.allocated_amount - s.approved_amount);

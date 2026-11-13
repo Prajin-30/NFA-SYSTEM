@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { v4 as uuid } from 'uuid';
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
+import multer from 'multer';
 import { fileURLToPath } from 'url';
 import { store } from '../store.js';
 import { requireAuth, requireRole, AuthedRequest } from '../middleware/auth.js';
@@ -20,9 +22,159 @@ import type { NfaStatus, Role } from '../types.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const signaturesDir = path.join(__dirname, '..', '..', 'data', 'signatures');
+const attachmentsDir = path.join(__dirname, '..', '..', 'data', 'nfa-attachments');
+
+if (!fs.existsSync(attachmentsDir)) {
+  fs.mkdirSync(attachmentsDir, { recursive: true });
+}
+
+const attachmentStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    cb(null, attachmentsDir);
+  },
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const uniqueName = `${uuid()}${ext}`;
+    cb(null, uniqueName);
+  },
+});
+
+const allowedMimes = [
+  'application/pdf',
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.ms-excel',
+];
+const allowedExts = ['.pdf', '.jpg', '.jpeg', '.png', '.xlsx', '.xls'];
+
+const uploadAttachment = multer({
+  storage: attachmentStorage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB max
+  fileFilter: (_req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (allowedMimes.includes(file.mimetype) || allowedExts.includes(ext)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid document format. Allowed: PDF, JPG, JPEG, PNG, XLSX (Max 10MB).'));
+    }
+  },
+});
+
+function computeFileHash(filePath: string): string {
+  try {
+    const buffer = fs.readFileSync(filePath);
+    return crypto.createHash('sha256').update(buffer).digest('hex');
+  } catch {
+    return '';
+  }
+}
 
 export const nfasRouter = Router();
 nfasRouter.use(requireAuth);
+
+/** POST /api/nfas/upload-attachment — Upload quotation or comparative statement file */
+nfasRouter.post('/upload-attachment', (req: AuthedRequest, res) => {
+  uploadAttachment.single('file')(req as any, res as any, (err: any) => {
+    if (err) {
+      return res.status(400).json({ error: err.message || 'File upload failed' });
+    }
+    const file = req.file;
+    if (!file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    const fullPath = path.join(attachmentsDir, file.filename);
+    const hash = computeFileHash(fullPath);
+
+    res.json({
+      file_id: uuid(),
+      original_filename: file.originalname,
+      file_path: file.filename,
+      file_size: file.size,
+      file_hash: hash,
+      mime_type: file.mimetype,
+      uploaded_at: new Date().toISOString(),
+    });
+  });
+});
+
+/** GET /api/nfas/attachment-preview/:filename — Preview uploaded file */
+nfasRouter.get('/attachment-preview/:filename', (req: AuthedRequest, res) => {
+  const safeBase = path.basename(req.params.filename);
+  const fullPath = path.join(attachmentsDir, safeBase);
+
+  if (!fs.existsSync(fullPath)) {
+    return res.status(404).json({ error: 'Attachment file not found' });
+  }
+
+  const ext = path.extname(safeBase).toLowerCase();
+  const mimeTypes: Record<string, string> = {
+    '.pdf': 'application/pdf',
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  };
+  const mime = mimeTypes[ext] || 'application/octet-stream';
+
+  res.setHeader('Content-Type', mime);
+  res.setHeader('Content-Disposition', `inline; filename="${safeBase}"`);
+  fs.createReadStream(fullPath).pipe(res);
+});
+
+/** GET /api/nfas/:id/attachments/:type/:index? — Secure download / stream for NFA attachments */
+nfasRouter.get('/:id/attachments/:type/:index?', (req: AuthedRequest, res) => {
+  const nfa = store.data.nfas.find((n) => n.id === req.params.id);
+  if (!nfa) return res.status(404).json({ error: 'NFA not found' });
+
+  // Role-based / ownership access verification
+  const u = req.user!;
+  const isPrivileged = ['super_admin', 'dean', 'associate_dean', 'finance', 'director'].includes(u.role);
+  const isCreator = nfa.created_by === u.id;
+  const isSameDept = nfa.department_id === u.department_id;
+
+  if (!isPrivileged && !isCreator && !isSameDept) {
+    return res.status(403).json({ error: 'Not authorized to access this attachment' });
+  }
+
+  const { type, index } = req.params;
+  let targetAttachment: { file_path: string; original_filename: string; mime_type?: string } | undefined;
+
+  if (type === 'quotation') {
+    const idx = parseInt(index || '0', 10);
+    const quotes = nfa.quotations || [];
+    targetAttachment = quotes[idx];
+  } else if (type === 'comparative-statement' || type === 'comparative_statement') {
+    targetAttachment = nfa.comparative_statement;
+  }
+
+  if (!targetAttachment || !targetAttachment.file_path) {
+    return res.status(404).json({ error: 'Attachment record not found' });
+  }
+
+  const safeBase = path.basename(targetAttachment.file_path);
+  const fullPath = path.join(attachmentsDir, safeBase);
+
+  if (!fs.existsSync(fullPath)) {
+    return res.status(404).json({ error: 'Attachment file not found on disk' });
+  }
+
+  const ext = path.extname(safeBase).toLowerCase();
+  const mimeTypes: Record<string, string> = {
+    '.pdf': 'application/pdf',
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  };
+  const mime = targetAttachment.mime_type || mimeTypes[ext] || 'application/octet-stream';
+
+  res.setHeader('Content-Type', mime);
+  res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(targetAttachment.original_filename || safeBase)}"`);
+  fs.createReadStream(fullPath).pipe(res);
+});
 
 function withItems(nfaId: string) {
   return store.data.nfa_items.filter((i) => i.nfa_id === nfaId).sort((a, b) => a.sl_no - b.sl_no);
@@ -77,20 +229,44 @@ nfasRouter.get('/', (req: AuthedRequest, res) => {
   // dean, associate_dean, director, finance, super_admin see all departments
   if (req.query.status) list = list.filter((n) => n.status === req.query.status);
   if (req.query.department) list = list.filter((n) => n.department_id === req.query.department);
-  res.json(list.map((n) => ({ ...n, items: withItems(n.id), approvals: withApprovals(n.id) })));
+  const seen = new Set<string>();
+  const uniqueList = list.filter((n) => {
+    if (seen.has(n.id)) return false;
+    seen.add(n.id);
+    return true;
+  });
+  res.json(uniqueList.map((n) => ({ ...n, items: withItems(n.id), approvals: withApprovals(n.id) })));
 });
+
+function generateUniqueNfaRefNo(db: any, departmentId: string, financialYearId: string): string {
+  const dept = db.departments.find((d: any) => d.id === departmentId);
+  const fy = db.financial_years.find((f: any) => f.id === financialYearId);
+  const deptCode = dept ? dept.code : 'GEN';
+  const fyLabel = fy ? fy.label : String(new Date().getFullYear());
+  const prefix = `NFA/${deptCode}/${fyLabel}/`;
+
+  let maxSeq = 0;
+  for (const n of db.nfas) {
+    if (n.ref_no && n.ref_no.startsWith(prefix)) {
+      const suffix = n.ref_no.slice(prefix.length);
+      const num = parseInt(suffix, 10);
+      if (!isNaN(num) && num > maxSeq) {
+        maxSeq = num;
+      }
+    }
+  }
+
+  const deptCount = db.nfas.filter((n: any) => n.department_id === departmentId).length;
+  const nextSeq = Math.max(maxSeq + 1, deptCount + 1);
+  return `${prefix}${String(nextSeq).padStart(4, '0')}`;
+}
 
 /** GET /api/nfas/next-ref — generate auto reference number */
 nfasRouter.get('/next-ref', (req: AuthedRequest, res) => {
   const deptId = String(req.query.department_id || req.user?.department_id || '');
   const fyId = String(req.query.financial_year_id || store.data.financial_years.find((f) => f.is_active)?.id || '');
-  const dept = store.data.departments.find((d) => d.id === deptId);
-  const fy = store.data.financial_years.find((f) => f.id === fyId);
-  const deptCode = dept ? dept.code : 'GEN';
-  const fyLabel = fy ? fy.label : String(new Date().getFullYear());
-  const count = store.data.nfas.filter((n) => !deptId || n.department_id === deptId).length;
-  const seq = String(count + 1).padStart(4, '0');
-  res.json({ ref_no: `NFA/${deptCode}/${fyLabel}/${seq}` });
+  const refNo = generateUniqueNfaRefNo(store.data, deptId, fyId);
+  res.json({ ref_no: refNo });
 });
 
 /** GET /api/nfas/:id */
@@ -301,17 +477,43 @@ nfasRouter.post('/', requireRole('faculty', 'hod', 'dean', 'super_admin'), (req:
   }
 
   const items = Array.isArray(b.items) ? b.items : [];
-  const total = items.reduce((s: number, it: any) => s + (Number(it.amount) || 0), 0);
+  const processedItems = items.map((it: any, i: number) => {
+    const qtyNum = Number(it.quantity);
+    const rateNum = Number(it.rate);
+    let computedAmount = Number(it.amount) || 0;
+    if (!isNaN(qtyNum) && qtyNum > 0 && !isNaN(rateNum) && rateNum >= 0) {
+      computedAmount = Math.round(qtyNum * rateNum * 100) / 100;
+    }
+    if (isNaN(computedAmount) || !isFinite(computedAmount) || computedAmount < 0) {
+      computedAmount = 0;
+    }
+    return {
+      id: uuid(),
+      sl_no: i + 1,
+      particulars: String(it.particulars || '').trim(),
+      quantity: it.quantity !== undefined && it.quantity !== null ? String(it.quantity).trim() : '',
+      rate: it.rate !== undefined && it.rate !== null ? String(it.rate).trim() : '',
+      amount: computedAmount,
+      comments: it.comments || '',
+      justification: it.justification || '',
+      basis_of_budget: it.basis_of_budget || '',
+      previous_year_budget: Number(it.previous_year_budget) || 0,
+      previous_year_actual: Number(it.previous_year_actual) || 0,
+      is_predefined: Boolean(it.is_predefined),
+      predefined_key: it.predefined_key || undefined,
+      distance_km: it.distance_km || undefined,
+      carry_back_arrangement: it.carry_back_arrangement || undefined,
+      sampling_required: Boolean(it.sampling_required),
+      item_type: it.item_type || (Boolean(it.is_predefined) ? 'predefined' : (b.nfa_type === 'purchase' ? 'purchase' : 'custom')),
+    };
+  });
+  const total = processedItems.reduce((s: number, it: any) => s + (Number(it.amount) || 0), 0);
 
-  // Auto reference number calculation
-  let refNo = b.ref_no;
-  if (!refNo || refNo.trim() === '') {
-    const dept = store.data.departments.find((d) => d.id === targetDepartmentId);
-    const fy = store.data.financial_years.find((f) => f.id === b.financial_year_id);
-    const deptCode = dept ? dept.code : 'GEN';
-    const fyLabel = fy ? fy.label : String(new Date().getFullYear());
-    const count = store.data.nfas.filter((n) => n.department_id === targetDepartmentId).length;
-    refNo = `NFA/${deptCode}/${fyLabel}/${String(count + 1).padStart(4, '0')}`;
+  // Auto reference number calculation with enforced uniqueness
+  let refNo = b.ref_no ? String(b.ref_no).trim() : '';
+  const refExists = refNo && store.data.nfas.some((n) => n.ref_no.toLowerCase() === refNo.toLowerCase());
+  if (!refNo || refExists) {
+    refNo = generateUniqueNfaRefNo(store.data, targetDepartmentId, b.financial_year_id);
   }
 
   const creatorUser = store.data.users.find((u) => u.id === req.user!.id);
@@ -363,25 +565,17 @@ nfasRouter.post('/', requireRole('faculty', 'hod', 'dean', 'super_admin'), (req:
       purpose: b.purchase_purpose || '',
       additional_info: b.purchase_additional_info || '',
     },
+    quotations: Array.isArray(b.quotations) ? b.quotations : [],
+    comparative_statement: b.comparative_statement || undefined,
     proposer_signature: proposerSig,
   };
 
   store.transact((db) => {
     db.nfas.push(nfa);
-    items.forEach((it: any, i: number) => {
+    processedItems.forEach((it: any) => {
       db.nfa_items.push({
-        id: uuid(),
+        ...it,
         nfa_id: nfa.id,
-        sl_no: i + 1,
-        particulars: it.particulars,
-        quantity: it.quantity || '',
-        rate: it.rate || '',
-        amount: Number(it.amount) || 0,
-        comments: it.comments || '',
-        justification: it.justification || '',
-        basis_of_budget: it.basis_of_budget || '',
-        previous_year_budget: Number(it.previous_year_budget) || 0,
-        previous_year_actual: Number(it.previous_year_actual) || 0,
       });
     });
   });
@@ -448,6 +642,13 @@ nfasRouter.put('/:id', async (req: AuthedRequest, res) => {
       if (b[f] !== undefined) (nfa as any)[f] = b[f];
     });
 
+    if (b.quotations !== undefined) {
+      nfa.quotations = Array.isArray(b.quotations) ? b.quotations : [];
+    }
+    if (b.comparative_statement !== undefined) {
+      nfa.comparative_statement = b.comparative_statement || undefined;
+    }
+
     if (b.point1) nfa.purpose = b.point1;
     if (b.point2) nfa.description = b.point2;
     if (b.point3) nfa.justification = b.point3;
@@ -455,22 +656,37 @@ nfasRouter.put('/:id', async (req: AuthedRequest, res) => {
     if (Array.isArray(b.items)) {
       db.nfa_items = db.nfa_items.filter((i) => i.nfa_id !== nfa.id);
       b.items.forEach((it: any, i: number) => {
+        const qtyNum = Number(it.quantity);
+        const rateNum = Number(it.rate);
+        let computedAmount = Number(it.amount) || 0;
+        if (!isNaN(qtyNum) && qtyNum > 0 && !isNaN(rateNum) && rateNum >= 0) {
+          computedAmount = Math.round(qtyNum * rateNum * 100) / 100;
+        }
+        if (isNaN(computedAmount) || !isFinite(computedAmount) || computedAmount < 0) {
+          computedAmount = 0;
+        }
         db.nfa_items.push({
-          id: uuid(),
+          id: it.id || uuid(),
           nfa_id: nfa.id,
           sl_no: i + 1,
-          particulars: it.particulars,
-          quantity: it.quantity || '',
-          rate: it.rate || '',
-          amount: Number(it.amount) || 0,
+          particulars: String(it.particulars || '').trim(),
+          quantity: it.quantity !== undefined && it.quantity !== null ? String(it.quantity).trim() : '',
+          rate: it.rate !== undefined && it.rate !== null ? String(it.rate).trim() : '',
+          amount: computedAmount,
           comments: it.comments || '',
           justification: it.justification || '',
           basis_of_budget: it.basis_of_budget || '',
           previous_year_budget: Number(it.previous_year_budget) || 0,
           previous_year_actual: Number(it.previous_year_actual) || 0,
+          is_predefined: Boolean(it.is_predefined),
+          predefined_key: it.predefined_key || undefined,
+          distance_km: it.distance_km || undefined,
+          carry_back_arrangement: it.carry_back_arrangement || undefined,
+          sampling_required: Boolean(it.sampling_required),
+          item_type: it.item_type || (Boolean(it.is_predefined) ? 'predefined' : (nfa.nfa_type === 'purchase' ? 'purchase' : 'custom')),
         });
       });
-      nfa.total_amount = b.items.reduce((s: number, it: any) => s + (Number(it.amount) || 0), 0);
+      nfa.total_amount = db.nfa_items.filter((i) => i.nfa_id === nfa.id).reduce((s: number, it: any) => s + (Number(it.amount) || 0), 0);
     }
 
     if (nfa.status === 'revision_required' && isOwner) {
@@ -495,7 +711,70 @@ nfasRouter.post('/:id/submit', async (req: AuthedRequest, res) => {
     if (!nfa) return { error: 404 as const };
     if (nfa.created_by !== req.user!.id && req.user!.role !== 'super_admin') return { error: 403 as const };
     if (!['draft', 'revision_required'].includes(nfa.status)) return { error: 'bad_status' as const };
-    if (db.nfa_items.filter((i) => i.nfa_id === nfa.id).length === 0) return { error: 'no_items' as const };
+    
+    const items = db.nfa_items.filter((i) => i.nfa_id === nfa.id);
+    if (items.length === 0) return { error: 'no_items' as const };
+
+    // Strict Submission Validation for Purchase NFA
+    if (nfa.nfa_type === 'purchase') {
+      const validItems = items.filter((it) => it.particulars && it.amount > 0);
+      if (validItems.length === 0) {
+        return { error: 'validation_error' as const, msg: 'Purchase NFA must contain at least one valid item with description, quantity, rate, and amount.' };
+      }
+
+      const quotes = nfa.quotations || [];
+      if (quotes.length < 3) {
+        return { error: 'validation_error' as const, msg: 'Three vendor quotations (Vendor A, Vendor B, Vendor C) are mandatory before submitting a Purchase NFA.' };
+      }
+
+      const quoteFiles: string[] = [];
+      const quoteHashes: string[] = [];
+      const vLabels = ['Vendor A (Quotation 1)', 'Vendor B (Quotation 2)', 'Vendor C (Quotation 3)'];
+
+      for (let i = 0; i < 3; i++) {
+        const q = quotes[i];
+        const vLabel = vLabels[i];
+        if (!q || !q.vendor_name || !q.vendor_name.trim()) {
+          return { error: 'validation_error' as const, msg: `${vLabel}: Vendor Name is required.` };
+        }
+        if (!q.file_path) {
+          return { error: 'validation_error' as const, msg: `${vLabel}: Quotation document upload is missing.` };
+        }
+        const fullP = path.join(attachmentsDir, path.basename(q.file_path));
+        if (!fs.existsSync(fullP)) {
+          return { error: 'validation_error' as const, msg: `${vLabel}: Uploaded quotation file could not be found in storage.` };
+        }
+        quoteFiles.push(path.basename(q.file_path).toLowerCase());
+        if (q.file_hash) quoteHashes.push(q.file_hash);
+      }
+
+      // Check for duplicate files across quotations
+      const uniqueFiles = new Set(quoteFiles);
+      if (uniqueFiles.size < quoteFiles.length) {
+        return { error: 'validation_error' as const, msg: 'Identical quotation documents detected. Each vendor quotation must be a distinct document.' };
+      }
+      if (quoteHashes.length === 3) {
+        const uniqueHashes = new Set(quoteHashes);
+        if (uniqueHashes.size < quoteHashes.length) {
+          return { error: 'validation_error' as const, msg: 'Identical quotation document contents detected. Each vendor quotation must be an independent document.' };
+        }
+      }
+
+      // Comparative Statement validation
+      if (!nfa.comparative_statement || !nfa.comparative_statement.file_path) {
+        return { error: 'validation_error' as const, msg: 'Comparative Statement document upload is mandatory before submitting a Purchase NFA.' };
+      }
+      const csPath = path.join(attachmentsDir, path.basename(nfa.comparative_statement.file_path));
+      if (!fs.existsSync(csPath)) {
+        return { error: 'validation_error' as const, msg: 'Comparative Statement file could not be found in storage.' };
+      }
+    } else {
+      // Event NFA validation
+      const validItems = items.filter((it) => it.particulars && it.amount > 0);
+      if (validItems.length === 0) {
+        return { error: 'validation_error' as const, msg: 'Event NFA must contain at least one valid expense item with quantity, rate, and calculated amount.' };
+      }
+    }
 
     const creatorUser = db.users.find((u) => u.id === req.user!.id);
     if (!nfa.proposer_signature) {
@@ -516,7 +795,7 @@ nfasRouter.post('/:id/submit', async (req: AuthedRequest, res) => {
   });
 
   if ('error' in result) {
-    if (result.error === 'budget_error') {
+    if (result.error === 'validation_error' || result.error === 'budget_error') {
       return res.status(400).json({ error: (result as any).msg });
     }
     const map: Record<string, [number, string]> = {

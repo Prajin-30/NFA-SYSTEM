@@ -123,6 +123,13 @@ export interface NfaItem {
   basis_of_budget?: string;
   previous_year_budget?: number;
   previous_year_actual?: number;
+  // Event Predefined / Custom metadata
+  is_predefined?: boolean;
+  predefined_key?: string;
+  distance_km?: string;
+  carry_back_arrangement?: string;
+  sampling_required?: boolean;
+  item_type?: 'predefined' | 'custom' | 'purchase';
 }
 
 export interface EventDetails {
@@ -140,6 +147,29 @@ export interface PurchaseDetails {
   quantity?: string;
   purpose?: string;
   additional_info?: string;
+}
+
+export interface VendorQuotation {
+  vendor_name: string;
+  quotation_ref?: string;
+  quotation_date?: string;
+  file_id: string;
+  original_filename: string;
+  file_path: string;
+  file_size: number;
+  file_hash?: string;
+  mime_type?: string;
+  uploaded_at: string;
+}
+
+export interface ComparativeStatementDoc {
+  file_id: string;
+  original_filename: string;
+  file_path: string;
+  file_size: number;
+  file_hash?: string;
+  mime_type?: string;
+  uploaded_at: string;
 }
 
 export interface Nfa {
@@ -176,6 +206,8 @@ export interface Nfa {
   nfa_type?: 'event' | 'purchase';
   event_details?: EventDetails;
   purchase_details?: PurchaseDetails;
+  quotations?: VendorQuotation[];
+  comparative_statement?: ComparativeStatementDoc;
   proposer_signature?: string;
   // set while a revision to an already-approved NFA awaits Finance sign-off
   pending_revision_amount?: number;
@@ -288,6 +320,9 @@ export interface MasterBudgetPreviewResponse {
   filename: string;
   detected_department?: { id?: string; code?: string; name?: string };
   detected_financial_year?: { id?: string; label?: string };
+  has_existing_budget?: boolean;
+  existing_total_allocated?: number;
+  existing_categories_count?: number;
   sheets: MasterBudgetSheetPreview[];
   categories: MasterBudgetCategoryPreview[];
   total_allocated: number;

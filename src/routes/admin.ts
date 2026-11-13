@@ -7,18 +7,37 @@ import { requireAuth, requireRole, AuthedRequest } from '../middleware/auth.js';
 export const adminRouter = Router();
 adminRouter.use(requireAuth, requireRole('super_admin'));
 
-/** POST /api/admin/financial-years — requirement #21: add new financial years without code changes */
+/** POST /api/admin/financial-years — enforce uniqueness and format */
 adminRouter.post('/financial-years', async (req, res) => {
-  const { label } = req.body || {};
-  if (!label) return res.status(400).json({ error: 'label is required, e.g. "2027-28"' });
-  const fy = { id: uuid(), label, is_active: false };
-  await store.transact((db) => db.financial_years.push(fy));
-  res.status(201).json(fy);
+  const label = String(req.body?.label || '').trim();
+  if (!label) return res.status(400).json({ error: 'Academic Year label is required, e.g. "2027-28"' });
+  
+  const result = await store.transact((db) => {
+    const existing = db.financial_years.find((f) => f.label.toLowerCase() === label.toLowerCase());
+    if (existing) {
+      return { error: 409 as const, msg: `Academic / Financial Year '${label}' already exists.` };
+    }
+    const fy = { id: uuid(), label, is_active: false };
+    db.financial_years.push(fy);
+    return { fy };
+  });
+
+  if ('error' in result) return res.status(result.error).json({ error: result.msg });
+  res.status(201).json(result.fy);
 });
 
-/** PUT /api/admin/financial-years/:id/activate */
+/** PUT /api/admin/financial-years/:id/activate — enforce single active academic year */
 adminRouter.put('/financial-years/:id/activate', async (req, res) => {
-  await store.transact((db) => db.financial_years.forEach((f) => (f.is_active = f.id === req.params.id)));
+  const result = await store.transact((db) => {
+    const target = db.financial_years.find((f) => f.id === req.params.id);
+    if (!target) return { error: 404 as const, msg: 'Academic Year not found' };
+    db.financial_years.forEach((f) => {
+      f.is_active = f.id === target.id;
+    });
+    return { active_fy: target };
+  });
+
+  if ('error' in result) return res.status(result.error).json({ error: result.msg });
   res.json(store.data.financial_years);
 });
 

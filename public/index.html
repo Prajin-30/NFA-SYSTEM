@@ -944,6 +944,123 @@
     color: var(--primary-blue);
   }
 
+  /* PREDEFINED EVENT PARTICULARS */
+  .event-particulars-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .event-particular-item {
+    background: #ffffff;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    transition: all 0.2s ease;
+  }
+  .event-particular-item:hover {
+    border-color: var(--primary-blue);
+  }
+  .event-particular-item.checked {
+    border-color: var(--primary-blue);
+    background: var(--light-blue);
+  }
+  .event-particular-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text-main);
+  }
+  .event-particular-header input[type="checkbox"] {
+    width: 17px;
+    height: 17px;
+    cursor: pointer;
+    accent-color: var(--primary-blue);
+    margin: 0;
+  }
+  .event-subfield {
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px dashed #cbd5e1;
+  }
+  .event-subfield input {
+    font-size: 12px;
+    padding: 6px 8px;
+    margin-bottom: 0;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    width: 100%;
+  }
+
+  /* VENDOR QUOTATIONS & COMPARATIVE STATEMENT */
+  .quotations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 12px;
+    margin-top: 10px;
+  }
+  .quotation-card {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  }
+  .quotation-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 700;
+    color: var(--primary-blue);
+    font-size: 13px;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 6px;
+  }
+  .upload-dropzone {
+    border: 1.5px dashed #94a3b8;
+    background: #f8fafc;
+    border-radius: 6px;
+    padding: 12px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .upload-dropzone:hover {
+    border-color: var(--primary-blue);
+    background: var(--light-blue);
+  }
+  .uploaded-file-pill {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #065f46;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .uploaded-file-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .uploaded-file-actions button {
+    padding: 3px 8px;
+    font-size: 11px;
+    min-height: auto;
+  }
+
   /* ==========================================================================
      RESPONSIVE BREAKPOINTS (Mobile: 320px-480px, Tablet: 768px, Laptop: 1024px+)
      ========================================================================== */
@@ -1181,6 +1298,8 @@ let currentTab = 'dashboard';
 let currentActiveFyId = '';
 let activeBudgetTypeFilter = 'all';
 let activeMasterBudgetPreview = null;
+let selectedDashboardDeptId = null;
+let selectedBudgetDeptId = null;
 let currentSelectedAvailableBudget = null;
 
 // SDG 17 List
@@ -1200,7 +1319,7 @@ function toast(msg){
 }
 
 function inr(n){
-  return '₹' + Number(n||0).toLocaleString('en-IN');
+  return '₹\u00A0' + Number(n||0).toLocaleString('en-IN');
 }
 
 function fmtStatus(s){
@@ -1247,23 +1366,509 @@ function updateWordCount(inputId, badgeId, maxWords = 50) {
   }
 }
 
+const PREDEFINED_EVENT_PARTICULARS = [
+  { key: 'memento', name: 'Memento (including carry-back arrangements)', defaultLabel: 'Memento', notePlaceholder: 'Carry-back arrangement (optional)' },
+  { key: 'travel_expenses', name: 'Travel Expenses (based on distance)', defaultLabel: 'Travel Expenses', notePlaceholder: 'Distance in km (optional)' },
+  { key: 'ta', name: 'Travel Allowance (TA)', defaultLabel: 'Travel Allowance (TA)' },
+  { key: 'da', name: 'Dearness Allowance (DA)', defaultLabel: 'Dearness Allowance (DA)' },
+  { key: 'honorarium', name: 'Honorarium', defaultLabel: 'Honorarium' },
+  { key: 'refreshments_fn', name: 'Refreshments — Forenoon', defaultLabel: 'Refreshments — Forenoon' },
+  { key: 'refreshments_an', name: 'Refreshments — Afternoon', defaultLabel: 'Refreshments — Afternoon' },
+  { key: 'sampling', name: 'Sampling (field / laboratory verification)', defaultLabel: 'Sampling', isSampling: true },
+  { key: 'lunch', name: 'Lunch', defaultLabel: 'Lunch' },
+  { key: 'miscellaneous', name: 'Miscellaneous', defaultLabel: 'Miscellaneous' }
+];
+
+let quotationUploads = [null, null, null];
+let comparativeStatementUpload = null;
+
+function confirmSwitchNfaType(newType, isEdit = false) {
+  const currentRadio = isEdit ? document.getElementById('editNfaTypePurchase') : document.getElementById('nfaTypePurchase');
+  const currentType = currentRadio?.checked ? 'purchase' : 'event';
+  if (currentType === newType) return true;
+
+  const items = [...document.querySelectorAll('#itemsWrap .item-row')].map(r => ({
+    p: r.querySelector('.it-p')?.value?.trim() || '',
+    q: r.querySelector('.it-q')?.value?.trim() || '',
+    r: r.querySelector('.it-r')?.value?.trim() || '',
+    a: Number(r.querySelector('.it-a')?.value) || 0
+  })).filter(i => i.p || i.a > 0);
+
+  const hasEventData = currentType === 'event' && (
+    items.length > 0 ||
+    document.getElementById(isEdit ? 'editEventResourcePerson' : 'eventResourcePerson')?.value?.trim() ||
+    document.getElementById(isEdit ? 'editEventDesignation' : 'eventDesignation')?.value?.trim() ||
+    document.getElementById(isEdit ? 'editEventVenue' : 'eventVenue')?.value?.trim()
+  );
+
+  const hasPurchaseData = currentType === 'purchase' && (
+    items.length > 0 ||
+    document.getElementById(isEdit ? 'editPurchaseItemName' : 'purchaseItemName')?.value?.trim() ||
+    document.getElementById(isEdit ? 'editPurchaseDescription' : 'purchaseDescription')?.value?.trim() ||
+    quotationUploads.some(q => q && q.file_path) ||
+    (comparativeStatementUpload && comparativeStatementUpload.file_path)
+  );
+
+  if (hasEventData || hasPurchaseData) {
+    const ok = confirm("Switching NFA Category: You have entered data for this category. Switching categories will adjust category-specific items and attachments. Common proposal details (Title, Purpose, Justification, Department, Financial Year) will be preserved. Do you want to proceed?");
+    if (!ok) {
+      if (isEdit) {
+        if (currentType === 'event') document.getElementById('editNfaTypeEvent').checked = true;
+        else document.getElementById('editNfaTypePurchase').checked = true;
+      } else {
+        if (currentType === 'event') document.getElementById('nfaTypeEvent').checked = true;
+        else document.getElementById('nfaTypePurchase').checked = true;
+      }
+      return false;
+    }
+  }
+
+  if (isEdit) {
+    onEditNfaTypeChange(newType);
+  } else {
+    onNfaTypeChange(newType);
+  }
+  return true;
+}
+
 function onNfaTypeChange(type) {
-  const eventSection = document.getElementById('eventDetailsSection');
-  const purchaseSection = document.getElementById('purchaseDetailsSection');
+  const eventDetails = document.getElementById('eventDetailsSection');
+  const eventPredefined = document.getElementById('eventPredefinedSection');
+  const purchaseDetails = document.getElementById('purchaseDetailsSection');
+  const purchaseQuotations = document.getElementById('purchaseQuotationsSection');
+  const purchaseCs = document.getElementById('purchaseCsSection');
   const eventCard = document.getElementById('nfaTypeCardEvent');
   const purchaseCard = document.getElementById('nfaTypeCardPurchase');
+  const itemsHeaderFirstCol = document.querySelector('#itemsHeader > div:first-child');
+  const itemsSectionTitle = document.getElementById('itemsSectionTitle');
 
   if (type === 'purchase') {
-    if (eventSection) eventSection.style.display = 'none';
-    if (purchaseSection) purchaseSection.style.display = 'block';
+    if (eventDetails) eventDetails.style.display = 'none';
+    if (eventPredefined) eventPredefined.style.display = 'none';
+    if (purchaseDetails) purchaseDetails.style.display = 'block';
+    if (purchaseQuotations) purchaseQuotations.style.display = 'block';
+    if (purchaseCs) purchaseCs.style.display = 'block';
     if (eventCard) eventCard.classList.remove('active');
     if (purchaseCard) purchaseCard.classList.add('active');
+    if (itemsHeaderFirstCol) itemsHeaderFirstCol.textContent = 'Purchase Item / Description';
+    if (itemsSectionTitle) itemsSectionTitle.textContent = 'Purchase Budget Items (Enter item description, quantity, and rate)';
   } else {
-    if (eventSection) eventSection.style.display = 'block';
-    if (purchaseSection) purchaseSection.style.display = 'none';
+    if (eventDetails) eventDetails.style.display = 'block';
+    if (eventPredefined) eventPredefined.style.display = 'block';
+    if (purchaseDetails) purchaseDetails.style.display = 'none';
+    if (purchaseQuotations) purchaseQuotations.style.display = 'none';
+    if (purchaseCs) purchaseCs.style.display = 'none';
     if (eventCard) eventCard.classList.add('active');
     if (purchaseCard) purchaseCard.classList.remove('active');
+    if (itemsHeaderFirstCol) itemsHeaderFirstCol.textContent = 'Particulars / Item Description';
+    if (itemsSectionTitle) itemsSectionTitle.textContent = 'Event Budget Items (Select from predefined list above or add custom rows)';
   }
+}
+
+function onToggleEventParticular(key, cbEl, isEdit = false) {
+  const itemConfig = PREDEFINED_EVENT_PARTICULARS.find(p => p.key === key);
+  if (!itemConfig) return;
+
+  const prefix = isEdit ? 'edit_' : '';
+  const itemCard = document.getElementById(`${prefix}card_particular_${key}`);
+  if (itemCard) itemCard.classList.toggle('checked', cbEl.checked);
+
+  const existingRow = document.querySelector(`#itemsWrap .item-row[data-predefined-key="${key}"]`);
+
+  if (cbEl.checked) {
+    if (!existingRow) {
+      let displayName = itemConfig.defaultLabel;
+      let dist = '';
+      let carryBack = '';
+
+      if (key === 'travel_expenses') {
+        const subIn = document.getElementById(`${prefix}subfield_${key}`);
+        if (subIn && subIn.value.trim()) {
+          dist = subIn.value.trim();
+          displayName = `Travel Expenses (Distance: ${dist} km)`;
+        }
+      } else if (key === 'memento') {
+        const subIn = document.getElementById(`${prefix}subfield_${key}`);
+        if (subIn && subIn.value.trim()) {
+          carryBack = subIn.value.trim();
+          displayName = `Memento (${carryBack})`;
+        }
+      }
+
+      addPredefinedItemRow(key, displayName, '', '', '', dist, carryBack, Boolean(itemConfig.isSampling), isEdit);
+    }
+  } else {
+    if (existingRow) {
+      const q = existingRow.querySelector('.it-q')?.value?.trim();
+      const r = existingRow.querySelector('.it-r')?.value?.trim();
+      const a = Number(existingRow.querySelector('.it-a')?.value) || 0;
+      if (q || r || a > 0) {
+        const ok = confirm(`Unchecking "${itemConfig.name}" will remove its budget row and entered values. Do you wish to continue?`);
+        if (!ok) {
+          cbEl.checked = true;
+          if (itemCard) itemCard.classList.add('checked');
+          return;
+        }
+      }
+      existingRow.remove();
+      calcTotal();
+    }
+  }
+}
+
+function onPredefinedSubfieldChange(key, inputEl, isEdit = false) {
+  const row = document.querySelector(`#itemsWrap .item-row[data-predefined-key="${key}"]`);
+  if (!row) return;
+  const pInput = row.querySelector('.it-p');
+  if (!pInput) return;
+
+  const val = inputEl.value.trim();
+  if (key === 'travel_expenses') {
+    pInput.value = val ? `Travel Expenses (Distance: ${val} km)` : 'Travel Expenses';
+    row.dataset.distanceKm = val;
+  } else if (key === 'memento') {
+    pInput.value = val ? `Memento (${val})` : 'Memento';
+    row.dataset.carryBack = val;
+  }
+}
+
+function addPredefinedItemRow(key, particulars, q='', r='', a='', dist='', carryBack='', isSampling=false, isEdit=false) {
+  const wrap = document.getElementById('itemsWrap');
+  if (!wrap) return;
+
+  const row = document.createElement('div');
+  row.className = 'item-row predefined-row';
+  row.dataset.predefinedKey = key;
+  if (dist) row.dataset.distanceKm = dist;
+  if (carryBack) row.dataset.carryBack = carryBack;
+  if (isSampling) row.dataset.sampling = 'true';
+
+  row.innerHTML = `
+    <input placeholder="Particulars / Item Description" class="it-p" value="${escapeHtml(particulars)}" />
+    <input placeholder="Qty" class="it-q" type="number" min="1" step="1" value="${escapeHtml(q)}" oninput="calcRow(this)" />
+    <input placeholder="Rate (₹)" class="it-r" type="number" min="0" step="any" value="${escapeHtml(r)}" oninput="calcRow(this)" />
+    <input placeholder="Amount (₹)" class="it-a" type="number" min="0" step="any" value="${escapeHtml(a)}" oninput="calcTotal()" style="font-weight:700" />
+    <button class="del-item" type="button" title="Remove row" onclick="removeItemRow(this, ${isEdit})">✕</button>
+  `;
+  wrap.appendChild(row);
+
+  const prefix = isEdit ? 'edit_' : '';
+  const cb = document.getElementById(`${prefix}cb_particular_${key}`);
+  if (cb) cb.checked = true;
+  const card = document.getElementById(`${prefix}card_particular_${key}`);
+  if (card) card.classList.add('checked');
+
+  calcTotal();
+
+  const qtyInput = row.querySelector('.it-q');
+  if (qtyInput && !q) {
+    setTimeout(() => {
+      qtyInput.focus();
+    }, 50);
+  }
+}
+
+function removeItemRow(btn, isEdit = false) {
+  const row = btn.closest('.item-row');
+  if (!row) return;
+
+  const key = row.dataset.predefinedKey;
+  const p = row.querySelector('.it-p')?.value?.trim() || '';
+  const q = row.querySelector('.it-q')?.value?.trim() || '';
+  const r = row.querySelector('.it-r')?.value?.trim() || '';
+  const a = Number(row.querySelector('.it-a')?.value) || 0;
+
+  if (q || r || a > 0) {
+    const ok = confirm(`Are you sure you want to remove "${p || 'this item'}"? Entered financial values will be lost.`);
+    if (!ok) return;
+  }
+
+  if (key) {
+    const prefix = isEdit ? 'edit_' : '';
+    const cb = document.getElementById(`${prefix}cb_particular_${key}`);
+    if (cb) cb.checked = false;
+    const card = document.getElementById(`${prefix}card_particular_${key}`);
+    if (card) card.classList.remove('checked');
+  }
+
+  row.remove();
+  calcTotal();
+}
+
+function renderPredefinedChecklistHtml(isEdit = false, checkedKeys = [], savedItems = []) {
+  const prefix = isEdit ? 'edit_' : '';
+  return `
+    <div id="${prefix}eventPredefinedSection" style="margin-top:14px;padding:16px;background:var(--section-bg);border:1px solid var(--border);border-radius:var(--radius-sm);">
+      <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <h3 style="margin:0;font-size:13.5px;color:var(--primary);text-transform:uppercase;letter-spacing:0.5px;font-weight:700;">SELECT EVENT BUDGET PARTICULARS</h3>
+        <span class="field-help" style="margin:0;font-weight:600;color:var(--primary-blue);">Editable Qty &amp; Rate required</span>
+      </div>
+      <div class="field-help" style="margin-bottom:10px;">Select required event expenses. Rows will be added below. You must manually enter the Quantity and Rate for each item.</div>
+      <div class="event-particulars-grid">
+        ${PREDEFINED_EVENT_PARTICULARS.map(p => {
+          const isChecked = checkedKeys.includes(p.key);
+          const matchedItem = (savedItems || []).find(it => it.predefined_key === p.key || (it.particulars && it.particulars.toLowerCase().startsWith(p.defaultLabel.toLowerCase())));
+          const distVal = matchedItem?.distance_km || '';
+          const carryBackVal = matchedItem?.carry_back_arrangement || '';
+          return `
+            <div id="${prefix}card_particular_${p.key}" class="event-particular-item ${isChecked ? 'checked' : ''}">
+              <label class="event-particular-header" for="${prefix}cb_particular_${p.key}">
+                <input type="checkbox" id="${prefix}cb_particular_${p.key}" ${isChecked ? 'checked' : ''} onchange="onToggleEventParticular('${p.key}', this, ${isEdit})" />
+                <span>${escapeHtml(p.name)}</span>
+              </label>
+              ${p.key === 'sampling' ? `
+                <div style="font-size:11px;color:var(--text-muted);margin-top:4px;padding-left:25px;">
+                  Indicate if sampling is required for this event.
+                </div>
+              ` : ''}
+              ${p.key === 'travel_expenses' ? `
+                <div class="event-subfield" style="padding-left:25px;">
+                  <input id="${prefix}subfield_${p.key}" value="${escapeHtml(distVal)}" placeholder="${p.notePlaceholder}" oninput="onPredefinedSubfieldChange('${p.key}', this, ${isEdit})" />
+                </div>
+              ` : ''}
+              ${p.key === 'memento' ? `
+                <div class="event-subfield" style="padding-left:25px;">
+                  <input id="${prefix}subfield_${p.key}" value="${escapeHtml(carryBackVal)}" placeholder="${p.notePlaceholder}" oninput="onPredefinedSubfieldChange('${p.key}', this, ${isEdit})" />
+                </div>
+              ` : ''}
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderPurchaseQuotationsHtml(isEdit = false, existingQuotes = [], existingCs = null) {
+  const prefix = isEdit ? 'edit_' : '';
+  const vendorLabels = [
+    { label: 'Quotation 1 — Vendor A', tag: 'Vendor A' },
+    { label: 'Quotation 2 — Vendor B', tag: 'Vendor B' },
+    { label: 'Quotation 3 — Vendor C', tag: 'Vendor C' }
+  ];
+
+  return `
+    <div id="${prefix}purchaseQuotationsSection" style="display:none;margin-top:14px;padding:16px;background:var(--section-bg);border:1px solid #cbd5e1;border-radius:var(--radius-sm);">
+      <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <h3 style="margin:0;font-size:13.5px;color:var(--primary);text-transform:uppercase;letter-spacing:0.5px;font-weight:700;">VENDOR QUOTATIONS (3 MANDATORY QUOTATIONS)</h3>
+        <span class="badge b-submitted" style="font-size:11px;">Mandatory for Submission</span>
+      </div>
+      <div class="field-help" style="margin-bottom:10px;">Three distinct vendor quotations are mandatory for institutional procurement compliance. (Drafts can be saved with partial uploads).</div>
+
+      <div class="quotations-grid">
+        ${vendorLabels.map((v, idx) => {
+          const q = (existingQuotes || [])[idx] || {};
+          return `
+            <div class="quotation-card">
+              <div class="quotation-card-header">
+                <span>${v.label}</span>
+                <span class="badge" style="background:#e0f2fe;color:#0369a1;font-size:10px;">${v.tag}</span>
+              </div>
+              <div>
+                <label class="field-label" style="margin:0 0 2px;font-size:11.5px;">Vendor Name <span style="color:var(--danger)">*</span></label>
+                <input id="${prefix}quoteVendor${idx}" value="${escapeHtml(q.vendor_name || '')}" placeholder="Company / Vendor Name" style="margin-bottom:6px;font-size:12.5px;" />
+              </div>
+              <div class="row" style="gap:6px;">
+                <div style="flex:1">
+                  <label class="field-label" style="margin:0 0 2px;font-size:11px;">Quote Ref (Optional)</label>
+                  <input id="${prefix}quoteRef${idx}" value="${escapeHtml(q.quotation_ref || '')}" placeholder="e.g. QT-2026-09" style="margin-bottom:6px;font-size:12px;" />
+                </div>
+                <div style="flex:1">
+                  <label class="field-label" style="margin:0 0 2px;font-size:11px;">Quote Date (Optional)</label>
+                  <input id="${prefix}quoteDate${idx}" type="date" value="${escapeHtml(q.quotation_date || '')}" style="margin-bottom:6px;font-size:12px;" />
+                </div>
+              </div>
+              <div style="margin-top:4px;">
+                <label class="field-label" style="margin:0 0 4px;font-size:11.5px;">Quotation Document (PDF, JPG, PNG)</label>
+                <input type="file" id="${prefix}quoteFileInput${idx}" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="handleQuotationFileUpload(${idx}, this, ${isEdit})" />
+                <button type="button" id="${prefix}quoteTriggerBtn${idx}" class="secondary" style="width:100%;font-size:12px;padding:8px;" onclick="document.getElementById('${prefix}quoteFileInput${idx}').click()">
+                  Upload Quotation Document
+                </button>
+                <div id="${prefix}quoteUploadedWrap${idx}"></div>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+
+    <div id="${prefix}purchaseCsSection" style="display:none;margin-top:14px;padding:16px;background:var(--section-bg);border:1px solid #cbd5e1;border-radius:var(--radius-sm);">
+      <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <h3 style="margin:0;font-size:13.5px;color:var(--primary);text-transform:uppercase;letter-spacing:0.5px;font-weight:700;">COMPARATIVE STATEMENT / COMPARISON DOCUMENT</h3>
+        <span class="badge b-submitted" style="font-size:11px;">Mandatory for Submission</span>
+      </div>
+      <div class="field-help" style="margin-bottom:10px;">Upload the institutional Comparative Statement (CS) evaluating the 3 vendor quotations (PDF, JPG, PNG, or XLSX).</div>
+
+      <div style="background:#ffffff;border:1px solid #cbd5e1;border-radius:var(--radius-sm);padding:14px;">
+        <input type="file" id="${prefix}csFileInput" accept=".pdf,.jpg,.jpeg,.png,.xlsx" style="display:none" onchange="handleCsFileUpload(this, ${isEdit})" />
+        <button type="button" id="${prefix}csTriggerBtn" class="secondary" style="font-size:12.5px;padding:8px 16px;" onclick="document.getElementById('${prefix}csFileInput').click()">
+          Upload Comparative Statement
+        </button>
+        <div id="${prefix}csUploadedWrap"></div>
+      </div>
+    </div>
+  `;
+}
+
+async function handleQuotationFileUpload(index, inputEl, isEdit = false) {
+  const file = inputEl.files[0];
+  if (!file) return;
+
+  const validExts = ['.pdf', '.jpg', '.jpeg', '.png'];
+  const ext = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
+  if (!validExts.includes(ext)) {
+    alert('Please upload a valid document format: PDF, JPG, JPEG, or PNG.');
+    inputEl.value = '';
+    return;
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    alert('File size exceeds the 10MB limit. Please upload a smaller file.');
+    inputEl.value = '';
+    return;
+  }
+
+  const prefix = isEdit ? 'edit_' : '';
+  const wrapEl = document.getElementById(`${prefix}quoteUploadedWrap${index}`);
+  if (wrapEl) wrapEl.innerHTML = `<span class="muted" style="font-size:12px;">Uploading ${escapeHtml(file.name)}...</span>`;
+
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await fetch('/api/nfas/upload-attachment', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${TOKEN}` },
+      body: formData
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Upload failed');
+
+    quotationUploads[index] = data;
+    renderQuotationCardUploadState(index, isEdit);
+  } catch(e) {
+    alert(`Upload failed: ${e.message}`);
+    renderQuotationCardUploadState(index, isEdit);
+  }
+}
+
+async function handleCsFileUpload(inputEl, isEdit = false) {
+  const file = inputEl.files[0];
+  if (!file) return;
+
+  const validExts = ['.pdf', '.jpg', '.jpeg', '.png', '.xlsx'];
+  const ext = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
+  if (!validExts.includes(ext)) {
+    alert('Please upload a valid Comparative Statement document: PDF, JPG, JPEG, PNG, or XLSX.');
+    inputEl.value = '';
+    return;
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    alert('File size exceeds the 10MB limit. Please upload a smaller file.');
+    inputEl.value = '';
+    return;
+  }
+
+  const prefix = isEdit ? 'edit_' : '';
+  const wrapEl = document.getElementById(`${prefix}csUploadedWrap`);
+  if (wrapEl) wrapEl.innerHTML = `<span class="muted" style="font-size:12px;">Uploading ${escapeHtml(file.name)}...</span>`;
+
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await fetch('/api/nfas/upload-attachment', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${TOKEN}` },
+      body: formData
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Upload failed');
+
+    comparativeStatementUpload = data;
+    renderCsUploadState(isEdit);
+  } catch(e) {
+    alert(`Upload failed: ${e.message}`);
+    renderCsUploadState(isEdit);
+  }
+}
+
+function renderQuotationCardUploadState(index, isEdit = false) {
+  const prefix = isEdit ? 'edit_' : '';
+  const wrap = document.getElementById(`${prefix}quoteUploadedWrap${index}`);
+  const triggerBtn = document.getElementById(`${prefix}quoteTriggerBtn${index}`);
+  if (!wrap) return;
+
+  const q = quotationUploads[index];
+  if (q && q.file_path) {
+    if (triggerBtn) triggerBtn.style.display = 'none';
+    const sizeStr = q.file_size ? `${(q.file_size / 1024).toFixed(1)} KB` : '';
+    wrap.innerHTML = `
+      <div class="uploaded-file-pill">
+        <div style="display:flex;align-items:center;gap:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+          <span style="font-weight:600;max-width:130px;overflow:hidden;text-overflow:ellipsis;" title="${escapeHtml(q.original_filename)}">${escapeHtml(q.original_filename)}</span>
+          <span class="muted" style="font-size:11px;">(${sizeStr})</span>
+          <span class="badge b-approved" style="font-size:10px;padding:2px 6px;">Ready</span>
+        </div>
+        <div class="uploaded-file-actions">
+          <button type="button" class="secondary" onclick="viewAttachmentPreview('${escapeHtml(q.file_path)}')">View</button>
+          <button type="button" class="secondary" onclick="document.getElementById('${prefix}quoteFileInput${index}').click()">Replace</button>
+          <button type="button" class="del-item" style="padding:4px 7px;min-height:auto;" onclick="removeQuotationUpload(${index}, ${isEdit})">✕</button>
+        </div>
+      </div>
+    `;
+  } else {
+    if (triggerBtn) triggerBtn.style.display = 'inline-block';
+    wrap.innerHTML = '';
+  }
+}
+
+function removeQuotationUpload(index, isEdit = false) {
+  quotationUploads[index] = null;
+  const prefix = isEdit ? 'edit_' : '';
+  const inputEl = document.getElementById(`${prefix}quoteFileInput${index}`);
+  if (inputEl) inputEl.value = '';
+  renderQuotationCardUploadState(index, isEdit);
+}
+
+function renderCsUploadState(isEdit = false) {
+  const prefix = isEdit ? 'edit_' : '';
+  const wrap = document.getElementById(`${prefix}csUploadedWrap`);
+  const triggerBtn = document.getElementById(`${prefix}csTriggerBtn`);
+  if (!wrap) return;
+
+  const cs = comparativeStatementUpload;
+  if (cs && cs.file_path) {
+    if (triggerBtn) triggerBtn.style.display = 'none';
+    const sizeStr = cs.file_size ? `${(cs.file_size / 1024).toFixed(1)} KB` : '';
+    wrap.innerHTML = `
+      <div class="uploaded-file-pill">
+        <div style="display:flex;align-items:center;gap:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+          <span style="font-weight:600;max-width:170px;overflow:hidden;text-overflow:ellipsis;" title="${escapeHtml(cs.original_filename)}">${escapeHtml(cs.original_filename)}</span>
+          <span class="muted" style="font-size:11px;">(${sizeStr})</span>
+          <span class="badge b-approved" style="font-size:10px;padding:2px 6px;">Ready</span>
+        </div>
+        <div class="uploaded-file-actions">
+          <button type="button" class="secondary" onclick="viewAttachmentPreview('${escapeHtml(cs.file_path)}')">View</button>
+          <button type="button" class="secondary" onclick="document.getElementById('${prefix}csFileInput').click()">Replace</button>
+          <button type="button" class="del-item" style="padding:4px 7px;min-height:auto;" onclick="removeCsUpload(${isEdit})">✕</button>
+        </div>
+      </div>
+    `;
+  } else {
+    if (triggerBtn) triggerBtn.style.display = 'inline-block';
+    wrap.innerHTML = '';
+  }
+}
+
+function removeCsUpload(isEdit = false) {
+  comparativeStatementUpload = null;
+  const prefix = isEdit ? 'edit_' : '';
+  const inputEl = document.getElementById(`${prefix}csFileInput`);
+  if (inputEl) inputEl.value = '';
+  renderCsUploadState(isEdit);
+}
+
+function viewAttachmentPreview(filePath) {
+  if (!filePath) return;
+  window.open(`/api/nfas/attachment-preview/${encodeURIComponent(filePath)}`, '_blank');
 }
 
 async function openProfileModal() {
@@ -1497,9 +2102,12 @@ async function boot(){
   currentActiveFyId = activeFyObj.id;
 
   const fySelect = document.getElementById('headerFySelect');
-  fySelect.innerHTML = REF.financialYears.map(f => 
-    `<option value="${f.id}" ${f.id === currentActiveFyId ? 'selected' : ''}>${escapeHtml(f.label)}${f.is_active ? ' (Active)' : ''}</option>`
-  ).join('');
+  const activeStart = parseInt((activeFyObj.label.match(/\d{4}/) || ['0'])[0], 10);
+  fySelect.innerHTML = REF.financialYears.map(f => {
+    const fStart = parseInt((f.label.match(/\d{4}/) || ['0'])[0], 10);
+    const tag = f.is_active ? ' [Active]' : fStart > activeStart ? ' [Future]' : ' [Past]';
+    return `<option value="${f.id}" ${f.id === currentActiveFyId ? 'selected' : ''}>${escapeHtml(f.label)}${tag}</option>`;
+  }).join('');
 
   const tabs = TABS_BY_ROLE[USER.role] || ['dashboard', 'nfas', 'budgets'];
   document.getElementById('nav').innerHTML = tabs.map(t =>
@@ -1569,8 +2177,18 @@ async function showTab(tab){
 }
 
 // ---------------- HOME VIEW ----------------
+async function onDashboardDeptChange(deptId){
+  selectedDashboardDeptId = deptId;
+  const main = document.getElementById('main');
+  await renderHome(main);
+}
+
 async function renderHome(main){
-  const deptId = USER.department_id || REF.departments[0]?.id;
+  const isInstitutionalRole = ['super_admin', 'director', 'finance', 'dean', 'associate_dean'].includes(USER.role);
+  if (!selectedDashboardDeptId) {
+    selectedDashboardDeptId = USER.department_id || REF.departments[0]?.id;
+  }
+  const deptId = isInstitutionalRole ? (selectedDashboardDeptId || REF.departments[0]?.id) : (USER.department_id || REF.departments[0]?.id);
   const fy = activeFy();
   const [nfas, summary, inboxItems] = await Promise.all([
     api('/nfas'),
@@ -1606,7 +2224,15 @@ async function renderHome(main){
           <h2 class="card-title">Department Master Budget Overview — ${fy.label}</h2>
           <div class="card-sub">${deptName(deptId)}</div>
         </div>
-        <div class="row">
+        <div class="row" style="align-items:center;gap:10px;">
+          ${isInstitutionalRole ? `
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span class="muted" style="font-size:12px;font-weight:600;">Department:</span>
+              <select style="max-width:280px;margin-bottom:0;padding:5px 10px;font-size:12px;" onchange="onDashboardDeptChange(this.value)">
+                ${renderDeptSelectOptions(deptId, false)}
+              </select>
+            </div>
+          ` : ''}
           ${isAdmin ? `
             <button class="secondary" onclick="exportBudgetReport('${deptId}')">Export Master Budget Excel</button>
             <button class="secondary" onclick="showTab('admin')">Budget Management &amp; Upload in Settings</button>
@@ -1957,6 +2583,20 @@ function renderMasterBudgetPreview(preview){
       </div>
   `;
 
+  if (preview.has_existing_budget) {
+    html += `
+      <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:14px;">
+        <strong style="color:#b45309;font-size:14px;">Existing Department Budget Detected:</strong>
+        <div style="font-size:13px;color:#92400e;margin-top:4px;">
+          <strong>${escapeHtml(preview.detected_department?.name || 'This Department')}</strong> currently has an active budget for Academic Year <strong>${escapeHtml(preview.detected_financial_year?.label || '')}</strong> of <strong>${inr(preview.existing_total_allocated || 0)}</strong> across ${preview.existing_categories_count || 0} categories.
+        </div>
+        <div style="font-size:12px;color:#78350f;margin-top:6px;">
+          Please select whether to <strong>Replace</strong> (overwrites allocations for this department only, preserving existing committed NFAs) or <strong>Merge</strong> (updates matching categories and adds new items).
+        </div>
+      </div>
+    `;
+  }
+
   // Warnings / Notices
   if (preview.warnings && preview.warnings.length > 0) {
     html += `
@@ -2098,12 +2738,14 @@ async function confirmMasterBudgetImport(){
       }
     });
 
-    toast(`Successfully imported master budget! Total: ${inr(res.total_allocated)} across ${res.categories_count} categories & ${res.subcategories_count} subcategories.`);
-    closeModal();
+    selectedDashboardDeptId = deptId;
+    selectedBudgetDeptId = deptId;
     REF.departments = await api('/budgets/departments');
     REF.categories = await api('/budgets/categories');
     REF.subcategories = await api('/budgets/subcategories');
-    boot();
+    toast(`Successfully imported master budget for ${deptName(deptId)}! Total: ${inr(res.total_allocated)} across ${res.categories_count} categories & ${res.subcategories_count} subcategories.`);
+    closeModal();
+    showTab(currentTab || 'dashboard');
   } catch(e) {
     toast(e.message);
     confirmBtn.disabled = false;
@@ -2342,6 +2984,8 @@ let selectedSdgs = [];
 
 async function newNfaModal(){
   selectedSdgs = [];
+  quotationUploads = [null, null, null];
+  comparativeStatementUpload = null;
   activeModalType = 'new_nfa';
   const deptId = USER.department_id || REF.departments[0]?.id;
   const fy = activeFy();
@@ -2424,11 +3068,11 @@ async function newNfaModal(){
       <label class="field-label" style="font-weight:700;color:var(--primary);margin:0 0 8px;">Select NFA Category Type</label>
       <div class="row" style="gap:14px;">
         <label id="nfaTypeCardEvent" class="nfa-type-card active">
-          <input type="radio" name="nfaType" id="nfaTypeEvent" value="event" checked onchange="onNfaTypeChange('event')" />
+          <input type="radio" name="nfaType" id="nfaTypeEvent" value="event" checked onchange="confirmSwitchNfaType('event', false)" />
           Event NFA (Seminars, Conferences, Workshops, Fests, Guest Lectures)
         </label>
         <label id="nfaTypeCardPurchase" class="nfa-type-card">
-          <input type="radio" name="nfaType" id="nfaTypePurchase" value="purchase" onchange="onNfaTypeChange('purchase')" />
+          <input type="radio" name="nfaType" id="nfaTypePurchase" value="purchase" onchange="confirmSwitchNfaType('purchase', false)" />
           Purchase NFA (Equipment, Lab Components, Hardware, Software, Services)
         </label>
       </div>
@@ -2538,6 +3182,12 @@ async function newNfaModal(){
       </div>
     </div>
 
+    <!-- PREDEFINED EVENT PARTICULARS CHECKLIST -->
+    ${renderPredefinedChecklistHtml(false, [], [])}
+
+    <!-- PURCHASE VENDOR QUOTATIONS & COMPARATIVE STATEMENT UPLOADS -->
+    ${renderPurchaseQuotationsHtml(false, [], null)}
+
     <label class="field-label" style="margin-top:14px;">Select Relevant UN Sustainable Development Goals (SDGs)</label>
     <div class="field-help">Click to highlight all sustainable development goals addressed:</div>
     <div class="sdg-grid" id="sdgGrid">
@@ -2549,12 +3199,12 @@ async function newNfaModal(){
     </div>
 
     <div class="card-header" style="margin-top:20px;margin-bottom:8px">
-      <label class="field-label" style="margin:0">Budget Items (Qty × Rate automatically calculates Amount)</label>
+      <label id="itemsSectionTitle" class="field-label" style="margin:0">Event Budget Items (Select from predefined list above or add custom rows)</label>
       <button class="secondary" type="button" onclick="addItemRow()">+ Add Item Row</button>
     </div>
     
     <div id="itemsHeader" class="item-row muted" style="font-size:11px;font-weight:700">
-      <div>Particulars</div>
+      <div>Particulars / Item Description</div>
       <div>Qty</div>
       <div>Rate (₹)</div>
       <div>Amount (₹)</div>
@@ -2575,7 +3225,6 @@ async function newNfaModal(){
     </div>
   `);
 
-  addItemRow();
   initialApplyNfaSnapshot = captureApplyNfaSnapshot();
   setTimeout(() => {
     if (!initialApplyNfaSnapshot || initialApplyNfaSnapshot === captureApplyNfaSnapshot()) {
@@ -2952,15 +3601,87 @@ async function createNfa(andSubmit){
     additional_info: document.getElementById('purchaseAdditionalInfo')?.value?.trim() || '',
   };
 
-  const items = [...document.querySelectorAll('#itemsWrap .item-row')].map(r => ({
-    particulars: r.querySelector('.it-p').value.trim(),
-    quantity: r.querySelector('.it-q').value.trim(),
-    rate: r.querySelector('.it-r').value.trim(),
-    amount: Number(r.querySelector('.it-a').value) || 0,
-    justification: r.querySelector('.it-j')?.value?.trim() || ''
-  })).filter(i => i.particulars && i.amount > 0);
+  // Build Vendor Quotations (3 vendors)
+  const quotations = [0, 1, 2].map(idx => {
+    const qUp = quotationUploads[idx] || {};
+    const vName = document.getElementById(`quoteVendor${idx}`)?.value?.trim() || '';
+    const vRef = document.getElementById(`quoteRef${idx}`)?.value?.trim() || '';
+    const vDate = document.getElementById(`quoteDate${idx}`)?.value?.trim() || '';
+    if (!vName && !qUp.file_path) return null;
+    return {
+      vendor_name: vName,
+      quotation_ref: vRef,
+      quotation_date: vDate,
+      file_id: qUp.file_id || '',
+      original_filename: qUp.original_filename || '',
+      file_path: qUp.file_path || '',
+      file_size: qUp.file_size || 0,
+      file_hash: qUp.file_hash || '',
+      mime_type: qUp.mime_type || '',
+      uploaded_at: qUp.uploaded_at || new Date().toISOString()
+    };
+  }).filter(Boolean);
 
-  if (items.length === 0) return toast('Add at least one item with particulars and amount');
+  const comparativeStatement = comparativeStatementUpload && comparativeStatementUpload.file_path ? comparativeStatementUpload : undefined;
+
+  const items = [...document.querySelectorAll('#itemsWrap .item-row')].map(r => {
+    const p = r.querySelector('.it-p').value.trim();
+    const q = r.querySelector('.it-q').value.trim();
+    const rateVal = r.querySelector('.it-r').value.trim();
+    const amtVal = Number(r.querySelector('.it-a').value) || 0;
+    const key = r.dataset.predefinedKey || undefined;
+    const isPredefined = Boolean(key);
+    const dist = r.dataset.distanceKm || undefined;
+    const carryBack = r.dataset.carryBack || undefined;
+    const isSampling = r.dataset.sampling === 'true';
+
+    return {
+      particulars: p,
+      quantity: q,
+      rate: rateVal,
+      amount: amtVal,
+      justification: r.querySelector('.it-j')?.value?.trim() || '',
+      is_predefined: isPredefined,
+      predefined_key: key,
+      distance_km: dist,
+      carry_back_arrangement: carryBack,
+      sampling_required: isSampling,
+      item_type: isPredefined ? 'predefined' : (nfaType === 'purchase' ? 'purchase' : 'custom')
+    };
+  }).filter(i => i.particulars && i.amount > 0);
+
+  if (items.length === 0) return toast(nfaType === 'purchase' ? 'Add at least one purchase item with description, quantity, rate, and amount' : 'Add at least one event expense item with quantity, rate, and amount');
+
+  // Strict Validation on Submission to HOD
+  if (andSubmit) {
+    if (nfaType === 'purchase') {
+      const vLabels = ['Vendor A (Quotation 1)', 'Vendor B (Quotation 2)', 'Vendor C (Quotation 3)'];
+      for (let i = 0; i < 3; i++) {
+        const vName = document.getElementById(`quoteVendor${i}`)?.value?.trim() || '';
+        const qUp = quotationUploads[i];
+        if (!vName) {
+          return toast(`${vLabels[i]}: Vendor Name is mandatory before submitting.`);
+        }
+        if (!qUp || !qUp.file_path) {
+          return toast(`${vLabels[i]}: Quotation document upload is mandatory before submitting.`);
+        }
+      }
+
+      // Check distinct quotation files
+      const files = quotationUploads.map(q => q && q.file_path).filter(Boolean);
+      if (new Set(files).size < 3) {
+        return toast('Distinct quotation documents must be uploaded for each vendor. Identical files detected.');
+      }
+      const hashes = quotationUploads.map(q => q && q.file_hash).filter(Boolean);
+      if (hashes.length === 3 && new Set(hashes).size < 3) {
+        return toast('Distinct quotation documents must be uploaded for each vendor. Identical file contents detected.');
+      }
+
+      if (!comparativeStatementUpload || !comparativeStatementUpload.file_path) {
+        return toast('Comparative Statement document upload is mandatory before submitting a Purchase NFA.');
+      }
+    }
+  }
 
   const totalReq = items.reduce((s, it) => s + (it.amount || 0), 0);
   if (andSubmit && currentSelectedAvailableBudget !== null && currentSelectedAvailableBudget >= 0 && totalReq > currentSelectedAvailableBudget) {
@@ -2991,6 +3712,8 @@ async function createNfa(andSubmit){
         justification: point3,
         event_details: eventDetails,
         purchase_details: purchaseDetails,
+        quotations,
+        comparative_statement: comparativeStatement,
         sdgs: selectedSdgs.join('; '),
         submitted_by_name: submittedByName,
         items
@@ -3111,6 +3834,45 @@ async function openNfa(id){
           <div style="grid-column:1/-1"><span class="muted">Description / Specifications:</span> ${escapeHtml(n.purchase_details?.description || '—')}</div>
           <div style="grid-column:1/-1"><span class="muted">Purpose / Justification:</span> ${escapeHtml(n.purchase_details?.purpose || '—')}</div>
           ${n.purchase_details?.additional_info ? `<div style="grid-column:1/-1"><span class="muted">Additional Info:</span> ${escapeHtml(n.purchase_details.additional_info)}</div>` : ''}
+        </div>
+      </div>
+
+      <!-- Vendor Quotations & Comparative Statement View -->
+      <div class="card" style="padding:16px;margin:16px 0;background:#f8fafc;border:1px solid #cbd5e1;border-radius:6px;">
+        <h4 style="margin:0 0 10px;color:var(--primary-blue);font-size:14px;font-weight:700;">Vendor Quotations (3 Mandatory Quotations)</h4>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(230px, 1fr));gap:12px;">
+          ${['Vendor A (Quotation 1)', 'Vendor B (Quotation 2)', 'Vendor C (Quotation 3)'].map((vTitle, idx) => {
+            const q = (n.quotations || [])[idx];
+            return `
+              <div style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:12px;">
+                <div style="font-weight:700;color:var(--primary-blue);font-size:13px;margin-bottom:6px;">${vTitle}</div>
+                <div style="font-size:12.5px;margin-bottom:4px;"><span class="muted">Vendor:</span> <strong>${escapeHtml(q?.vendor_name || '—')}</strong></div>
+                ${q?.quotation_ref ? `<div style="font-size:12px;margin-bottom:2px;"><span class="muted">Ref No:</span> ${escapeHtml(q.quotation_ref)}</div>` : ''}
+                ${q?.quotation_date ? `<div style="font-size:12px;margin-bottom:6px;"><span class="muted">Date:</span> ${escapeHtml(q.quotation_date)}</div>` : ''}
+                ${q?.file_path ? `
+                  <a href="/api/nfas/${n.id}/attachments/quotation/${idx}" target="_blank" class="button secondary" style="display:inline-block;padding:5px 10px;font-size:11.5px;text-decoration:none;margin-top:4px;">
+                    View Quotation Document
+                  </a>
+                ` : `<span class="muted" style="font-size:11.5px;color:var(--danger)">No document attached</span>`}
+              </div>
+            `;
+          }).join('')}
+        </div>
+
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid #e2e8f0;">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+            <div>
+              <div style="font-weight:700;color:var(--primary-blue);font-size:13px;">Comparative Statement Document</div>
+              <div style="font-size:12px;color:var(--text-muted);">Institutional comparison sheet evaluating the 3 vendor quotations</div>
+            </div>
+            <div>
+              ${n.comparative_statement?.file_path ? `
+                <a href="/api/nfas/${n.id}/attachments/comparative-statement" target="_blank" class="button secondary" style="display:inline-block;padding:6px 12px;font-size:12px;text-decoration:none;">
+                  View Comparative Statement (${escapeHtml(n.comparative_statement.original_filename || 'Document')})
+                </a>
+              ` : `<span class="badge b-rejected">Missing Comparative Statement</span>`}
+            </div>
+          </div>
         </div>
       </div>
     ` : `
@@ -3287,6 +4049,20 @@ async function editNfaModal(id){
   selectedSdgs = n.sdgs ? n.sdgs.split(';').map(s=>s.trim()).filter(Boolean) : [];
   const isPurchase = n.nfa_type === 'purchase';
 
+  // Restore uploaded quotation and comparative statement state
+  quotationUploads = [null, null, null];
+  if (Array.isArray(n.quotations)) {
+    for (let i = 0; i < 3; i++) {
+      if (n.quotations[i]) quotationUploads[i] = { ...n.quotations[i] };
+    }
+  }
+  comparativeStatementUpload = n.comparative_statement ? { ...n.comparative_statement } : null;
+
+  const savedItems = n.items || [];
+  const checkedKeys = PREDEFINED_EVENT_PARTICULARS.filter(p => {
+    return savedItems.some(it => it.predefined_key === p.key || (it.particulars && it.particulars.toLowerCase().startsWith(p.defaultLabel.toLowerCase())));
+  }).map(p => p.key);
+
   const p1 = n.point1 || n.purpose || '';
   const p2 = n.point2 || n.description || '';
   const p3 = n.point3 || n.justification || '';
@@ -3306,11 +4082,11 @@ async function editNfaModal(id){
     <label class="field-label" style="font-weight:700;margin-top:16px;">NFA Category Type</label>
     <div class="row" style="gap:24px;margin-bottom:12px;">
       <label style="cursor:pointer;display:flex;align-items:center;gap:8px;font-weight:600;">
-        <input type="radio" name="editNfaType" id="editNfaTypeEvent" value="event" ${!isPurchase ? 'checked' : ''} onchange="onEditNfaTypeChange('event')">
+        <input type="radio" name="editNfaType" id="editNfaTypeEvent" value="event" ${!isPurchase ? 'checked' : ''} onchange="confirmSwitchNfaType('event', true)">
         Event / Conference / Guest Lecture NFA
       </label>
       <label style="cursor:pointer;display:flex;align-items:center;gap:8px;font-weight:600;">
-        <input type="radio" name="editNfaType" id="editNfaTypePurchase" value="purchase" ${isPurchase ? 'checked' : ''} onchange="onEditNfaTypeChange('purchase')">
+        <input type="radio" name="editNfaType" id="editNfaTypePurchase" value="purchase" ${isPurchase ? 'checked' : ''} onchange="confirmSwitchNfaType('purchase', true)">
         Purchase / Equipment / Procurement NFA
       </label>
     </div>
@@ -3353,7 +4129,7 @@ async function editNfaModal(id){
     </div>
 
     <!-- Event Details Card -->
-    <div id="editEventCard" class="card nfa-type-card" style="padding:16px;background:linear-gradient(to right, #eff6ff, #f8fafc);border:1px solid #bfdbfe;margin-bottom:16px;${isPurchase ? 'display:none;' : ''}">
+    <div id="editEventCard" class="card" style="padding:16px;background:linear-gradient(to right, #eff6ff, #f8fafc);border:1px solid #bfdbfe;margin-bottom:16px;${isPurchase ? 'display:none;' : ''}">
       <h3 style="margin-top:0;font-size:15px;color:#1e3a8a;font-weight:700;">Event &amp; Resource Person Details</h3>
       <div class="grid2" style="gap:12px;">
         <div>
@@ -3384,7 +4160,7 @@ async function editNfaModal(id){
     </div>
 
     <!-- Purchase Details Card -->
-    <div id="editPurchaseCard" class="card nfa-type-card" style="padding:16px;background:linear-gradient(to right, #f0fdf4, #f8fafc);border:1px solid #bbf7d0;margin-bottom:16px;${!isPurchase ? 'display:none;' : ''}">
+    <div id="editPurchaseCard" class="card" style="padding:16px;background:linear-gradient(to right, #f0fdf4, #f8fafc);border:1px solid #bbf7d0;margin-bottom:16px;${!isPurchase ? 'display:none;' : ''}">
       <h3 style="margin-top:0;font-size:15px;color:#14532d;font-weight:700;">Purchase &amp; Procurement Details</h3>
       <div class="grid2" style="gap:12px;">
         <div>
@@ -3410,6 +4186,12 @@ async function editNfaModal(id){
       </div>
     </div>
 
+    <!-- Edit Predefined Checklist -->
+    ${renderPredefinedChecklistHtml(true, checkedKeys, savedItems)}
+
+    <!-- Edit Purchase Quotations & CS Uploads -->
+    ${renderPurchaseQuotationsHtml(true, n.quotations || [], n.comparative_statement || null)}
+
     <label class="field-label">Select Relevant UN SDGs</label>
     <div class="sdg-grid" id="sdgGrid">
       ${SDG_LIST.map(sdg => `
@@ -3420,12 +4202,12 @@ async function editNfaModal(id){
     </div>
 
     <div class="card-header" style="margin-top:20px;margin-bottom:8px">
-      <label class="field-label" style="margin:0">Budget Items (Qty × Rate automatically calculates Amount)</label>
+      <label id="itemsSectionTitle" class="field-label" style="margin:0">${isPurchase ? 'Purchase Budget Items (Enter item description, quantity, and rate)' : 'Event Budget Items (Select from predefined list above or add custom rows)'}</label>
       <button class="secondary" type="button" onclick="addItemRow()">+ Add Item Row</button>
     </div>
     
     <div id="itemsHeader" class="item-row muted" style="font-size:11px;font-weight:700">
-      <div>Particulars</div>
+      <div>${isPurchase ? 'Purchase Item / Description' : 'Particulars / Item Description'}</div>
       <div>Qty</div>
       <div>Rate (₹)</div>
       <div>Amount (₹)</div>
@@ -3445,8 +4227,23 @@ async function editNfaModal(id){
     </div>
   `);
 
-  if (n.items && n.items.length > 0) {
-    n.items.forEach(it => addItemRow(it.particulars, it.quantity, it.rate, it.amount));
+  // Initialize view state
+  onEditNfaTypeChange(isPurchase ? 'purchase' : 'event');
+  if (isPurchase) {
+    [0, 1, 2].forEach(i => renderQuotationCardUploadState(i, true));
+    renderCsUploadState(true);
+  }
+
+  // Populate item rows
+  if (savedItems && savedItems.length > 0) {
+    savedItems.forEach(it => {
+      const matchedKey = it.predefined_key || PREDEFINED_EVENT_PARTICULARS.find(p => it.particulars && it.particulars.toLowerCase().startsWith(p.defaultLabel.toLowerCase()))?.key;
+      if (!isPurchase && matchedKey) {
+        addPredefinedItemRow(matchedKey, it.particulars, it.quantity, it.rate, it.amount, it.distance_km, it.carry_back_arrangement, it.sampling_required, true);
+      } else {
+        addItemRow(it.particulars, it.quantity, it.rate, it.amount);
+      }
+    });
   } else {
     addItemRow();
   }
@@ -3485,15 +4282,56 @@ async function saveNfaEdits(id){
     additional_info: document.getElementById('editPurchaseAdditionalInfo')?.value?.trim() || '',
   };
 
-  const items = [...document.querySelectorAll('#itemsWrap .item-row')].map(r => ({
-    particulars: r.querySelector('.it-p').value.trim(),
-    quantity: r.querySelector('.it-q').value.trim(),
-    rate: r.querySelector('.it-r').value.trim(),
-    amount: Number(r.querySelector('.it-a').value) || 0,
-    justification: r.querySelector('.it-j')?.value?.trim() || ''
-  })).filter(i => i.particulars && i.amount > 0);
+  // Build Vendor Quotations (3 vendors)
+  const quotations = [0, 1, 2].map(idx => {
+    const qUp = quotationUploads[idx] || {};
+    const vName = document.getElementById(`edit_quoteVendor${idx}`)?.value?.trim() || '';
+    const vRef = document.getElementById(`edit_quoteRef${idx}`)?.value?.trim() || '';
+    const vDate = document.getElementById(`edit_quoteDate${idx}`)?.value?.trim() || '';
+    if (!vName && !qUp.file_path) return null;
+    return {
+      vendor_name: vName,
+      quotation_ref: vRef,
+      quotation_date: vDate,
+      file_id: qUp.file_id || '',
+      original_filename: qUp.original_filename || '',
+      file_path: qUp.file_path || '',
+      file_size: qUp.file_size || 0,
+      file_hash: qUp.file_hash || '',
+      mime_type: qUp.mime_type || '',
+      uploaded_at: qUp.uploaded_at || new Date().toISOString()
+    };
+  }).filter(Boolean);
 
-  if (items.length === 0) return toast('Add at least one item with particulars and amount');
+  const comparativeStatement = comparativeStatementUpload && comparativeStatementUpload.file_path ? comparativeStatementUpload : undefined;
+
+  const items = [...document.querySelectorAll('#itemsWrap .item-row')].map(r => {
+    const p = r.querySelector('.it-p').value.trim();
+    const q = r.querySelector('.it-q').value.trim();
+    const rateVal = r.querySelector('.it-r').value.trim();
+    const amtVal = Number(r.querySelector('.it-a').value) || 0;
+    const key = r.dataset.predefinedKey || undefined;
+    const isPredefined = Boolean(key);
+    const dist = r.dataset.distanceKm || undefined;
+    const carryBack = r.dataset.carryBack || undefined;
+    const isSampling = r.dataset.sampling === 'true';
+
+    return {
+      particulars: p,
+      quantity: q,
+      rate: rateVal,
+      amount: amtVal,
+      justification: r.querySelector('.it-j')?.value?.trim() || '',
+      is_predefined: isPredefined,
+      predefined_key: key,
+      distance_km: dist,
+      carry_back_arrangement: carryBack,
+      sampling_required: isSampling,
+      item_type: isPredefined ? 'predefined' : (nfaType === 'purchase' ? 'purchase' : 'custom')
+    };
+  }).filter(i => i.particulars && i.amount > 0);
+
+  if (items.length === 0) return toast(nfaType === 'purchase' ? 'Add at least one purchase item with description, quantity, rate, and amount' : 'Add at least one event expense item with quantity, rate, and amount');
 
   try {
     await api(`/nfas/${id}`, {
@@ -3510,6 +4348,8 @@ async function saveNfaEdits(id){
         justification: point3,
         event_details: eventDetails,
         purchase_details: purchaseDetails,
+        quotations,
+        comparative_statement: comparativeStatement,
         sdgs: selectedSdgs.join('; '),
         items
       }
@@ -3618,7 +4458,11 @@ async function createProject(){
 
 // ---------------- BUDGETS VIEW ----------------
 async function renderBudgets(main){
-  const deptId = USER.department_id || REF.departments[0]?.id;
+  const isInstitutionalRole = ['super_admin', 'director', 'finance', 'dean', 'associate_dean'].includes(USER.role);
+  if (!selectedBudgetDeptId) {
+    selectedBudgetDeptId = USER.department_id || REF.departments[0]?.id;
+  }
+  const deptId = isInstitutionalRole ? (selectedBudgetDeptId || REF.departments[0]?.id) : (USER.department_id || REF.departments[0]?.id);
   const fy = activeFy();
   const summary = await api(`/budgets/${deptId}/summary?fy=${fy.id}`);
   const isAdmin = USER.role === 'super_admin';
@@ -3716,9 +4560,9 @@ async function renderBudgets(main){
 }
 
 async function changeBudgetDept(deptId){
+  selectedBudgetDeptId = deptId;
   const main = document.getElementById('main');
   main.innerHTML = '<div class="card muted" style="text-align:center;padding:40px;">Loading department budget...</div>';
-  USER.department_id = deptId;
   await renderBudgets(main);
 }
 
@@ -4049,13 +4893,25 @@ async function renderAdmin(main){
       <table>
         <thead><tr><th>Label</th><th>Status</th><th>Action</th></tr></thead>
         <tbody>
-          ${REF.financialYears.map(f => `
+          ${REF.financialYears.map(f => {
+            const activeStart = parseInt((activeFy().label.match(/\d{4}/) || ['0'])[0], 10);
+            const fStart = parseInt((f.label.match(/\d{4}/) || ['0'])[0], 10);
+            const isFuture = fStart > activeStart;
+            
+            const badgeHtml = f.is_active
+              ? `<span class="badge" style="background:#003D8F;color:#FFFFFF;border:1px solid #002D70;font-weight:700;">Active Year</span>`
+              : isFuture
+              ? `<span class="badge" style="background:#FEF9C3;color:#854D0E;border:1px solid #FDE047;font-weight:600;">Future / Projected</span>`
+              : `<span class="badge" style="background:#F1F5F9;color:#475569;border:1px solid #CBD5E1;font-weight:600;">Inactive</span>`;
+
+            return `
             <tr>
               <td><strong>${escapeHtml(f.label)}</strong></td>
-              <td>${f.is_active ? '<span class="badge b-approved">Active Year</span>' : '<span class="badge b-draft">Inactive</span>'}</td>
+              <td>${badgeHtml}</td>
               <td>${!f.is_active ? `<button class="secondary" style="padding:5px 10px;font-size:12px" onclick="activateFy('${f.id}')">Set Active</button>` : ''}</td>
             </tr>
-          `).join('')}
+            `;
+          }).join('')}
         </tbody>
       </table>
       </div>
@@ -4254,11 +5110,9 @@ function closeModal(){
 }
 document.getElementById('modalBg').addEventListener('click', e => {
   if (e.target.id === 'modalBg') {
-    if (activeModalType === 'new_nfa' || activeModalType === 'nfa_preview' || activeModalType === 'edit_nfa') {
-      // Apply NFA and NFA Preview modals must NOT close when clicking outside or darkened background
-      return;
-    }
-    closeModal();
+    // Application modals must NOT close unexpectedly on darkened backdrop clicks.
+    // User must explicitly click the dedicated '✕' close button or 'Cancel'/'Close' button.
+    return;
   }
 });
 

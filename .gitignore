@@ -1,6 +1,10 @@
 node_modules/
 .env
 data/budget-uploads/
+data/nfa-attachments/*
+!data/nfa-attachments/.gitkeep
 data/*.bak
 data/*.backup
+data/*.backup*
+data/*.pre_*
 scratch/

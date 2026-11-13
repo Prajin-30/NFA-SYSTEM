@@ -624,12 +624,30 @@ export async function analyzeMasterBudgetWorkbook(
     if (activeFy) matchedFy = { id: activeFy.id, label: activeFy.label };
   }
 
+  // Check if department already has allocations in this FY
+  let hasExistingBudget = false;
+  let existingTotalAllocated = 0;
+  let existingCategoriesCount = 0;
+  if (matchedDept?.id && matchedFy?.id) {
+    const existingLines = db.department_budgets.filter(
+      (b) => b.department_id === matchedDept!.id && b.financial_year_id === matchedFy!.id && (b.allocated_amount > 0 || b.approved_amount > 0)
+    );
+    if (existingLines.length > 0) {
+      hasExistingBudget = true;
+      existingCategoriesCount = existingLines.length;
+      existingTotalAllocated = existingLines.reduce((sum, b) => sum + (b.allocated_amount || 0), 0);
+    }
+  }
+
   const previewId = uuid();
   const response: MasterBudgetPreviewResponse = {
     preview_id: previewId,
     filename,
     detected_department: matchedDept,
     detected_financial_year: matchedFy,
+    has_existing_budget: hasExistingBudget,
+    existing_total_allocated: existingTotalAllocated,
+    existing_categories_count: existingCategoriesCount,
     sheets: sheetsPreview,
     categories: Array.from(categoriesMap.values()),
     total_allocated: totalAllocated,
@@ -721,10 +739,17 @@ export async function applyMasterBudgetImport(
   const existingBudgetLines = db.department_budgets.filter((b) => b.department_id === dept!.id && b.financial_year_id === fy!.id);
 
   if (options.mode === 'replace') {
-    // Zero out old allocations before setting new ones, but retain approved/pending figures
+    // Zero out old allocations for THIS department and FY only
     existingBudgetLines.forEach((b) => {
       b.allocated_amount = 0;
     });
+    if (db.budget_subcategories) {
+      db.budget_subcategories
+        .filter((s) => s.department_id === dept!.id)
+        .forEach((s) => {
+          s.allocated_amount = 0;
+        });
+    }
   }
 
   for (const catPreview of preview.categories) {
@@ -748,13 +773,13 @@ export async function applyMasterBudgetImport(
     }
     catsProcessed.add(cat.id);
 
-    // 3. Process Subcategories and Cell Mappings
+    // 3. Process Subcategories and Cell Mappings (strictly scoped to this department)
     if (!db.budget_subcategories) db.budget_subcategories = [];
 
     let categorySum = 0;
     for (const subPreview of catPreview.subcategories) {
       let subcat = db.budget_subcategories.find(
-        (s) => s.budget_category_id === cat!.id && s.name.toLowerCase() === subPreview.name.toLowerCase()
+        (s) => s.department_id === dept!.id && s.budget_category_id === cat!.id && s.name.toLowerCase() === subPreview.name.toLowerCase()
       );
 
       const cellMap = {
@@ -769,7 +794,7 @@ export async function applyMasterBudgetImport(
         subcat = {
           id: uuid(),
           budget_category_id: cat.id,
-          department_id: dept.id,
+          department_id: dept!.id,
           name: subPreview.name,
           allocated_amount: subPreview.allocated_amount,
           approved_amount: 0,
@@ -780,6 +805,7 @@ export async function applyMasterBudgetImport(
       } else {
         subcat.allocated_amount = subPreview.allocated_amount;
         subcat.cell_mapping = cellMap;
+        subcat.department_id = dept!.id;
       }
 
       subcatsProcessed.add(subcat.id);

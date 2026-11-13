@@ -32,7 +32,20 @@ app.use('/api/admin', adminRouter);
 app.get('/api/health', (_req, res) => res.json({ ok: true, time: new Date().toISOString() }));
 
 const PORT = Number(process.env.PORT) || 4000;
-app.listen(PORT, () => {
-  console.log(`\n  University NFA & Budget System API running on http://localhost:${PORT}`);
-  console.log(`  Frontend served from the same origin: http://localhost:${PORT}\n`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  const server = app.listen(PORT, () => {
+    console.log(`\n  University NFA & Budget System API running on http://localhost:${PORT}`);
+    console.log(`  Frontend served from the same origin: http://localhost:${PORT}\n`);
+  });
+  server.on('error', (err: any) => {
+    if (err.code === 'EADDRINUSE') {
+      const fallbackPort = 4050;
+      console.log(`  Port ${PORT} in use, trying fallback port ${fallbackPort}...`);
+      app.listen(fallbackPort, () => {
+        console.log(`\n  University NFA & Budget System API running on http://localhost:${fallbackPort}`);
+      });
+    } else {
+      console.error(err);
+    }
+  });
+}

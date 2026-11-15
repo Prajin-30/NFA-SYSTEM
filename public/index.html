@@ -1513,92 +1513,145 @@ function addPurchaseCategoryRow(categoryName, isEdit = false) {
 
 let quotationUploads = [null, null, null];
 let comparativeStatementUpload = null;
+let currentNfaCategory = 'event';
 
-function confirmSwitchNfaType(newType, isEdit = false) {
-  const currentRadio = isEdit ? document.getElementById('editNfaTypePurchase') : document.getElementById('nfaTypePurchase');
-  const currentType = currentRadio?.checked ? 'purchase' : 'event';
-  if (currentType === newType) return true;
+function updateCategoryRadioButtons(type, isEdit = false) {
+  if (isEdit) {
+    const ev = document.getElementById('editNfaTypeEvent');
+    const pur = document.getElementById('editNfaTypePurchase');
+    if (ev) ev.checked = (type === 'event');
+    if (pur) pur.checked = (type === 'purchase');
+  } else {
+    const ev = document.getElementById('nfaTypeEvent');
+    const pur = document.getElementById('nfaTypePurchase');
+    if (ev) ev.checked = (type === 'event');
+    if (pur) pur.checked = (type === 'purchase');
+  }
+}
 
-  const items = [...document.querySelectorAll('#itemsWrap .item-row')].map(r => ({
-    p: r.querySelector('.it-p')?.value?.trim() || '',
-    q: r.querySelector('.it-q')?.value?.trim() || '',
-    r: r.querySelector('.it-r')?.value?.trim() || '',
-    a: Number(r.querySelector('.it-a')?.value) || 0
-  })).filter(i => i.p || i.a > 0);
+function applyNfaCategoryUi(type, isEdit = false) {
+  const isPur = type === 'purchase';
+  const prefix = isEdit ? 'edit_' : '';
 
-  const hasEventData = currentType === 'event' && (
-    items.length > 0 ||
-    document.getElementById(isEdit ? 'editEventResourcePerson' : 'eventResourcePerson')?.value?.trim() ||
-    document.getElementById(isEdit ? 'editEventDesignation' : 'eventDesignation')?.value?.trim() ||
-    document.getElementById(isEdit ? 'editEventVenue' : 'eventVenue')?.value?.trim()
-  );
+  // 1. Details sections
+  const eventDetails = isEdit ? document.getElementById('editEventCard') : document.getElementById('eventDetailsSection');
+  const purchaseDetails = isEdit ? document.getElementById('editPurchaseCard') : document.getElementById('purchaseDetailsSection');
+  if (eventDetails) eventDetails.style.display = isPur ? 'none' : 'block';
+  if (purchaseDetails) purchaseDetails.style.display = isPur ? 'block' : 'none';
 
-  const hasPurchaseData = currentType === 'purchase' && (
-    items.length > 0 ||
-    document.getElementById(isEdit ? 'editPurchaseItemName' : 'purchaseItemName')?.value?.trim() ||
-    document.getElementById(isEdit ? 'editPurchaseDescription' : 'purchaseDescription')?.value?.trim() ||
-    quotationUploads.some(q => q && q.file_path) ||
-    (comparativeStatementUpload && comparativeStatementUpload.file_path)
-  );
+  // 2. Budget Particulars sections
+  const eventPredefined = document.getElementById(`${prefix}eventPredefinedSection`);
+  const purchaseParticulars = document.getElementById(`${prefix}purchaseParticularsSection`);
+  if (eventPredefined) eventPredefined.style.display = isPur ? 'none' : 'block';
+  if (purchaseParticulars) purchaseParticulars.style.display = isPur ? 'block' : 'none';
 
-  if (hasEventData || hasPurchaseData) {
-    const ok = confirm("Switching NFA Category: You have entered data for this category. Switching categories will adjust category-specific items and attachments. Common proposal details (Title, Purpose, Justification, Department, Financial Year) will be preserved. Do you want to proceed?");
+  // 3. Purchase uploads (Quotations & Comparative Statement)
+  const purchaseQuotations = document.getElementById(`${prefix}purchaseQuotationsSection`);
+  const purchaseCs = document.getElementById(`${prefix}purchaseCsSection`);
+  if (purchaseQuotations) purchaseQuotations.style.display = isPur ? 'block' : 'none';
+  if (purchaseCs) purchaseCs.style.display = isPur ? 'block' : 'none';
+
+  // 4. Card active classes
+  const evCard = isEdit ? document.getElementById('editNfaTypeCardEvent') : document.getElementById('nfaTypeCardEvent');
+  const purCard = isEdit ? document.getElementById('editNfaTypeCardPurchase') : document.getElementById('nfaTypeCardPurchase');
+  if (evCard) evCard.classList.toggle('active', !isPur);
+  if (purCard) purCard.classList.toggle('active', isPur);
+
+  // 5. Items header & section title
+  const itemsHeaderFirstCol = document.querySelector('#itemsHeader > div:first-child');
+  const itemsSectionTitle = document.getElementById('itemsSectionTitle');
+  if (itemsHeaderFirstCol) {
+    itemsHeaderFirstCol.textContent = isPur ? 'Purchase Item / Description' : 'Particulars / Item Description';
+  }
+  if (itemsSectionTitle) {
+    itemsSectionTitle.textContent = isPur 
+      ? 'Purchase Budget Items (Select category above or add custom rows)' 
+      : 'Event Budget Items (Select from predefined list above or add custom rows)';
+  }
+}
+
+function switchNfaCategory(newType, isEdit = false) {
+  if (currentNfaCategory === newType) {
+    updateCategoryRadioButtons(newType, isEdit);
+    applyNfaCategoryUi(newType, isEdit);
+    return true;
+  }
+
+  const prefix = isEdit ? 'edit_' : '';
+  const itemsWrap = document.getElementById('itemsWrap');
+  const rows = itemsWrap ? [...itemsWrap.querySelectorAll('.item-row')] : [];
+  
+  const hasEnteredItems = rows.some(r => {
+    const p = r.querySelector('.it-p')?.value?.trim();
+    const q = r.querySelector('.it-q')?.value?.trim();
+    const rate = r.querySelector('.it-r')?.value?.trim();
+    const a = Number(r.querySelector('.it-a')?.value) || 0;
+    return Boolean(p || q || rate || a > 0);
+  });
+
+  let hasCategoryData = false;
+  if (currentNfaCategory === 'event') {
+    const resPerson = document.getElementById(isEdit ? 'editEventResourcePerson' : 'eventResourcePerson')?.value?.trim();
+    const desig = document.getElementById(isEdit ? 'editEventDesignation' : 'eventDesignation')?.value?.trim();
+    const venue = document.getElementById(isEdit ? 'editEventVenue' : 'eventVenue')?.value?.trim();
+    const org = document.getElementById(isEdit ? 'editEventOrganization' : 'eventOrganization')?.value?.trim();
+    const hasCheckedParticular = PREDEFINED_EVENT_PARTICULARS.some(p => {
+      const cb = document.getElementById(`${prefix}cb_particular_${p.key}`);
+      return Boolean(cb && cb.checked);
+    });
+    hasCategoryData = Boolean(hasEnteredItems || resPerson || desig || venue || org || hasCheckedParticular);
+  } else {
+    const itemName = document.getElementById(isEdit ? 'editPurchaseItemName' : 'purchaseItemName')?.value?.trim();
+    const desc = document.getElementById(isEdit ? 'editPurchaseDescription' : 'purchaseDescription')?.value?.trim();
+    const purpose = document.getElementById(isEdit ? 'editPurchasePurpose' : 'purchasePurpose')?.value?.trim();
+    const hasQuotes = quotationUploads.some(q => Boolean(q && q.file_path));
+    const hasCs = Boolean(comparativeStatementUpload && comparativeStatementUpload.file_path);
+    hasCategoryData = Boolean(hasEnteredItems || itemName || desc || purpose || hasQuotes || hasCs);
+  }
+
+  if (hasCategoryData) {
+    const curLabel = currentNfaCategory === 'event' ? 'Event NFA' : 'Purchase NFA';
+    const targetLabel = newType === 'purchase' ? 'Purchase NFA' : 'Event NFA';
+    const ok = confirm(`Switching NFA Category:\n\nYou have entered data for ${curLabel}. Switching categories will reset category-specific budget rows and attachments to prevent mixing incompatible expenditures.\n\nCommon proposal fields (Title, Purpose, Justification, Department, Financial Year, SDGs) will be preserved.\n\nDo you want to proceed with switching to ${targetLabel}?`);
+    
     if (!ok) {
-      if (isEdit) {
-        if (currentType === 'event') document.getElementById('editNfaTypeEvent').checked = true;
-        else document.getElementById('editNfaTypePurchase').checked = true;
-      } else {
-        if (currentType === 'event') document.getElementById('nfaTypeEvent').checked = true;
-        else document.getElementById('nfaTypePurchase').checked = true;
-      }
+      updateCategoryRadioButtons(currentNfaCategory, isEdit);
       return false;
     }
   }
 
-  if (isEdit) {
-    onEditNfaTypeChange(newType);
-  } else {
-    onNfaTypeChange(newType);
+  // Clear category-specific items to avoid retention of incompatible rows
+  if (itemsWrap) {
+    itemsWrap.innerHTML = '';
   }
+
+  if (currentNfaCategory === 'event' && newType === 'purchase') {
+    PREDEFINED_EVENT_PARTICULARS.forEach(p => {
+      const cb = document.getElementById(`${prefix}cb_particular_${p.key}`);
+      if (cb) cb.checked = false;
+      const card = document.getElementById(`${prefix}card_particular_${p.key}`);
+      if (card) card.classList.remove('checked');
+    });
+    addItemRow('', '', '', '', isEdit);
+  } else if (currentNfaCategory === 'purchase' && newType === 'event') {
+    quotationUploads = [null, null, null];
+    comparativeStatementUpload = null;
+    [0, 1, 2].forEach(i => renderQuotationCardUploadState(i, isEdit));
+    renderCsUploadState(isEdit);
+    addItemRow('', '', '', '', isEdit);
+  }
+
+  currentNfaCategory = newType;
+  updateCategoryRadioButtons(newType, isEdit);
+  applyNfaCategoryUi(newType, isEdit);
+  calcTotal();
   return true;
 }
 
-function onNfaTypeChange(type) {
-  const eventDetails = document.getElementById('eventDetailsSection');
-  const eventPredefined = document.getElementById('eventPredefinedSection');
-  const purchaseDetails = document.getElementById('purchaseDetailsSection');
-  const purchaseParticulars = document.getElementById('purchaseParticularsSection');
-  const purchaseQuotations = document.getElementById('purchaseQuotationsSection');
-  const purchaseCs = document.getElementById('purchaseCsSection');
-  const eventCard = document.getElementById('nfaTypeCardEvent');
-  const purchaseCard = document.getElementById('nfaTypeCardPurchase');
-  const itemsHeaderFirstCol = document.querySelector('#itemsHeader > div:first-child');
-  const itemsSectionTitle = document.getElementById('itemsSectionTitle');
-
-  if (type === 'purchase') {
-    if (eventDetails) eventDetails.style.display = 'none';
-    if (eventPredefined) eventPredefined.style.display = 'none';
-    if (purchaseDetails) purchaseDetails.style.display = 'block';
-    if (purchaseParticulars) purchaseParticulars.style.display = 'block';
-    if (purchaseQuotations) purchaseQuotations.style.display = 'block';
-    if (purchaseCs) purchaseCs.style.display = 'block';
-    if (eventCard) eventCard.classList.remove('active');
-    if (purchaseCard) purchaseCard.classList.add('active');
-    if (itemsHeaderFirstCol) itemsHeaderFirstCol.textContent = 'Purchase Item / Description';
-    if (itemsSectionTitle) itemsSectionTitle.textContent = 'Purchase Budget Items (Select category above or add custom rows)';
-  } else {
-    if (eventDetails) eventDetails.style.display = 'block';
-    if (eventPredefined) eventPredefined.style.display = 'block';
-    if (purchaseDetails) purchaseDetails.style.display = 'none';
-    if (purchaseParticulars) purchaseParticulars.style.display = 'none';
-    if (purchaseQuotations) purchaseQuotations.style.display = 'none';
-    if (purchaseCs) purchaseCs.style.display = 'none';
-    if (eventCard) eventCard.classList.add('active');
-    if (purchaseCard) purchaseCard.classList.remove('active');
-    if (itemsHeaderFirstCol) itemsHeaderFirstCol.textContent = 'Particulars / Item Description';
-    if (itemsSectionTitle) itemsSectionTitle.textContent = 'Event Budget Items (Select from predefined list above or add custom rows)';
-  }
-}
+// Aliases for compatibility
+function confirmSwitchNfaType(t, isEdit = false) { return switchNfaCategory(t, isEdit); }
+function onNfaTypeChange(t) { applyNfaCategoryUi(t, false); }
+function onEditNfaTypeChange(t) { applyNfaCategoryUi(t, true); }
 
 function onToggleEventParticular(key, cbEl, isEdit = false) {
   const itemConfig = PREDEFINED_EVENT_PARTICULARS.find(p => p.key === key);
@@ -3210,11 +3263,11 @@ async function newNfaModal(){
       <label class="field-label" style="font-weight:700;color:var(--primary);margin:0 0 8px;">Select NFA Category Type</label>
       <div class="row" style="gap:14px;">
         <label id="nfaTypeCardEvent" class="nfa-type-card active">
-          <input type="radio" name="nfaType" id="nfaTypeEvent" value="event" checked onchange="confirmSwitchNfaType('event', false)" />
+          <input type="radio" name="nfaType" id="nfaTypeEvent" value="event" checked onchange="switchNfaCategory('event', false)" />
           Event NFA (Seminars, Conferences, Workshops, Fests, Guest Lectures)
         </label>
         <label id="nfaTypeCardPurchase" class="nfa-type-card">
-          <input type="radio" name="nfaType" id="nfaTypePurchase" value="purchase" onchange="confirmSwitchNfaType('purchase', false)" />
+          <input type="radio" name="nfaType" id="nfaTypePurchase" value="purchase" onchange="switchNfaCategory('purchase', false)" />
           Purchase NFA (Equipment, Lab Components, Hardware, Software, Services)
         </label>
       </div>
@@ -3372,6 +3425,10 @@ async function newNfaModal(){
       <button type="button" class="green" onclick="createNfa(true)">Submit to HOD</button>
     </div>
   `);
+
+  currentNfaCategory = 'event';
+  applyNfaCategoryUi('event', false);
+  addItemRow('', '', '', '', false);
 
   initialApplyNfaSnapshot = captureApplyNfaSnapshot();
   setTimeout(() => {
@@ -3672,10 +3729,12 @@ function toggleSdg(sdg, el){
 function addItemRow(p='', q='', r='', a='', isEdit=false){
   const wrap = document.getElementById('itemsWrap');
   if (!wrap) return;
+  const isPur = currentNfaCategory === 'purchase';
+  const placeholder = isPur ? 'Purchase Item Description (e.g. Model, Make, Spec)' : 'Particulars / Item Description';
   const row = document.createElement('div');
   row.className = 'item-row';
   row.innerHTML = `
-    <input placeholder="Particulars / Item Description" class="it-p" value="${escapeHtml(p)}" />
+    <input placeholder="${placeholder}" class="it-p" value="${escapeHtml(p)}" />
     <input placeholder="Qty" class="it-q" type="number" min="1" step="1" value="${escapeHtml(q)}" oninput="calcRow(this)" />
     <input placeholder="Rate (₹)" class="it-r" type="number" min="0" step="any" value="${escapeHtml(r)}" oninput="calcRow(this)" />
     <input placeholder="Amount (₹)" class="it-a" type="number" min="0" step="any" value="${escapeHtml(a)}" oninput="calcTotal()" style="font-weight:700" />
@@ -3867,10 +3926,10 @@ async function createNfa(andSubmit){
         purpose: point1,
         description: point2,
         justification: point3,
-        event_details: eventDetails,
-        purchase_details: purchaseDetails,
-        quotations,
-        comparative_statement: comparativeStatement,
+        event_details: nfaType === 'event' ? eventDetails : undefined,
+        purchase_details: nfaType === 'purchase' ? purchaseDetails : undefined,
+        quotations: nfaType === 'purchase' ? quotations : [],
+        comparative_statement: nfaType === 'purchase' ? comparativeStatement : undefined,
         sdgs: selectedSdgs.join('; '),
         submitted_by_name: submittedByName,
         items
@@ -4182,37 +4241,6 @@ async function decideReview(id, decision, promptTitle){
 }
 
 // ---------------- EDIT NFA MODAL ----------------
-function onEditNfaTypeChange(type) {
-  const evCard = document.getElementById('editEventCard');
-  const purCard = document.getElementById('editPurchaseCard');
-  const evPre = document.getElementById('edit_eventPredefinedSection');
-  const purPart = document.getElementById('edit_purchaseParticularsSection');
-  const purQuotes = document.getElementById('edit_purchaseQuotationsSection');
-  const purCs = document.getElementById('edit_purchaseCsSection');
-  const itemsHeaderFirstCol = document.querySelector('#itemsHeader > div:first-child');
-  const itemsSectionTitle = document.getElementById('itemsSectionTitle');
-
-  if (type === 'event') {
-    if (evCard) evCard.style.display = 'block';
-    if (purCard) purCard.style.display = 'none';
-    if (evPre) evPre.style.display = 'block';
-    if (purPart) purPart.style.display = 'none';
-    if (purQuotes) purQuotes.style.display = 'none';
-    if (purCs) purCs.style.display = 'none';
-    if (itemsHeaderFirstCol) itemsHeaderFirstCol.textContent = 'Particulars / Item Description';
-    if (itemsSectionTitle) itemsSectionTitle.textContent = 'Event Budget Items (Select from predefined list above or add custom rows)';
-  } else {
-    if (evCard) evCard.style.display = 'none';
-    if (purCard) purCard.style.display = 'block';
-    if (evPre) evPre.style.display = 'none';
-    if (purPart) purPart.style.display = 'block';
-    if (purQuotes) purQuotes.style.display = 'block';
-    if (purCs) purCs.style.display = 'block';
-    if (itemsHeaderFirstCol) itemsHeaderFirstCol.textContent = 'Purchase Item / Description';
-    if (itemsSectionTitle) itemsSectionTitle.textContent = 'Purchase Budget Items (Select category above or add custom rows)';
-  }
-}
-
 async function editNfaModal(id){
   activeModalType = 'edit_nfa';
   let n;
@@ -4255,16 +4283,18 @@ async function editNfaModal(id){
     <label class="field-label">Proposal Title</label>
     <input id="editTitle" value="${escapeHtml(n.title)}" />
 
-    <label class="field-label" style="font-weight:700;margin-top:16px;">NFA Category Type</label>
-    <div class="row" style="gap:24px;margin-bottom:12px;">
-      <label style="cursor:pointer;display:flex;align-items:center;gap:8px;font-weight:600;">
-        <input type="radio" name="editNfaType" id="editNfaTypeEvent" value="event" ${!isPurchase ? 'checked' : ''} onchange="confirmSwitchNfaType('event', true)">
-        Event / Conference / Guest Lecture NFA
-      </label>
-      <label style="cursor:pointer;display:flex;align-items:center;gap:8px;font-weight:600;">
-        <input type="radio" name="editNfaType" id="editNfaTypePurchase" value="purchase" ${isPurchase ? 'checked' : ''} onchange="confirmSwitchNfaType('purchase', true)">
-        Purchase / Equipment / Procurement NFA
-      </label>
+    <div class="card" style="padding:14px;background:var(--section-bg);border:1px solid var(--accent-border);margin-top:12px;margin-bottom:14px;">
+      <label class="field-label" style="font-weight:700;color:var(--primary);margin:0 0 8px;">Select NFA Category Type</label>
+      <div class="row" style="gap:14px;">
+        <label id="editNfaTypeCardEvent" class="nfa-type-card ${!isPurchase ? 'active' : ''}">
+          <input type="radio" name="editNfaType" id="editNfaTypeEvent" value="event" ${!isPurchase ? 'checked' : ''} onchange="switchNfaCategory('event', true)" />
+          Event NFA (Seminars, Conferences, Workshops, Fests, Guest Lectures)
+        </label>
+        <label id="editNfaTypeCardPurchase" class="nfa-type-card ${isPurchase ? 'active' : ''}">
+          <input type="radio" name="editNfaType" id="editNfaTypePurchase" value="purchase" ${isPurchase ? 'checked' : ''} onchange="switchNfaCategory('purchase', true)" />
+          Purchase NFA (Equipment, Lab Components, Hardware, Software, Services)
+        </label>
+      </div>
     </div>
 
     <!-- 4 Description Points -->
@@ -4410,7 +4440,9 @@ async function editNfaModal(id){
   `);
 
   // Initialize view state
-  onEditNfaTypeChange(isPurchase ? 'purchase' : 'event');
+  currentNfaCategory = isPurchase ? 'purchase' : 'event';
+  updateCategoryRadioButtons(currentNfaCategory, true);
+  applyNfaCategoryUi(currentNfaCategory, true);
   if (isPurchase) {
     [0, 1, 2].forEach(i => renderQuotationCardUploadState(i, true));
     renderCsUploadState(true);
@@ -4423,11 +4455,11 @@ async function editNfaModal(id){
       if (!isPurchase && matchedKey) {
         addPredefinedItemRow(matchedKey, it.particulars, it.quantity, it.rate, it.amount, it.distance_km, it.carry_back_arrangement, it.sampling_required, true);
       } else {
-        addItemRow(it.particulars, it.quantity, it.rate, it.amount);
+        addItemRow(it.particulars, it.quantity, it.rate, it.amount, true);
       }
     });
   } else {
-    addItemRow();
+    addItemRow('', '', '', '', true);
   }
   initialApplyNfaSnapshot = captureApplyNfaSnapshot();
 }
@@ -4528,10 +4560,10 @@ async function saveNfaEdits(id){
         purpose: point1,
         description: point2,
         justification: point3,
-        event_details: eventDetails,
-        purchase_details: purchaseDetails,
-        quotations,
-        comparative_statement: comparativeStatement,
+        event_details: nfaType === 'event' ? eventDetails : undefined,
+        purchase_details: nfaType === 'purchase' ? purchaseDetails : undefined,
+        quotations: nfaType === 'purchase' ? quotations : [],
+        comparative_statement: nfaType === 'purchase' ? comparativeStatement : undefined,
         sdgs: selectedSdgs.join('; '),
         items
       }

@@ -476,6 +476,9 @@ nfasRouter.post('/', requireRole('faculty', 'hod', 'dean', 'super_admin'), (req:
     return res.status(400).json({ error: `Point 4 (Expenditure Statement) exceeds the 50-word limit (${countWords(b.point4)}/50)` });
   }
 
+  const isPurchase = b.nfa_type === 'purchase';
+  const targetNfaType: 'event' | 'purchase' = isPurchase ? 'purchase' : 'event';
+
   const items = Array.isArray(b.items) ? b.items : [];
   const processedItems = items.map((it: any, i: number) => {
     const qtyNum = Number(it.quantity);
@@ -487,6 +490,7 @@ nfasRouter.post('/', requireRole('faculty', 'hod', 'dean', 'super_admin'), (req:
     if (isNaN(computedAmount) || !isFinite(computedAmount) || computedAmount < 0) {
       computedAmount = 0;
     }
+    const isPredefined = !isPurchase && Boolean(it.is_predefined);
     return {
       id: uuid(),
       sl_no: i + 1,
@@ -499,12 +503,12 @@ nfasRouter.post('/', requireRole('faculty', 'hod', 'dean', 'super_admin'), (req:
       basis_of_budget: it.basis_of_budget || '',
       previous_year_budget: Number(it.previous_year_budget) || 0,
       previous_year_actual: Number(it.previous_year_actual) || 0,
-      is_predefined: Boolean(it.is_predefined),
-      predefined_key: it.predefined_key || undefined,
-      distance_km: it.distance_km || undefined,
-      carry_back_arrangement: it.carry_back_arrangement || undefined,
-      sampling_required: Boolean(it.sampling_required),
-      item_type: it.item_type || (Boolean(it.is_predefined) ? 'predefined' : (b.nfa_type === 'purchase' ? 'purchase' : 'custom')),
+      is_predefined: isPredefined,
+      predefined_key: isPredefined ? (it.predefined_key || undefined) : undefined,
+      distance_km: isPredefined ? (it.distance_km || undefined) : undefined,
+      carry_back_arrangement: isPredefined ? (it.carry_back_arrangement || undefined) : undefined,
+      sampling_required: isPredefined ? Boolean(it.sampling_required) : false,
+      item_type: isPurchase ? 'purchase' : (isPredefined ? 'predefined' : 'custom'),
     };
   });
   const total = processedItems.reduce((s: number, it: any) => s + (Number(it.amount) || 0), 0);
@@ -545,28 +549,28 @@ nfasRouter.post('/', requireRole('faculty', 'hod', 'dean', 'super_admin'), (req:
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     // Specific requirements
-    nfa_type: (b.nfa_type === 'purchase' ? 'purchase' : 'event') as 'event' | 'purchase',
+    nfa_type: targetNfaType,
     point1: b.point1 || b.purpose || '',
     point2: b.point2 || b.description || '',
     point3: b.point3 || b.justification || '',
     point4: b.point4 || '',
-    event_details: b.event_details || {
+    event_details: isPurchase ? undefined : (b.event_details || {
       resource_person_name: b.event_resource_person_name || '',
       designation: b.event_designation || '',
       organization: b.event_organization || '',
       event_date: b.event_date || '',
       venue: b.event_venue || '',
       additional_info: b.event_additional_info || '',
-    },
-    purchase_details: b.purchase_details || {
+    }),
+    purchase_details: isPurchase ? (b.purchase_details || {
       item_name: b.purchase_item_name || '',
       description: b.purchase_description || '',
       quantity: b.purchase_quantity || '',
       purpose: b.purchase_purpose || '',
       additional_info: b.purchase_additional_info || '',
-    },
-    quotations: Array.isArray(b.quotations) ? b.quotations : [],
-    comparative_statement: b.comparative_statement || undefined,
+    }) : undefined,
+    quotations: isPurchase && Array.isArray(b.quotations) ? b.quotations : [],
+    comparative_statement: isPurchase ? (b.comparative_statement || undefined) : undefined,
     proposer_signature: proposerSig,
   };
 
@@ -631,22 +635,36 @@ nfasRouter.put('/:id', async (req: AuthedRequest, res) => {
       'budget_subcategory_name',
       'submitted_by_name',
       'submitted_by_designation',
-      'nfa_type',
       'point1',
       'point2',
       'point3',
       'point4',
-      'event_details',
-      'purchase_details',
     ].forEach((f) => {
       if (b[f] !== undefined) (nfa as any)[f] = b[f];
     });
 
-    if (b.quotations !== undefined) {
-      nfa.quotations = Array.isArray(b.quotations) ? b.quotations : [];
-    }
-    if (b.comparative_statement !== undefined) {
-      nfa.comparative_statement = b.comparative_statement || undefined;
+    const targetType = (b.nfa_type !== undefined ? b.nfa_type : nfa.nfa_type) === 'purchase' ? 'purchase' : 'event';
+    const isPurchase = targetType === 'purchase';
+    nfa.nfa_type = targetType;
+
+    if (isPurchase) {
+      nfa.event_details = undefined;
+      if (b.purchase_details !== undefined) {
+        nfa.purchase_details = b.purchase_details;
+      }
+      if (b.quotations !== undefined) {
+        nfa.quotations = Array.isArray(b.quotations) ? b.quotations : [];
+      }
+      if (b.comparative_statement !== undefined) {
+        nfa.comparative_statement = b.comparative_statement || undefined;
+      }
+    } else {
+      nfa.purchase_details = undefined;
+      nfa.quotations = [];
+      nfa.comparative_statement = undefined;
+      if (b.event_details !== undefined) {
+        nfa.event_details = b.event_details;
+      }
     }
 
     if (b.point1) nfa.purpose = b.point1;
@@ -665,6 +683,7 @@ nfasRouter.put('/:id', async (req: AuthedRequest, res) => {
         if (isNaN(computedAmount) || !isFinite(computedAmount) || computedAmount < 0) {
           computedAmount = 0;
         }
+        const isPredefined = !isPurchase && Boolean(it.is_predefined);
         db.nfa_items.push({
           id: it.id || uuid(),
           nfa_id: nfa.id,
@@ -678,12 +697,12 @@ nfasRouter.put('/:id', async (req: AuthedRequest, res) => {
           basis_of_budget: it.basis_of_budget || '',
           previous_year_budget: Number(it.previous_year_budget) || 0,
           previous_year_actual: Number(it.previous_year_actual) || 0,
-          is_predefined: Boolean(it.is_predefined),
-          predefined_key: it.predefined_key || undefined,
-          distance_km: it.distance_km || undefined,
-          carry_back_arrangement: it.carry_back_arrangement || undefined,
-          sampling_required: Boolean(it.sampling_required),
-          item_type: it.item_type || (Boolean(it.is_predefined) ? 'predefined' : (nfa.nfa_type === 'purchase' ? 'purchase' : 'custom')),
+          is_predefined: isPredefined,
+          predefined_key: isPredefined ? (it.predefined_key || undefined) : undefined,
+          distance_km: isPredefined ? (it.distance_km || undefined) : undefined,
+          carry_back_arrangement: isPredefined ? (it.carry_back_arrangement || undefined) : undefined,
+          sampling_required: isPredefined ? Boolean(it.sampling_required) : false,
+          item_type: isPurchase ? 'purchase' : (isPredefined ? 'predefined' : 'custom'),
         });
       });
       nfa.total_amount = db.nfa_items.filter((i) => i.nfa_id === nfa.id).reduce((s: number, it: any) => s + (Number(it.amount) || 0), 0);

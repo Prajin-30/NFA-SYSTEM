@@ -202,7 +202,7 @@ export function applyNewApproval(
     difference: amount,
     changed_by: ctx.changed_by,
     role: ctx.role,
-    reason: 'NFA approved - new project budget added to department master budget',
+    reason: `NFA ${nfa?.ref_no || ctx.nfa_id} approved: ₹${amount.toLocaleString('en-IN')} reservation converted to approved commitment (master allocation unchanged)`,
     source: 'portal',
     approval_status: 'approved',
     created_at: new Date().toISOString(),

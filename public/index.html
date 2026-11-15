@@ -358,10 +358,10 @@
     white-space: nowrap;
   }
   .fy-pill-select {
-    background: rgba(0,0,0,0.25);
-    border: 1px solid rgba(212, 175, 55, 0.6);
-    color: #fce7ba;
-    padding: 4px 8px;
+    background: #FFFFFF !important;
+    border: 1.5px solid var(--accent-gold) !important;
+    color: var(--primary-blue) !important;
+    padding: 4px 10px;
     border-radius: 6px;
     font-size: 12px;
     font-weight: 700;
@@ -369,6 +369,24 @@
     cursor: pointer;
     height: auto;
     min-height: 32px;
+    outline: none;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+  }
+  .fy-pill-select:hover, .fy-pill-select:focus {
+    border-color: #FFFFFF !important;
+    box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.6) !important;
+  }
+  .fy-pill-select option {
+    background-color: #FFFFFF !important;
+    color: #172033 !important;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 10px;
+  }
+  .fy-pill-select option:checked {
+    background-color: var(--light-blue) !important;
+    color: var(--primary-blue) !important;
+    font-weight: 700;
   }
 
   nav {
@@ -634,8 +652,8 @@
     text-align: left;
     padding: 11px 14px;
     border-bottom: 1px solid var(--border);
-    overflow-wrap: anywhere;
-    word-break: break-word;
+    word-break: normal;
+    overflow-wrap: break-word;
   }
   th {
     color: var(--text-muted);
@@ -648,6 +666,35 @@
   }
   tbody tr:nth-child(even) td { background: #fafbfc; }
   tbody tr:hover td { background: var(--light-blue); }
+
+  /* TASK 9 — FINANCIAL AMOUNTS & NUMERIC FORMATTING */
+  .financial-amount {
+    white-space: nowrap !important;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-val, .grand-total, td.amount-cell, th.amount-cell {
+    white-space: nowrap !important;
+    font-variant-numeric: tabular-nums;
+  }
+  
+  /* Audit ledger specific widths & alignment */
+  .audit-ledger-table {
+    min-width: 900px;
+    table-layout: auto;
+  }
+  .audit-ledger-table th, .audit-ledger-table td {
+    padding: 11px 12px;
+  }
+  .audit-ledger-table th.num-col, .audit-ledger-table td.num-col {
+    text-align: right;
+    min-width: 110px;
+  }
+  .audit-ledger-table td.desc-col {
+    max-width: 380px;
+    word-break: normal;
+    overflow-wrap: break-word;
+    line-height: 1.45;
+  }
 
   /* BADGES */
   .badge {
@@ -1061,6 +1108,42 @@
     min-height: auto;
   }
 
+  /* PURCHASE BUDGET PARTICULARS */
+  .purchase-particulars-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .purchase-category-chip {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    cursor: pointer;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.15s ease;
+  }
+  .purchase-category-chip:hover {
+    border-color: var(--primary-blue);
+    background: var(--light-blue);
+    color: var(--primary-blue);
+  }
+  .purchase-category-chip .chip-action {
+    font-size: 11px;
+    color: var(--primary-blue);
+    font-weight: 700;
+    background: rgba(0, 61, 143, 0.08);
+    padding: 2px 7px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
   /* ==========================================================================
      RESPONSIVE BREAKPOINTS (Mobile: 320px-480px, Tablet: 768px, Laptop: 1024px+)
      ========================================================================== */
@@ -1379,6 +1462,55 @@ const PREDEFINED_EVENT_PARTICULARS = [
   { key: 'miscellaneous', name: 'Miscellaneous', defaultLabel: 'Miscellaneous' }
 ];
 
+const PREDEFINED_PURCHASE_CATEGORIES = [
+  { key: 'equipment', name: 'Equipment' },
+  { key: 'lab_materials', name: 'Laboratory Materials / Components' },
+  { key: 'computer_hardware', name: 'Computer Hardware' },
+  { key: 'software_licenses', name: 'Software / Licences' },
+  { key: 'furniture', name: 'Furniture' },
+  { key: 'electrical_electronics', name: 'Electrical / Electronic Items' },
+  { key: 'tools_instruments', name: 'Tools / Instruments' },
+  { key: 'services_maintenance', name: 'Services / Maintenance' },
+  { key: 'other_purchase', name: 'Other Purchase' }
+];
+
+function renderPurchaseParticularsHtml(isEdit = false) {
+  const prefix = isEdit ? 'edit_' : '';
+  return `
+    <div id="${prefix}purchaseParticularsSection" style="display:none;margin-top:14px;padding:16px;background:var(--section-bg);border:1px solid var(--border);border-radius:var(--radius-sm);">
+      <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <h3 style="margin:0;font-size:13.5px;color:var(--primary);text-transform:uppercase;letter-spacing:0.5px;font-weight:700;">SELECT PURCHASE BUDGET PARTICULARS</h3>
+        <span class="field-help" style="margin:0;font-weight:600;color:var(--primary-blue);">Click category to add item row</span>
+      </div>
+      <div class="field-help" style="margin-bottom:10px;">Select a purchase category below to quickly generate a budget item row, or use "+ Add Item Row" to manually enter any purchase item.</div>
+      <div class="purchase-particulars-grid">
+        ${PREDEFINED_PURCHASE_CATEGORIES.map(c => `
+          <div class="purchase-category-chip" onclick="addPurchaseCategoryRow('${escapeHtml(c.name)}', ${isEdit})">
+            <span>${escapeHtml(c.name)}</span>
+            <span class="chip-action">+ Add</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function addPurchaseCategoryRow(categoryName, isEdit = false) {
+  const defaultDesc = categoryName === 'Other Purchase' ? '' : `[${categoryName}] `;
+  addItemRow(defaultDesc, '', '', 0, isEdit);
+  const rows = document.querySelectorAll('#itemsWrap .item-row');
+  const lastRow = rows[rows.length - 1];
+  if (lastRow) {
+    const pInput = lastRow.querySelector('.it-p');
+    if (pInput) {
+      pInput.focus();
+      if (defaultDesc) {
+        try { pInput.setSelectionRange(defaultDesc.length, defaultDesc.length); } catch(e){}
+      }
+    }
+  }
+}
+
 let quotationUploads = [null, null, null];
 let comparativeStatementUpload = null;
 
@@ -1435,6 +1567,7 @@ function onNfaTypeChange(type) {
   const eventDetails = document.getElementById('eventDetailsSection');
   const eventPredefined = document.getElementById('eventPredefinedSection');
   const purchaseDetails = document.getElementById('purchaseDetailsSection');
+  const purchaseParticulars = document.getElementById('purchaseParticularsSection');
   const purchaseQuotations = document.getElementById('purchaseQuotationsSection');
   const purchaseCs = document.getElementById('purchaseCsSection');
   const eventCard = document.getElementById('nfaTypeCardEvent');
@@ -1446,16 +1579,18 @@ function onNfaTypeChange(type) {
     if (eventDetails) eventDetails.style.display = 'none';
     if (eventPredefined) eventPredefined.style.display = 'none';
     if (purchaseDetails) purchaseDetails.style.display = 'block';
+    if (purchaseParticulars) purchaseParticulars.style.display = 'block';
     if (purchaseQuotations) purchaseQuotations.style.display = 'block';
     if (purchaseCs) purchaseCs.style.display = 'block';
     if (eventCard) eventCard.classList.remove('active');
     if (purchaseCard) purchaseCard.classList.add('active');
     if (itemsHeaderFirstCol) itemsHeaderFirstCol.textContent = 'Purchase Item / Description';
-    if (itemsSectionTitle) itemsSectionTitle.textContent = 'Purchase Budget Items (Enter item description, quantity, and rate)';
+    if (itemsSectionTitle) itemsSectionTitle.textContent = 'Purchase Budget Items (Select category above or add custom rows)';
   } else {
     if (eventDetails) eventDetails.style.display = 'block';
     if (eventPredefined) eventPredefined.style.display = 'block';
     if (purchaseDetails) purchaseDetails.style.display = 'none';
+    if (purchaseParticulars) purchaseParticulars.style.display = 'none';
     if (purchaseQuotations) purchaseQuotations.style.display = 'none';
     if (purchaseCs) purchaseCs.style.display = 'none';
     if (eventCard) eventCard.classList.add('active');
@@ -2105,8 +2240,8 @@ async function boot(){
   const activeStart = parseInt((activeFyObj.label.match(/\d{4}/) || ['0'])[0], 10);
   fySelect.innerHTML = REF.financialYears.map(f => {
     const fStart = parseInt((f.label.match(/\d{4}/) || ['0'])[0], 10);
-    const tag = f.is_active ? ' [Active]' : fStart > activeStart ? ' [Future]' : ' [Past]';
-    return `<option value="${f.id}" ${f.id === currentActiveFyId ? 'selected' : ''}>${escapeHtml(f.label)}${tag}</option>`;
+    const tag = f.is_active ? ' — Active Year' : fStart > activeStart ? ' — Future Year' : ' — Past Year';
+    return `<option value="${f.id}" style="color:#172033;background:#FFFFFF;font-weight:600;" ${f.id === currentActiveFyId ? 'selected' : ''}>${escapeHtml(f.label)}${tag}</option>`;
   }).join('');
 
   const tabs = TABS_BY_ROLE[USER.role] || ['dashboard', 'nfas', 'budgets'];
@@ -3011,7 +3146,14 @@ async function newNfaModal(){
       </div>
       <div style="flex:1">
         <label class="field-label">Academic / Financial Year</label>
-        <select id="nfaFy" onchange="onNfaFyOrDeptChange()">${REF.financialYears.map(f=>`<option value="${f.id}" ${f.id===fy.id?'selected':''}>${f.label}</option>`).join('')}</select>
+        <select id="nfaFy" onchange="onNfaFyOrDeptChange()" style="color:#172033;background:#FFFFFF;">
+          ${REF.financialYears.map(f => {
+            const fStart = parseInt((f.label.match(/\d{4}/) || ['0'])[0], 10);
+            const activeStart = parseInt((fy.label.match(/\d{4}/) || ['0'])[0], 10);
+            const tag = f.is_active ? ' — Active Year' : fStart > activeStart ? ' — Future Year' : ' — Past Year';
+            return `<option value="${f.id}" style="color:#172033;background:#FFFFFF;" ${f.id === fy.id ? 'selected' : ''}>${escapeHtml(f.label)}${tag}</option>`;
+          }).join('')}
+        </select>
       </div>
     </div>
 
@@ -3182,13 +3324,8 @@ async function newNfaModal(){
       </div>
     </div>
 
-    <!-- PREDEFINED EVENT PARTICULARS CHECKLIST -->
-    ${renderPredefinedChecklistHtml(false, [], [])}
-
-    <!-- PURCHASE VENDOR QUOTATIONS & COMPARATIVE STATEMENT UPLOADS -->
-    ${renderPurchaseQuotationsHtml(false, [], null)}
-
-    <label class="field-label" style="margin-top:14px;">Select Relevant UN Sustainable Development Goals (SDGs)</label>
+    <!-- 3. SUSTAINABLE DEVELOPMENT GOALS (SDGs) -->
+    <label class="field-label" style="margin-top:16px;font-weight:700">Select Relevant UN Sustainable Development Goals (SDGs)</label>
     <div class="field-help">Click to highlight all sustainable development goals addressed:</div>
     <div class="sdg-grid" id="sdgGrid">
       ${SDG_LIST.map(sdg => `
@@ -3198,9 +3335,17 @@ async function newNfaModal(){
       `).join('')}
     </div>
 
+    <!-- 4. EVENT BUDGET PARTICULARS OR PURCHASE BUDGET PARTICULARS -->
+    <!-- PREDEFINED EVENT PARTICULARS CHECKLIST -->
+    ${renderPredefinedChecklistHtml(false, [], [])}
+
+    <!-- PREDEFINED PURCHASE PARTICULARS CHECKLIST -->
+    ${renderPurchaseParticularsHtml(false)}
+
+    <!-- 5. BUDGET ITEM ROWS -->
     <div class="card-header" style="margin-top:20px;margin-bottom:8px">
       <label id="itemsSectionTitle" class="field-label" style="margin:0">Event Budget Items (Select from predefined list above or add custom rows)</label>
-      <button class="secondary" type="button" onclick="addItemRow()">+ Add Item Row</button>
+      <button class="secondary" type="button" onclick="addItemRow('', '', '', '', false)">+ Add Item Row</button>
     </div>
     
     <div id="itemsHeader" class="item-row muted" style="font-size:11px;font-weight:700">
@@ -3215,8 +3360,11 @@ async function newNfaModal(){
 
     <div class="row" style="justify-content:flex-end;margin:14px 0 20px;font-size:16px;">
       <span class="muted">Total Budget Requested:</span>
-      <strong id="grandTotalText" style="color:var(--primary);font-size:19px;font-family:'Outfit',sans-serif;">₹0</strong>
+      <strong id="grandTotalText" class="financial-amount" style="color:var(--primary);font-size:19px;font-family:'Outfit',sans-serif;">₹0</strong>
     </div>
+
+    <!-- 6. PURCHASE VENDOR QUOTATIONS & COMPARATIVE STATEMENT UPLOADS -->
+    ${renderPurchaseQuotationsHtml(false, [], null)}
 
     <div class="row" style="justify-content:flex-end;gap:12px">
       <button class="secondary" type="button" onclick="handleCloseApplyNfa()">Cancel</button>
@@ -3521,16 +3669,17 @@ function toggleSdg(sdg, el){
   }
 }
 
-function addItemRow(p='', q='', r='', a=''){
+function addItemRow(p='', q='', r='', a='', isEdit=false){
   const wrap = document.getElementById('itemsWrap');
+  if (!wrap) return;
   const row = document.createElement('div');
   row.className = 'item-row';
   row.innerHTML = `
     <input placeholder="Particulars / Item Description" class="it-p" value="${escapeHtml(p)}" />
-    <input placeholder="Qty" class="it-q" type="number" min="1" value="${escapeHtml(q)}" oninput="calcRow(this)" />
-    <input placeholder="Rate (₹)" class="it-r" type="number" min="0" value="${escapeHtml(r)}" oninput="calcRow(this)" />
-    <input placeholder="Amount (₹)" class="it-a" type="number" min="0" value="${escapeHtml(a)}" oninput="calcTotal()" style="font-weight:700" />
-    <button class="del-item" type="button" onclick="this.parentElement.remove();calcTotal()">✕</button>
+    <input placeholder="Qty" class="it-q" type="number" min="1" step="1" value="${escapeHtml(q)}" oninput="calcRow(this)" />
+    <input placeholder="Rate (₹)" class="it-r" type="number" min="0" step="any" value="${escapeHtml(r)}" oninput="calcRow(this)" />
+    <input placeholder="Amount (₹)" class="it-a" type="number" min="0" step="any" value="${escapeHtml(a)}" oninput="calcTotal()" style="font-weight:700" />
+    <button class="del-item" type="button" title="Remove row" onclick="removeItemRow(this, ${isEdit})">✕</button>
   `;
   wrap.appendChild(row);
   calcTotal();
@@ -3538,17 +3687,25 @@ function addItemRow(p='', q='', r='', a=''){
 
 function calcRow(input){
   const row = input.parentElement;
-  const q = Number(row.querySelector('.it-q').value) || 0;
-  const r = Number(row.querySelector('.it-r').value) || 0;
-  if (q > 0 && r > 0) {
-    row.querySelector('.it-a').value = q * r;
+  if (!row) return;
+  const qVal = Number(row.querySelector('.it-q')?.value);
+  const rVal = Number(row.querySelector('.it-r')?.value);
+  const q = (!isNaN(qVal) && isFinite(qVal) && qVal > 0) ? qVal : 0;
+  const r = (!isNaN(rVal) && isFinite(rVal) && rVal >= 0) ? rVal : 0;
+  if (q > 0 && r >= 0) {
+    const computed = Math.round(q * r * 100) / 100;
+    const aInput = row.querySelector('.it-a');
+    if (aInput) aInput.value = computed;
   }
   calcTotal();
 }
 
 function calcTotal(){
-  const amounts = [...document.querySelectorAll('#itemsWrap .it-a')].map(i => Number(i.value) || 0);
-  const total = amounts.reduce((s, a) => s + a, 0);
+  const amounts = [...document.querySelectorAll('#itemsWrap .it-a')].map(i => {
+    const val = Number(i.value);
+    return (!isNaN(val) && isFinite(val) && val >= 0) ? val : 0;
+  });
+  const total = Math.round(amounts.reduce((s, a) => s + a, 0) * 100) / 100;
   const totalEl = document.getElementById('grandTotalText');
   if (totalEl) totalEl.textContent = inr(total);
   updateNfaBudgetStatusBanner();
@@ -4028,12 +4185,31 @@ async function decideReview(id, decision, promptTitle){
 function onEditNfaTypeChange(type) {
   const evCard = document.getElementById('editEventCard');
   const purCard = document.getElementById('editPurchaseCard');
+  const evPre = document.getElementById('edit_eventPredefinedSection');
+  const purPart = document.getElementById('edit_purchaseParticularsSection');
+  const purQuotes = document.getElementById('edit_purchaseQuotationsSection');
+  const purCs = document.getElementById('edit_purchaseCsSection');
+  const itemsHeaderFirstCol = document.querySelector('#itemsHeader > div:first-child');
+  const itemsSectionTitle = document.getElementById('itemsSectionTitle');
+
   if (type === 'event') {
     if (evCard) evCard.style.display = 'block';
     if (purCard) purCard.style.display = 'none';
+    if (evPre) evPre.style.display = 'block';
+    if (purPart) purPart.style.display = 'none';
+    if (purQuotes) purQuotes.style.display = 'none';
+    if (purCs) purCs.style.display = 'none';
+    if (itemsHeaderFirstCol) itemsHeaderFirstCol.textContent = 'Particulars / Item Description';
+    if (itemsSectionTitle) itemsSectionTitle.textContent = 'Event Budget Items (Select from predefined list above or add custom rows)';
   } else {
     if (evCard) evCard.style.display = 'none';
     if (purCard) purCard.style.display = 'block';
+    if (evPre) evPre.style.display = 'none';
+    if (purPart) purPart.style.display = 'block';
+    if (purQuotes) purQuotes.style.display = 'block';
+    if (purCs) purCs.style.display = 'block';
+    if (itemsHeaderFirstCol) itemsHeaderFirstCol.textContent = 'Purchase Item / Description';
+    if (itemsSectionTitle) itemsSectionTitle.textContent = 'Purchase Budget Items (Select category above or add custom rows)';
   }
 }
 
@@ -4186,13 +4362,8 @@ async function editNfaModal(id){
       </div>
     </div>
 
-    <!-- Edit Predefined Checklist -->
-    ${renderPredefinedChecklistHtml(true, checkedKeys, savedItems)}
-
-    <!-- Edit Purchase Quotations & CS Uploads -->
-    ${renderPurchaseQuotationsHtml(true, n.quotations || [], n.comparative_statement || null)}
-
-    <label class="field-label">Select Relevant UN SDGs</label>
+    <!-- 3. SDGs -->
+    <label class="field-label" style="margin-top:16px;font-weight:700">Select Relevant UN Sustainable Development Goals (SDGs)</label>
     <div class="sdg-grid" id="sdgGrid">
       ${SDG_LIST.map(sdg => `
         <div class="sdg-chip ${selectedSdgs.includes(sdg) ? 'active' : ''}" onclick="toggleSdg('${sdg}', this)">
@@ -4201,9 +4372,17 @@ async function editNfaModal(id){
       `).join('')}
     </div>
 
+    <!-- 4. EVENT BUDGET PARTICULARS OR PURCHASE BUDGET PARTICULARS -->
+    <!-- Edit Predefined Checklist -->
+    ${renderPredefinedChecklistHtml(true, checkedKeys, savedItems)}
+
+    <!-- Edit Purchase Particulars Checklist -->
+    ${renderPurchaseParticularsHtml(true)}
+
+    <!-- 5. BUDGET ITEM ROWS -->
     <div class="card-header" style="margin-top:20px;margin-bottom:8px">
       <label id="itemsSectionTitle" class="field-label" style="margin:0">${isPurchase ? 'Purchase Budget Items (Enter item description, quantity, and rate)' : 'Event Budget Items (Select from predefined list above or add custom rows)'}</label>
-      <button class="secondary" type="button" onclick="addItemRow()">+ Add Item Row</button>
+      <button class="secondary" type="button" onclick="addItemRow('', '', '', '', true)">+ Add Item Row</button>
     </div>
     
     <div id="itemsHeader" class="item-row muted" style="font-size:11px;font-weight:700">
@@ -4218,8 +4397,11 @@ async function editNfaModal(id){
 
     <div class="row" style="justify-content:flex-end;margin:14px 0 20px;font-size:16px;">
       <span class="muted">Total Budget:</span>
-      <strong id="grandTotalText" style="color:var(--primary);font-size:18px;">${inr(n.total_amount)}</strong>
+      <strong id="grandTotalText" class="financial-amount" style="color:var(--primary);font-size:18px;">${inr(n.total_amount)}</strong>
     </div>
+
+    <!-- 6. PURCHASE VENDOR QUOTATIONS & CS UPLOADS -->
+    ${renderPurchaseQuotationsHtml(true, n.quotations || [], n.comparative_statement || null)}
 
     <div class="row" style="justify-content:flex-end;gap:12px">
       <button class="secondary" type="button" onclick="handleCloseEditNfa('${n.id}', false)">Cancel</button>
@@ -4831,28 +5013,28 @@ async function renderAudit(main){
         </div>
       </div>
       <div class="table-wrap">
-      <table>
+      <table class="audit-ledger-table">
         <thead>
           <tr>
-            <th>Timestamp</th>
-            <th>Entity</th>
-            <th>Previous</th>
-            <th>Updated</th>
-            <th>Net Diff</th>
-            <th>Role</th>
-            <th>Reason &amp; Action</th>
+            <th style="min-width:145px;white-space:nowrap;">Timestamp</th>
+            <th style="min-width:85px;white-space:nowrap;">Entity</th>
+            <th class="num-col" style="min-width:115px;white-space:nowrap;text-align:right;">Previous</th>
+            <th class="num-col" style="min-width:115px;white-space:nowrap;text-align:right;">Updated</th>
+            <th class="num-col" style="min-width:115px;white-space:nowrap;text-align:right;">Net Diff</th>
+            <th style="min-width:90px;white-space:nowrap;">Role</th>
+            <th style="min-width:280px;">Reason &amp; Action</th>
           </tr>
         </thead>
         <tbody>
           ${logs.map(l => `
             <tr>
-              <td>${new Date(l.created_at).toLocaleString()}</td>
-              <td><strong>${l.entity_type.toUpperCase()}</strong></td>
-              <td>${l.old_amount !== null ? inr(l.old_amount) : '—'}</td>
-              <td style="font-weight:700">${l.new_amount !== null ? inr(l.new_amount) : '—'}</td>
-              <td style="color:${l.difference > 0 ? 'var(--warning)' : 'var(--success)'}">${l.difference !== null ? inr(l.difference) : '—'}</td>
-              <td><span class="role-pill" style="color:var(--dark-blue);background:var(--light-blue);border:1px solid #BFDBFE">${String(l.role || '').replace('_',' ')}</span></td>
-              <td class="muted">${escapeHtml(l.reason)}</td>
+              <td style="white-space:nowrap;">${new Date(l.created_at).toLocaleString()}</td>
+              <td><strong>${escapeHtml(l.entity_type.toUpperCase())}</strong></td>
+              <td class="num-col financial-amount">${l.old_amount !== null ? inr(l.old_amount) : '—'}</td>
+              <td class="num-col financial-amount" style="font-weight:700">${l.new_amount !== null ? inr(l.new_amount) : '—'}</td>
+              <td class="num-col financial-amount" style="font-weight:700;color:${l.difference > 0 ? 'var(--warning)' : (l.difference < 0 ? 'var(--success)' : 'var(--text)')}">${l.difference !== null ? (l.difference > 0 ? '+' : '') + inr(l.difference) : '—'}</td>
+              <td><span class="role-pill" style="color:var(--dark-blue);background:var(--light-blue);border:1px solid #BFDBFE">${escapeHtml(String(l.role || '').replace('_',' '))}</span></td>
+              <td class="desc-col">${escapeHtml(l.reason)}</td>
             </tr>
           `).join('') || '<tr><td colspan="7" class="muted" style="text-align:center;padding:30px;">No audit events recorded</td></tr>'}
         </tbody>

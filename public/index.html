@@ -294,6 +294,12 @@
     gap: 20px;
     border-bottom: 2px solid var(--gold-accent);
     box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    /* Change 5 — Fixed header */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
   }
   header .brand {
     display: flex;
@@ -398,6 +404,12 @@
     -webkit-overflow-scrolling: touch;
     border-bottom: 1px solid rgba(255, 255, 255, 0.12);
     scrollbar-width: thin;
+    /* Change 5 — Fixed nav directly below header */
+    position: fixed;
+    top: 70px;
+    left: 0;
+    right: 0;
+    z-index: 999;
   }
   nav button {
     background: transparent;
@@ -435,9 +447,27 @@
   main {
     max-width: 1240px;
     margin: 24px auto;
-    padding: 0 20px 80px;
+    /* Change 5 — Offset for fixed header + nav + room for footer */
+    padding: 120px 20px 70px;
     width: 100%;
     min-width: 0;
+  }
+
+  /* Change 5 — Institutional Footer */
+  #app-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 998;
+    background: #002D70;
+    color: #D6E4FF;
+    border-top: 2px solid var(--gold-accent);
+    text-align: center;
+    font-size: 11.5px;
+    font-weight: 500;
+    padding: 8px 20px;
+    letter-spacing: 0.01em;
   }
   .card {
     background: var(--card);
@@ -668,6 +698,7 @@
   tbody tr:hover td { background: var(--light-blue); }
 
   /* TASK 9 — FINANCIAL AMOUNTS & NUMERIC FORMATTING */
+  /* Change 7 — Currency must never wrap to next line */
   .financial-amount {
     white-space: nowrap !important;
     font-variant-numeric: tabular-nums;
@@ -675,6 +706,21 @@
   .stat-val, .grand-total, td.amount-cell, th.amount-cell {
     white-space: nowrap !important;
     font-variant-numeric: tabular-nums;
+  }
+  /* Universal inline currency spans */
+  .inr-amount {
+    white-space: nowrap !important;
+    font-variant-numeric: tabular-nums;
+    display: inline;
+  }
+  /* NFA table Amount column — never wrap INR values */
+  td.nfa-amount-cell, th.nfa-amount-cell {
+    white-space: nowrap !important;
+    min-width: 110px;
+    font-variant-numeric: tabular-nums;
+  }
+  td.nfa-amount-cell strong {
+    white-space: nowrap !important;
   }
   
   /* Audit ledger specific widths & alignment */
@@ -914,35 +960,44 @@
     justify-content: center;
     padding: 30px 14px;
     overflow-y: auto;
-    z-index: 500;
+    /* Fix: raised above fixed header (z-index:1000) and nav (z-index:999) */
+    z-index: 1100;
     backdrop-filter: blur(3px);
   }
   .modal {
     background: #fff;
     border-radius: var(--radius-lg);
-    padding: 28px 30px;
+    /* Extra top padding to accommodate absolutely-positioned close button */
+    padding: 44px 30px 28px;
     max-width: 820px;
     width: 100%;
-    max-height: calc(100vh - 40px);
+    max-height: calc(100vh - 60px);
     overflow-y: auto;
     box-shadow: var(--shadow-lg);
     border: 1px solid var(--border);
     margin: auto;
+    /* Anchor for absolutely-positioned .close-btn */
+    position: relative;
   }
   .close-btn {
-    float: right;
+    /* Fix: absolute so it's always visible at top-right, never clipped by scroll */
+    position: absolute;
+    top: 14px;
+    right: 18px;
     cursor: pointer;
     color: var(--text-muted);
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 700;
     background: none;
     border: none;
-    padding: 0;
+    padding: 2px 6px;
     min-height: auto;
     width: auto;
     line-height: 1;
+    border-radius: 4px;
+    z-index: 1;
   }
-  .close-btn:hover { color: var(--primary-blue); background: none; }
+  .close-btn:hover { color: var(--primary-blue); background: rgba(0,61,143,0.07); }
   .field-label {
     display: block;
     font-size: 11.5px;
@@ -1266,7 +1321,8 @@
       padding: 10px 6px;
     }
     .modal {
-      padding: 18px 14px;
+      /* Extra top padding for absolute close-btn on mobile */
+      padding: 44px 14px 18px;
       max-height: calc(100vh - 16px);
       border-radius: var(--radius);
     }
@@ -1372,6 +1428,11 @@
 <div class="toast" id="toast"></div>
 <div class="modal-bg" id="modalBg"><div class="modal" id="modalBody"></div></div>
 
+<!-- Change 5 — INSTITUTIONAL FOOTER (Fixed) -->
+<footer id="app-footer">
+  CHRIST (Deemed to be University), Bengaluru – Kengeri Campus &copy; 2026
+</footer>
+
 <script>
 const API = '/api';
 let TOKEN = localStorage.getItem('token') || '';
@@ -1457,7 +1518,7 @@ const PREDEFINED_EVENT_PARTICULARS = [
   { key: 'honorarium', name: 'Honorarium', defaultLabel: 'Honorarium' },
   { key: 'refreshments_fn', name: 'Refreshments — Forenoon', defaultLabel: 'Refreshments — Forenoon' },
   { key: 'refreshments_an', name: 'Refreshments — Afternoon', defaultLabel: 'Refreshments — Afternoon' },
-  { key: 'sampling', name: 'Sampling (field / laboratory verification)', defaultLabel: 'Sampling', isSampling: true },
+  { key: 'sampling', name: 'Sampling', defaultLabel: 'Sampling', isSampling: true },
   { key: 'lunch', name: 'Lunch', defaultLabel: 'Lunch' },
   { key: 'miscellaneous', name: 'Miscellaneous', defaultLabel: 'Miscellaneous' }
 ];
@@ -1723,6 +1784,17 @@ function onPredefinedSubfieldChange(key, inputEl, isEdit = false) {
 function addPredefinedItemRow(key, particulars, q='', r='', a='', dist='', carryBack='', isSampling=false, isEdit=false) {
   const wrap = document.getElementById('itemsWrap');
   if (!wrap) return;
+
+  // Change 1: Sampling is non-monetary — do NOT add a row to the budget table
+  if (isSampling) {
+    // Just mark the checkbox & card as checked; do not append a row
+    const prefix = isEdit ? 'edit_' : '';
+    const cb = document.getElementById(`${prefix}cb_particular_${key}`);
+    if (cb) cb.checked = true;
+    const card = document.getElementById(`${prefix}card_particular_${key}`);
+    if (card) card.classList.add('checked');
+    return;
+  }
 
   const row = document.createElement('div');
   row.className = 'item-row predefined-row';
@@ -2059,16 +2131,41 @@ function viewAttachmentPreview(filePath) {
   window.open(`/api/nfas/attachment-preview/${encodeURIComponent(filePath)}`, '_blank');
 }
 
+let currentSigBlobUrl = null;
+
 async function openProfileModal() {
   try {
     const me = await api('/users/me');
+    let sigImgSrc = null;
+
+    if (me.signature_valid && me.signature_url) {
+      try {
+        const res = await fetch(me.signature_url, {
+          headers: { 'Authorization': 'Bearer ' + TOKEN }
+        });
+        if (res.ok) {
+          const ct = res.headers.get('content-type') || '';
+          if (ct.includes('image')) {
+            const blob = await res.blob();
+            if (currentSigBlobUrl) {
+              try { URL.revokeObjectURL(currentSigBlobUrl); } catch(e){}
+            }
+            currentSigBlobUrl = URL.createObjectURL(blob);
+            sigImgSrc = currentSigBlobUrl;
+          }
+        }
+      } catch (fetchErr) {
+        console.error('Failed to load signature preview via authenticated fetch', fetchErr);
+      }
+    }
+
     let sigHtml = '';
-    if (me.has_signature) {
+    if (sigImgSrc) {
       sigHtml = `
         <div style="margin:12px 0;padding:12px;background:#f8fafc;border:1px solid var(--border);border-radius:var(--radius-sm);text-align:center;">
           <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;">Current Registered Signature:</div>
           <div style="background:#fff;border:1px dashed #cbd5e1;padding:12px;display:inline-block;border-radius:4px;">
-            <img src="${me.signature_url}?v=${Date.now()}" alt="Signature" style="max-height:60px;max-width:240px;display:block;" />
+            <img src="${sigImgSrc}" alt="Signature" style="max-height:60px;max-width:240px;display:block;" />
           </div>
           <div style="margin-top:10px;">
             <button class="danger" style="padding:4px 10px;font-size:11px;" onclick="removeMySignature()">Remove Signature</button>
@@ -2078,7 +2175,7 @@ async function openProfileModal() {
     } else {
       sigHtml = `
         <div style="margin:12px 0;padding:12px;background:#fff8ee;border:1px solid #fce7ba;border-radius:var(--radius-sm);font-size:12px;color:#92400e;">
-          No digital signature registered yet. Upload your official signature in PNG format (transparent background recommended) below.
+          No verified digital signature registered yet. Upload your official signature in PNG format (minimum 200 × 70 px, recommended 600 × 200 px with transparent background) below.
         </div>
       `;
     }
@@ -2107,7 +2204,7 @@ async function openProfileModal() {
 
         <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">
           <label class="field-label" style="font-weight:700;">Upload New Signature (PNG format only)</label>
-          <div class="field-help" style="margin-bottom:8px;">Max file size: 2MB. Transparent background PNG recommended for best PDF appearance.</div>
+          <div class="field-help" style="margin-bottom:8px;">Min size: 200 × 70 px. Recommended: 600 × 200 px (transparent background PNG). Max file size: 2 MB.</div>
           <div class="row" style="gap:10px;">
             <input type="file" id="sigFileInput" accept="image/png" style="flex:1;margin-bottom:0;" />
             <button onclick="uploadMySignature()">Upload Signature</button>
@@ -2132,6 +2229,35 @@ async function uploadMySignature(targetUserId = null) {
   const file = fileInput.files[0];
   if (!file.name.toLowerCase().endsWith('.png') && file.type !== 'image/png') {
     return toast('Only PNG images are supported');
+  }
+  if (file.size < 1000) {
+    return toast(`Selected file is too small (${file.size} bytes). Minimum size is 1 KB. Please select a genuine signature image.`);
+  }
+  if (file.size > 2 * 1024 * 1024) {
+    return toast('Signature file exceeds the maximum 2 MB limit.');
+  }
+
+  // Pre-flight image dimension validation
+  try {
+    const dims = await new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        resolve({ width: img.naturalWidth || img.width, height: img.naturalHeight || img.height });
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error('Failed to read image. Please ensure this is a genuine PNG image.'));
+      };
+      img.src = url;
+    });
+
+    if (dims.width < 200 || dims.height < 70) {
+      return toast(`Signature dimensions are too small (${dims.width} × ${dims.height} px). Minimum required size is 200 × 70 px (recommended 600 × 200 px).`);
+    }
+  } catch (dimErr) {
+    return toast(dimErr.message || 'Invalid PNG image');
   }
 
   const formData = new FormData();
@@ -2367,6 +2493,7 @@ async function showTab(tab){
 // ---------------- HOME VIEW ----------------
 async function onDashboardDeptChange(deptId){
   selectedDashboardDeptId = deptId;
+  selectedBudgetDeptId = deptId;
   const main = document.getElementById('main');
   await renderHome(main);
 }
@@ -2378,18 +2505,29 @@ async function renderHome(main){
   }
   const deptId = isInstitutionalRole ? (selectedDashboardDeptId || REF.departments[0]?.id) : (USER.department_id || REF.departments[0]?.id);
   const fy = activeFy();
-  const [nfas, summary, inboxItems] = await Promise.all([
-    api('/nfas'),
-    api(`/budgets/${deptId}/summary?fy=${fy.id}`),
-    api('/nfas/inbox')
-  ]);
+
+  let nfas, summary, inboxItems, schoolOverview = null;
+  if (isInstitutionalRole) {
+    [nfas, summary, inboxItems, schoolOverview] = await Promise.all([
+      api('/nfas'),
+      api(`/budgets/${deptId}/summary?fy=${fy.id}`),
+      api('/nfas/inbox'),
+      api(`/budgets/school/overview?fy=${fy.id}`)
+    ]);
+  } else {
+    [nfas, summary, inboxItems] = await Promise.all([
+      api('/nfas'),
+      api(`/budgets/${deptId}/summary?fy=${fy.id}`),
+      api('/nfas/inbox')
+    ]);
+  }
 
   let html = '';
 
   // Pending Actions Banner
   if (inboxItems.length > 0) {
     html += `
-      <div class="card" style="border-left: 5px solid var(--warning); background: var(--warning-bg);">
+      <div class="card" style="border-left: 5px solid var(--warning); background: var(--warning-bg); margin-bottom: 24px;">
         <div class="row" style="justify-content: space-between;">
           <div>
             <strong style="color:var(--warning);font-size:15px;">Pending Action: ${inboxItems.length} Note(s) For Approval awaiting your authorization</strong>
@@ -2401,18 +2539,115 @@ async function renderHome(main){
     `;
   }
 
-  // Summary Metrics Header
-  const totals = summary.totals;
   const isAdmin = USER.role === 'super_admin';
+
+  // 1. SCHOOL OF ENGINEERING AND TECHNOLOGY — OVERALL BUDGET (SENIOR ROLES ONLY)
+  if (isInstitutionalRole && schoolOverview) {
+    const sTotals = schoolOverview.totals;
+    html += `
+      <div class="card" style="margin-bottom:24px;">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">School of Engineering and Technology — Overall Budget — ${escapeHtml(fy.label)}</h2>
+            <div class="card-sub">School of Engineering and Technology · Consolidated Financial Overview</div>
+          </div>
+          <div class="row" style="gap:10px;">
+            ${['super_admin', 'director', 'finance'].includes(USER.role) ? `
+              <button class="secondary" onclick="openRolloverModal()">Annual Rollover</button>
+            ` : ''}
+            ${isAdmin ? `
+              <button class="secondary" onclick="exportBudgetReport('all')">Export All Departments Excel</button>
+            ` : ''}
+          </div>
+        </div>
+
+        <!-- Four School-Wide Summary Cards -->
+        <div class="grid-4" style="margin-bottom:20px;">
+          <div class="stat-card primary">
+            <div class="stat-label">Total Allocated Budget</div>
+            <div class="stat-val financial-amount" style="color:var(--primary);">${inr(sTotals.allocated_amount)}</div>
+            <div class="stat-desc">Consolidated Approved Ceiling</div>
+          </div>
+          <div class="stat-card success">
+            <div class="stat-label">Total Approved Amount</div>
+            <div class="stat-val financial-amount" style="color:var(--success);">${inr(sTotals.approved_amount)}</div>
+            <div class="stat-desc">${sTotals.utilization_pct}% Utilized Across School</div>
+          </div>
+          <div class="stat-card warning">
+            <div class="stat-label">Total Pending Amount</div>
+            <div class="stat-val financial-amount" style="color:var(--warning);">${inr(sTotals.pending_amount)}</div>
+            <div class="stat-desc">Reserved in Active Proposals</div>
+          </div>
+          <div class="stat-card accent">
+            <div class="stat-label">Total Remaining Budget</div>
+            <div class="stat-val financial-amount" style="color:${sTotals.remaining_amount < 0 ? 'var(--danger)' : 'var(--primary-blue)'};">
+              ${inr(sTotals.remaining_amount)}
+            </div>
+            <div class="stat-desc">Net Available Balance${sTotals.is_deficit ? ' <span class="badge b-rejected" style="font-size:10px;padding:2px 5px;margin-left:4px;">Deficit</span>' : ''}</div>
+          </div>
+        </div>
+
+        <!-- All-Department Budget Summary Table (13 Active Academic Units & COEs) -->
+        <div style="margin-top:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
+            <div>
+              <h3 style="font-size:15px;margin:0;color:var(--dark-blue);">All-Department Budget Summary</h3>
+              <div class="field-help" style="margin-top:2px;">Click any department row to inspect its detailed budget and subcategory allocations below.</div>
+            </div>
+            <span class="muted" style="font-size:12px;">${schoolOverview.departments.length} Units Registered</span>
+          </div>
+          <div class="table-container" style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+            <table style="width:100%;border-collapse:collapse;min-width:650px;">
+              <thead>
+                <tr style="background:#f1f4f9;border-bottom:2px solid var(--border);">
+                  <th style="text-align:left;padding:10px 14px;font-size:12px;">Department</th>
+                  <th style="text-align:right;padding:10px 14px;font-size:12px;">Allocated</th>
+                  <th style="text-align:right;padding:10px 14px;font-size:12px;">Approved</th>
+                  <th style="text-align:right;padding:10px 14px;font-size:12px;">Pending</th>
+                  <th style="text-align:right;padding:10px 14px;font-size:12px;">Remaining</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${schoolOverview.departments.map(d => {
+                  const isSelected = d.department_id === deptId;
+                  const rowBg = isSelected ? '#eef2ff' : 'transparent';
+                  const borderLeft = isSelected ? '4px solid var(--primary-blue)' : '4px solid transparent';
+                  const remColor = d.remaining_amount < 0 ? 'var(--danger)' : 'var(--text)';
+                  return `
+                    <tr class="dept-summary-row" style="background:${rowBg};border-left:${borderLeft};cursor:pointer;border-bottom:1px solid #f1f5f9;transition:background 0.15s ease;" onclick="onDashboardDeptChange('${d.department_id}')" title="Click to view details for ${escapeHtml(d.department_name)}">
+                      <td style="padding:10px 14px;">
+                        <span style="font-weight:${isSelected ? '700' : '600'};color:${isSelected ? 'var(--primary-blue)' : 'var(--text)'};">${escapeHtml(d.department_name)}</span>
+                        <span class="badge" style="margin-left:6px;font-size:11px;background:#f8fafc;color:#64748b;border:1px solid #e2e8f0;">${escapeHtml(d.department_code)}</span>
+                        ${isSelected ? '<span class="badge b-approved" style="margin-left:6px;font-size:10px;">Selected</span>' : ''}
+                      </td>
+                      <td style="text-align:right;padding:10px 14px;white-space:nowrap;" class="financial-amount">${inr(d.allocated_amount)}</td>
+                      <td style="text-align:right;padding:10px 14px;white-space:nowrap;color:var(--success);" class="financial-amount">${inr(d.approved_amount)}</td>
+                      <td style="text-align:right;padding:10px 14px;white-space:nowrap;color:var(--warning);" class="financial-amount">${inr(d.pending_amount)}</td>
+                      <td style="text-align:right;padding:10px 14px;white-space:nowrap;color:${remColor};font-weight:700;" class="financial-amount">
+                        ${inr(d.remaining_amount)}${d.is_deficit ? ' <span class="badge b-rejected" style="font-size:10px;padding:2px 4px;margin-left:4px;">Deficit</span>' : ''}
+                      </td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // 2. SELECTED DEPARTMENT MASTER BUDGET OVERVIEW
+  const totals = summary.totals;
 
   html += `
     <div class="card">
       <div class="card-header">
         <div>
-          <h2 class="card-title">Department Master Budget Overview — ${fy.label}</h2>
-          <div class="card-sub">${deptName(deptId)}</div>
+          <h2 class="card-title">${isInstitutionalRole ? 'Department Budget Details' : 'Department Master Budget Overview'} — ${escapeHtml(fy.label)}</h2>
+          <div class="card-sub">${escapeHtml(deptName(deptId))}</div>
         </div>
-        <div class="row" style="align-items:center;gap:10px;">
+        <div class="row" style="align-items:center;gap:10px;flex-wrap:wrap;">
           ${isInstitutionalRole ? `
             <div style="display:flex;align-items:center;gap:6px;">
               <span class="muted" style="font-size:12px;font-weight:600;">Department:</span>
@@ -2425,7 +2660,7 @@ async function renderHome(main){
             <button class="secondary" onclick="exportBudgetReport('${deptId}')">Export Master Budget Excel</button>
             <button class="secondary" onclick="showTab('admin')">Budget Management &amp; Upload in Settings</button>
           ` : ''}
-          ${['super_admin', 'director', 'finance'].includes(USER.role) ? `
+          ${(!isInstitutionalRole && ['super_admin', 'director', 'finance'].includes(USER.role)) ? `
             <button class="secondary" onclick="openRolloverModal()">Annual Rollover &amp; Next-Year Projection</button>
           ` : ''}
         </div>
@@ -2433,25 +2668,25 @@ async function renderHome(main){
       <div class="grid-4">
         <div class="stat-card primary">
           <div class="stat-label">Total Allocated Ceiling</div>
-          <div class="stat-val" style="color:var(--primary)">${inr(totals.allocated_amount)}</div>
+          <div class="stat-val financial-amount" style="color:var(--primary)">${inr(totals.allocated_amount)}</div>
           <div class="stat-desc">Approved Academic Year Ceiling</div>
         </div>
         <div class="stat-card success">
           <div class="stat-label">Approved &amp; Debited</div>
-          <div class="stat-val" style="color:var(--success)">${inr(totals.approved_amount)}</div>
+          <div class="stat-val financial-amount" style="color:var(--success)">${inr(totals.approved_amount)}</div>
           <div class="stat-desc">${totals.utilization_pct}% Utilized</div>
         </div>
         <div class="stat-card warning">
           <div class="stat-label">Pending Approval Pipeline</div>
-          <div class="stat-val" style="color:var(--warning)">${inr(totals.pending_amount)}</div>
+          <div class="stat-val financial-amount" style="color:var(--warning)">${inr(totals.pending_amount)}</div>
           <div class="stat-desc">In Multi-Tier Review</div>
         </div>
         <div class="stat-card accent">
           <div class="stat-label">Remaining Balance</div>
-          <div class="stat-val" style="color:${totals.available_amount < 0 ? 'var(--danger)' : 'var(--primary-blue)'}">
+          <div class="stat-val financial-amount" style="color:${totals.available_amount < 0 ? 'var(--danger)' : 'var(--primary-blue)'}">
             ${inr(totals.available_amount)}
           </div>
-          <div class="stat-desc">Available for New Proposals</div>
+          <div class="stat-desc">Available for New Proposals${totals.available_amount < 0 ? ' <span class="badge b-rejected" style="font-size:10px;padding:2px 5px;margin-left:4px;">Deficit</span>' : ''}</div>
         </div>
       </div>
     </div>
@@ -2495,7 +2730,7 @@ async function renderHome(main){
     const isEarnings = (line.category_name || '').toLowerCase().includes('grant') || (line.category_name || '').toLowerCase().includes('consultancy');
 
     html += `
-      <div class="category-accordion ${idx === 0 ? 'open' : ''}" id="cat-acc-${line.id}">
+      <div class="category-accordion" id="cat-acc-${line.id}">
         <div class="category-header" onclick="toggleAccordion('cat-acc-${line.id}')">
           <div class="category-name-group">
             <span class="category-chevron">▶</span>
@@ -2505,9 +2740,9 @@ async function renderHome(main){
             <span class="badge ${line.status === 'exceeded' ? 'b-rejected' : 'b-approved'}">${line.utilization_pct}%</span>
           </div>
           <div class="category-stats-summary">
-            <div><span class="muted">Allocated:</span> <strong>${inr(line.allocated_amount)}</strong></div>
-            <div><span class="muted">Approved:</span> <strong style="color:var(--success)">${inr(line.approved_amount)}</strong></div>
-            <div><span class="muted">Available:</span> <strong style="color:${line.available_amount < 0 ? 'var(--danger)' : 'var(--primary)'}">${inr(line.available_amount)}</strong></div>
+            <div><span class="muted">Allocated:</span> <strong class="financial-amount">${inr(line.allocated_amount)}</strong></div>
+            <div><span class="muted">Approved:</span> <strong style="color:var(--success)" class="financial-amount">${inr(line.approved_amount)}</strong></div>
+            <div><span class="muted">Available:</span> <strong style="color:${line.available_amount < 0 ? 'var(--danger)' : 'var(--primary)'}" class="financial-amount">${inr(line.available_amount)}</strong>${line.available_amount < 0 ? ' <span class="badge b-rejected" style="font-size:10px;padding:2px 5px;margin-left:4px;">Deficit</span>' : ''}</div>
             <div class="progress-wrap"><div class="progress-fill ${utilClass}" style="width:${Math.min(100, line.utilization_pct)}%"></div></div>
             ${isAdmin ? `
               <button class="secondary" style="padding:4px 8px;font-size:11px;" data-line-id="${line.id}" data-cat-name="${encodeURIComponent(line.category_name || '')}" data-alloc="${line.allocated_amount || 0}" onclick="event.stopPropagation(); onEditCategoryClick(this)">Edit</button>
@@ -2531,10 +2766,10 @@ async function renderHome(main){
               ${subcats.length > 0 ? subcats.map(sub => `
                 <tr>
                   <td><strong>${escapeHtml(sub.name || 'Particulars')}</strong></td>
-                  <td>${inr(sub.allocated_amount)}</td>
-                  <td style="color:var(--success)">${inr(sub.approved_amount)}</td>
-                  <td style="color:var(--warning)">${inr(sub.pending_amount)}</td>
-                  <td style="font-weight:700;color:${sub.available_amount < 0 ? 'var(--danger)' : 'var(--text)'}">${inr(sub.available_amount)}</td>
+                  <td class="financial-amount">${inr(sub.allocated_amount)}</td>
+                  <td style="color:var(--success)" class="financial-amount">${inr(sub.approved_amount)}</td>
+                  <td style="color:var(--warning)" class="financial-amount">${inr(sub.pending_amount)}</td>
+                  <td style="font-weight:700;color:${sub.available_amount < 0 ? 'var(--danger)' : 'var(--text)'}"><span class="financial-amount">${inr(sub.available_amount)}</span>${sub.available_amount < 0 ? ' <span class="badge b-rejected" style="font-size:10px;padding:2px 5px;margin-left:4px;">Deficit</span>' : ''}</td>
                   <td>
                     <div class="row" style="gap:6px">
                       <div class="progress-wrap"><div class="progress-fill ${sub.utilization_pct >= 100 ? 'danger' : sub.utilization_pct >= 80 ? 'warning' : 'safe'}" style="width:${Math.min(100, sub.utilization_pct)}%"></div></div>
@@ -2567,7 +2802,16 @@ function setBudgetTypeFilter(filter){
 
 function toggleAccordion(id){
   const el = document.getElementById(id);
-  if (el) el.classList.toggle('open');
+  if (!el) return;
+  const isOpen = el.classList.contains('open');
+  // Change 6 — Collapse all siblings first (single-accordion behaviour)
+  const parent = el.parentElement;
+  if (parent) {
+    [...parent.querySelectorAll('.category-accordion.open')].forEach(acc => {
+      if (acc !== el) acc.classList.remove('open');
+    });
+  }
+  el.classList.toggle('open', !isOpen);
 }
 
 // ---------------- ADMIN EDIT MODALS ----------------
@@ -3085,7 +3329,7 @@ async function renderInbox(main){
           <th>Title &amp; Proposer</th>
           <th>Department</th>
           <th>Category &amp; Subcategory</th>
-          <th>Amount</th>
+          <th class="nfa-amount-cell">Amount</th>
           <th>Current Status</th>
           <th>Action</th>
         </tr>
@@ -3103,7 +3347,7 @@ async function renderInbox(main){
           <strong>${escapeHtml(catName(n.budget_category_id))}</strong>
           ${n.budget_subcategory_name ? `<div class="muted">↳ ${escapeHtml(n.budget_subcategory_name)}</div>` : ''}
         </td>
-        <td><strong style="color:var(--primary);font-size:14px">${inr(n.total_amount)}</strong></td>
+        <td class="nfa-amount-cell"><strong style="color:var(--primary);font-size:14px">${inr(n.total_amount)}</strong></td>
         <td><span class="badge b-${n.status}">${fmtStatus(n.status)}</span></td>
         <td><button onclick="openNfa('${n.id}')">Review &amp; Decide →</button></td>
       </tr>
@@ -3134,7 +3378,7 @@ async function renderNfas(main){
             <th>Title</th>
             <th>Department</th>
             <th>Category &amp; Subcategory</th>
-            <th>Amount</th>
+            <th class="nfa-amount-cell">Amount</th>
             <th>Status</th>
             <th></th>
           </tr>
@@ -3155,7 +3399,7 @@ async function renderNfas(main){
             <strong>${escapeHtml(catName(n.budget_category_id))}</strong>
             ${n.budget_subcategory_name ? `<div class="muted">↳ ${escapeHtml(n.budget_subcategory_name)}</div>` : ''}
           </td>
-          <td><strong>${inr(n.total_amount)}</strong></td>
+          <td class="nfa-amount-cell"><strong>${inr(n.total_amount)}</strong></td>
           <td><span class="badge b-${n.status}">${fmtStatus(n.status)}</span></td>
           <td><button class="secondary" onclick="openNfa('${n.id}')">View Details →</button></td>
         </tr>
@@ -3866,7 +4110,25 @@ async function createNfa(andSubmit){
     };
   }).filter(i => i.particulars && i.amount > 0);
 
-  if (items.length === 0) return toast(nfaType === 'purchase' ? 'Add at least one purchase item with description, quantity, rate, and amount' : 'Add at least one event expense item with quantity, rate, and amount');
+  // Also capture sampling checkbox state (non-monetary – not in budget table rows) for edit mode
+  const samplingChecked = document.getElementById('edit_cb_particular_sampling')?.checked || document.getElementById('cb_particular_sampling')?.checked || false;
+  if (nfaType === 'event' && samplingChecked) {
+    items.push({
+      particulars: 'Sampling',
+      quantity: '',
+      rate: '',
+      amount: 0,
+      justification: '',
+      is_predefined: true,
+      predefined_key: 'sampling',
+      distance_km: undefined,
+      carry_back_arrangement: undefined,
+      sampling_required: true,
+      item_type: 'predefined'
+    });
+  }
+
+  if (items.filter(i => i.amount > 0).length === 0 && (!samplingChecked || nfaType === 'purchase')) return toast(nfaType === 'purchase' ? 'Add at least one purchase item with description, quantity, rate, and amount' : 'Add at least one event expense item with quantity, rate, and amount');
 
   // Strict Validation on Submission to HOD
   if (andSubmit) {
@@ -4283,6 +4545,39 @@ async function editNfaModal(id){
     <label class="field-label">Proposal Title</label>
     <input id="editTitle" value="${escapeHtml(n.title)}" />
 
+    <div class="row" style="margin-top:10px;">
+      <div style="flex:1">
+        <label class="field-label">Department</label>
+        <select id="editNfaDept">
+          ${renderDeptSelectOptions(n.department_id, false)}
+        </select>
+      </div>
+      <div style="flex:1">
+        <label class="field-label">Academic / Financial Year</label>
+        <select id="editNfaFy">
+          ${REF.financialYears.map(f => `<option value="${f.id}" ${f.id === n.financial_year_id ? 'selected' : ''}>${escapeHtml(f.label)}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;padding:14px;background:var(--section-bg);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:14px;">
+      <div class="row">
+        <div style="flex:1">
+          <label class="field-label" style="font-weight:700;color:var(--primary)">Budget Main Category</label>
+          <select id="editNfaCat" onchange="onEditCategorySelect(this.value)">
+            ${REF.categories.map(c => `<option value="${c.id}" ${c.id === n.budget_category_id ? 'selected' : ''}>${escapeHtml(c.name)}</option>`).join('')}
+          </select>
+        </div>
+        <div style="flex:1">
+          <label class="field-label" style="font-weight:700;color:var(--primary)">Budget Subcategory</label>
+          <select id="editNfaSubcat">
+            <option value="">— General Category Allocation —</option>
+            ${(REF.subcategories || []).filter(s => s.budget_category_id === n.budget_category_id).map(s => `<option value="${s.id}" ${s.id === n.budget_subcategory_id ? 'selected' : ''}>${escapeHtml(s.name)}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+    </div>
+
     <div class="card" style="padding:14px;background:var(--section-bg);border:1px solid var(--accent-border);margin-top:12px;margin-bottom:14px;">
       <label class="field-label" style="font-weight:700;color:var(--primary);margin:0 0 8px;">Select NFA Category Type</label>
       <div class="row" style="gap:14px;">
@@ -4464,6 +4759,14 @@ async function editNfaModal(id){
   initialApplyNfaSnapshot = captureApplyNfaSnapshot();
 }
 
+function onEditCategorySelect(catId){
+  const subSelect = document.getElementById('editNfaSubcat');
+  if (!subSelect) return;
+  const subs = (REF.subcategories || []).filter(s => s.budget_category_id === catId);
+  subSelect.innerHTML = `<option value="">— General Category Allocation —</option>` +
+    subs.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('');
+}
+
 async function saveNfaEdits(id){
   const title = document.getElementById('editTitle').value.trim();
   const nfaType = document.getElementById('editNfaTypePurchase')?.checked ? 'purchase' : 'event';
@@ -4471,6 +4774,13 @@ async function saveNfaEdits(id){
   const point2 = document.getElementById('editPoint2')?.value?.trim() || '';
   const point3 = document.getElementById('editPoint3')?.value?.trim() || '';
   const point4 = document.getElementById('editPoint4')?.value?.trim() || '';
+
+  const deptIdVal = document.getElementById('editNfaDept')?.value;
+  const fyIdVal = document.getElementById('editNfaFy')?.value;
+  const catIdVal = document.getElementById('editNfaCat')?.value;
+  const subcatIdVal = document.getElementById('editNfaSubcat')?.value;
+  const subcatOpt = document.getElementById('editNfaSubcat')?.selectedOptions[0];
+  const subcatNameVal = subcatOpt && subcatIdVal ? subcatOpt.text.replace(/\s*\(Available:.*\)/, '').trim() : '';
 
   if (!title) return toast('Proposal title is required');
 
@@ -4545,7 +4855,25 @@ async function saveNfaEdits(id){
     };
   }).filter(i => i.particulars && i.amount > 0);
 
-  if (items.length === 0) return toast(nfaType === 'purchase' ? 'Add at least one purchase item with description, quantity, rate, and amount' : 'Add at least one event expense item with quantity, rate, and amount');
+  // Also capture sampling checkbox state (non-monetary – not in budget table rows) for edit mode
+  const samplingChecked = document.getElementById('edit_cb_particular_sampling')?.checked || document.getElementById('cb_particular_sampling')?.checked || false;
+  if (nfaType === 'event' && samplingChecked) {
+    items.push({
+      particulars: 'Sampling',
+      quantity: '',
+      rate: '',
+      amount: 0,
+      justification: '',
+      is_predefined: true,
+      predefined_key: 'sampling',
+      distance_km: undefined,
+      carry_back_arrangement: undefined,
+      sampling_required: true,
+      item_type: 'predefined'
+    });
+  }
+
+  if (items.filter(i => i.amount > 0).length === 0 && (!samplingChecked || nfaType === 'purchase')) return toast(nfaType === 'purchase' ? 'Add at least one purchase item with description, quantity, rate, and amount' : 'Add at least one event expense item with quantity, rate, and amount');
 
   try {
     await api(`/nfas/${id}`, {
@@ -4553,6 +4881,11 @@ async function saveNfaEdits(id){
       body: {
         title,
         nfa_type: nfaType,
+        department_id: deptIdVal || undefined,
+        financial_year_id: fyIdVal || undefined,
+        budget_category_id: catIdVal || undefined,
+        budget_subcategory_id: subcatIdVal || null,
+        budget_subcategory_name: subcatNameVal || '',
         point1,
         point2,
         point3,
@@ -4678,29 +5011,69 @@ async function renderBudgets(main){
   }
   const deptId = isInstitutionalRole ? (selectedBudgetDeptId || REF.departments[0]?.id) : (USER.department_id || REF.departments[0]?.id);
   const fy = activeFy();
-  const summary = await api(`/budgets/${deptId}/summary?fy=${fy.id}`);
-  const isAdmin = USER.role === 'super_admin';
 
-  let html = `
+  const summary = await api(`/budgets/${deptId}/summary?fy=${fy.id}`);
+
+  const isAdmin = USER.role === 'super_admin';
+  let html = '';
+
+  // SELECTED DEPARTMENT MASTER BUDGET (DISPLAYED FOR ALL ROLES, BUT RESTRICTED TO OWN DEPT FOR FACULTY/HOD)
+  const dTotals = summary.totals;
+  html += `
     <div class="card">
       <div class="card-header">
         <div>
-          <h2 class="card-title">Department Master Budget — ${fy.label}</h2>
-          <div class="card-sub">${deptName(deptId)}</div>
+          <h2 class="card-title">${isInstitutionalRole ? 'Department Budget Details' : 'Department Master Budget'} — ${escapeHtml(fy.label)}</h2>
+          <div class="card-sub">${escapeHtml(deptName(deptId))}</div>
         </div>
-        <div class="row">
-          <select style="max-width:280px;margin-bottom:0;" onchange="changeBudgetDept(this.value)">
-            ${renderDeptSelectOptions(deptId, false)}
-          </select>
+        <div class="row" style="align-items:center;gap:10px;flex-wrap:wrap;">
+          ${isInstitutionalRole ? `
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span class="muted" style="font-size:12px;font-weight:600;">Department:</span>
+              <select style="max-width:280px;margin-bottom:0;" onchange="changeBudgetDept(this.value)">
+                ${renderDeptSelectOptions(deptId, false)}
+              </select>
+            </div>
+          ` : ''}
           ${isAdmin ? `
             <button class="gold" onclick="openPrivateBudgetUploadModal()">Upload Private University Budget (.xlsx)</button>
             <button class="secondary" onclick="exportBudgetReport('${deptId}')">Export Excel</button>
+            <button class="secondary" onclick="exportBudgetReport('all')">Export All Departments Excel</button>
           ` : ''}
           ${['super_admin', 'director', 'finance'].includes(USER.role) ? `
             <button class="secondary" onclick="openRolloverModal()">Annual Rollover</button>
           ` : ''}
         </div>
       </div>
+
+      <!-- Four Department Budget Cards -->
+      <div class="grid-4" style="margin-bottom:20px;">
+        <div class="stat-card primary">
+          <div class="stat-label">Allocated Budget</div>
+          <div class="stat-val financial-amount" style="color:var(--primary);">${inr(dTotals.allocated_amount)}</div>
+          <div class="stat-desc">Approved Academic Ceiling</div>
+        </div>
+        <div class="stat-card success">
+          <div class="stat-label">Approved Amount</div>
+          <div class="stat-val financial-amount" style="color:var(--success);">${inr(dTotals.approved_amount)}</div>
+          <div class="stat-desc">${dTotals.utilization_pct}% Utilized</div>
+        </div>
+        <div class="stat-card warning">
+          <div class="stat-label">Pending Amount</div>
+          <div class="stat-val financial-amount" style="color:var(--warning);">${inr(dTotals.pending_amount)}</div>
+          <div class="stat-desc">Reserved in Active Proposals</div>
+        </div>
+        <div class="stat-card accent">
+          <div class="stat-label">Remaining Budget</div>
+          <div class="stat-val financial-amount" style="color:${dTotals.available_amount < 0 ? 'var(--danger)' : 'var(--primary-blue)'};">
+            ${inr(dTotals.available_amount)}
+          </div>
+          <div class="stat-desc">Available for New Proposals${dTotals.is_deficit ? ' <span class="badge b-rejected" style="font-size:10px;padding:2px 5px;margin-left:4px;">Deficit</span>' : ''}</div>
+        </div>
+      </div>
+
+      <!-- Categories & Subcategories Accordion -->
+      ${summary.lines.length === 0 ? `<div class="muted" style="text-align:center;padding:32px 16px;">No budget categories allocated for this department in ${escapeHtml(fy.label)}.</div>` : ''}
   `;
 
   summary.lines.forEach((line, idx) => {
@@ -4709,7 +5082,7 @@ async function renderBudgets(main){
     const isCapex = (line.category_name || '').toLowerCase().includes('capex');
 
     html += `
-      <div class="category-accordion ${idx === 0 ? 'open' : ''}" id="bgt-acc-${line.id}">
+      <div class="category-accordion" id="bgt-acc-${line.id}">
         <div class="category-header" onclick="toggleAccordion('bgt-acc-${line.id}')">
           <div class="category-name-group">
             <span class="category-chevron">▶</span>
@@ -4718,10 +5091,10 @@ async function renderBudgets(main){
             <span class="badge ${line.status === 'exceeded' ? 'b-rejected' : 'b-approved'}">${line.utilization_pct}%</span>
           </div>
           <div class="category-stats-summary">
-            <div><span class="muted">Allocated:</span> <strong>${inr(line.allocated_amount)}</strong></div>
-            <div><span class="muted">Approved:</span> <strong style="color:var(--success)">${inr(line.approved_amount)}</strong></div>
-            <div><span class="muted">Pending:</span> <strong style="color:var(--warning)">${inr(line.pending_amount)}</strong></div>
-            <div><span class="muted">Available:</span> <strong style="color:${line.available_amount < 0 ? 'var(--danger)' : 'var(--primary)'}">${inr(line.available_amount)}</strong></div>
+            <div><span class="muted">Allocated:</span> <strong class="financial-amount">${inr(line.allocated_amount)}</strong></div>
+            <div><span class="muted">Approved:</span> <strong style="color:var(--success)" class="financial-amount">${inr(line.approved_amount)}</strong></div>
+            <div><span class="muted">Pending:</span> <strong style="color:var(--warning)" class="financial-amount">${inr(line.pending_amount)}</strong></div>
+            <div><span class="muted">Available:</span> <strong style="color:${line.available_amount < 0 ? 'var(--danger)' : 'var(--primary)'}" class="financial-amount">${inr(line.available_amount)}</strong>${line.available_amount < 0 ? ' <span class="badge b-rejected" style="font-size:10px;padding:2px 5px;margin-left:4px;">Deficit</span>' : ''}</div>
             <div class="progress-wrap"><div class="progress-fill ${utilClass}" style="width:${Math.min(100, line.utilization_pct)}%"></div></div>
             ${isAdmin ? `
               <button class="secondary" style="padding:4px 8px;font-size:11px;" data-line-id="${line.id}" data-cat-name="${encodeURIComponent(line.category_name || '')}" data-alloc="${line.allocated_amount || 0}" onclick="event.stopPropagation(); onEditCategoryClick(this)">Edit</button>
@@ -4729,41 +5102,43 @@ async function renderBudgets(main){
           </div>
         </div>
         <div class="category-subtable">
-          <table>
-            <thead>
-              <tr>
-                <th>Subcategory Item</th>
-                <th>Allocated Budget</th>
-                <th>Approved &amp; Debited</th>
-                <th>Pending Review</th>
-                <th>Remaining Balance</th>
-                <th>Utilization</th>
-                ${isAdmin ? `<th>Action</th>` : ''}
-              </tr>
-            </thead>
-            <tbody>
-              ${subcats.length > 0 ? subcats.map(sub => `
+          <div class="table-container" style="overflow-x:auto;">
+            <table>
+              <thead>
                 <tr>
-                  <td><strong>${escapeHtml(sub.name || 'Particulars')}</strong></td>
-                  <td>${inr(sub.allocated_amount)}</td>
-                  <td style="color:var(--success)">${inr(sub.approved_amount)}</td>
-                  <td style="color:var(--warning)">${inr(sub.pending_amount)}</td>
-                  <td style="font-weight:700;color:${sub.available_amount < 0 ? 'var(--danger)' : 'var(--text)'}">${inr(sub.available_amount)}</td>
-                  <td>
-                    <div class="row" style="gap:6px">
-                      <div class="progress-wrap"><div class="progress-fill ${sub.utilization_pct >= 100 ? 'danger' : sub.utilization_pct >= 80 ? 'warning' : 'safe'}" style="width:${Math.min(100, sub.utilization_pct)}%"></div></div>
-                      <span class="muted" style="font-size:11px">${sub.utilization_pct}%</span>
-                    </div>
-                  </td>
-                  ${isAdmin ? `
-                    <td>
-                      <button class="secondary" style="padding:3px 7px;font-size:11px;" data-sub-id="${sub.id}" data-sub-name="${encodeURIComponent(sub.name || '')}" data-alloc="${sub.allocated_amount || 0}" onclick="onEditSubcategoryClick(this)">Edit</button>
-                    </td>
-                  ` : ''}
+                  <th>Subcategory Item</th>
+                  <th style="text-align:right;">Allocated Budget</th>
+                  <th style="text-align:right;">Approved &amp; Debited</th>
+                  <th style="text-align:right;">Pending Review</th>
+                  <th style="text-align:right;">Remaining Balance</th>
+                  <th>Utilization</th>
+                  ${isAdmin ? `<th>Action</th>` : ''}
                 </tr>
-              `).join('') : `<tr><td colspan="${isAdmin?7:6}" class="muted">No specific subcategories registered.</td></tr>`}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                ${subcats.length > 0 ? subcats.map(sub => `
+                  <tr>
+                    <td><strong>${escapeHtml(sub.name || 'Particulars')}</strong></td>
+                    <td style="text-align:right;" class="financial-amount">${inr(sub.allocated_amount)}</td>
+                    <td style="text-align:right;color:var(--success);" class="financial-amount">${inr(sub.approved_amount)}</td>
+                    <td style="text-align:right;color:var(--warning);" class="financial-amount">${inr(sub.pending_amount)}</td>
+                    <td style="text-align:right;font-weight:700;color:${sub.available_amount < 0 ? 'var(--danger)' : 'var(--text)'};"><span class="financial-amount">${inr(sub.available_amount)}</span>${sub.available_amount < 0 ? ' <span class="badge b-rejected" style="font-size:10px;padding:2px 5px;margin-left:4px;">Deficit</span>' : ''}</td>
+                    <td>
+                      <div class="row" style="gap:6px">
+                        <div class="progress-wrap"><div class="progress-fill ${sub.utilization_pct >= 100 ? 'danger' : sub.utilization_pct >= 80 ? 'warning' : 'safe'}" style="width:${Math.min(100, sub.utilization_pct)}%"></div></div>
+                        <span class="muted" style="font-size:11px">${sub.utilization_pct}%</span>
+                      </div>
+                    </td>
+                    ${isAdmin ? `
+                      <td>
+                        <button class="secondary" style="padding:3px 7px;font-size:11px;" data-sub-id="${sub.id}" data-sub-name="${encodeURIComponent(sub.name || '')}" data-alloc="${sub.allocated_amount || 0}" onclick="onEditSubcategoryClick(this)">Edit</button>
+                      </td>
+                    ` : ''}
+                  </tr>
+                `).join('') : `<tr><td colspan="${isAdmin?7:6}" class="muted">No specific subcategories registered.</td></tr>`}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     `;
@@ -4775,6 +5150,7 @@ async function renderBudgets(main){
 
 async function changeBudgetDept(deptId){
   selectedBudgetDeptId = deptId;
+  selectedDashboardDeptId = deptId;
   const main = document.getElementById('main');
   main.innerHTML = '<div class="card muted" style="text-align:center;padding:40px;">Loading department budget...</div>';
   await renderBudgets(main);
@@ -5317,6 +5693,10 @@ function openModal(html){
   document.body.classList.add('modal-open');
 }
 function closeModal(){
+  if (currentSigBlobUrl) {
+    try { URL.revokeObjectURL(currentSigBlobUrl); } catch(e){}
+    currentSigBlobUrl = null;
+  }
   activeModalType = null;
   dismissUnsavedConfirmation();
   document.getElementById('modalBg').style.display = 'none';

@@ -462,6 +462,71 @@ budgetsRouter.put('/subcategory/:id', requireRole('super_admin'), async (req: Au
 });
 
 /**
+ * GET /api/budgets/school/overview?fy=<financial_year_id>
+ * School-wide aggregated budget overview: Total Allocated, Total Approved, Total Pending, Total Remaining
+ * and all-department summary table for authorized senior officials (Director, Dean, Associate Dean, Finance, Super Admin).
+ */
+budgetsRouter.get('/school/overview', (req: AuthedRequest, res) => {
+  const isSenior = ['super_admin', 'director', 'finance', 'dean', 'associate_dean'].includes(req.user!.role);
+  if (!isSenior) {
+    return res.status(403).json({ error: 'Forbidden: School-wide budget overview is restricted to senior institutional officials' });
+  }
+
+  let fyId = String(req.query.fy || store.data.financial_years.find((f) => f.is_active)?.id);
+  const fyObj = store.data.financial_years.find((f) => f.id === fyId || f.label === fyId);
+  if (fyObj) fyId = fyObj.id;
+
+  const allLines = store.data.department_budgets.filter((b) => b.financial_year_id === fyId);
+
+  // Filter to verified active academic departments and Centres of Excellence (exactly 13 units; excludes DRAS)
+  const validDepartments = store.data.departments.filter(
+    (dept) => dept.is_active && (dept.category === 'academic' || dept.category === 'coe')
+  );
+
+  const deptSummaries = validDepartments.map((dept) => {
+    const deptLines = allLines.filter((b) => b.department_id === dept.id);
+    const allocated = deptLines.reduce((sum, l) => sum + (Number(l.allocated_amount) || 0), 0);
+    const approved = deptLines.reduce((sum, l) => sum + (Number(l.approved_amount) || 0), 0);
+    const pending = deptLines.reduce((sum, l) => sum + (Number(l.pending_amount) || 0), 0);
+    const remaining = allocated - approved - pending;
+    const utilizationPct = allocated > 0 ? Math.round((approved / allocated) * 10000) / 100 : (approved > 0 ? 100 : 0);
+    return {
+      department_id: dept.id,
+      department_name: dept.name,
+      department_code: dept.code,
+      allocated_amount: allocated,
+      approved_amount: approved,
+      pending_amount: pending,
+      remaining_amount: remaining,
+      utilization_pct: utilizationPct,
+      is_deficit: remaining < 0,
+      deficit_amount: remaining < 0 ? Math.abs(remaining) : 0,
+      has_budget: deptLines.length > 0,
+    };
+  });
+
+  const totalAllocated = deptSummaries.reduce((sum, d) => sum + d.allocated_amount, 0);
+  const totalApproved = deptSummaries.reduce((sum, d) => sum + d.approved_amount, 0);
+  const totalPending = deptSummaries.reduce((sum, d) => sum + d.pending_amount, 0);
+  const totalRemaining = totalAllocated - totalApproved - totalPending;
+  const totalUtilPct = totalAllocated > 0 ? Math.round((totalApproved / totalAllocated) * 10000) / 100 : (totalApproved > 0 ? 100 : 0);
+
+  res.json({
+    financial_year: fyObj || { id: fyId, label: 'Current' },
+    totals: {
+      allocated_amount: totalAllocated,
+      approved_amount: totalApproved,
+      pending_amount: totalPending,
+      remaining_amount: totalRemaining,
+      utilization_pct: totalUtilPct,
+      is_deficit: totalRemaining < 0,
+      deficit_amount: totalRemaining < 0 ? Math.abs(totalRemaining) : 0,
+    },
+    departments: deptSummaries,
+  });
+});
+
+/**
  * GET /api/budgets/:department/summary?fy=<financial_year_id>
  * Master department budget view: allocated / approved / reserved / financial_remaining / available per category and subcategory.
  */
@@ -469,6 +534,11 @@ budgetsRouter.get('/:department/summary', (req: AuthedRequest, res) => {
   const deptParam = req.params.department;
   const dept = store.data.departments.find((d) => d.id === deptParam || d.code.toLowerCase() === deptParam.toLowerCase());
   const deptId = dept ? dept.id : deptParam;
+
+  const isSenior = ['super_admin', 'director', 'finance', 'dean', 'associate_dean'].includes(req.user!.role);
+  if (!isSenior && req.user!.department_id !== deptId) {
+    return res.status(403).json({ error: 'Forbidden: You do not have permission to view budget data for this department' });
+  }
 
   let fyId = String(req.query.fy || store.data.financial_years.find((f) => f.is_active)?.id);
   const fyObj = store.data.financial_years.find((f) => f.id === fyId || f.label === fyId);
@@ -479,33 +549,52 @@ budgetsRouter.get('/:department/summary', (req: AuthedRequest, res) => {
 
   const out = lines.map((line) => {
     const cat = store.data.budget_categories.find((c) => c.id === line.budget_category_id);
-    const avail = Math.max(0, line.allocated_amount - line.approved_amount - line.pending_amount);
-    const finRemaining = Math.max(0, line.allocated_amount - line.approved_amount);
-    const utilPct = line.allocated_amount > 0 ? Math.round((line.approved_amount / line.allocated_amount) * 10000) / 100 : 0;
+    const lineAlloc = Number(line.allocated_amount) || 0;
+    const lineAppr = Number(line.approved_amount) || 0;
+    const linePend = Number(line.pending_amount) || 0;
+    const avail = lineAlloc - lineAppr - linePend;
+    const finRemaining = lineAlloc - lineAppr;
+    const utilPct = lineAlloc > 0 ? Math.round((lineAppr / lineAlloc) * 10000) / 100 : (lineAppr > 0 ? 100 : 0);
+    const isLineDeficit = avail < 0;
 
     const subcats = allSubcats
       .filter((s) => s.budget_category_id === line.budget_category_id && (s.department_id === deptId || (!s.department_id && deptId === 'b5643609-22d9-4b21-9ce0-2f6eb5b9d04e')))
       .map((s) => {
-        const subAvail = Math.max(0, s.allocated_amount - s.approved_amount - s.pending_amount);
-        const subFinRem = Math.max(0, s.allocated_amount - s.approved_amount);
-        const subUtil = s.allocated_amount > 0 ? Math.round((s.approved_amount / s.allocated_amount) * 10000) / 100 : 0;
+        const subAlloc = Number(s.allocated_amount) || 0;
+        const subAppr = Number(s.approved_amount) || 0;
+        const subPend = Number(s.pending_amount) || 0;
+        const subAvail = subAlloc - subAppr - subPend;
+        const subFinRem = subAlloc - subAppr;
+        const subUtil = subAlloc > 0 ? Math.round((subAppr / subAlloc) * 10000) / 100 : (subAppr > 0 ? 100 : 0);
+        const isSubDeficit = subAvail < 0;
         return {
           ...s,
-          reserved_amount: s.pending_amount,
+          allocated_amount: subAlloc,
+          approved_amount: subAppr,
+          pending_amount: subPend,
+          reserved_amount: subPend,
           financial_remaining: subFinRem,
           available_amount: subAvail,
           utilization_pct: subUtil,
+          is_deficit: isSubDeficit,
+          deficit_amount: isSubDeficit ? Math.abs(subAvail) : 0,
+          status: isSubDeficit ? 'exceeded' : subUtil >= 100 ? 'exceeded' : subUtil >= 80 ? 'warning' : 'healthy',
         };
       });
 
     return {
       ...line,
+      allocated_amount: lineAlloc,
+      approved_amount: lineAppr,
+      pending_amount: linePend,
       category_name: cat ? cat.name : 'General Category',
-      reserved_amount: line.pending_amount,
+      reserved_amount: linePend,
       financial_remaining: finRemaining,
       available_amount: avail,
       utilization_pct: utilPct,
-      status: utilPct >= 100 ? 'exceeded' : utilPct >= 80 ? 'warning' : 'healthy',
+      is_deficit: isLineDeficit,
+      deficit_amount: isLineDeficit ? Math.abs(avail) : 0,
+      status: isLineDeficit ? 'exceeded' : utilPct >= 100 ? 'exceeded' : utilPct >= 80 ? 'warning' : 'healthy',
       subcategories: subcats,
     };
   });
@@ -516,31 +605,40 @@ budgetsRouter.get('/:department/summary', (req: AuthedRequest, res) => {
       approved_amount: acc.approved_amount + l.approved_amount,
       pending_amount: acc.pending_amount + l.pending_amount,
       reserved_amount: acc.reserved_amount + l.pending_amount,
-      financial_remaining: acc.financial_remaining + (l.allocated_amount - l.approved_amount),
-      available_amount: acc.available_amount + (l.allocated_amount - l.approved_amount - l.pending_amount),
+      financial_remaining: acc.financial_remaining + l.financial_remaining,
+      available_amount: acc.available_amount + l.available_amount,
     }),
     { allocated_amount: 0, approved_amount: 0, pending_amount: 0, reserved_amount: 0, financial_remaining: 0, available_amount: 0 }
   );
 
   const totalAlloc = totals.allocated_amount;
-  const totalUtilPct = totalAlloc > 0 ? Math.round((totals.approved_amount / totalAlloc) * 10000) / 100 : 0;
+  const totalUtilPct = totalAlloc > 0 ? Math.round((totals.approved_amount / totalAlloc) * 10000) / 100 : (totals.approved_amount > 0 ? 100 : 0);
+  const totalAvail = totals.allocated_amount - totals.approved_amount - totals.pending_amount;
+  const totalFinRem = totals.allocated_amount - totals.approved_amount;
 
   res.json({
     lines: out,
     totals: {
       ...totals,
-      financial_remaining: Math.max(0, totals.allocated_amount - totals.approved_amount),
-      available_amount: Math.max(0, totals.allocated_amount - totals.approved_amount - totals.pending_amount),
+      financial_remaining: totalFinRem,
+      available_amount: totalAvail,
+      is_deficit: totalAvail < 0,
+      deficit_amount: totalAvail < 0 ? Math.abs(totalAvail) : 0,
       utilization_pct: totalUtilPct,
     },
   });
 });
 
 /** GET /api/budgets/:department - raw budget lines (all financial years) */
-budgetsRouter.get('/:department', (req, res) => {
+budgetsRouter.get('/:department', (req: AuthedRequest, res) => {
   const deptParam = req.params.department;
   const dept = store.data.departments.find((d) => d.id === deptParam || d.code.toLowerCase() === deptParam.toLowerCase());
   const deptId = dept ? dept.id : deptParam;
+
+  const isSenior = ['super_admin', 'director', 'finance', 'dean', 'associate_dean'].includes(req.user!.role);
+  if (!isSenior && req.user!.department_id !== deptId) {
+    return res.status(403).json({ error: 'Forbidden: You do not have permission to view budget data for this department' });
+  }
   res.json(store.data.department_budgets.filter((b) => b.department_id === deptId));
 });
 

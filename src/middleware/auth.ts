@@ -13,12 +13,16 @@ export function signToken(user: { id: string; role: Role; department_id: string 
 }
 
 export function requireAuth(req: AuthedRequest, res: Response, next: NextFunction) {
+  let token: string | undefined;
   const header = req.headers.authorization;
-  if (!header || !header.startsWith('Bearer ')) {
+  if (header && header.startsWith('Bearer ')) {
+    token = header.slice('Bearer '.length);
+  }
+
+  if (!token) {
     return res.status(401).json({ error: 'Missing or invalid Authorization header' });
   }
   try {
-    const token = header.slice('Bearer '.length);
     req.user = jwt.verify(token, JWT_SECRET) as any;
     next();
   } catch {

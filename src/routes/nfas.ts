@@ -135,6 +135,12 @@ nfasRouter.get('/:id/attachments/:type/:index?', (req: AuthedRequest, res) => {
   const isCreator = nfa.created_by === u.id;
   const isSameDept = nfa.department_id === u.department_id;
 
+  if (u.role === 'faculty' && !isCreator) {
+    return res.status(403).json({ error: 'You are only authorized to access attachments of your own NFAs' });
+  }
+  if ((u.role === 'hod' || u.role === 'it_admin') && !isSameDept) {
+    return res.status(403).json({ error: 'You are only authorized to access attachments from your own department' });
+  }
   if (!isPrivileged && !isCreator && !isSameDept) {
     return res.status(403).json({ error: 'Not authorized to access this attachment' });
   }
@@ -224,7 +230,7 @@ nfasRouter.get('/inbox', (req: AuthedRequest, res) => {
 nfasRouter.get('/', (req: AuthedRequest, res) => {
   let list = store.data.nfas;
   const { role, id, department_id } = req.user!;
-  if (role === 'faculty') list = list.filter((n) => n.created_by === id || n.department_id === department_id);
+  if (role === 'faculty') list = list.filter((n) => n.created_by === id);
   else if (role === 'hod' || role === 'it_admin') list = list.filter((n) => n.department_id === department_id);
   // dean, associate_dean, director, finance, super_admin see all departments
   if (req.query.status) list = list.filter((n) => n.status === req.query.status);
@@ -270,16 +276,34 @@ nfasRouter.get('/next-ref', (req: AuthedRequest, res) => {
 });
 
 /** GET /api/nfas/:id */
-nfasRouter.get('/:id', (req, res) => {
+nfasRouter.get('/:id', (req: AuthedRequest, res) => {
   const nfa = store.data.nfas.find((n) => n.id === req.params.id);
   if (!nfa) return res.status(404).json({ error: 'NFA not found' });
+  if (req.user) {
+    const { role, id, department_id } = req.user;
+    if (role === 'faculty' && nfa.created_by !== id) {
+      return res.status(403).json({ error: 'You are only authorized to view your own NFAs' });
+    }
+    if ((role === 'hod' || role === 'it_admin') && nfa.department_id !== department_id) {
+      return res.status(403).json({ error: 'You can only view NFAs from your own department' });
+    }
+  }
   res.json({ ...nfa, items: withItems(nfa.id), approvals: withApprovals(nfa.id) });
 });
 
 /** GET /api/nfas/:id/pdf */
-nfasRouter.get('/:id/pdf', (req, res) => {
+nfasRouter.get('/:id/pdf', (req: AuthedRequest, res) => {
   const nfa = store.data.nfas.find((n) => n.id === req.params.id);
   if (!nfa) return res.status(404).json({ error: 'NFA not found' });
+  if (req.user) {
+    const { role, id, department_id } = req.user;
+    if (role === 'faculty' && nfa.created_by !== id) {
+      return res.status(403).json({ error: 'You are only authorized to download your own NFAs' });
+    }
+    if ((role === 'hod' || role === 'it_admin') && nfa.department_id !== department_id) {
+      return res.status(403).json({ error: 'You can only download NFAs from your own department' });
+    }
+  }
   const dept = store.data.departments.find((d) => d.id === nfa.department_id) || {
     id: nfa.department_id,
     name: (nfa as any).custom_department_name || 'Department',
@@ -589,24 +613,32 @@ nfasRouter.post('/', requireRole('faculty', 'hod', 'dean', 'super_admin'), (req:
 
 /**
  * PUT /api/nfas/:id — Edit NFA:
- * - Faculty (proposer) can edit while draft, revision_required, or submitted
- * - HOD can review & edit while submitted
- * - Dean & Associate Dean can review & edit while dean_review
- * - Super admin can edit anytime
+ * - Faculty (proposer) can edit until final approval
+ * - HOD can review & edit while in department review
+ * - Dean & Associate Dean can review & edit while in dean review
+ * - Super admin can edit anytime pre-approval
+ * - Post-approval editing is locked (must use /revise)
  */
 nfasRouter.put('/:id', async (req: AuthedRequest, res) => {
   const result = await store.transact((db) => {
     const nfa = db.nfas.find((n) => n.id === req.params.id);
     if (!nfa) return { error: 404 as const };
 
+    if (nfa.status === 'approved') {
+      return { error: 400 as const, msg: 'This NFA is already approved. Direct editing is locked; please use the formal budget revision route.' };
+    }
+    if (nfa.status === 'rejected') {
+      return { error: 400 as const, msg: 'This NFA has been rejected. Direct editing is locked.' };
+    }
+
     const isOwner = nfa.created_by === req.user!.id;
-    const isHod = req.user!.role === 'hod' && req.user!.department_id === nfa.department_id && ['submitted', 'under_review'].includes(nfa.status);
-    const isDean = ['dean', 'associate_dean'].includes(req.user!.role) && ['under_review', 'dean_review'].includes(nfa.status);
+    const isHod = req.user!.role === 'hod' && req.user!.department_id === nfa.department_id;
+    const isDean = ['dean', 'associate_dean'].includes(req.user!.role);
     const isSuperAdmin = req.user!.role === 'super_admin';
-    const canOwnerEdit = isOwner && ['draft', 'revision_required', 'submitted'].includes(nfa.status);
+    const canOwnerEdit = isOwner && !['approved', 'rejected'].includes(nfa.status);
 
     if (!canOwnerEdit && !isHod && !isDean && !isSuperAdmin) {
-      return { error: 403 as const };
+      return { error: 403 as const, msg: 'Not authorized to edit this NFA' };
     }
 
     const b = req.body || {};
@@ -623,6 +655,204 @@ nfasRouter.put('/:id', async (req: AuthedRequest, res) => {
     if (b.point4 && countWords(b.point4) > 50) {
       return { error: 400 as const, msg: `Point 4 (Expenditure Statement) exceeds the 50-word limit (${countWords(b.point4)}/50)` };
     }
+
+    // Capture old financial coordinates
+    const oldDeptId = nfa.department_id;
+    const oldFyId = nfa.financial_year_id;
+    const oldCatId = nfa.budget_category_id;
+    const oldSubcatId = nfa.budget_subcategory_id;
+    const oldSubcatName = (nfa as any).budget_subcategory_name;
+    const oldAmount = nfa.total_amount;
+    const oldStatus = nfa.status;
+    const hasActiveReservation = !['draft', 'revision_required'].includes(oldStatus);
+
+    let targetDeptId = oldDeptId;
+    if (b.department_id && b.department_id !== oldDeptId) {
+      if (req.user!.role === 'super_admin' || req.user!.department_id === b.department_id) {
+        targetDeptId = b.department_id;
+      } else {
+        return { error: 403 as const, msg: 'You can only assign NFAs to your authorized department' };
+      }
+    }
+
+    let targetFyId = oldFyId;
+    if (b.financial_year_id && db.financial_years.some((f) => f.id === b.financial_year_id)) {
+      targetFyId = b.financial_year_id;
+    }
+
+    const targetCatId = b.budget_category_id !== undefined ? b.budget_category_id : oldCatId;
+    const targetSubcatId = b.budget_subcategory_id !== undefined ? b.budget_subcategory_id : oldSubcatId;
+    const targetSubcatName = b.budget_subcategory_name !== undefined ? b.budget_subcategory_name : oldSubcatName;
+
+    // Compute updated total amount from items if provided
+    const targetType = (b.nfa_type !== undefined ? b.nfa_type : nfa.nfa_type) === 'purchase' ? 'purchase' : 'event';
+    const isPurchase = targetType === 'purchase';
+    let newTotalAmount = oldAmount;
+
+    let updatedItems: any[] | null = null;
+    if (Array.isArray(b.items)) {
+      updatedItems = [];
+      b.items.forEach((it: any, i: number) => {
+        const qtyNum = Number(it.quantity);
+        const rateNum = Number(it.rate);
+        let computedAmount = Number(it.amount) || 0;
+        if (!isNaN(qtyNum) && qtyNum > 0 && !isNaN(rateNum) && rateNum >= 0) {
+          computedAmount = Math.round(qtyNum * rateNum * 100) / 100;
+        }
+        if (isNaN(computedAmount) || !isFinite(computedAmount) || computedAmount < 0) {
+          computedAmount = 0;
+        }
+        const isPredefined = !isPurchase && Boolean(it.is_predefined);
+        const isSampling = !isPurchase && (Boolean(it.sampling_required) || it.predefined_key === 'sampling');
+        if (isSampling) {
+          computedAmount = 0; // Sampling has zero financial budget impact
+        }
+        updatedItems!.push({
+          id: it.id || uuid(),
+          nfa_id: nfa.id,
+          sl_no: i + 1,
+          particulars: String(it.particulars || '').trim(),
+          quantity: isSampling ? '' : (it.quantity !== undefined && it.quantity !== null ? String(it.quantity).trim() : ''),
+          rate: isSampling ? '' : (it.rate !== undefined && it.rate !== null ? String(it.rate).trim() : ''),
+          amount: computedAmount,
+          comments: it.comments || '',
+          justification: it.justification || '',
+          basis_of_budget: it.basis_of_budget || '',
+          previous_year_budget: Number(it.previous_year_budget) || 0,
+          previous_year_actual: Number(it.previous_year_actual) || 0,
+          is_predefined: isPredefined,
+          predefined_key: isPredefined ? (it.predefined_key || undefined) : undefined,
+          distance_km: isPredefined ? (it.distance_km || undefined) : undefined,
+          carry_back_arrangement: isPredefined ? (it.carry_back_arrangement || undefined) : undefined,
+          sampling_required: isSampling,
+          item_type: isPurchase ? 'purchase' : (isPredefined ? 'predefined' : 'custom'),
+        });
+      });
+      newTotalAmount = updatedItems.reduce((s: number, it: any) => s + (Number(it.amount) || 0), 0);
+    }
+
+    const financialChanged = (
+      targetDeptId !== oldDeptId ||
+      targetFyId !== oldFyId ||
+      targetCatId !== oldCatId ||
+      targetSubcatId !== oldSubcatId ||
+      newTotalAmount !== oldAmount
+    );
+
+    // If submitted and financial details changed: atomically adjust reservation and return to HOD review
+    if (hasActiveReservation && financialChanged) {
+      // 1. Release old reservation
+      releaseNfaReservation(
+        db,
+        {
+          id: nfa.id,
+          department_id: oldDeptId,
+          financial_year_id: oldFyId,
+          budget_category_id: oldCatId,
+          budget_subcategory_id: oldSubcatId,
+          budget_subcategory_name: oldSubcatName,
+          total_amount: oldAmount,
+          ref_no: nfa.ref_no,
+        },
+        {
+          changed_by: req.user!.id,
+          role: req.user!.role,
+          reason: `NFA updated: adjusting budget reservation from ₹${oldAmount.toLocaleString('en-IN')} to ₹${newTotalAmount.toLocaleString('en-IN')}`,
+        }
+      );
+
+      // 2. Reserve new amount on target line
+      try {
+        reserveNfaBudget(
+          db,
+          {
+            id: nfa.id,
+            department_id: targetDeptId,
+            financial_year_id: targetFyId,
+            budget_category_id: targetCatId,
+            budget_subcategory_id: targetSubcatId,
+            budget_subcategory_name: targetSubcatName,
+            total_amount: newTotalAmount,
+            ref_no: nfa.ref_no,
+          },
+          {
+            changed_by: req.user!.id,
+            role: req.user!.role,
+          }
+        );
+      } catch (err: any) {
+        // Rollback: re-reserve old line
+        reserveNfaBudget(
+          db,
+          {
+            id: nfa.id,
+            department_id: oldDeptId,
+            financial_year_id: oldFyId,
+            budget_category_id: oldCatId,
+            budget_subcategory_id: oldSubcatId,
+            budget_subcategory_name: oldSubcatName,
+            total_amount: oldAmount,
+            ref_no: nfa.ref_no,
+          },
+          {
+            changed_by: req.user!.id,
+            role: req.user!.role,
+          }
+        );
+        return { error: 400 as const, msg: `Budget allocation check failed: ${err.message}` };
+      }
+
+      // Requirement: Return NFA to HOD review for fresh approvals when financial details change
+      nfa.status = 'submitted';
+      db.audit_logs.push({
+        id: uuid(),
+        entity_type: 'nfa',
+        entity_id: nfa.id,
+        department_id: targetDeptId,
+        old_amount: oldAmount,
+        new_amount: newTotalAmount,
+        difference: newTotalAmount - oldAmount,
+        changed_by: req.user!.id,
+        role: req.user!.role,
+        reason: `Financial details edited (amount/category/department/FY). Reset to HOD review for fresh approvals.`,
+        source: 'portal',
+        approval_status: 'submitted',
+        created_at: new Date().toISOString(),
+      });
+    } else if (hasActiveReservation && !financialChanged) {
+      // Non-financial corrections: preserve the current review stage and record audit log
+      db.audit_logs.push({
+        id: uuid(),
+        entity_type: 'nfa',
+        entity_id: nfa.id,
+        department_id: nfa.department_id,
+        old_amount: oldAmount,
+        new_amount: oldAmount,
+        difference: 0,
+        changed_by: req.user!.id,
+        role: req.user!.role,
+        reason: `Non-financial details updated by ${req.user!.name} (${req.user!.role}). Preserving current review stage (${nfa.status}).`,
+        source: 'portal',
+        approval_status: nfa.status,
+        created_at: new Date().toISOString(),
+      });
+    }
+
+    // Commit items
+    if (updatedItems) {
+      db.nfa_items = db.nfa_items.filter((i) => i.nfa_id !== nfa.id);
+      updatedItems.forEach((it) => db.nfa_items.push(it));
+      nfa.total_amount = newTotalAmount;
+    }
+
+    // Commit fields
+    nfa.department_id = targetDeptId;
+    nfa.financial_year_id = targetFyId;
+    nfa.budget_category_id = targetCatId;
+    nfa.budget_subcategory_id = targetSubcatId || null;
+    nfa.budget_subcategory_name = targetSubcatName || '';
+    nfa.nfa_type = targetType;
+
     [
       'title',
       'purpose',
@@ -630,9 +860,6 @@ nfasRouter.put('/:id', async (req: AuthedRequest, res) => {
       'justification',
       'sdgs',
       'requirements',
-      'budget_category_id',
-      'budget_subcategory_id',
-      'budget_subcategory_name',
       'submitted_by_name',
       'submitted_by_designation',
       'point1',
@@ -642,10 +869,6 @@ nfasRouter.put('/:id', async (req: AuthedRequest, res) => {
     ].forEach((f) => {
       if (b[f] !== undefined) (nfa as any)[f] = b[f];
     });
-
-    const targetType = (b.nfa_type !== undefined ? b.nfa_type : nfa.nfa_type) === 'purchase' ? 'purchase' : 'event';
-    const isPurchase = targetType === 'purchase';
-    nfa.nfa_type = targetType;
 
     if (isPurchase) {
       nfa.event_details = undefined;
@@ -671,43 +894,6 @@ nfasRouter.put('/:id', async (req: AuthedRequest, res) => {
     if (b.point2) nfa.description = b.point2;
     if (b.point3) nfa.justification = b.point3;
 
-    if (Array.isArray(b.items)) {
-      db.nfa_items = db.nfa_items.filter((i) => i.nfa_id !== nfa.id);
-      b.items.forEach((it: any, i: number) => {
-        const qtyNum = Number(it.quantity);
-        const rateNum = Number(it.rate);
-        let computedAmount = Number(it.amount) || 0;
-        if (!isNaN(qtyNum) && qtyNum > 0 && !isNaN(rateNum) && rateNum >= 0) {
-          computedAmount = Math.round(qtyNum * rateNum * 100) / 100;
-        }
-        if (isNaN(computedAmount) || !isFinite(computedAmount) || computedAmount < 0) {
-          computedAmount = 0;
-        }
-        const isPredefined = !isPurchase && Boolean(it.is_predefined);
-        db.nfa_items.push({
-          id: it.id || uuid(),
-          nfa_id: nfa.id,
-          sl_no: i + 1,
-          particulars: String(it.particulars || '').trim(),
-          quantity: it.quantity !== undefined && it.quantity !== null ? String(it.quantity).trim() : '',
-          rate: it.rate !== undefined && it.rate !== null ? String(it.rate).trim() : '',
-          amount: computedAmount,
-          comments: it.comments || '',
-          justification: it.justification || '',
-          basis_of_budget: it.basis_of_budget || '',
-          previous_year_budget: Number(it.previous_year_budget) || 0,
-          previous_year_actual: Number(it.previous_year_actual) || 0,
-          is_predefined: isPredefined,
-          predefined_key: isPredefined ? (it.predefined_key || undefined) : undefined,
-          distance_km: isPredefined ? (it.distance_km || undefined) : undefined,
-          carry_back_arrangement: isPredefined ? (it.carry_back_arrangement || undefined) : undefined,
-          sampling_required: isPredefined ? Boolean(it.sampling_required) : false,
-          item_type: isPurchase ? 'purchase' : (isPredefined ? 'predefined' : 'custom'),
-        });
-      });
-      nfa.total_amount = db.nfa_items.filter((i) => i.nfa_id === nfa.id).reduce((s: number, it: any) => s + (Number(it.amount) || 0), 0);
-    }
-
     if (nfa.status === 'revision_required' && isOwner) {
       nfa.status = 'draft';
     }
@@ -718,7 +904,7 @@ nfasRouter.put('/:id', async (req: AuthedRequest, res) => {
   if ('error' in result) {
     if (result.error === 404) return res.status(404).json({ error: 'NFA not found' });
     if (result.error === 400) return res.status(400).json({ error: (result as any).msg });
-    return res.status(403).json({ error: 'Not authorized to edit this NFA at current stage' });
+    return res.status(403).json({ error: (result as any).msg || 'Not authorized to edit this NFA at current stage' });
   }
   res.json({ ...result.nfa, items: withItems(result.nfa!.id), approvals: withApprovals(result.nfa!.id) });
 });
@@ -936,6 +1122,9 @@ nfasRouter.post('/:id/review', async (req: AuthedRequest, res) => {
     }
 
     // level === 4 (University Director) approving -> automatically changes to 'approved' and debits budget!
+    if ((nfa.status as string) === 'approved') {
+      return { error: 409 as const, msg: 'NFA is already approved. Cannot apply duplicate approval deduction.' };
+    }
     let line;
     try {
       line = findBudgetLine(db, nfa.department_id, nfa.financial_year_id, nfa.budget_category_id);
@@ -973,6 +1162,9 @@ nfasRouter.post('/:id/finance-decision', requireRole('director', 'finance', 'sup
   const result = await store.transact((db) => {
     const nfa = db.nfas.find((n) => n.id === req.params.id);
     if (!nfa) return { error: 404 as const, msg: 'NFA not found' };
+    if ((nfa.status as string) === 'approved') {
+      return { error: 409 as const, msg: 'NFA is already approved. Cannot apply duplicate approval deduction.' };
+    }
     if (!['pending_director_approval', 'pending_higher_approval'].includes(nfa.status)) {
       return { error: 409 as const, msg: 'NFA is not pending Director approval' };
     }

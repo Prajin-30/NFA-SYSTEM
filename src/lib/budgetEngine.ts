@@ -54,13 +54,40 @@ export function validateBudget(b: DepartmentBudget, requestedAmount: number) {
   };
 }
 
+export function findSubcategoryForNfa(
+  db: DB,
+  categoryId: string,
+  departmentId: string,
+  subcatId?: string | null,
+  subcatName?: string | null
+) {
+  if (!db.budget_subcategories) return undefined;
+  if (subcatId) {
+    const byId = db.budget_subcategories.find((s) => s.id === subcatId);
+    if (byId) return byId;
+  }
+  if (subcatName && String(subcatName).trim()) {
+    const cleanName = String(subcatName).trim().toLowerCase();
+    const matches = db.budget_subcategories.filter(
+      (s) => s.budget_category_id === categoryId &&
+             (s.department_id === departmentId || !s.department_id) &&
+             s.name.trim().toLowerCase() === cleanName
+    );
+    // Unambiguous match only - never guess if multiple matches exist
+    if (matches.length === 1) {
+      return matches[0];
+    }
+  }
+  return undefined;
+}
+
 /**
  * Reserve budget for a newly submitted NFA (under review).
  * Deducts from Available for New NFAs without increasing Approved Commitments.
  */
 export function reserveNfaBudget(
   db: DB,
-  nfa: { id: string; department_id: string; financial_year_id: string; budget_category_id: string; budget_subcategory_id?: string | null; total_amount: number; ref_no?: string },
+  nfa: { id: string; department_id: string; financial_year_id: string; budget_category_id: string; budget_subcategory_id?: string | null; budget_subcategory_name?: string | null; total_amount: number; ref_no?: string },
   ctx: { changed_by: string; role: Role }
 ) {
   const line = findBudgetLine(db, nfa.department_id, nfa.financial_year_id, nfa.budget_category_id);
@@ -70,23 +97,24 @@ export function reserveNfaBudget(
   }
 
   // Check subcategory allocation if specified and has individual allocation
-  if (nfa.budget_subcategory_id && db.budget_subcategories) {
-    const subcat = db.budget_subcategories.find((s) => s.id === nfa.budget_subcategory_id);
-    if (subcat && subcat.allocated_amount > 0) {
-      const subAvailable = Math.max(0, subcat.allocated_amount - subcat.approved_amount - subcat.pending_amount);
-      if (nfa.total_amount > subAvailable) {
-        throw new BudgetError(`Insufficient available budget in subcategory '${subcat.name}'. Requested ₹${nfa.total_amount.toLocaleString('en-IN')}, but only ₹${subAvailable.toLocaleString('en-IN')} is available.`);
-      }
+  const subcat = findSubcategoryForNfa(
+    db,
+    nfa.budget_category_id,
+    nfa.department_id,
+    nfa.budget_subcategory_id,
+    nfa.budget_subcategory_name || (nfa as any).subcategory_name
+  );
+  if (subcat && subcat.allocated_amount > 0) {
+    const subAvailable = subcat.allocated_amount - subcat.approved_amount - subcat.pending_amount;
+    if (nfa.total_amount > subAvailable) {
+      throw new BudgetError(`Insufficient available budget in subcategory '${subcat.name}'. Requested ₹${nfa.total_amount.toLocaleString('en-IN')}, but only ₹${subAvailable.toLocaleString('en-IN')} is available.`);
     }
   }
 
   line.pending_amount += nfa.total_amount;
 
-  if (nfa.budget_subcategory_id && db.budget_subcategories) {
-    const subcat = db.budget_subcategories.find((s) => s.id === nfa.budget_subcategory_id);
-    if (subcat) {
-      subcat.pending_amount += nfa.total_amount;
-    }
+  if (subcat) {
+    subcat.pending_amount += nfa.total_amount;
   }
 
   db.audit_logs.push({
@@ -114,7 +142,7 @@ export function reserveNfaBudget(
  */
 export function releaseNfaReservation(
   db: DB,
-  nfa: { id: string; department_id: string; financial_year_id: string; budget_category_id: string; budget_subcategory_id?: string | null; total_amount: number; ref_no?: string },
+  nfa: { id: string; department_id: string; financial_year_id: string; budget_category_id: string; budget_subcategory_id?: string | null; budget_subcategory_name?: string | null; total_amount: number; ref_no?: string },
   ctx: { changed_by: string; role: Role; reason: string }
 ) {
   let line: DepartmentBudget | undefined;
@@ -128,11 +156,15 @@ export function releaseNfaReservation(
     line.pending_amount = Math.max(0, line.pending_amount - nfa.total_amount);
   }
 
-  if (nfa.budget_subcategory_id && db.budget_subcategories) {
-    const subcat = db.budget_subcategories.find((s) => s.id === nfa.budget_subcategory_id);
-    if (subcat) {
-      subcat.pending_amount = Math.max(0, subcat.pending_amount - nfa.total_amount);
-    }
+  const subcat = findSubcategoryForNfa(
+    db,
+    nfa.budget_category_id,
+    nfa.department_id,
+    nfa.budget_subcategory_id,
+    nfa.budget_subcategory_name || (nfa as any).subcategory_name
+  );
+  if (subcat) {
+    subcat.pending_amount = Math.max(0, subcat.pending_amount - nfa.total_amount);
   }
 
   db.audit_logs.push({
@@ -164,15 +196,26 @@ export function applyNewApproval(
   amount: number,
   ctx: { nfa_id: string; project_id: string; changed_by: string; role: Role; department_id: string }
 ) {
+  // Prevent duplicate deduction if NFA is already approved
+  const nfa = db.nfas.find((n) => n.id === ctx.nfa_id);
+  if (nfa && nfa.status === 'approved') {
+    throw new BudgetError(`NFA ${nfa.ref_no || nfa.id} is already approved. Duplicate approval deduction prevented.`);
+  }
+
   const line = getBudget(db, budgetLineId);
   const oldApproved = line.approved_amount;
   line.pending_amount = Math.max(0, line.pending_amount - amount);
   line.approved_amount += amount;
 
   // Deduct from subcategory as well if assigned
-  const nfa = db.nfas.find((n) => n.id === ctx.nfa_id);
-  if (nfa?.budget_subcategory_id && db.budget_subcategories) {
-    const subcat = db.budget_subcategories.find((s) => s.id === nfa.budget_subcategory_id);
+  if (nfa) {
+    const subcat = findSubcategoryForNfa(
+      db,
+      line.budget_category_id,
+      ctx.department_id,
+      nfa.budget_subcategory_id,
+      (nfa as any).budget_subcategory_name || (nfa as any).subcategory_name
+    );
     if (subcat) {
       subcat.pending_amount = Math.max(0, subcat.pending_amount - amount);
       subcat.approved_amount += amount;

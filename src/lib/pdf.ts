@@ -64,6 +64,9 @@ function renderSignatureImage(doc: any, sigName: string | undefined, x: number, 
   const cleanName = path.basename(sigName);
   const fullPath = path.join(signaturesDir, cleanName);
   if (fs.existsSync(fullPath)) {
+    // Guard: skip placeholder/empty PNGs (< 500 bytes = no real signature drawn)
+    const stat = fs.statSync(fullPath);
+    if (stat.size < 500) return false;
     try {
       doc.image(fullPath, x, y, { fit: [maxW, maxH], align: 'left', valign: 'bottom' });
       return true;
@@ -248,6 +251,16 @@ export function renderNfaPdf(
     }
   }
 
+  // Change 1: Display "Sampling — Required" when selected; omit when not selected
+  const hasSampling = !isPurchase && Boolean(
+    (nfa.event_details && (nfa.event_details as any).sampling_required) ||
+    (nfa as any).sampling_required ||
+    items.some((i: any) => i.sampling_required || (i.predefined_key === 'sampling' && i.sampling_required !== false))
+  );
+  if (hasSampling) {
+    renderBullet('Sampling — Required');
+  }
+
   doc.y += 6;
 
   // =========================================================================
@@ -377,7 +390,8 @@ export function renderNfaPdf(
   const sigBoxHeight = 32;
 
   // Proposer (Left)
-  const propSigRendered = renderSignatureImage(doc, nfa.proposer_signature, leftMargin, row1Y, 110, sigBoxHeight);
+  const propSigName = nfa.proposer_signature || (nfa.created_by ? `${nfa.created_by}.png` : undefined);
+  renderSignatureImage(doc, propSigName, leftMargin, row1Y, 110, sigBoxHeight);
   const propTextY = row1Y + sigBoxHeight + 2;
   doc.font(fontBold).fontSize(10.5).fillColor('#000000');
   doc.text(nfa.submitted_by_name || 'Faculty Proposer', leftMargin, propTextY, { width: colHalfWidth });
@@ -386,7 +400,7 @@ export function renderNfaPdf(
 
   // HOD (Right)
   const hodX = leftMargin + colHalfWidth + 20;
-  const hodSigName = hodApproval?.signature_image || (dept.hod_name ? `${dept.hod_name}.png` : undefined);
+  const hodSigName = hodApproval ? (hodApproval.signature_image || `${hodApproval.approver_id}.png`) : undefined;
   renderSignatureImage(doc, hodSigName, hodX, row1Y, 110, sigBoxHeight);
   const hodTextY = row1Y + sigBoxHeight + 2;
   doc.font(fontBold).fontSize(10.5).fillColor('#000000');
@@ -401,7 +415,7 @@ export function renderNfaPdf(
 
   // Column 1: Dean / Associate Dean
   const deanX = leftMargin;
-  const deanSigName = deanApproval?.signature_image || (dept.dean_name ? `${dept.dean_name}.png` : undefined);
+  const deanSigName = deanApproval ? (deanApproval.signature_image || `${deanApproval.approver_id}.png`) : undefined;
   renderSignatureImage(doc, deanSigName, deanX, row2Y, 100, sigBoxHeight);
   const deanTextY = row2Y + sigBoxHeight + 2;
   doc.font(fontBold).fontSize(10).fillColor('#000000');
@@ -412,7 +426,7 @@ export function renderNfaPdf(
 
   // Column 2: Director
   const dirX = leftMargin + colThirdWidth + 12;
-  const dirSigName = directorApproval?.signature_image || (dept.director_name ? `${dept.director_name}.png` : undefined);
+  const dirSigName = directorApproval ? (directorApproval.signature_image || `${directorApproval.approver_id}.png`) : undefined;
   renderSignatureImage(doc, dirSigName, dirX, row2Y, 100, sigBoxHeight);
   const dirTextY = row2Y + sigBoxHeight + 2;
   doc.font(fontBold).fontSize(10).fillColor('#000000');
@@ -423,7 +437,7 @@ export function renderNfaPdf(
 
   // Column 3: Finance Officer
   const finX = leftMargin + (colThirdWidth + 12) * 2;
-  const finSigName = financeApproval?.signature_image || (dept.finance_officer_name ? `${dept.finance_officer_name}.png` : undefined);
+  const finSigName = financeApproval ? (financeApproval.signature_image || `${financeApproval.approver_id}.png`) : undefined;
   renderSignatureImage(doc, finSigName, finX, row2Y, 100, sigBoxHeight);
   const finTextY = row2Y + sigBoxHeight + 2;
   doc.font(fontBold).fontSize(10).fillColor('#000000');
@@ -489,8 +503,15 @@ export function renderNfaPdf(
 
   let currentTableY = renderTableHeader(doc.y);
 
-  // Render items rows
-  items.forEach((item, index) => {
+  // Render items rows (Sampling is non-monetary and displayed on Page 1)
+  const printableItems = items.filter((item: any) => {
+    if (!isPurchase && (item.sampling_required || item.predefined_key === 'sampling') && (Number(item.amount) || 0) === 0) {
+      return false;
+    }
+    return true;
+  });
+
+  printableItems.forEach((item, index) => {
     doc.font(fontRegular).fontSize(10);
     const particularHeight = doc.heightOfString(item.particulars || '', { width: tableColumns[1].width - 12 });
     const rowHeight = Math.max(22, particularHeight + 8);

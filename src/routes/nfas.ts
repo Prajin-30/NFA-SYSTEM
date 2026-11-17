@@ -131,6 +131,10 @@ nfasRouter.get('/:id/attachments/:type/:index?', (req: AuthedRequest, res) => {
 
   // Role-based / ownership access verification
   const u = req.user!;
+  // Strict Draft Privacy: Unsubmitted draft attachments are strictly private to creator
+  if (nfa.status === 'draft' && nfa.created_by !== u.id && u.role !== 'super_admin') {
+    return res.status(403).json({ error: 'Forbidden: Draft attachments are private to the creator until submitted for approval' });
+  }
   const isPrivileged = ['super_admin', 'dean', 'associate_dean', 'finance', 'director'].includes(u.role);
   const isCreator = nfa.created_by === u.id;
   const isSameDept = nfa.department_id === u.department_id;
@@ -226,13 +230,28 @@ nfasRouter.get('/inbox', (req: AuthedRequest, res) => {
   res.json(list.map((n) => ({ ...n, items: withItems(n.id), approvals: withApprovals(n.id) })));
 });
 
-/** GET /api/nfas — role-scoped list */
+/** GET /api/nfas — role-scoped list with strict draft privacy */
 nfasRouter.get('/', (req: AuthedRequest, res) => {
   let list = store.data.nfas;
   const { role, id, department_id } = req.user!;
-  if (role === 'faculty') list = list.filter((n) => n.created_by === id);
-  else if (role === 'hod' || role === 'it_admin') list = list.filter((n) => n.department_id === department_id);
+  if (role === 'faculty') {
+    list = list.filter((n) => n.created_by === id);
+  } else if (role === 'hod' || role === 'it_admin') {
+    list = list.filter((n) => n.department_id === department_id);
+  }
   // dean, associate_dean, director, finance, super_admin see all departments
+
+  // Strict Draft Privacy: Unsubmitted draft NFAs are strictly private to their creator.
+  // Higher officials (HOD, Dean, Finance, Director) and other users must NOT see another user's draft.
+  // Super Admin administrative access is supported via ?all_drafts=true or for drafts created by super_admin.
+  const canSeeAllDrafts = role === 'super_admin' && req.query.all_drafts === 'true';
+  list = list.filter((n) => {
+    if (n.status === 'draft') {
+      return n.created_by === id || canSeeAllDrafts;
+    }
+    return true;
+  });
+
   if (req.query.status) list = list.filter((n) => n.status === req.query.status);
   if (req.query.department) list = list.filter((n) => n.department_id === req.query.department);
   const seen = new Set<string>();
@@ -281,6 +300,10 @@ nfasRouter.get('/:id', (req: AuthedRequest, res) => {
   if (!nfa) return res.status(404).json({ error: 'NFA not found' });
   if (req.user) {
     const { role, id, department_id } = req.user;
+    // Strict Draft Privacy: An unsubmitted Draft NFA is strictly private to its creator
+    if (nfa.status === 'draft' && nfa.created_by !== id && role !== 'super_admin') {
+      return res.status(403).json({ error: 'Forbidden: Draft NFAs are private to their creator until submitted for approval' });
+    }
     if (role === 'faculty' && nfa.created_by !== id) {
       return res.status(403).json({ error: 'You are only authorized to view your own NFAs' });
     }
@@ -297,6 +320,10 @@ nfasRouter.get('/:id/pdf', (req: AuthedRequest, res) => {
   if (!nfa) return res.status(404).json({ error: 'NFA not found' });
   if (req.user) {
     const { role, id, department_id } = req.user;
+    // Strict Draft Privacy: Unsubmitted draft NFAs cannot be downloaded by non-creators
+    if (nfa.status === 'draft' && nfa.created_by !== id && role !== 'super_admin') {
+      return res.status(403).json({ error: 'Forbidden: Draft NFAs are private to their creator until submitted for approval' });
+    }
     if (role === 'faculty' && nfa.created_by !== id) {
       return res.status(403).json({ error: 'You are only authorized to download your own NFAs' });
     }
@@ -418,7 +445,14 @@ nfasRouter.delete('/:id', async (req: AuthedRequest, res) => {
   const result = await store.transact((db) => {
     const nfa = db.nfas.find((item) => item.id === req.params.id);
     if (!nfa) return { error: 404 as const };
-    const canDelete = req.user!.role === 'super_admin' || nfa.created_by === req.user!.id || (['faculty', 'hod'].includes(req.user!.role) && nfa.department_id === req.user!.department_id);
+
+    // When status is 'draft', only the creator (or super_admin) can delete their draft
+    let canDelete: boolean;
+    if (nfa.status === 'draft') {
+      canDelete = nfa.created_by === req.user!.id || req.user!.role === 'super_admin';
+    } else {
+      canDelete = req.user!.role === 'super_admin' || nfa.created_by === req.user!.id || (['faculty', 'hod'].includes(req.user!.role) && nfa.department_id === req.user!.department_id);
+    }
     if (!canDelete) return { error: 403 as const };
 
     // If deleting an NFA that has an active reservation, release the reserved funds

@@ -1,9 +1,15 @@
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
+import WebSocket from 'ws';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { Role, User } from '../types.js';
 import { store } from '../store.js';
 import { query } from '../db/pool.js';
+
+// Polyfill native WebSocket on globalThis if running in Node environments where it is absent
+if (typeof (globalThis as any).WebSocket === 'undefined') {
+  (globalThis as any).WebSocket = WebSocket;
+}
 
 export function maskEmail(email: string): string {
   const clean = String(email || '').trim().toLowerCase();
@@ -141,6 +147,9 @@ export function getSupabaseAdmin(): SupabaseClient | null {
       auth: {
         autoRefreshToken: false,
         persistSession: false,
+      },
+      realtime: {
+        transport: WebSocket as any,
       },
     });
   }

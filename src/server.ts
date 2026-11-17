@@ -1,4 +1,11 @@
 import 'dotenv/config';
+import WebSocket from 'ws';
+
+// Ensure global WebSocket is available across Node.js runtime environments
+if (typeof (globalThis as any).WebSocket === 'undefined') {
+  (globalThis as any).WebSocket = WebSocket;
+}
+
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
@@ -120,6 +127,8 @@ app.get('/api/health', async (_req, res) => {
       data_source_value: process.env.DATA_SOURCE || null,
       app_env: process.env.APP_ENV || null,
       node_env: process.env.NODE_ENV || null,
+      node_version: process.version,
+      has_websocket: typeof (globalThis as any).WebSocket !== 'undefined',
       live_auth_configured: isLiveSupabaseAuthConfigured(),
       supabase_auth_ok: supabaseAuthOk,
       supabase_auth_error: supabaseAuthError,

@@ -72,7 +72,16 @@ class Store {
   private persist() {
     const tmp = DATA_FILE + '.tmp';
     fs.writeFileSync(tmp, JSON.stringify(this.db, null, 2));
-    fs.renameSync(tmp, DATA_FILE);
+    try {
+      fs.renameSync(tmp, DATA_FILE);
+    } catch (err: any) {
+      if (err.code === 'EPERM' || err.code === 'EBUSY') {
+        fs.copyFileSync(tmp, DATA_FILE);
+        try { fs.unlinkSync(tmp); } catch {}
+      } else {
+        throw err;
+      }
+    }
   }
 }
 

@@ -29,8 +29,12 @@ export interface User {
   password_hash: string;
   role: Role;
   department_id: string | null;
+  school?: string | null;
   signature_image?: string;
   created_at: string;
+  must_change_password?: boolean;
+  is_active?: boolean;
+  temp_password_created_at?: string | null;
 }
 
 export interface Department {
@@ -38,6 +42,7 @@ export interface Department {
   name: string;
   code: string;
   category?: 'academic' | 'coe';
+  school?: string | null;
   is_active?: boolean;
   hod_name?: string;
   dean_name?: string;
@@ -242,7 +247,7 @@ export interface BudgetTransaction {
 
 export interface AuditLog {
   id: string;
-  entity_type: 'nfa' | 'project' | 'department_budget' | 'excel_sync';
+  entity_type: 'nfa' | 'project' | 'department_budget' | 'excel_sync' | 'user_account';
   entity_id: string;
   department_id: string;
   old_amount: number | null;

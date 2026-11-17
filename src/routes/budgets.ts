@@ -58,7 +58,13 @@ budgetsRouter.get('/categories', (req, res) => {
 });
 
 /** GET /api/budgets/subcategories?category=&department_id= */
-budgetsRouter.get('/subcategories', (req, res) => {
+budgetsRouter.get('/subcategories', (req: AuthedRequest, res) => {
+  const isSenior = ['super_admin', 'director', 'finance', 'dean', 'associate_dean'].includes(req.user!.role);
+  const targetDept = req.query.department_id ? String(req.query.department_id) : undefined;
+  if (!isSenior && targetDept && req.user!.department_id !== targetDept) {
+    return res.status(403).json({ error: 'Forbidden: You do not have permission to view subcategories for this department' });
+  }
+
   let list = store.data.budget_subcategories || [];
   if (req.query.category) list = list.filter((s) => s.budget_category_id === req.query.category);
   if (req.query.department_id) list = list.filter((s) => s.department_id === req.query.department_id || !s.department_id);
@@ -478,9 +484,14 @@ budgetsRouter.get('/school/overview', (req: AuthedRequest, res) => {
 
   const allLines = store.data.department_budgets.filter((b) => b.financial_year_id === fyId);
 
-  // Filter to verified active academic departments and Centres of Excellence (exactly 13 units; excludes DRAS)
+  // Filter to verified active academic departments and Centres of Excellence of School of Engineering and Technology (SoET)
+  // Excludes inactive/legacy units (e.g. DRAS) and strictly excludes non-SoET departments (e.g. School of Architecture)
   const validDepartments = store.data.departments.filter(
-    (dept) => dept.is_active && (dept.category === 'academic' || dept.category === 'coe')
+    (dept) =>
+      dept.is_active &&
+      (dept.category === 'academic' || dept.category === 'coe') &&
+      (!dept.school || dept.school === 'SoET' || dept.school.includes('SoET')) &&
+      dept.school !== 'SoA'
   );
 
   const deptSummaries = validDepartments.map((dept) => {
@@ -497,7 +508,9 @@ budgetsRouter.get('/school/overview', (req: AuthedRequest, res) => {
       allocated_amount: allocated,
       approved_amount: approved,
       pending_amount: pending,
+      reserved_amount: pending,
       remaining_amount: remaining,
+      available_amount: remaining,
       utilization_pct: utilizationPct,
       is_deficit: remaining < 0,
       deficit_amount: remaining < 0 ? Math.abs(remaining) : 0,
@@ -513,11 +526,15 @@ budgetsRouter.get('/school/overview', (req: AuthedRequest, res) => {
 
   res.json({
     financial_year: fyObj || { id: fyId, label: 'Current' },
+    school: 'School of Engineering and Technology',
+    school_code: 'SoET',
     totals: {
       allocated_amount: totalAllocated,
       approved_amount: totalApproved,
       pending_amount: totalPending,
+      reserved_amount: totalPending,
       remaining_amount: totalRemaining,
+      available_amount: totalRemaining,
       utilization_pct: totalUtilPct,
       is_deficit: totalRemaining < 0,
       deficit_amount: totalRemaining < 0 ? Math.abs(totalRemaining) : 0,
@@ -538,6 +555,11 @@ budgetsRouter.get('/:department/summary', (req: AuthedRequest, res) => {
   const isSenior = ['super_admin', 'director', 'finance', 'dean', 'associate_dean'].includes(req.user!.role);
   if (!isSenior && req.user!.department_id !== deptId) {
     return res.status(403).json({ error: 'Forbidden: You do not have permission to view budget data for this department' });
+  }
+
+  // School of Architecture isolation check (Requirement #12)
+  if (dept && dept.school === 'SoA' && req.user!.role !== 'super_admin') {
+    return res.status(403).json({ error: 'Forbidden: You do not have access to School of Architecture financial budgets' });
   }
 
   let fyId = String(req.query.fy || store.data.financial_years.find((f) => f.is_active)?.id);
@@ -639,6 +661,12 @@ budgetsRouter.get('/:department', (req: AuthedRequest, res) => {
   if (!isSenior && req.user!.department_id !== deptId) {
     return res.status(403).json({ error: 'Forbidden: You do not have permission to view budget data for this department' });
   }
+
+  // School of Architecture isolation check (Requirement #12)
+  if (dept && dept.school === 'SoA' && req.user!.role !== 'super_admin') {
+    return res.status(403).json({ error: 'Forbidden: You do not have access to School of Architecture financial budgets' });
+  }
+
   res.json(store.data.department_budgets.filter((b) => b.department_id === deptId));
 });
 

@@ -71,7 +71,8 @@ app.use('/api/admin', adminRouter);
 app.get('/api/health', (_req, res) => res.json({ ok: true, time: new Date().toISOString() }));
 
 const PORT = Number(process.env.PORT) || 4000;
-if (process.env.NODE_ENV !== 'test') {
+const isMain = process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1]);
+if (isMain && process.env.NODE_ENV !== 'test') {
   const server = app.listen(PORT, () => {
     console.log(`\n  University NFA & Budget System API running on http://localhost:${PORT}`);
     console.log(`  Frontend served from the same origin: http://localhost:${PORT}\n`);

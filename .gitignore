@@ -7,4 +7,7 @@ data/*.bak
 data/*.backup
 data/*.backup*
 data/*.pre_*
+data/.super_admin_temp_credential*
+data/*credential*
+data/*.txt
 scratch/

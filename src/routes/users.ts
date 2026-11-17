@@ -110,6 +110,8 @@ usersRouter.get('/me', (req: AuthedRequest, res) => {
     email: user.email,
     role: user.role,
     department_id: user.department_id,
+    school: user.school || (['super_admin', 'director', 'finance', 'dean', 'associate_dean'].includes(user.role) ? 'SoET' : null),
+    must_change_password: Boolean((user as any).must_change_password),
     has_signature: hasSignature,
     signature_valid: signatureValid,
     signature_url: signatureValid ? `/api/signatures/${user.id}.png` : null,

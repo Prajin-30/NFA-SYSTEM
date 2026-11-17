@@ -3,6 +3,7 @@ import { store } from '../store.js';
 import { requireAuth, signToken, AuthedRequest } from '../middleware/auth.js';
 import {
   authenticateInstitutionalUser,
+  maskEmail,
   updateUserPassword,
   validatePasswordStrength,
   validateUniversityEmail,
@@ -90,9 +91,26 @@ authRouter.post('/login', async (req, res) => {
     });
   } catch (err: any) {
     const message = err?.message || 'Authentication failed';
+    const email = req.body?.email ? String(req.body.email).trim() : 'unknown';
+    const masked = maskEmail(email);
+
     if (message.includes('deactivated')) {
+      console.warn(`[Auth Failure] Category: ACCOUNT_DEACTIVATED | Target: ${masked}`);
       return res.status(401).json({ error: message });
     }
+
+    if (message === 'INVALID_CREDENTIALS' || message.includes('Invalid email or password')) {
+      console.warn(`[Auth Failure] Category: INVALID_CREDENTIALS | Target: ${masked}`);
+    } else if (message === 'DATABASE_UNAVAILABLE') {
+      console.error(`[Auth Failure] Category: DATABASE_UNAVAILABLE | Target: ${masked}`);
+    } else if (message === 'AUTH_CONFIGURATION_ERROR') {
+      console.error(`[Auth Failure] Category: AUTH_CONFIGURATION_ERROR | Target: ${masked}`);
+    } else if (message === 'PROFILE_NOT_FOUND') {
+      console.warn(`[Auth Failure] Category: PROFILE_NOT_FOUND | Target: ${masked}`);
+    } else {
+      console.error(`[Auth Failure] Category: AUTH_ERROR | Target: ${masked}`);
+    }
+
     return res.status(401).json({ error: 'Invalid email or password' });
   }
 });

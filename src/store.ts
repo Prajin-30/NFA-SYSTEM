@@ -77,7 +77,7 @@ class Store {
     } catch (err: any) {
       if (err.code === 'EPERM' || err.code === 'EBUSY') {
         fs.copyFileSync(tmp, DATA_FILE);
-        try { fs.unlinkSync(tmp); } catch {}
+        try { fs.unlinkSync(tmp); } catch { }
       } else {
         throw err;
       }

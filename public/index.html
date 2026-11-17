@@ -2123,9 +2123,9 @@
                 <th style="padding:8px 10px;border-bottom:1px solid var(--border);">Faculty Name</th>
                 <th style="padding:8px 10px;border-bottom:1px solid var(--border);">Designation</th>
                 <th style="padding:8px 10px;border-bottom:1px solid var(--border);">School</th>
-                <th style="padding:8px 10px;border-bottom:1px solid var(--border);">Department</th>
-                <th style="padding:8px 10px;border-bottom:1px solid var(--border);">Official Email</th>
                 <th style="padding:8px 10px;border-bottom:1px solid var(--border);">Assigned Role</th>
+                <th style="padding:8px 10px;border-bottom:1px solid var(--border);">Department / Scope</th>
+                <th style="padding:8px 10px;border-bottom:1px solid var(--border);">Official Email</th>
                 <th style="padding:8px 10px;border-bottom:1px solid var(--border);">Status</th>
               </tr>
             </thead>
@@ -7166,26 +7166,29 @@
             `<option value="${opt.value}" ${(r.role || 'faculty') === opt.value ? 'selected' : ''}>${opt.label}</option>`
           ).join('');
 
-          const roleSelector = `<select style="padding:3px 6px;font-size:11.5px;border:1px solid #CBD5E1;border-radius:4px;background:#FFF;" onchange="updateExcelPreviewRowRole(${idx}, this.value)">${roleOptions}</select>`;
+          const roleSelector = `<select style="padding:4px 6px;font-size:11.5px;font-weight:600;border:1px solid #CBD5E1;border-radius:4px;background:#FFF;cursor:pointer;" onchange="updateExcelPreviewRowRole(${idx}, this.value)">${roleOptions}</select>`;
 
-          // School column display
+          // School column display (preserves joint affiliation note if present)
           const schoolLabel = r.school
             ? `<span style="font-weight:600;color:var(--primary-blue);" title="${escapeHtml(r.school_name || r.school)}">${escapeHtml(r.school)}</span>`
             : `<span style="color:var(--text-muted);font-style:italic;">—</span>`;
 
-          // Department column with dropdown selection
-          const defaultOption = isSchoolWideRole
-            ? `<option value="__SCHOOL_WIDE__" ${!r.department_id ? 'selected' : ''}>🏫 School-wide (SoET)</option>`
-            : `<option value="">-- Select Department --</option>`;
+          // Department / Scope column display:
+          // For School-wide roles (Dean, Director, Finance, Associate Dean): Read-only institutional badge
+          // For Faculty & HOD: Department/CoE dropdown selector
+          let deptOrScopeDisplay;
+          if (isSchoolWideRole) {
+            deptOrScopeDisplay = `<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 8px;font-size:11.5px;font-weight:600;color:var(--primary-blue);background:#EFF6FF;border:1px solid #BFDBFE;border-radius:4px;white-space:nowrap;" title="School-wide institutional scope for SoET"><span style="font-size:12px;">🏫</span> School-wide (SoET)</span>`;
+          } else {
+            const deptOptions = [
+              `<option value="">-- Select Department / CoE --</option>`,
+              ...activeDepts.map(d =>
+                `<option value="${d.id}" ${r.department_id === d.id ? 'selected' : ''}>${escapeHtml(d.code)} - ${escapeHtml(d.name)}</option>`
+              )
+            ].join('');
 
-          const deptOptions = [
-            defaultOption,
-            ...activeDepts.map(d =>
-              `<option value="${d.id}" ${r.department_id === d.id ? 'selected' : ''}>${escapeHtml(d.code)} - ${escapeHtml(d.name)}</option>`
-            )
-          ].join('');
-
-          const deptSelect = `<select style="padding:3px 6px;font-size:11.5px;border:1px solid ${(!r.department_id && !isSchoolWideRole) ? '#F59E0B' : '#CBD5E1'};background:${(!r.department_id && !isSchoolWideRole) ? '#FFFBEB' : '#FFF'};border-radius:4px;max-width:210px;" onchange="updateExcelPreviewRowDept(${idx}, this.value)">${deptOptions}</select>`;
+            deptOrScopeDisplay = `<select style="padding:4px 6px;font-size:11.5px;border:1px solid ${!r.department_id ? '#F59E0B' : '#CBD5E1'};background:${!r.department_id ? '#FFFBEB' : '#FFF'};border-radius:4px;max-width:210px;" onchange="updateExcelPreviewRowDept(${idx}, this.value)">${deptOptions}</select>`;
+          }
 
           return `
             <tr style="${!isValid ? (isNeedsDept ? 'background:#FFFDF5;' : 'background:#FFF5F5;') : ''}">
@@ -7193,9 +7196,9 @@
               <td style="padding:6px 10px;border-bottom:1px solid #E2E8F0;"><strong>${escapeHtml(r.name || '—')}</strong></td>
               <td style="padding:6px 10px;border-bottom:1px solid #E2E8F0;color:#475569;">${escapeHtml(r.designation || 'Faculty')}</td>
               <td style="padding:6px 10px;border-bottom:1px solid #E2E8F0;">${schoolLabel}</td>
-              <td style="padding:6px 10px;border-bottom:1px solid #E2E8F0;">${deptSelect}</td>
-              <td style="padding:6px 10px;border-bottom:1px solid #E2E8F0;">${escapeHtml(r.email || '—')}</td>
               <td style="padding:6px 10px;border-bottom:1px solid #E2E8F0;">${roleSelector}</td>
+              <td style="padding:6px 10px;border-bottom:1px solid #E2E8F0;">${deptOrScopeDisplay}</td>
+              <td style="padding:6px 10px;border-bottom:1px solid #E2E8F0;">${escapeHtml(r.email || '—')}</td>
               <td style="padding:6px 10px;border-bottom:1px solid #E2E8F0;">${statusBadge}</td>
             </tr>
           `;
@@ -7212,19 +7215,8 @@
     function updateExcelPreviewRowDept(idx, newDeptId) {
       if (!pendingExcelUploadRows || !pendingExcelUploadRows[idx]) return;
       const row = pendingExcelUploadRows[idx];
-      const isSchoolWideRole = ['dean', 'associate_dean', 'director', 'finance'].includes(row.role);
 
-      if (newDeptId === '__SCHOOL_WIDE__') {
-        row.department_id = null;
-        row.department_code = 'SoET';
-        row.department_name = 'School-wide (SoET)';
-        row.school = 'SoET';
-        row.needs_department = false;
-        if (!row.error || row.error.includes('Select Department') || row.error.includes('Department required') || row.error.includes('Action required') || row.error.includes('could not be matched')) {
-          row.status = 'valid';
-          row.error = '';
-        }
-      } else if (newDeptId) {
+      if (newDeptId) {
         const d = (REF.departments || []).find(dept => dept.id === newDeptId);
         if (d) {
           row.department_id = d.id;
@@ -7232,31 +7224,19 @@
           row.department_name = d.name;
           row.needs_department = false;
 
-          // If row had an error only because of missing/unmatched department, clear it and mark valid
-          if (!row.error || row.error.includes('Select Department') || row.error.includes('Department required') || row.error.includes('Action required') || row.error.includes('could not be matched')) {
+          // Clear department-related error and mark valid
+          if (!row.error || row.error.includes('Department') || row.error.includes('Select') || row.error.includes('School-level') || row.error.includes('Action required') || row.error.includes('could not be matched')) {
             row.status = 'valid';
             row.error = '';
           }
         }
       } else {
-        if (isSchoolWideRole) {
-          row.department_id = null;
-          row.department_code = 'SoET';
-          row.department_name = 'School-wide (SoET)';
-          row.school = 'SoET';
-          row.needs_department = false;
-          if (!row.error || row.error.includes('Select Department') || row.error.includes('Department required') || row.error.includes('Action required') || row.error.includes('could not be matched')) {
-            row.status = 'valid';
-            row.error = '';
-          }
-        } else {
-          row.department_id = null;
-          row.department_code = '';
-          row.department_name = '';
-          row.needs_department = true;
-          row.status = 'invalid';
-          row.error = 'Department selection required';
-        }
+        row.department_id = null;
+        row.department_code = '';
+        row.department_name = '';
+        row.needs_department = true;
+        row.status = 'invalid';
+        row.error = 'Department selection required';
       }
 
       renderExcelPreviewTable();
@@ -7269,22 +7249,37 @@
 
       const isSchoolWideRole = ['dean', 'associate_dean', 'director', 'finance'].includes(newRole);
       if (isSchoolWideRole) {
+        // Automatically set organizational scope as School-wide (SoET) with department_id = null
+        row.department_id = null;
+        row.department_code = 'SoET';
+        row.department_name = 'School-wide (SoET)';
         row.needs_department = false;
-        if (!row.department_id || row.department_code === 'SoET') {
-          row.department_id = null;
-          row.department_code = 'SoET';
-          row.department_name = 'School-wide (SoET)';
+
+        // Preserve SoET & SoA affiliation without granting Architecture access
+        if (row.school !== 'SoET & SoA') {
           row.school = 'SoET';
+          row.school_name = 'School of Engineering and Technology';
         }
-        if (!row.error || row.error.includes('Select Department') || row.error.includes('Department required') || row.error.includes('Action required') || row.error.includes('could not be matched')) {
+
+        // Clear department-related errors and display Ready
+        if (!row.error || row.error.includes('Department') || row.error.includes('Select') || row.error.includes('School-level') || row.error.includes('Action required') || row.error.includes('could not be matched')) {
           row.status = 'valid';
           row.error = '';
         }
       } else {
-        if (!row.department_id) {
+        // For Faculty and HOD, a valid Department/CoE assignment is required
+        if (row.department_id) {
+          row.needs_department = false;
+          if (!row.error || row.error.includes('Department') || row.error.includes('Select') || row.error.includes('School-level')) {
+            row.status = 'valid';
+            row.error = '';
+          }
+        } else {
+          row.department_code = '';
+          row.department_name = '';
           row.needs_department = true;
           row.status = 'invalid';
-          row.error = 'Department required for Faculty and HOD';
+          row.error = 'Department selection required for ' + (newRole === 'hod' ? 'HOD' : 'Faculty');
         }
       }
 

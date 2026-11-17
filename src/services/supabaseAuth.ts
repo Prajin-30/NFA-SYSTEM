@@ -5,8 +5,22 @@ import type { Role, User } from '../types.js';
 import { store } from '../store.js';
 import { query } from '../db/pool.js';
 
-const SUPABASE_URL = process.env.SUPABASE_URL || '';
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+export function maskEmail(email: string): string {
+  const clean = String(email || '').trim().toLowerCase();
+  const atIdx = clean.indexOf('@');
+  if (atIdx <= 0) return '***';
+  const name = clean.slice(0, atIdx);
+  const domain = clean.slice(atIdx + 1);
+  const maskedName = name.length > 2 ? `${name[0]}***${name[name.length - 1]}` : `${name[0]}***`;
+  return `${maskedName}@${domain}`;
+}
+
+function getSupabaseConfig() {
+  const url = process.env.SUPABASE_URL || '';
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_KEY || '';
+  return { url, key };
+}
+
 const APPROVED_DOMAINS = (process.env.APPROVED_EMAIL_DOMAINS || 'christuniversity.in,christ.edu')
   .split(',')
   .map((d) => d.trim().toLowerCase());
@@ -121,8 +135,9 @@ let supabaseAdminClient: SupabaseClient | null = null;
 
 export function getSupabaseAdmin(): SupabaseClient | null {
   if (supabaseAdminClient) return supabaseAdminClient;
-  if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
-    supabaseAdminClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+  const { url, key } = getSupabaseConfig();
+  if (url && key) {
+    supabaseAdminClient = createClient(url, key, {
       auth: {
         autoRefreshToken: false,
         persistSession: false,
@@ -152,7 +167,8 @@ export function isLiveSupabaseAuthConfigured(): boolean {
   if (process.env.NODE_ENV === 'test' || process.env.MOCK_AUTH === 'true') {
     return false;
   }
-  return Boolean(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY && !SUPABASE_URL.includes('your-project-ref'));
+  const { url, key } = getSupabaseConfig();
+  return Boolean(url && key && !url.includes('your-project-ref'));
 }
 
 export const APPROVED_DEMO_EMAILS = [
@@ -403,6 +419,7 @@ export async function authenticateInstitutionalUser(
 
   let authUserId: string | null = null;
   const supabase = getSupabaseAdmin();
+  const isProd = process.env.NODE_ENV === 'production' || process.env.APP_ENV === 'production';
 
   if (isLiveSupabaseAuthConfigured() && supabase) {
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -410,21 +427,26 @@ export async function authenticateInstitutionalUser(
       password,
     });
     if (error || !data.user) {
-      throw new Error('Invalid email or password');
+      console.warn(`[Auth Failure] Category: INVALID_CREDENTIALS | Target: ${maskEmail(cleanEmail)}`);
+      throw new Error('INVALID_CREDENTIALS');
     }
     authUserId = data.user.id;
+  } else if (isProd) {
+    console.error(`[Auth Failure] Category: AUTH_CONFIGURATION_ERROR | Target: ${maskEmail(cleanEmail)} | Reason: Supabase Auth credentials not configured in production.`);
+    throw new Error('AUTH_CONFIGURATION_ERROR');
   } else {
-    // Isolated unit test harness / mock auth
+    // Isolated unit test harness / mock auth (non-production only)
     const mockUser = mockAuthUsers.get(cleanEmail);
     if (!mockUser || !bcrypt.compareSync(password, mockUser.passwordHash)) {
-      throw new Error('Invalid email or password');
+      console.warn(`[Auth Failure] Category: INVALID_CREDENTIALS | Target: ${maskEmail(cleanEmail)} | Reason: Mock auth rejection`);
+      throw new Error('INVALID_CREDENTIALS');
     }
     authUserId = mockUser.id;
   }
 
   // Authoritative user profile query from PostgreSQL
   let userRecord: any = null;
-  if (process.env.DATABASE_URL && process.env.DATA_SOURCE === 'postgres') {
+  if (process.env.DATABASE_URL && process.env.DATA_SOURCE !== 'json') {
     try {
       const dbRes = await query(
         'SELECT id, name, email, role, department_id, must_change_password, is_active, temp_password_created_at, signature_image FROM user_profiles WHERE id = $1 OR lower(email) = $2 LIMIT 1;',
@@ -433,17 +455,25 @@ export async function authenticateInstitutionalUser(
       if (dbRes.rows.length > 0) {
         userRecord = dbRes.rows[0];
       }
-    } catch {
-      // Fallback to store if query fails in test harness
+    } catch (dbErr: any) {
+      console.error(`[Auth Failure] Category: DATABASE_UNAVAILABLE | Target: ${maskEmail(cleanEmail)} | Code: ${dbErr?.code || 'ERR'}`);
+      if (isProd) {
+        throw new Error('DATABASE_UNAVAILABLE');
+      }
     }
+  } else if (isProd) {
+    console.error(`[Auth Failure] Category: AUTH_CONFIGURATION_ERROR | Target: ${maskEmail(cleanEmail)} | Reason: DATABASE_URL missing in production.`);
+    throw new Error('AUTH_CONFIGURATION_ERROR');
   }
 
-  if (!userRecord) {
+  // Fallback to store only in non-production development/test
+  if (!userRecord && !isProd) {
     userRecord = store.data.users.find((u) => u.id === authUserId || u.email.toLowerCase() === cleanEmail);
   }
 
   if (!userRecord) {
-    throw new Error('User profile record not found in institutional database');
+    console.warn(`[Auth Failure] Category: PROFILE_NOT_FOUND | Target: ${maskEmail(cleanEmail)}`);
+    throw new Error('PROFILE_NOT_FOUND');
   }
 
   const isActive = userRecord.is_active !== false;

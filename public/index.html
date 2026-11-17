@@ -3401,7 +3401,10 @@ async function renderNfas(main){
           </td>
           <td class="nfa-amount-cell"><strong>${inr(n.total_amount)}</strong></td>
           <td><span class="badge b-${n.status}">${fmtStatus(n.status)}</span></td>
-          <td><button class="secondary" onclick="openNfa('${n.id}')">View Details →</button></td>
+          <td>
+            <button class="secondary" onclick="openNfa('${n.id}')">View Details →</button>
+            ${n.status === 'draft' && n.created_by === USER.id ? `<button class="danger" style="margin-left:6px;padding:5px 10px;font-size:12px;" onclick="confirmDeleteDraft('${n.id}')">Delete Draft</button>` : ''}
+          </td>
         </tr>
       `;
     });
@@ -4229,8 +4232,9 @@ async function openNfa(id){
   const canOwnerEdit = isOwner && ['draft', 'submitted', 'revision_required'].includes(n.status);
   const canHodEdit = USER.role === 'hod' && n.status === 'submitted' && USER.department_id === n.department_id;
   const canDeanEdit = ['dean', 'associate_dean'].includes(USER.role) && n.status === 'dean_review';
-  const canSuperAdminEdit = USER.role === 'super_admin';
-  const canEdit = canOwnerEdit || canHodEdit || canDeanEdit || canSuperAdminEdit;
+  const canSuperAdminEdit = USER.role === 'super_admin' && n.status !== 'draft';
+  const canEdit = n.status === 'draft' ? isOwner : (canOwnerEdit || canHodEdit || canDeanEdit || canSuperAdminEdit);
+  const canDeleteDraft = n.status === 'draft' && isOwner;
 
   const canSubmit = n.status === 'draft' && isOwner;
   const canHodReview = (n.status === 'submitted' || n.status === 'under_review') && USER.role === 'hod' && USER.department_id === n.department_id;
@@ -4433,6 +4437,7 @@ async function openNfa(id){
       <div class="row">
         <button class="secondary" onclick="downloadPdf('${n.id}')">Download Official PDF</button>
         ${canEdit ? `<button class="secondary" onclick="editNfaModal('${n.id}')">Edit Details</button>` : ''}
+        ${canDeleteDraft ? `<button class="danger" type="button" onclick="confirmDeleteDraft('${n.id}')">Delete Draft</button>` : ''}
         <button class="secondary" type="button" onclick="closeModal()">Close</button>
       </div>
       <div class="row">
@@ -4478,6 +4483,51 @@ async function submitNfa(id){
     openNfa(id);
     if (currentTab === 'nfas') showTab('nfas');
   } catch(e){ toast(e.message); }
+}
+
+function confirmDeleteDraft(nfaId) {
+  const existing = document.getElementById('deleteDraftConfirmDialog');
+  if (existing) existing.remove();
+
+  const dialog = document.createElement('div');
+  dialog.id = 'deleteDraftConfirmDialog';
+  dialog.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.65);z-index:999999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px);';
+  dialog.innerHTML = `
+    <div style="background:#ffffff;border-radius:12px;padding:24px 28px;max-width:440px;width:90%;box-shadow:0 25px 50px -12px rgba(0,0,0,0.35);border-top:5px solid #dc2626;text-align:left;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+        <h3 style="margin:0;font-size:18px;font-weight:700;color:#0f172a;">Delete Draft NFA</h3>
+      </div>
+      <p style="margin:0 0 22px;font-size:14.5px;color:#334155;line-height:1.55;">
+        Are you sure you want to permanently delete this Draft NFA? This action cannot be undone.
+      </p>
+      <div style="display:flex;justify-content:flex-end;gap:12px;">
+        <button type="button" class="secondary" style="padding:9px 18px;font-size:13.5px;font-weight:600;" onclick="dismissDeleteDraftConfirmation()">Cancel</button>
+        <button type="button" class="danger" style="padding:9px 18px;font-size:13.5px;font-weight:600;" onclick="executeDeleteDraft('${nfaId}')">Delete Draft</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(dialog);
+}
+
+function dismissDeleteDraftConfirmation() {
+  const dialog = document.getElementById('deleteDraftConfirmDialog');
+  if (dialog) dialog.remove();
+}
+
+async function executeDeleteDraft(nfaId) {
+  dismissDeleteDraftConfirmation();
+  try {
+    await api(`/nfas/${nfaId}`, { method: 'DELETE' });
+    toast('Draft NFA permanently deleted successfully.');
+    closeModal();
+    if (currentTab === 'nfas') {
+      showTab('nfas');
+    } else {
+      showTab(currentTab || 'home');
+    }
+  } catch (err) {
+    toast(err.message || 'Failed to delete draft NFA');
+  }
 }
 
 async function decideReview(id, decision, promptTitle){
@@ -4729,6 +4779,7 @@ async function editNfaModal(id){
     ${renderPurchaseQuotationsHtml(true, n.quotations || [], n.comparative_statement || null)}
 
     <div class="row" style="justify-content:flex-end;gap:12px">
+      ${n.status === 'draft' && n.created_by === USER.id ? `<button class="danger" type="button" onclick="confirmDeleteDraft('${n.id}')">Delete Draft</button>` : ''}
       <button class="secondary" type="button" onclick="handleCloseEditNfa('${n.id}', false)">Cancel</button>
       <button class="green" onclick="saveNfaEdits('${n.id}')">Save Changes</button>
     </div>

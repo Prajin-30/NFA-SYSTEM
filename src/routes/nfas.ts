@@ -131,8 +131,8 @@ nfasRouter.get('/:id/attachments/:type/:index?', (req: AuthedRequest, res) => {
 
   // Role-based / ownership access verification
   const u = req.user!;
-  // Strict Draft Privacy: Unsubmitted draft attachments are strictly private to creator
-  if (nfa.status === 'draft' && nfa.created_by !== u.id && u.role !== 'super_admin') {
+  // Strict Draft Privacy: Unsubmitted draft attachments are strictly private to creator (even super_admin)
+  if (nfa.status === 'draft' && nfa.created_by !== u.id) {
     return res.status(403).json({ error: 'Forbidden: Draft attachments are private to the creator until submitted for approval' });
   }
   const isPrivileged = ['super_admin', 'dean', 'associate_dean', 'finance', 'director'].includes(u.role);
@@ -242,12 +242,11 @@ nfasRouter.get('/', (req: AuthedRequest, res) => {
   // dean, associate_dean, director, finance, super_admin see all departments
 
   // Strict Draft Privacy: Unsubmitted draft NFAs are strictly private to their creator.
-  // Higher officials (HOD, Dean, Finance, Director) and other users must NOT see another user's draft.
-  // Super Admin administrative access is supported via ?all_drafts=true or for drafts created by super_admin.
-  const canSeeAllDrafts = role === 'super_admin' && req.query.all_drafts === 'true';
+  // Super Admin, HOD, Dean, Finance, Director, and other users must NOT see another user's draft.
+  // There is NO exception for Super Admin (all_drafts=true removed).
   list = list.filter((n) => {
     if (n.status === 'draft') {
-      return n.created_by === id || canSeeAllDrafts;
+      return n.created_by === id;
     }
     return true;
   });
@@ -300,8 +299,8 @@ nfasRouter.get('/:id', (req: AuthedRequest, res) => {
   if (!nfa) return res.status(404).json({ error: 'NFA not found' });
   if (req.user) {
     const { role, id, department_id } = req.user;
-    // Strict Draft Privacy: An unsubmitted Draft NFA is strictly private to its creator
-    if (nfa.status === 'draft' && nfa.created_by !== id && role !== 'super_admin') {
+    // Strict Draft Privacy: An unsubmitted Draft NFA is strictly private to its creator (even super_admin)
+    if (nfa.status === 'draft' && nfa.created_by !== id) {
       return res.status(403).json({ error: 'Forbidden: Draft NFAs are private to their creator until submitted for approval' });
     }
     if (role === 'faculty' && nfa.created_by !== id) {
@@ -320,8 +319,8 @@ nfasRouter.get('/:id/pdf', (req: AuthedRequest, res) => {
   if (!nfa) return res.status(404).json({ error: 'NFA not found' });
   if (req.user) {
     const { role, id, department_id } = req.user;
-    // Strict Draft Privacy: Unsubmitted draft NFAs cannot be downloaded by non-creators
-    if (nfa.status === 'draft' && nfa.created_by !== id && role !== 'super_admin') {
+    // Strict Draft Privacy: Unsubmitted draft NFAs cannot be downloaded by non-creators (even super_admin)
+    if (nfa.status === 'draft' && nfa.created_by !== id) {
       return res.status(403).json({ error: 'Forbidden: Draft NFAs are private to their creator until submitted for approval' });
     }
     if (role === 'faculty' && nfa.created_by !== id) {
@@ -440,32 +439,75 @@ nfasRouter.get('/:id/pdf', (req: AuthedRequest, res) => {
   );
 });
 
-/** DELETE /api/nfas/:id — remove an NFA and its draft data when authorized. */
+/** DELETE /api/nfas/:id — permanently remove a draft NFA when authorized. */
 nfasRouter.delete('/:id', async (req: AuthedRequest, res) => {
+  const attachmentsToDelete: string[] = [];
+
   const result = await store.transact((db) => {
     const nfa = db.nfas.find((item) => item.id === req.params.id);
-    if (!nfa) return { error: 404 as const };
+    if (!nfa) return { error: 404 as const, msg: 'NFA not found' };
 
-    // When status is 'draft', only the creator (or super_admin) can delete their draft
-    let canDelete: boolean;
-    if (nfa.status === 'draft') {
-      canDelete = nfa.created_by === req.user!.id || req.user!.role === 'super_admin';
-    } else {
-      canDelete = req.user!.role === 'super_admin' || nfa.created_by === req.user!.id || (['faculty', 'hod'].includes(req.user!.role) && nfa.department_id === req.user!.department_id);
-    }
-    if (!canDelete) return { error: 403 as const };
-
-    // If deleting an NFA that has an active reservation, release the reserved funds
-    if (['submitted', 'dean_review', 'accounts_review', 'pending_director_approval', 'under_review'].includes(nfa.status)) {
-      releaseNfaReservation(db, nfa, { changed_by: req.user!.id, role: req.user!.role, reason: 'NFA deleted / withdrawn by user' });
+    // Strict Draft Deletion:
+    // Only the user who created the Draft can delete it.
+    // HOD, Dean, Director, Finance, Super Admin, and other users receive 403.
+    if (nfa.created_by !== req.user!.id) {
+      return { error: 403 as const, msg: 'Forbidden: Only the creator may delete their draft NFA' };
     }
 
+    // Never allow submitted, under-review, approved or rejected NFAs to be deleted through this feature.
+    if (nfa.status !== 'draft') {
+      return { error: 403 as const, msg: 'Forbidden: Only draft NFAs can be deleted. Submitted, under-review, approved, or rejected NFAs cannot be deleted.' };
+    }
+
+    // Identify attachments belonging to this draft to remove from storage (if not shared)
+    const draftFilePaths: string[] = [];
+    if (Array.isArray(nfa.quotations)) {
+      for (const q of nfa.quotations) {
+        if (q && q.file_path) draftFilePaths.push(q.file_path);
+      }
+    }
+    if (nfa.comparative_statement && nfa.comparative_statement.file_path) {
+      draftFilePaths.push(nfa.comparative_statement.file_path);
+    }
+
+    // Verify whether each attachment is shared with any other record
+    for (const fp of draftFilePaths) {
+      const isShared = db.nfas.some((other) => {
+        if (other.id === nfa.id) return false;
+        if (Array.isArray(other.quotations) && other.quotations.some((oq) => oq?.file_path === fp)) return true;
+        if (other.comparative_statement?.file_path === fp) return true;
+        return false;
+      });
+      if (!isShared) {
+        attachmentsToDelete.push(fp);
+      }
+    }
+
+    // Remove the draft NFA and its custom items
+    // (Drafts have ₹0 budget reservation, no ledger transactions, and no approval history)
     db.nfas = db.nfas.filter((item) => item.id !== nfa.id);
     db.nfa_items = db.nfa_items.filter((item) => item.nfa_id !== nfa.id);
     db.approvals = db.approvals.filter((approval) => approval.nfa_id !== nfa.id);
-    return { deleted: true };
+
+    return { deleted: true, id: nfa.id };
   });
-  if ('error' in result) return res.status(result.error).json({ error: result.error === 404 ? 'NFA not found' : 'Not authorized to delete this NFA' });
+
+  if ('error' in result) {
+    return res.status(result.error).json({ error: result.msg || (result.error === 404 ? 'NFA not found' : 'Not authorized to delete this NFA') });
+  }
+
+  // Remove unshared files from disk after transaction succeeds
+  for (const fp of attachmentsToDelete) {
+    try {
+      const fullPath = path.join(attachmentsDir, path.basename(fp));
+      if (fs.existsSync(fullPath)) {
+        fs.unlinkSync(fullPath);
+      }
+    } catch (e) {
+      console.warn(`[WARN] Failed to delete draft attachment file: ${fp}`, e);
+    }
+  }
+
   res.json(result);
 });
 
@@ -670,9 +712,9 @@ nfasRouter.put('/:id', async (req: AuthedRequest, res) => {
     const isDean = ['dean', 'associate_dean'].includes(req.user!.role);
     const isSuperAdmin = req.user!.role === 'super_admin';
 
-    // Strict Draft Editing: An unsubmitted Draft can ONLY be edited by its creator (or super_admin)
+    // Strict Draft Editing: An unsubmitted Draft can ONLY be edited by its creator
     if (nfa.status === 'draft') {
-      if (!isOwner && !isSuperAdmin) {
+      if (!isOwner) {
         return { error: 403 as const, msg: 'Forbidden: Only the creator may edit a draft NFA' };
       }
     } else {
@@ -955,7 +997,7 @@ nfasRouter.post('/:id/submit', async (req: AuthedRequest, res) => {
   const result = await store.transact((db) => {
     const nfa = db.nfas.find((n) => n.id === req.params.id);
     if (!nfa) return { error: 404 as const };
-    if (nfa.created_by !== req.user!.id && req.user!.role !== 'super_admin') return { error: 403 as const };
+    if (nfa.created_by !== req.user!.id) return { error: 403 as const };
     if (!['draft', 'revision_required'].includes(nfa.status)) return { error: 'bad_status' as const };
     
     const items = db.nfa_items.filter((i) => i.nfa_id === nfa.id);

@@ -14,6 +14,8 @@ import { adminRouter } from './routes/admin.js';
 import { usersRouter } from './routes/users.js';
 import { requireAuth, AuthedRequest } from './middleware/auth.js';
 import { store } from './store.js';
+import { query } from './db/pool.js';
+import { isLiveSupabaseAuthConfigured } from './services/supabaseAuth.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const signaturesDir = path.join(__dirname, '..', 'data', 'signatures');
@@ -76,7 +78,37 @@ app.use('/api/projects', projectsRouter);
 app.use('/api/audit', auditRouter);
 app.use('/api/admin', adminRouter);
 
-app.get('/api/health', (_req, res) => res.json({ ok: true, time: new Date().toISOString() }));
+app.get('/api/health', async (_req, res) => {
+  let dbConnected = false;
+  let dbError: string | null = null;
+  if (process.env.DATABASE_URL) {
+    try {
+      await query('SELECT 1;');
+      dbConnected = true;
+    } catch (err: any) {
+      dbError = err?.code || err?.message || 'DB_ERROR';
+    }
+  }
+
+  res.json({
+    ok: true,
+    time: new Date().toISOString(),
+    env: {
+      has_supabase_url: Boolean(process.env.SUPABASE_URL),
+      has_supabase_service_role_key: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
+      has_supabase_service_key: Boolean(process.env.SUPABASE_SERVICE_KEY),
+      has_supabase_key: Boolean(process.env.SUPABASE_KEY),
+      has_database_url: Boolean(process.env.DATABASE_URL),
+      has_data_source: Boolean(process.env.DATA_SOURCE),
+      data_source_value: process.env.DATA_SOURCE || null,
+      app_env: process.env.APP_ENV || null,
+      node_env: process.env.NODE_ENV || null,
+      live_auth_configured: isLiveSupabaseAuthConfigured(),
+      db_connected: dbConnected,
+      db_error: dbError,
+    },
+  });
+});
 
 const PORT = Number(process.env.PORT) || 4000;
 const isMain = process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1]);

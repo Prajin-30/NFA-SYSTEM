@@ -422,15 +422,27 @@ export async function authenticateInstitutionalUser(
   const isProd = process.env.NODE_ENV === 'production' || process.env.APP_ENV === 'production';
 
   if (isLiveSupabaseAuthConfigured() && supabase) {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: cleanEmail,
-      password,
-    });
-    if (error || !data.user) {
-      console.warn(`[Auth Failure] Category: INVALID_CREDENTIALS | Target: ${maskEmail(cleanEmail)}`);
-      throw new Error('INVALID_CREDENTIALS');
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: cleanEmail,
+        password,
+      });
+      if (error) {
+        console.warn(`[Auth Failure] Category: INVALID_CREDENTIALS | Target: ${maskEmail(cleanEmail)} | Supabase: ${error.message}`);
+        throw new Error('INVALID_CREDENTIALS');
+      }
+      if (!data?.user) {
+        console.warn(`[Auth Failure] Category: INVALID_CREDENTIALS | Target: ${maskEmail(cleanEmail)} | Reason: No user data returned`);
+        throw new Error('INVALID_CREDENTIALS');
+      }
+      authUserId = data.user.id;
+    } catch (apiErr: any) {
+      if (apiErr.message === 'INVALID_CREDENTIALS') {
+        throw apiErr;
+      }
+      console.error(`[Auth Failure] Category: SUPABASE_API_ERROR | Target: ${maskEmail(cleanEmail)} | Detail: ${apiErr?.message || apiErr}`);
+      throw new Error(`SUPABASE_API_ERROR: ${apiErr?.message || 'Verification failed'}`);
     }
-    authUserId = data.user.id;
   } else if (isProd) {
     console.error(`[Auth Failure] Category: AUTH_CONFIGURATION_ERROR | Target: ${maskEmail(cleanEmail)} | Reason: Supabase Auth credentials not configured in production.`);
     throw new Error('AUTH_CONFIGURATION_ERROR');

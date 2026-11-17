@@ -65,16 +65,22 @@ authRouter.post('/login', async (req, res) => {
     );
 
     const userSchool = user.school || (['super_admin', 'director', 'finance', 'dean', 'associate_dean'].includes(user.role) ? 'SoET' : null);
-    const token = signToken({
-      id: user.id,
-      role: user.role,
-      department_id: user.department_id,
-      school: userSchool,
-      name: user.name,
-      email: user.email,
-      must_change_password,
-      is_active: user.is_active,
-    });
+    let token: string;
+    try {
+      token = signToken({
+        id: user.id,
+        role: user.role,
+        department_id: user.department_id,
+        school: userSchool,
+        name: user.name,
+        email: user.email,
+        must_change_password,
+        is_active: user.is_active,
+      });
+    } catch (jwtErr: any) {
+      console.error(`[Auth Failure] Category: JWT_ERROR | Detail: ${jwtErr?.message || jwtErr}`);
+      throw new Error(`JWT_ERROR: ${jwtErr?.message || 'Token generation failed'}`);
+    }
 
     return res.json({
       token,
@@ -90,25 +96,31 @@ authRouter.post('/login', async (req, res) => {
       must_change_password,
     });
   } catch (err: any) {
-    const message = err?.message || 'Authentication failed';
+    const rawMessage = String(err?.message || 'Authentication failed');
     const email = req.body?.email ? String(req.body.email).trim() : 'unknown';
     const masked = maskEmail(email);
 
-    if (message.includes('deactivated')) {
+    if (rawMessage.includes('deactivated')) {
       console.warn(`[Auth Failure] Category: ACCOUNT_DEACTIVATED | Target: ${masked}`);
-      return res.status(401).json({ error: message });
+      return res.status(401).json({ error: rawMessage });
     }
 
-    if (message === 'INVALID_CREDENTIALS' || message.includes('Invalid email or password')) {
+    if (rawMessage === 'INVALID_CREDENTIALS' || rawMessage.includes('Invalid email or password')) {
       console.warn(`[Auth Failure] Category: INVALID_CREDENTIALS | Target: ${masked}`);
-    } else if (message === 'DATABASE_UNAVAILABLE') {
+    } else if (rawMessage.startsWith('SUPABASE_API_ERROR')) {
+      console.error(`[Auth Failure] Category: SUPABASE_API_ERROR | Target: ${masked} | Detail: ${rawMessage}`);
+    } else if (rawMessage === 'DATABASE_UNAVAILABLE') {
       console.error(`[Auth Failure] Category: DATABASE_UNAVAILABLE | Target: ${masked}`);
-    } else if (message === 'AUTH_CONFIGURATION_ERROR') {
+    } else if (rawMessage === 'AUTH_CONFIGURATION_ERROR') {
       console.error(`[Auth Failure] Category: AUTH_CONFIGURATION_ERROR | Target: ${masked}`);
-    } else if (message === 'PROFILE_NOT_FOUND') {
+    } else if (rawMessage === 'PROFILE_NOT_FOUND') {
       console.warn(`[Auth Failure] Category: PROFILE_NOT_FOUND | Target: ${masked}`);
+    } else if (rawMessage.startsWith('JWT_ERROR')) {
+      console.error(`[Auth Failure] Category: JWT_ERROR | Target: ${masked} | Detail: ${rawMessage}`);
+    } else if (rawMessage.includes('not authorized')) {
+      console.warn(`[Auth Failure] Category: UNAUTHORIZED_DOMAIN | Target: ${masked}`);
     } else {
-      console.error(`[Auth Failure] Category: AUTH_ERROR | Target: ${masked}`);
+      console.error(`[Auth Failure] Category: UNEXPECTED_ERROR | Target: ${masked} | Name: ${err?.name || 'Error'} | Message: ${rawMessage}`);
     }
 
     return res.status(401).json({ error: 'Invalid email or password' });

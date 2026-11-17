@@ -15,7 +15,7 @@ import { usersRouter } from './routes/users.js';
 import { requireAuth, AuthedRequest } from './middleware/auth.js';
 import { store } from './store.js';
 import { query } from './db/pool.js';
-import { isLiveSupabaseAuthConfigured } from './services/supabaseAuth.js';
+import { isLiveSupabaseAuthConfigured, getSupabaseAdmin } from './services/supabaseAuth.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const signaturesDir = path.join(__dirname, '..', 'data', 'signatures');
@@ -90,6 +90,22 @@ app.get('/api/health', async (_req, res) => {
     }
   }
 
+  let supabaseAuthOk = false;
+  let supabaseAuthError: string | null = null;
+  const supabase = getSupabaseAdmin();
+  if (supabase) {
+    try {
+      const { error } = await supabase.auth.admin.listUsers({ perPage: 1 });
+      if (error) {
+        supabaseAuthError = error.message;
+      } else {
+        supabaseAuthOk = true;
+      }
+    } catch (err: any) {
+      supabaseAuthError = err?.message || 'FETCH_FAILED';
+    }
+  }
+
   res.json({
     ok: true,
     time: new Date().toISOString(),
@@ -105,6 +121,8 @@ app.get('/api/health', async (_req, res) => {
       app_env: process.env.APP_ENV || null,
       node_env: process.env.NODE_ENV || null,
       live_auth_configured: isLiveSupabaseAuthConfigured(),
+      supabase_auth_ok: supabaseAuthOk,
+      supabase_auth_error: supabaseAuthError,
       db_connected: dbConnected,
       db_error: dbError,
     },

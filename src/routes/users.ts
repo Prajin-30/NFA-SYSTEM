@@ -97,7 +97,7 @@ usersRouter.use(requireAuth);
  * and has dimensions ≥ 200 × 70 px.
  */
 usersRouter.get('/me', (req: AuthedRequest, res) => {
-  const user = store.data.users.find((u) => u.id === req.user!.id);
+  const user = req.user || store.data.users.find((u) => u.id === req.user?.id);
   if (!user) return res.status(404).json({ error: 'User not found' });
 
   const sigFile = path.join(signaturesDir, `${user.id}.png`);

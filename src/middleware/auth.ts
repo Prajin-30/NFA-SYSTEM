@@ -17,6 +17,7 @@ export interface AuthedRequest extends Request {
     email: string;
     must_change_password?: boolean;
     is_active?: boolean;
+    signature_image?: string | null;
   };
 }
 
@@ -59,7 +60,7 @@ export async function requireAuth(req: AuthedRequest, res: Response, next: NextF
     ) {
       try {
         const queryRes = await query(
-          'SELECT id, name, email, role, department_id, must_change_password, is_active FROM user_profiles WHERE id = $1 LIMIT 1;',
+          'SELECT id, name, email, role, department_id, must_change_password, is_active, signature_image FROM user_profiles WHERE id = $1 LIMIT 1;',
           [decoded.id]
         );
         if (queryRes.rows.length > 0) {
@@ -85,6 +86,7 @@ export async function requireAuth(req: AuthedRequest, res: Response, next: NextF
         school: dbUser.school || (['super_admin', 'director', 'finance', 'dean', 'associate_dean'].includes(dbUser.role) ? 'SoET' : null),
         must_change_password: Boolean(dbUser.must_change_password || decoded.must_change_password),
         is_active: dbUser.is_active !== false,
+        signature_image: dbUser.signature_image || null,
       };
     } else {
       req.user = {

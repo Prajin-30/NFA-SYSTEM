@@ -669,10 +669,17 @@ nfasRouter.put('/:id', async (req: AuthedRequest, res) => {
     const isHod = req.user!.role === 'hod' && req.user!.department_id === nfa.department_id;
     const isDean = ['dean', 'associate_dean'].includes(req.user!.role);
     const isSuperAdmin = req.user!.role === 'super_admin';
-    const canOwnerEdit = isOwner && !['approved', 'rejected'].includes(nfa.status);
 
-    if (!canOwnerEdit && !isHod && !isDean && !isSuperAdmin) {
-      return { error: 403 as const, msg: 'Not authorized to edit this NFA' };
+    // Strict Draft Editing: An unsubmitted Draft can ONLY be edited by its creator (or super_admin)
+    if (nfa.status === 'draft') {
+      if (!isOwner && !isSuperAdmin) {
+        return { error: 403 as const, msg: 'Forbidden: Only the creator may edit a draft NFA' };
+      }
+    } else {
+      const canOwnerEdit = isOwner && !['approved', 'rejected'].includes(nfa.status);
+      if (!canOwnerEdit && !isHod && !isDean && !isSuperAdmin) {
+        return { error: 403 as const, msg: 'Not authorized to edit this NFA' };
+      }
     }
 
     const b = req.body || {};

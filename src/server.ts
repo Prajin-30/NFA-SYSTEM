@@ -98,6 +98,7 @@ app.get('/api/health', async (_req, res) => {
       has_supabase_service_role_key: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
       has_supabase_service_key: Boolean(process.env.SUPABASE_SERVICE_KEY),
       has_supabase_key: Boolean(process.env.SUPABASE_KEY),
+      has_supabase_anon_key: Boolean(process.env.SUPABASE_ANON_KEY),
       has_database_url: Boolean(process.env.DATABASE_URL),
       has_data_source: Boolean(process.env.DATA_SOURCE),
       data_source_value: process.env.DATA_SOURCE || null,

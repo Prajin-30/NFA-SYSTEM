@@ -64,13 +64,15 @@ authRouter.post('/login', async (req, res) => {
       String(password)
     );
 
-    const userSchool = user.school || (['super_admin', 'director', 'finance', 'dean', 'associate_dean'].includes(user.role) ? 'SoET' : null);
+    const userSchool = user.school || (['super_admin', 'director', 'finance', 'finance_head', 'dean', 'associate_dean', 'deans_office'].includes(user.role) ? 'SoET' : null);
+    const userCentres = Array.isArray((user as any).authorized_centre_ids) ? (user as any).authorized_centre_ids : [];
     let token: string;
     try {
       token = signToken({
         id: user.id,
         role: user.role,
         department_id: user.department_id,
+        authorized_centre_ids: userCentres,
         school: userSchool,
         name: user.name,
         email: user.email,
@@ -90,6 +92,7 @@ authRouter.post('/login', async (req, res) => {
         email: user.email,
         role: user.role,
         department_id: user.department_id,
+        authorized_centre_ids: userCentres,
         school: userSchool,
         must_change_password,
       },
@@ -159,6 +162,8 @@ authRouter.post('/change-password', requireAuth, async (req: AuthedRequest, res)
       id: req.user!.id,
       role: req.user!.role,
       department_id: req.user!.department_id,
+      authorized_centre_ids: req.user!.authorized_centre_ids || [],
+      school: req.user!.school,
       name: req.user!.name,
       email: req.user!.email,
       must_change_password: false,

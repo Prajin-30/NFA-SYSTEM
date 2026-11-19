@@ -43,6 +43,15 @@ budgetsRouter.get('/departments', (_req, res) => res.json(store.data.departments
 /** GET /api/budgets/financial-years - reference data */
 budgetsRouter.get('/financial-years', (_req, res) => res.json(store.data.financial_years));
 
+function sortBySlNo(a: { sl_no?: number | string }, b: { sl_no?: number | string }) {
+  const aNum = typeof a.sl_no === 'number' ? a.sl_no : parseFloat(String(a.sl_no));
+  const bNum = typeof b.sl_no === 'number' ? b.sl_no : parseFloat(String(b.sl_no));
+  if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
+  if (!isNaN(aNum)) return -1;
+  if (!isNaN(bNum)) return 1;
+  return 0;
+}
+
 /** GET /api/budgets/budget-types - reference data */
 budgetsRouter.get('/budget-types', (_req, res) => res.json(store.data.budget_types || []));
 
@@ -52,22 +61,27 @@ budgetsRouter.get('/categories', (req, res) => {
   const subcats = store.data.budget_subcategories || [];
   const list = store.data.budget_categories.map((c) => ({
     ...c,
-    subcategories: subcats.filter((s) => s.budget_category_id === c.id && (!deptId || s.department_id === deptId || !s.department_id)),
+    subcategories: subcats
+      .filter((s) => s.budget_category_id === c.id && (!deptId || s.department_id === deptId || !s.department_id))
+      .sort(sortBySlNo),
   }));
   res.json(list);
 });
 
 /** GET /api/budgets/subcategories?category=&department_id= */
 budgetsRouter.get('/subcategories', (req: AuthedRequest, res) => {
-  const isSenior = ['super_admin', 'director', 'finance', 'dean', 'associate_dean'].includes(req.user!.role);
+  const isSenior = ['super_admin', 'director', 'finance', 'finance_head', 'dean', 'associate_dean', 'deans_office'].includes(req.user!.role);
   const targetDept = req.query.department_id ? String(req.query.department_id) : undefined;
-  if (!isSenior && targetDept && req.user!.department_id !== targetDept) {
-    return res.status(403).json({ error: 'Forbidden: You do not have permission to view subcategories for this department' });
+  const userCentres = req.user!.authorized_centre_ids || [];
+  const isAuthorized = targetDept ? (req.user!.department_id === targetDept || userCentres.includes(targetDept)) : true;
+  if (!isSenior && targetDept && !isAuthorized) {
+    return res.status(403).json({ error: 'Forbidden: You do not have permission to view subcategories for this organizational unit' });
   }
 
   let list = store.data.budget_subcategories || [];
   if (req.query.category) list = list.filter((s) => s.budget_category_id === req.query.category);
   if (req.query.department_id) list = list.filter((s) => s.department_id === req.query.department_id || !s.department_id);
+  list = [...list].sort(sortBySlNo);
   res.json(list);
 });
 
@@ -473,7 +487,7 @@ budgetsRouter.put('/subcategory/:id', requireRole('super_admin'), async (req: Au
  * and all-department summary table for authorized senior officials (Director, Dean, Associate Dean, Finance, Super Admin).
  */
 budgetsRouter.get('/school/overview', (req: AuthedRequest, res) => {
-  const isSenior = ['super_admin', 'director', 'finance', 'dean', 'associate_dean'].includes(req.user!.role);
+  const isSenior = ['super_admin', 'director', 'finance', 'finance_head', 'dean', 'associate_dean', 'deans_office'].includes(req.user!.role);
   if (!isSenior) {
     return res.status(403).json({ error: 'Forbidden: School-wide budget overview is restricted to senior institutional officials' });
   }
@@ -552,9 +566,11 @@ budgetsRouter.get('/:department/summary', (req: AuthedRequest, res) => {
   const dept = store.data.departments.find((d) => d.id === deptParam || d.code.toLowerCase() === deptParam.toLowerCase());
   const deptId = dept ? dept.id : deptParam;
 
-  const isSenior = ['super_admin', 'director', 'finance', 'dean', 'associate_dean'].includes(req.user!.role);
-  if (!isSenior && req.user!.department_id !== deptId) {
-    return res.status(403).json({ error: 'Forbidden: You do not have permission to view budget data for this department' });
+  const isSenior = ['super_admin', 'director', 'finance', 'finance_head', 'dean', 'associate_dean', 'deans_office'].includes(req.user!.role);
+  const userCentres = req.user!.authorized_centre_ids || [];
+  const isAuthorized = req.user!.department_id === deptId || userCentres.includes(deptId);
+  if (!isSenior && !isAuthorized) {
+    return res.status(403).json({ error: 'Forbidden: You do not have permission to view budget data for this organizational unit' });
   }
 
   // School of Architecture isolation check (Requirement #12)
@@ -602,7 +618,8 @@ budgetsRouter.get('/:department/summary', (req: AuthedRequest, res) => {
           deficit_amount: isSubDeficit ? Math.abs(subAvail) : 0,
           status: isSubDeficit ? 'exceeded' : subUtil >= 100 ? 'exceeded' : subUtil >= 80 ? 'warning' : 'healthy',
         };
-      });
+      })
+      .sort(sortBySlNo);
 
     return {
       ...line,
@@ -657,9 +674,11 @@ budgetsRouter.get('/:department', (req: AuthedRequest, res) => {
   const dept = store.data.departments.find((d) => d.id === deptParam || d.code.toLowerCase() === deptParam.toLowerCase());
   const deptId = dept ? dept.id : deptParam;
 
-  const isSenior = ['super_admin', 'director', 'finance', 'dean', 'associate_dean'].includes(req.user!.role);
-  if (!isSenior && req.user!.department_id !== deptId) {
-    return res.status(403).json({ error: 'Forbidden: You do not have permission to view budget data for this department' });
+  const isSenior = ['super_admin', 'director', 'finance', 'finance_head', 'dean', 'associate_dean', 'deans_office'].includes(req.user!.role);
+  const userCentres = req.user!.authorized_centre_ids || [];
+  const isAuthorized = req.user!.department_id === deptId || userCentres.includes(deptId);
+  if (!isSenior && !isAuthorized) {
+    return res.status(403).json({ error: 'Forbidden: You do not have permission to view budget data for this organizational unit' });
   }
 
   // School of Architecture isolation check (Requirement #12)

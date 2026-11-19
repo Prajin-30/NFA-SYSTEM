@@ -18,6 +18,7 @@ import {
   BudgetError,
 } from '../lib/budgetEngine.js';
 import { renderNfaPdf } from '../lib/pdf.js';
+import { dispatchWorkflowNotification } from '../services/notifications.js';
 import type { NfaStatus, Role } from '../types.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -203,6 +204,20 @@ function withApprovals(nfaId: string) {
     });
 }
 
+export function isCseOrAdseDepartment(deptId?: string | null): boolean {
+  if (!deptId) return false;
+  const dept = store.data.departments.find((d) => d.id === deptId);
+  if (!dept) return false;
+  const code = (dept.code || '').trim().toUpperCase();
+  const name = (dept.name || '').trim().toLowerCase();
+  if (code === 'CSE' || code === 'ADSE') return true;
+  if (deptId === 'b5643609-22d9-4b21-9ce0-2f6eb5b9d04e' || deptId === '330ada81-5246-4c92-9ca2-688eae0f28d4') return true;
+  if (name.includes('computer science') || name.includes('data science') || name.includes('artificial intelligence')) {
+    return true;
+  }
+  return false;
+}
+
 function countWords(str: string): number {
   if (!str) return 0;
   return str.trim().split(/\s+/).filter(Boolean).length;
@@ -211,19 +226,48 @@ function countWords(str: string): number {
 /** GET /api/nfas/inbox — NFAs requiring immediate action from logged in user */
 nfasRouter.get('/inbox', (req: AuthedRequest, res) => {
   const { role, id, department_id } = req.user!;
-  let list = store.data.nfas;
+  let list = store.data.nfas.filter((n) => !n.is_deleted);
+
   if (role === 'faculty') {
     list = list.filter((n) => n.created_by === id && (n.status === 'draft' || n.status === 'revision_required'));
   } else if (role === 'hod') {
-    list = list.filter((n) => n.department_id === department_id && n.status === 'submitted');
-  } else if (role === 'dean' || role === 'associate_dean') {
-    list = list.filter((n) => n.status === 'dean_review');
+    // HOD only reviews department NFAs that are pending HOD review (skips Centre/Office NFAs)
+    list = list.filter(
+      (n) =>
+        n.department_id === department_id &&
+        n.organization_type !== 'centre_or_office' &&
+        (n.status === 'pending_hod_review' || n.status === 'submitted' || n.status === 'under_review')
+    );
+  } else if (role === 'deans_office') {
+    list = list.filter((n) => n.status === 'pending_deans_office_verification');
+  } else if (role === 'associate_dean') {
+    list = list.filter((n) => n.status === 'pending_associate_dean_approval');
+  } else if (role === 'dean') {
+    list = list.filter((n) => n.status === 'pending_dean_approval' || n.status === 'dean_review');
   } else if (role === 'finance') {
-    list = list.filter((n) => n.status === 'accounts_review');
+    list = list.filter(
+      (n) => n.status === 'pending_finance_office_approval' || n.status === 'accounts_review' || n.status === 'budget_validation'
+    );
   } else if (role === 'director') {
     list = list.filter((n) => n.status === 'pending_director_approval' || n.status === 'pending_higher_approval');
+  } else if (role === 'finance_head') {
+    list = list.filter((n) => n.status === 'pending_finance_head_approval');
   } else if (role === 'super_admin') {
-    list = list.filter((n) => ['submitted', 'dean_review', 'accounts_review', 'pending_director_approval', 'pending_higher_approval'].includes(n.status));
+    list = list.filter((n) =>
+      [
+        'submitted',
+        'pending_hod_review',
+        'pending_deans_office_verification',
+        'pending_associate_dean_approval',
+        'dean_review',
+        'pending_dean_approval',
+        'accounts_review',
+        'pending_finance_office_approval',
+        'pending_director_approval',
+        'pending_finance_head_approval',
+        'pending_higher_approval',
+      ].includes(n.status)
+    );
   } else {
     list = [];
   }
@@ -232,14 +276,14 @@ nfasRouter.get('/inbox', (req: AuthedRequest, res) => {
 
 /** GET /api/nfas — role-scoped list with strict draft privacy */
 nfasRouter.get('/', (req: AuthedRequest, res) => {
-  let list = store.data.nfas;
+  let list = store.data.nfas.filter((n) => !n.is_deleted);
   const { role, id, department_id } = req.user!;
   if (role === 'faculty') {
     list = list.filter((n) => n.created_by === id);
   } else if (role === 'hod' || role === 'it_admin') {
     list = list.filter((n) => n.department_id === department_id);
   }
-  // dean, associate_dean, director, finance, super_admin see all departments
+  // deans_office, dean, associate_dean, director, finance, finance_head, super_admin see all departments
 
   // Strict Draft Privacy: Unsubmitted draft NFAs are strictly private to their creator.
   // Super Admin, HOD, Dean, Finance, Director, and other users must NOT see another user's draft.
@@ -375,25 +419,27 @@ nfasRouter.get('/:id/pdf', (req: AuthedRequest, res) => {
   // 3. Subcategory Total
   const totalAllocationSubcategory = subcat?.allocated_amount || (budgetLine?.allocated_amount ? Math.round(budgetLine.allocated_amount * 0.1) : 117700);
 
-  // 4. Available Subcategory Budget
+  // 4. Available Subcategory Budget (strictly preserving deficits, no zero-clamping)
   let currentAvailable = 0;
-  if (subcat && subcat.allocated_amount > 0) {
+  if (subcat && subcat.allocated_amount !== undefined) {
     currentAvailable = subcat.allocated_amount - subcat.approved_amount - subcat.pending_amount;
-  } else if (budgetLine && budgetLine.allocated_amount > 0) {
+  } else if (budgetLine && budgetLine.allocated_amount !== undefined) {
     currentAvailable = budgetLine.allocated_amount - budgetLine.approved_amount - budgetLine.pending_amount;
+  } else {
+    currentAvailable = totalAllocationSubcategory;
   }
 
   // Determine if NFA total_amount was already deducted in pending or approved
-  const isAlreadyDeducted = ['pending_director_approval', 'pending_higher_approval', 'approved'].includes(nfa.status);
+  const isAlreadyDeducted = ['pending_director_approval', 'pending_finance_head_approval', 'pending_higher_approval', 'approved'].includes(nfa.status);
   let availableBudget = 0;
   let balanceAfter = 0;
 
   if (isAlreadyDeducted) {
-    balanceAfter = Math.max(0, currentAvailable);
+    balanceAfter = currentAvailable;
     availableBudget = balanceAfter + nfa.total_amount;
   } else {
-    availableBudget = Math.max(0, currentAvailable > 0 ? currentAvailable : totalAllocationSubcategory);
-    balanceAfter = Math.max(0, availableBudget - nfa.total_amount);
+    availableBudget = currentAvailable;
+    balanceAfter = availableBudget - nfa.total_amount;
   }
 
   const budgetDetails = {
@@ -442,69 +488,80 @@ nfasRouter.get('/:id/pdf', (req: AuthedRequest, res) => {
 /** DELETE /api/nfas/:id — permanently remove a draft NFA when authorized. */
 nfasRouter.delete('/:id', async (req: AuthedRequest, res) => {
   const attachmentsToDelete: string[] = [];
+  let deletedNfaForNotify: any = null;
 
   const result = await store.transact((db) => {
-    const nfa = db.nfas.find((item) => item.id === req.params.id);
+    const nfa = db.nfas.find((item) => item.id === req.params.id && !item.is_deleted);
     if (!nfa) return { error: 404 as const, msg: 'NFA not found' };
 
-    // Strict Draft Deletion:
-    // Only the user who created the Draft can delete it.
-    // HOD, Dean, Director, Finance, Super Admin, and other users receive 403.
+    // Strict Deletion Permission:
+    // Only the faculty creator can delete their Draft or Returned for Correction NFA.
     if (nfa.created_by !== req.user!.id) {
-      return { error: 403 as const, msg: 'Forbidden: Only the creator may delete their draft NFA' };
+      return { error: 403 as const, msg: 'Forbidden: Only the creator may delete their NFA' };
     }
 
-    // Never allow submitted, under-review, approved or rejected NFAs to be deleted through this feature.
-    if (nfa.status !== 'draft') {
-      return { error: 403 as const, msg: 'Forbidden: Only draft NFAs can be deleted. Submitted, under-review, approved, or rejected NFAs cannot be deleted.' };
+    // Only Drafts and Returned for Correction NFAs can be deleted
+    if (!['draft', 'revision_required'].includes(nfa.status)) {
+      return {
+        error: 400 as const,
+        msg: 'Forbidden: Only draft NFAs and Returned for Correction NFAs can be deleted. In-progress, approved, or rejected NFAs cannot be deleted.',
+      };
     }
 
-    // Identify attachments belonging to this draft to remove from storage (if not shared)
-    const draftFilePaths: string[] = [];
-    if (Array.isArray(nfa.quotations)) {
-      for (const q of nfa.quotations) {
-        if (q && q.file_path) draftFilePaths.push(q.file_path);
-      }
-    }
-    if (nfa.comparative_statement && nfa.comparative_statement.file_path) {
-      draftFilePaths.push(nfa.comparative_statement.file_path);
-    }
-
-    // Verify whether each attachment is shared with any other record
-    for (const fp of draftFilePaths) {
-      const isShared = db.nfas.some((other) => {
-        if (other.id === nfa.id) return false;
-        if (Array.isArray(other.quotations) && other.quotations.some((oq) => oq?.file_path === fp)) return true;
-        if (other.comparative_statement?.file_path === fp) return true;
-        return false;
-      });
-      if (!isShared) {
-        attachmentsToDelete.push(fp);
+    // Release any pending reservation if present atomically
+    if (nfa.status === 'revision_required') {
+      try {
+        releaseNfaReservation(db, nfa, {
+          changed_by: req.user!.id,
+          role: req.user!.role,
+          reason: `NFA ${nfa.ref_no} soft-deleted by creator while in Returned for Correction status`,
+        });
+      } catch (err: any) {
+        console.warn(`[WARN] Reservation release on delete skipped: ${err.message}`);
       }
     }
 
-    // Remove the draft NFA and its custom items
-    // (Drafts have ₹0 budget reservation, no ledger transactions, and no approval history)
-    db.nfas = db.nfas.filter((item) => item.id !== nfa.id);
-    db.nfa_items = db.nfa_items.filter((item) => item.nfa_id !== nfa.id);
-    db.approvals = db.approvals.filter((approval) => approval.nfa_id !== nfa.id);
+    // Soft delete: mark is_deleted = true and record deletion timestamp
+    // Preserves NFA reference, audit history, and approval trail
+    nfa.is_deleted = true;
+    nfa.deleted_at = new Date().toISOString();
+    nfa.updated_at = new Date().toISOString();
 
-    return { deleted: true, id: nfa.id };
+    db.audit_logs.push({
+      id: uuid(),
+      entity_type: 'nfa',
+      entity_id: nfa.id,
+      department_id: nfa.department_id,
+      old_amount: nfa.total_amount,
+      new_amount: 0,
+      difference: -nfa.total_amount,
+      changed_by: req.user!.id,
+      role: req.user!.role,
+      reason: `NFA ${nfa.ref_no} soft-deleted by creator (${req.user!.name}).`,
+      source: 'portal',
+      approval_status: 'deleted',
+      created_at: new Date().toISOString(),
+    });
+
+    deletedNfaForNotify = { ...nfa };
+    return { deleted: true, id: nfa.id, soft_deleted: true };
   });
 
   if ('error' in result) {
     return res.status(result.error).json({ error: result.msg || (result.error === 404 ? 'NFA not found' : 'Not authorized to delete this NFA') });
   }
 
-  // Remove unshared files from disk after transaction succeeds
-  for (const fp of attachmentsToDelete) {
+  // Dispatch mock email deletion confirmation to Faculty
+  if (deletedNfaForNotify) {
     try {
-      const fullPath = path.join(attachmentsDir, path.basename(fp));
-      if (fs.existsSync(fullPath)) {
-        fs.unlinkSync(fullPath);
-      }
-    } catch (e) {
-      console.warn(`[WARN] Failed to delete draft attachment file: ${fp}`, e);
+      await dispatchWorkflowNotification(store.data, {
+        nfa: deletedNfaForNotify,
+        actor: req.user!,
+        event: 'nfa_deleted',
+        comments: 'NFA proposal was safely deleted by creator.',
+      });
+    } catch (e: any) {
+      console.warn(`[WARN] Failed to dispatch deletion mock notification: ${e.message}`);
     }
   }
 
@@ -520,9 +577,56 @@ nfasRouter.delete('/:id', async (req: AuthedRequest, res) => {
 nfasRouter.post('/', requireRole('faculty', 'hod', 'dean', 'super_admin'), (req: AuthedRequest, res) => {
   const b = req.body || {};
   
-  // Handle custom department if applicant specified
+  // Organization Type: 'department' (Option A) vs 'centre_or_office' (Option B)
+  const orgType: 'department' | 'centre_or_office' = b.organization_type === 'centre_or_office' ? 'centre_or_office' : 'department';
   let targetDepartmentId = b.department_id;
-  if ((b.department_id === '__custom__' || !b.department_id) && b.custom_department_name) {
+  let targetCentreId: string | null = null;
+
+  if (orgType === 'department') {
+    // Option A: Faculty belongs to an assigned department. Automatically identify & enforce.
+    if (['faculty', 'hod'].includes(req.user!.role)) {
+      if (!req.user!.department_id) {
+        return res.status(400).json({ error: 'No valid department assignment exists for your profile. Please contact Super Admin.' });
+      }
+      targetDepartmentId = req.user!.department_id;
+    } else {
+      // Super admin / Dean
+      if (!targetDepartmentId) {
+        targetDepartmentId = req.user?.department_id || store.data.departments[0]?.id;
+      }
+    }
+
+    const deptObj = store.data.departments.find((d) => d.id === targetDepartmentId);
+    if (!deptObj) {
+      return res.status(400).json({ error: 'Assigned department does not exist' });
+    }
+    targetCentreId = null;
+  } else {
+    // Option B: Centres or Offices
+    targetDepartmentId = b.centre_id || b.department_id;
+    if (!targetDepartmentId) {
+      return res.status(400).json({ error: 'Please select an authorized Centre or Office' });
+    }
+    const centreObj = store.data.departments.find((d) => d.id === targetDepartmentId);
+    if (!centreObj) {
+      return res.status(400).json({ error: 'Selected Centre or Office does not exist' });
+    }
+    if (centreObj.category !== 'coe' && !centreObj.code.startsWith('COE-')) {
+      return res.status(400).json({ error: `'${centreObj.name}' is an Academic Department, not a Centre or Office` });
+    }
+
+    // Backend validation: non-super_admin faculty can only select units they are authorized to access
+    if (req.user!.role !== 'super_admin') {
+      const authorizedCentres = req.user!.authorized_centre_ids || [];
+      if (!authorizedCentres.includes(targetDepartmentId)) {
+        return res.status(403).json({ error: 'Forbidden: You are not authorized to create an NFA for this Centre or Office' });
+      }
+    }
+    targetCentreId = targetDepartmentId;
+  }
+
+  // Handle custom department if applicant specified (super_admin only)
+  if ((b.department_id === '__custom__' || !targetDepartmentId) && b.custom_department_name) {
     const trimmed = b.custom_department_name.trim();
     let existing = store.data.departments.find((d) => d.name.toLowerCase() === trimmed.toLowerCase());
     if (!existing) {
@@ -551,11 +655,6 @@ nfasRouter.post('/', requireRole('faculty', 'hod', 'dean', 'super_admin'), (req:
       });
     }
     targetDepartmentId = existing.id;
-  }
-
-  // Ensure department is selected or fallback to user's assigned department
-  if (!targetDepartmentId) {
-    targetDepartmentId = req.user?.department_id || store.data.departments[0]?.id;
   }
 
   const required = ['financial_year_id', 'budget_category_id', 'title'];
@@ -628,6 +727,9 @@ nfasRouter.post('/', requireRole('faculty', 'hod', 'dean', 'super_admin'), (req:
     ref_no: refNo,
     project_id: b.project_id || null, // Project is optional!
     department_id: targetDepartmentId,
+    centre_id: targetCentreId,
+    organization_type: orgType,
+    workflow_type: orgType,
     financial_year_id: b.financial_year_id,
     budget_type_id: b.budget_type_id || undefined,
     budget_category_id: b.budget_category_id,
@@ -750,11 +852,41 @@ nfasRouter.put('/:id', async (req: AuthedRequest, res) => {
     const hasActiveReservation = !['draft', 'revision_required'].includes(oldStatus);
 
     let targetDeptId = oldDeptId;
-    if (b.department_id && b.department_id !== oldDeptId) {
-      if (req.user!.role === 'super_admin' || req.user!.department_id === b.department_id) {
-        targetDeptId = b.department_id;
+    let targetOrgType: 'department' | 'centre_or_office' = nfa.organization_type || 'department';
+    let targetCentreId = nfa.centre_id || null;
+
+    if (nfa.status === 'draft') {
+      if (b.organization_type) {
+        targetOrgType = b.organization_type === 'centre_or_office' ? 'centre_or_office' : 'department';
+      }
+      if (targetOrgType === 'department') {
+        if (['faculty', 'hod'].includes(req.user!.role)) {
+          if (!req.user!.department_id) {
+            return { error: 400 as const, msg: 'No valid department assignment exists for your profile' };
+          }
+          targetDeptId = req.user!.department_id;
+        } else if (b.department_id) {
+          targetDeptId = b.department_id;
+        }
+        targetCentreId = null;
       } else {
-        return { error: 403 as const, msg: 'You can only assign NFAs to your authorized department' };
+        const candidateCentre = b.centre_id || b.department_id || (nfa.organization_type === 'centre_or_office' ? nfa.department_id : null);
+        if (!candidateCentre) {
+          return { error: 400 as const, msg: 'Centre or Office selection is required' };
+        }
+        if (req.user!.role !== 'super_admin') {
+          const userCentres = req.user!.authorized_centre_ids || [];
+          if (!userCentres.includes(candidateCentre)) {
+            return { error: 403 as const, msg: 'Forbidden: You are not authorized for this Centre or Office' };
+          }
+        }
+        targetDeptId = candidateCentre;
+        targetCentreId = candidateCentre;
+      }
+    } else {
+      if ((b.organization_type && b.organization_type !== (nfa.organization_type || 'department')) ||
+          (b.department_id && b.department_id !== nfa.department_id)) {
+        return { error: 400 as const, msg: 'Organizational unit cannot be changed after submission.' };
       }
     }
 
@@ -930,6 +1062,9 @@ nfasRouter.put('/:id', async (req: AuthedRequest, res) => {
 
     // Commit fields
     nfa.department_id = targetDeptId;
+    nfa.centre_id = targetCentreId;
+    nfa.organization_type = targetOrgType;
+    nfa.workflow_type = targetOrgType;
     nfa.financial_year_id = targetFyId;
     nfa.budget_category_id = targetCatId;
     nfa.budget_subcategory_id = targetSubcatId || null;
@@ -992,10 +1127,12 @@ nfasRouter.put('/:id', async (req: AuthedRequest, res) => {
   res.json({ ...result.nfa, items: withItems(result.nfa!.id), approvals: withApprovals(result.nfa!.id) });
 });
 
-/** POST /api/nfas/:id/submit — Faculty submits draft to HOD */
+/** POST /api/nfas/:id/submit — Faculty submits draft or returned NFA */
 nfasRouter.post('/:id/submit', async (req: AuthedRequest, res) => {
+  let notifyEvent: 'nfa_submitted' | 'nfa_resubmitted' = 'nfa_submitted';
+
   const result = await store.transact((db) => {
-    const nfa = db.nfas.find((n) => n.id === req.params.id);
+    const nfa = db.nfas.find((n) => n.id === req.params.id && !n.is_deleted);
     if (!nfa) return { error: 404 as const };
     if (nfa.created_by !== req.user!.id) return { error: 403 as const };
     if (!['draft', 'revision_required'].includes(nfa.status)) return { error: 'bad_status' as const };
@@ -1076,10 +1213,33 @@ nfasRouter.post('/:id/submit', async (req: AuthedRequest, res) => {
       return { error: 'budget_error' as const, msg: e.message || 'Budget reservation failed' };
     }
 
-    // Submitting draft moves to HOD review (submitted)
-    nfa.status = 'submitted';
+    notifyEvent = nfa.status === 'revision_required' ? 'nfa_resubmitted' : 'nfa_submitted';
+    const prevStatus = nfa.status;
+
+    // Route to appropriate workflow entry stage:
+    // Centres or Offices -> Pending Dean's Office Verification (skips HOD entirely)
+    // Department -> Pending HOD Review
+    const isCentre = nfa.organization_type === 'centre_or_office';
+    nfa.status = isCentre ? 'pending_deans_office_verification' : 'pending_hod_review';
     nfa.updated_at = new Date().toISOString();
-    return { nfa };
+
+    db.audit_logs.push({
+      id: uuid(),
+      entity_type: 'nfa',
+      entity_id: nfa.id,
+      department_id: nfa.department_id,
+      old_amount: 0,
+      new_amount: nfa.total_amount,
+      difference: nfa.total_amount,
+      changed_by: req.user!.id,
+      role: req.user!.role,
+      reason: notifyEvent === 'nfa_resubmitted' ? `NFA resubmitted after correction.` : `NFA submitted for review.`,
+      source: 'portal',
+      approval_status: nfa.status,
+      created_at: new Date().toISOString(),
+    });
+
+    return { nfa, event: notifyEvent, prevStatus };
   });
 
   if ('error' in result) {
@@ -1095,15 +1255,48 @@ nfasRouter.post('/:id/submit', async (req: AuthedRequest, res) => {
     const [code, msg] = map[result.error];
     return res.status(code).json({ error: msg });
   }
+
+  // Dispatch mock email notification (never throws or reverses successful submission)
+  try {
+    await dispatchWorkflowNotification(store.data, {
+      nfa: result.nfa!,
+      actor: req.user!,
+      event: result.event!,
+    });
+  } catch (err: any) {
+    console.warn(`[WARN] Failed to dispatch submission mock notification: ${err.message}`);
+  }
+
   res.json({ ...result.nfa, items: withItems(result.nfa!.id), approvals: withApprovals(result.nfa!.id) });
 });
 
 /**
  * POST /api/nfas/:id/review — Multi-tier hierarchical university review:
- * Stage 1: HOD reviews 'submitted' -> 'dean_review'
- * Stage 2: Dean & Assoc Dean reviews 'dean_review' -> 'accounts_review'
- * Stage 3: Accounts Officer reviews 'accounts_review' -> 'pending_director_approval' (Need Permission)
- * Stage 4: University Director reviews 'pending_director_approval' -> 'approved' (Auto debits budget!)
+ * Workflow A — CSE and ADSE Departments (7 stages):
+ * 1. Faculty: Submitted -> pending_hod_review
+ * 2. HOD: Reviewed -> pending_deans_office_verification
+ * 3. Dean's Office: Verified -> pending_associate_dean_approval
+ * 4. Associate Dean: Approved -> pending_finance_office_approval
+ * 5. Finance Office: Approved -> pending_director_approval
+ * 6. Director: Approved -> pending_finance_head_approval
+ * 7. Finance Officer (Head): Final Approved -> approved (Debits budget)
+ *
+ * Workflow B — Other Academic Departments (7 stages):
+ * 1. Faculty: Submitted -> pending_hod_review
+ * 2. HOD: Reviewed -> pending_deans_office_verification
+ * 3. Dean's Office: Verified -> pending_dean_approval
+ * 4. Dean: Approved -> pending_finance_office_approval
+ * 5. Finance Office: Approved -> pending_director_approval
+ * 6. Director: Approved -> pending_finance_head_approval
+ * 7. Finance Officer (Head): Final Approved -> approved (Debits budget)
+ *
+ * Workflow C — Centres or Offices (6 stages):
+ * 1. Faculty / Coordinator: Submitted -> pending_deans_office_verification (skips HOD only)
+ * 2. Dean's Office: Verified -> pending_dean_approval
+ * 3. Dean: Approved -> pending_finance_office_approval
+ * 4. Finance Office: Approved -> pending_director_approval
+ * 5. Director: Approved -> pending_finance_head_approval
+ * 6. Finance Officer (Head): Final Approved -> approved (Debits budget)
  */
 nfasRouter.post('/:id/review', async (req: AuthedRequest, res) => {
   const { decision, comments } = req.body || {};
@@ -1111,34 +1304,89 @@ nfasRouter.post('/:id/review', async (req: AuthedRequest, res) => {
     return res.status(400).json({ error: "decision must be 'approve', 'reject', or 'revision_required'" });
   }
 
+  if ((decision === 'reject' || decision === 'revision_required') && (!comments || !String(comments).trim())) {
+    return res.status(400).json({
+      error: decision === 'reject' ? 'Rejection reason is mandatory.' : 'Correction reason is mandatory when returning an NFA to faculty.',
+    });
+  }
+
   const result = await store.transact((db) => {
-    const nfa = db.nfas.find((n) => n.id === req.params.id);
+    const nfa = db.nfas.find((n) => n.id === req.params.id && !n.is_deleted);
     if (!nfa) return { error: 404 as const, msg: 'NFA not found' };
 
     const role = req.user!.role;
-    let level: number;
-    let requiredRole: Role | Role[];
 
-    if (nfa.status === 'submitted' || nfa.status === 'under_review') {
+    // Super Admin is an administrative role and must NOT approve financial proposals
+    if (role === 'super_admin') {
+      return {
+        error: 403 as const,
+        msg: 'Super Admin is an administrative role and cannot approve financial proposals. Approvals must be performed by the designated institutional authority.',
+      };
+    }
+
+    const isCentre = nfa.organization_type === 'centre_or_office';
+    const isCseOrAdse = !isCentre && isCseOrAdseDepartment(nfa.department_id);
+    let level: number;
+    let requiredRoles: Role[];
+    let nextApprovedStatus: NfaStatus;
+    let approvedDecision: 'recommended' | 'verified' | 'approved' = 'recommended';
+    let eventName: any;
+
+    if (nfa.status === 'submitted' || nfa.status === 'pending_hod_review' || nfa.status === 'under_review') {
+      if (isCentre) {
+        return { error: 400 as const, msg: 'Centres or Offices NFAs do not require HOD review.' };
+      }
       level = 1;
-      requiredRole = 'hod';
-    } else if (nfa.status === 'dean_review') {
+      requiredRoles = ['hod'];
+      nextApprovedStatus = 'pending_deans_office_verification';
+      approvedDecision = 'recommended';
+      eventName = 'hod_reviewed';
+    } else if (nfa.status === 'pending_deans_office_verification') {
       level = 2;
-      requiredRole = ['dean', 'associate_dean'];
-    } else if (nfa.status === 'accounts_review' || nfa.status === 'budget_validation') {
+      requiredRoles = ['deans_office'];
+      // Workflow A (CSE/ADSE) -> Associate Dean; Workflow B & C -> Dean
+      nextApprovedStatus = isCseOrAdse ? 'pending_associate_dean_approval' : 'pending_dean_approval';
+      approvedDecision = 'verified';
+      eventName = 'deans_office_verified';
+    } else if (nfa.status === 'pending_associate_dean_approval') {
+      // Academic approval strictly by Associate Dean for Workflow A (CSE/ADSE)
       level = 3;
-      requiredRole = 'finance';
-    } else if (nfa.status === 'pending_director_approval' || nfa.status === 'pending_higher_approval') {
+      requiredRoles = ['associate_dean'];
+      nextApprovedStatus = 'pending_finance_office_approval';
+      approvedDecision = 'approved';
+      eventName = 'associate_dean_approved';
+    } else if (nfa.status === 'dean_review' || nfa.status === 'pending_dean_approval') {
+      // Academic approval strictly by Dean for Workflow B (Other Departments) & C (Centres)
+      level = 3;
+      requiredRoles = ['dean'];
+      nextApprovedStatus = 'pending_finance_office_approval';
+      approvedDecision = 'approved';
+      eventName = 'dean_approved';
+    } else if (nfa.status === 'accounts_review' || nfa.status === 'pending_finance_office_approval' || nfa.status === 'budget_validation') {
       level = 4;
-      requiredRole = ['director', 'finance'];
+      requiredRoles = ['finance'];
+      nextApprovedStatus = 'pending_director_approval';
+      approvedDecision = 'approved';
+      eventName = 'finance_office_approved';
+    } else if (nfa.status === 'pending_director_approval' || nfa.status === 'pending_higher_approval') {
+      level = 5;
+      requiredRoles = ['director'];
+      nextApprovedStatus = 'pending_finance_head_approval';
+      approvedDecision = 'approved';
+      eventName = 'director_approved';
+    } else if (nfa.status === 'pending_finance_head_approval') {
+      level = 6;
+      requiredRoles = ['finance_head'];
+      nextApprovedStatus = 'approved';
+      approvedDecision = 'approved';
+      eventName = 'finance_head_approved';
     } else {
       return { error: 409 as const, msg: `NFA in status '${nfa.status}' is not awaiting review` };
     }
 
-    const matchesRole = Array.isArray(requiredRole) ? requiredRole.includes(role) : role === requiredRole;
-    if (!matchesRole && role !== 'super_admin') {
-      const needed = Array.isArray(requiredRole) ? requiredRole.join(' or ') : requiredRole;
-      return { error: 403 as const, msg: `This stage requires review by '${needed}'` };
+    const matchesRole = requiredRoles.includes(role);
+    if (!matchesRole) {
+      return { error: 403 as const, msg: `This stage requires review by '${requiredRoles.join(' or ')}'` };
     }
 
     if (role === 'hod' && req.user!.department_id !== nfa.department_id) {
@@ -1147,146 +1395,195 @@ nfasRouter.post('/:id/review', async (req: AuthedRequest, res) => {
 
     const approverUser = db.users.find((u) => u.id === req.user!.id);
     const sigFilename = approverUser?.signature_image || (fs.existsSync(path.join(signaturesDir, `${req.user!.id}.png`)) ? `${req.user!.id}.png` : undefined);
+    const prevStatus = nfa.status;
 
+    if (decision === 'reject') {
+      releaseNfaReservation(db, nfa, { changed_by: req.user!.id, role, reason: comments || 'Proposal rejected during review' });
+      // If there was a pending revision, release its reservation
+      if ((nfa as any).pending_revision_amount !== undefined && (nfa as any).pending_revision_amount !== null) {
+        const diff = (nfa as any).pending_revision_amount - nfa.total_amount;
+        if (diff > 0) {
+          let line = db.department_budgets.find((b) => b.department_id === nfa.department_id && b.financial_year_id === nfa.financial_year_id && b.budget_category_id === nfa.budget_category_id);
+          if (line) {
+            line.pending_amount = Math.max(0, line.pending_amount - diff);
+          }
+        }
+        (nfa as any).pending_revision_amount = undefined;
+        (nfa as any).pending_revision_reason = undefined;
+        delete (nfa as any).pending_revision_items;
+      }
+
+      nfa.status = 'rejected';
+      nfa.updated_at = new Date().toISOString();
+
+      db.approvals.push({
+        id: uuid(),
+        nfa_id: nfa.id,
+        approver_role: role,
+        approver_id: req.user!.id,
+        approver_name: req.user!.name,
+        decision: 'rejected',
+        comments: comments || '',
+        level,
+        previous_status: prevStatus,
+        new_status: 'rejected',
+        signature_image: undefined,
+        created_at: new Date().toISOString(),
+      });
+
+      return { nfa, validation: null, event: 'nfa_rejected' as const, prevStatus };
+    }
+
+    if (decision === 'revision_required') {
+      releaseNfaReservation(db, nfa, { changed_by: req.user!.id, role, reason: comments || 'Revision requested by reviewer' });
+      if ((nfa as any).pending_revision_amount !== undefined && (nfa as any).pending_revision_amount !== null) {
+        const diff = (nfa as any).pending_revision_amount - nfa.total_amount;
+        if (diff > 0) {
+          let line = db.department_budgets.find((b) => b.department_id === nfa.department_id && b.financial_year_id === nfa.financial_year_id && b.budget_category_id === nfa.budget_category_id);
+          if (line) {
+            line.pending_amount = Math.max(0, line.pending_amount - diff);
+          }
+        }
+        (nfa as any).pending_revision_amount = undefined;
+        (nfa as any).pending_revision_reason = undefined;
+        delete (nfa as any).pending_revision_items;
+      }
+
+      nfa.status = 'revision_required';
+      nfa.updated_at = new Date().toISOString();
+
+      db.approvals.push({
+        id: uuid(),
+        nfa_id: nfa.id,
+        approver_role: role,
+        approver_id: req.user!.id,
+        approver_name: req.user!.name,
+        decision: 'revision_required',
+        comments: comments || '',
+        level,
+        previous_status: prevStatus,
+        new_status: 'revision_required',
+        signature_image: undefined,
+        created_at: new Date().toISOString(),
+      });
+
+      return { nfa, validation: null, event: 'revision_required' as const, prevStatus };
+    }
+
+    // decision === 'approve'
     db.approvals.push({
       id: uuid(),
       nfa_id: nfa.id,
       approver_role: role,
       approver_id: req.user!.id,
       approver_name: req.user!.name,
-      decision: decision === 'approve' ? (level < 4 ? 'recommended' : 'approved') : decision,
+      decision: approvedDecision,
       comments: comments || '',
       level,
-      signature_image: decision === 'approve' ? sigFilename : undefined,
+      previous_status: prevStatus,
+      new_status: nextApprovedStatus,
+      signature_image: sigFilename,
       created_at: new Date().toISOString(),
     });
 
-    if (decision === 'reject') {
-      releaseNfaReservation(db, nfa, { changed_by: req.user!.id, role, reason: comments || 'Proposal rejected during review' });
-      nfa.status = 'rejected';
-      nfa.updated_at = new Date().toISOString();
-      return { nfa, validation: null };
-    }
-    if (decision === 'revision_required') {
-      releaseNfaReservation(db, nfa, { changed_by: req.user!.id, role, reason: comments || 'Revision requested by reviewer' });
-      nfa.status = 'revision_required';
-      nfa.updated_at = new Date().toISOString();
-      return { nfa, validation: null };
-    }
-
-    // decision === 'approve'
     if (level === 1) {
-      // HOD recommended -> moves to Dean & Associate Dean (reservation maintained)
-      nfa.status = 'dean_review';
+      nfa.status = nextApprovedStatus;
       nfa.hod_name = req.user!.name;
       nfa.updated_at = new Date().toISOString();
-      return { nfa, validation: null };
+      return { nfa, validation: null, event: eventName, prevStatus };
     }
 
-    if (level === 2) {
-      // Dean recommended -> moves to Accounts Officer (reservation maintained)
-      nfa.status = 'accounts_review';
+    if (level >= 2 && level <= 5) {
+      nfa.status = nextApprovedStatus;
       nfa.updated_at = new Date().toISOString();
-      return { nfa, validation: null };
+      return { nfa, validation: null, event: eventName, prevStatus };
     }
 
-    if (level === 3) {
-      // Accounts Officer validated -> moves to University Director (reservation maintained, no duplicate reservation)
-      let line;
-      try {
-        line = findBudgetLine(db, nfa.department_id, nfa.financial_year_id, nfa.budget_category_id);
-      } catch (e) {
-        return { error: 400 as const, msg: (e as BudgetError).message };
-      }
-      const validation = validateBudget(line, nfa.total_amount);
-      nfa.status = 'pending_director_approval';
-      nfa.updated_at = new Date().toISOString();
-      return { nfa, validation, escalated: true };
-    }
-
-    // level === 4 (University Director) approving -> automatically changes to 'approved' and debits budget!
+    // level === 6: Finance Officer (Head) gives FINAL APPROVAL!
+    // Converts reservation into approved expenditure atomically
     if ((nfa.status as string) === 'approved') {
       return { error: 409 as const, msg: 'NFA is already approved. Cannot apply duplicate approval deduction.' };
     }
+
     let line;
     try {
       line = findBudgetLine(db, nfa.department_id, nfa.financial_year_id, nfa.budget_category_id);
     } catch (e) {
       return { error: 400 as const, msg: (e as BudgetError).message };
     }
-    applyNewApproval(db, line.id, nfa.total_amount, {
-      nfa_id: nfa.id,
-      project_id: nfa.project_id,
-      changed_by: req.user!.id,
-      role,
-      department_id: nfa.department_id,
-    });
+
+    if ((nfa as any).pending_revision_amount !== undefined && (nfa as any).pending_revision_amount !== null) {
+      const revAmount = (nfa as any).pending_revision_amount;
+      const diff = revAmount - nfa.total_amount;
+      finalizePendingRevision(db, line.id, diff, {
+        nfa_id: nfa.id,
+        project_id: nfa.project_id || '',
+        changed_by: req.user!.id,
+        role,
+        department_id: nfa.department_id,
+        reason: (nfa as any).pending_revision_reason || 'Approved revision by Finance Officer (Head)',
+      });
+      nfa.total_amount = revAmount;
+      if ((nfa as any).pending_revision_items) {
+        db.nfa_items = db.nfa_items.filter((i) => i.nfa_id !== nfa.id);
+        ((nfa as any).pending_revision_items as any[]).forEach((it: any, i: number) => {
+          db.nfa_items.push({ id: uuid(), nfa_id: nfa.id, sl_no: i + 1, particulars: it.particulars, quantity: it.quantity || '', amount: Number(it.amount) || 0 });
+        });
+        delete (nfa as any).pending_revision_items;
+      }
+      (nfa as any).pending_revision_amount = undefined;
+      (nfa as any).pending_revision_reason = undefined;
+    } else {
+      applyNewApproval(db, line.id, nfa.total_amount, {
+        nfa_id: nfa.id,
+        project_id: nfa.project_id || '',
+        changed_by: req.user!.id,
+        role,
+        department_id: nfa.department_id,
+      });
+    }
+
     nfa.status = 'approved';
     nfa.updated_at = new Date().toISOString();
-    return { nfa, validation: null, escalated: false };
+    return { nfa, validation: null, event: eventName, prevStatus };
   });
 
   if ('error' in result) return res.status(result.error).json({ error: result.msg });
+
+  // Dispatch mock email notification for this approval stage
+  try {
+    await dispatchWorkflowNotification(store.data, {
+      nfa: result.nfa!,
+      actor: req.user!,
+      event: result.event!,
+      comments: comments || '',
+    });
+  } catch (err: any) {
+    console.warn(`[WARN] Failed to dispatch workflow mock notification: ${err.message}`);
+  }
+
   res.json({
     ...result.nfa,
     items: withItems(result.nfa!.id),
     approvals: withApprovals(result.nfa!.id),
-    validation: result.validation,
+    validation: (result as any).validation,
   });
 });
 
 /**
- * POST /api/nfas/:id/finance-decision — Alias for Director / Accounts decision on pending_director_approval
+ * GET /api/nfas/dev/mock-emails — Developer & Super Admin Mock Email Log
  */
-nfasRouter.post('/:id/finance-decision', requireRole('director', 'finance', 'super_admin'), async (req: AuthedRequest, res) => {
-  const { decision, comments } = req.body || {};
-  if (!['approve', 'reject'].includes(decision)) return res.status(400).json({ error: "decision must be 'approve' or 'reject'" });
+nfasRouter.get('/dev/mock-emails', requireRole('super_admin'), (req: AuthedRequest, res) => {
+  const list = store.data.mock_emails || [];
+  res.json(list);
+});
 
-  const result = await store.transact((db) => {
-    const nfa = db.nfas.find((n) => n.id === req.params.id);
-    if (!nfa) return { error: 404 as const, msg: 'NFA not found' };
-    if ((nfa.status as string) === 'approved') {
-      return { error: 409 as const, msg: 'NFA is already approved. Cannot apply duplicate approval deduction.' };
-    }
-    if (!['pending_director_approval', 'pending_higher_approval'].includes(nfa.status)) {
-      return { error: 409 as const, msg: 'NFA is not pending Director approval' };
-    }
-
-    db.approvals.push({
-      id: uuid(),
-      nfa_id: nfa.id,
-      approver_role: req.user!.role,
-      approver_id: req.user!.id,
-      approver_name: req.user!.name,
-      decision: decision === 'approve' ? 'approved' : 'rejected',
-      comments: comments || '',
-      level: 4,
-      created_at: new Date().toISOString(),
-    });
-
-    const line = findBudgetLine(db, nfa.department_id, nfa.financial_year_id, nfa.budget_category_id);
-
-    if (decision === 'reject') {
-      releaseNfaReservation(db, nfa, { changed_by: req.user!.id, role: req.user!.role, reason: comments || 'Rejected by Director' });
-      nfa.status = 'rejected';
-      nfa.updated_at = new Date().toISOString();
-      return { nfa };
-    }
-
-    applyNewApproval(db, line.id, nfa.total_amount, {
-      nfa_id: nfa.id,
-      project_id: nfa.project_id,
-      changed_by: req.user!.id,
-      role: req.user!.role,
-      department_id: nfa.department_id,
-    });
-    nfa.status = 'approved';
-    nfa.updated_at = new Date().toISOString();
-    return { nfa };
-  });
-
-  if ('error' in result) return res.status(result.error).json({ error: result.msg });
-  res.json({ ...result.nfa, items: withItems(result.nfa!.id), approvals: withApprovals(result.nfa!.id) });
+/**
+ * POST /api/nfas/dev/mock-emails/clear — Clear mock email logs
+ */
+nfasRouter.post('/dev/mock-emails/clear', requireRole('super_admin'), (req: AuthedRequest, res) => {
+  store.data.mock_emails = [];
+  res.json({ success: true, count: 0 });
 });
 
 /**
@@ -1324,9 +1621,16 @@ nfasRouter.post('/:id/revise', requireRole('faculty', 'hod', 'super_admin'), asy
     });
 
     if (outcome.status === 'pending_higher_approval') {
-      nfa.status = 'pending_higher_approval';
+      // Revisions with significant increases route through the complete institutional workflow:
+      // Department -> pending_hod_review; Centres or Offices -> pending_deans_office_verification
+      // Both ending at pending_finance_head_approval
+      const isCentre = nfa.organization_type === 'centre_or_office';
+      nfa.status = isCentre ? 'pending_deans_office_verification' : 'pending_hod_review';
       nfa.pending_revision_amount = new_total_amount;
       nfa.pending_revision_reason = reason;
+      if (Array.isArray(items)) {
+        (nfa as any).pending_revision_items = items;
+      }
     } else {
       nfa.total_amount = new_total_amount;
       if (Array.isArray(items)) {

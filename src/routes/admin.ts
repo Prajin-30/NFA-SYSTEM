@@ -13,9 +13,30 @@ import {
   DEFAULT_FACULTY_ONBOARDING_PASSWORD,
 } from '../services/supabaseAuth.js';
 import type { Role } from '../types.js';
+import { getResendConfigStatus, sendSuperAdminTestEmail } from '../services/resendService.js';
 
 export const adminRouter = Router();
 adminRouter.use(requireAuth, requireRole('super_admin'));
+
+/**
+ * GET /api/admin/email-testing/status — Super Admin view of Resend configuration
+ */
+adminRouter.get('/email-testing/status', (req: AuthedRequest, res) => {
+  const status = getResendConfigStatus();
+  res.json(status);
+});
+
+/**
+ * POST /api/admin/email-testing/send — Super Admin triggers deliberate Resend test email
+ */
+adminRouter.post('/email-testing/send', async (req: AuthedRequest, res) => {
+  try {
+    const result = await sendSuperAdminTestEmail();
+    res.json(result);
+  } catch (err: any) {
+    res.status(400).json({ error: err.message || 'Failed to send test email via Resend' });
+  }
+});
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -154,6 +175,7 @@ adminRouter.get('/users', (req, res) => {
       email: u.email,
       role: u.role,
       department_id: u.department_id,
+      authorized_centre_ids: Array.isArray(u.authorized_centre_ids) ? u.authorized_centre_ids : [],
       department_name: dept ? dept.name : (u.department_id ? 'Unknown Department' : 'Institution-wide'),
       department_code: dept ? dept.code : '',
       is_active: u.is_active !== false,
@@ -273,7 +295,7 @@ adminRouter.post('/users', async (req: AuthedRequest, res) => {
  */
 adminRouter.put('/users/:id', async (req: AuthedRequest, res) => {
   try {
-    const { name, email, role, department_id } = req.body || {};
+    const { name, email, role, department_id, authorized_centre_ids } = req.body || {};
     const userId = req.params.id;
 
     const existingUser = store.data.users.find((u) => u.id === userId);
@@ -329,6 +351,20 @@ adminRouter.put('/users/:id', async (req: AuthedRequest, res) => {
       }
     }
 
+    let newAuthorizedCentres = existingUser.authorized_centre_ids || [];
+    if (authorized_centre_ids !== undefined) {
+      if (!Array.isArray(authorized_centre_ids)) {
+        return res.status(400).json({ error: 'authorized_centre_ids must be an array of Centre/Office IDs' });
+      }
+      for (const cId of authorized_centre_ids) {
+        const centre = store.data.departments.find((d) => d.id === cId);
+        if (!centre) {
+          return res.status(400).json({ error: `Centre or Office '${cId}' does not exist` });
+        }
+      }
+      newAuthorizedCentres = Array.from(new Set(authorized_centre_ids));
+    }
+
     await store.transact((db) => {
       const u = db.users.find((usr) => usr.id === userId);
       if (!u) return;
@@ -336,6 +372,7 @@ adminRouter.put('/users/:id', async (req: AuthedRequest, res) => {
       u.email = newEmail;
       u.role = newRole;
       u.department_id = newDeptId;
+      u.authorized_centre_ids = newAuthorizedCentres;
 
       db.audit_logs.push({
         id: uuid(),
@@ -347,7 +384,7 @@ adminRouter.put('/users/:id', async (req: AuthedRequest, res) => {
         difference: 0,
         changed_by: req.user!.id,
         role: req.user!.role,
-        reason: `Super Admin updated user profile: ${u.name} (${u.email}) [Role: ${u.role}, Dept: ${u.department_id || 'Institution'}]`,
+        reason: `Super Admin updated user profile: ${u.name} (${u.email}) [Role: ${u.role}, Dept: ${u.department_id || 'Institution'}, Centres: ${newAuthorizedCentres.length}]`,
         source: 'portal',
         approval_status: 'approved',
         created_at: new Date().toISOString(),
@@ -362,6 +399,7 @@ adminRouter.put('/users/:id', async (req: AuthedRequest, res) => {
         email: updated.email,
         role: updated.role,
         department_id: updated.department_id,
+        authorized_centre_ids: updated.authorized_centre_ids || [],
         is_active: updated.is_active !== false,
         must_change_password: Boolean(updated.must_change_password),
       },

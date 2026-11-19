@@ -261,6 +261,23 @@ import type {
   Role,
 } from '../types.js';
 
+function normalizeSubcategoryName(rawName: string): string {
+  let name = rawName.trim();
+  if (/^remenuration\b/i.test(name)) {
+    name = name.replace(/^remenuration/i, 'Remuneration');
+  }
+  if (name.includes('Furnuiters')) {
+    name = name.replace('Furnuiters', 'Furniture');
+  }
+  if (name.includes('Entruperenuership')) {
+    name = name.replace('Entruperenuership', 'Entrepreneurship');
+  }
+  if (name.includes('Seminar on Industry Practises')) {
+    name = name.replace('Seminar on Industry Practises', 'Seminar on Industry Practices');
+  }
+  return name;
+}
+
 /**
  * Requirement #2 & #3: Analyze multi-sheet workbook, detect hierarchy, categories,
  * subcategories, cell references, and compare declared totals. Returns preview without saving.
@@ -431,7 +448,57 @@ export async function analyzeMasterBudgetWorkbook(
     let sheetItemsCount = 0;
     const sheetCategories = new Set<string>();
 
-    let pendingParentItem: { name: string; row: number } | null = null;
+    let pendingParentItem: { name: string; row: number; sl_no?: number | string } | null = null;
+
+    const pushSubcategory = (
+      name: string,
+      amt: number,
+      cellAddr: string,
+      rowIdx: number,
+      slClean?: number | string
+    ) => {
+      const normalizedName = normalizeSubcategoryName(name);
+
+      // Tabular template override if explicit Category column exists
+      let finalCatName = currentCategory;
+      let finalItemName = normalizedName;
+      if (catCol !== -1 && subcatCol !== -1) {
+        const directCat = String(sheet.getRow(rowIdx).getCell(catCol).value || '').trim();
+        const directSubcat = String(sheet.getRow(rowIdx).getCell(subcatCol).value || '').trim();
+        if (directCat) finalCatName = directCat;
+        if (directSubcat) finalItemName = normalizeSubcategoryName(directSubcat);
+        if (natureCol !== -1) {
+          const directNature = String(sheet.getRow(rowIdx).getCell(natureCol).value || '').trim();
+          if (directNature) budgetTypeName = directNature;
+        }
+      }
+
+      if (!categoriesMap.has(finalCatName)) {
+        categoriesMap.set(finalCatName, {
+          category_name: finalCatName,
+          budget_type_name: budgetTypeName,
+          allocated_amount: 0,
+          cell_address: cellAddr,
+          subcategories: [],
+        });
+      }
+
+      const catData = categoriesMap.get(finalCatName)!;
+      catData.allocated_amount += amt;
+      catData.subcategories.push({
+        sl_no: slClean !== undefined ? slClean : (catData.subcategories.length + 1),
+        name: finalItemName,
+        allocated_amount: amt,
+        cell_address: cellAddr,
+        row: rowIdx,
+        col: amountCol,
+      });
+
+      sheetCategories.add(finalCatName);
+      sheetExtractedTotal += amt;
+      sheetItemsCount++;
+      totalAllocated += amt;
+    };
 
     for (let r = headerRowIdx + 1; r <= sheet.rowCount; r++) {
       const row = sheet.getRow(r);
@@ -492,6 +559,14 @@ export async function analyzeMasterBudgetWorkbook(
 
       // Check footnote or instructions to ignore
       if (
+        lowerItem === 'earnings' ||
+        lowerItem === 'sl no.' ||
+        lowerItem === 'particulars' ||
+        lowerItem === 'categories' ||
+        lowerItem.includes('capex: items') ||
+        String(slVal || '').trim().toLowerCase() === 'sl no.' ||
+        String(slVal || '').trim().toLowerCase() === 'sl no' ||
+        String(slVal || '').trim().toLowerCase() === 'sl' ||
         lowerItem.startsWith('note:') ||
         lowerItem.startsWith('1. ') ||
         lowerItem.startsWith('2. ') ||
@@ -508,77 +583,72 @@ export async function analyzeMasterBudgetWorkbook(
         continue;
       }
 
+      let slCleanVal: number | string | undefined;
+      if (slVal !== null && slVal !== undefined && slVal !== '') {
+        if (typeof slVal === 'number') {
+          slCleanVal = slVal;
+        } else {
+          const s = String(slVal).trim();
+          if (/^\d+(\.\d+)?$/.test(s)) slCleanVal = Number(s);
+          else if (s) slCleanVal = s;
+        }
+      }
+
       // Check section header / Main Category (e.g. in hierarchical sheets where row has item text, no amount, and no SL)
-      const isSectionHeader = (!slVal || slVal === null || slVal === undefined) && amountVal === 0 && !itemText.startsWith('(') && itemText.length > 2;
-      if (
-        isSectionHeader &&
+      const isSectionHeader = (slCleanVal === undefined) && amountVal === 0 && !itemText.startsWith('(') && itemText.length > 2 &&
         (sName === 'Revenue Expenditures' ||
           lowerItem.includes('remuneration') ||
           lowerItem.includes('welfare') ||
           lowerItem.includes('expenses') ||
-          lowerItem.includes('others'))
-      ) {
-        currentCategory = itemText;
-        pendingParentItem = null;
-        continue;
-      }
-
-      // Handle items with 0 on row N, followed by amount on row N+1 (e.g. Meeting Expenses)
-      if (amountVal === 0 && !itemText.startsWith('(') && itemText.length > 3) {
-        pendingParentItem = { name: itemText, row: r };
-        continue;
-      }
-
-      // Valid budget item with an amount
-      if (amountVal > 0) {
-        let finalItemName = itemText;
-        let finalRow = r;
-        if (itemText.startsWith('(') && pendingParentItem) {
-          finalItemName = pendingParentItem.name;
-          finalRow = r;
+          lowerItem.includes('others'));
+      if (isSectionHeader) {
+        if (pendingParentItem) {
+          pushSubcategory(pendingParentItem.name, 0, sheet.getCell(pendingParentItem.row, amountCol).address, pendingParentItem.row, pendingParentItem.sl_no);
           pendingParentItem = null;
         }
+        currentCategory = itemText;
+        continue;
+      }
 
-        const cellAddress = sheet.getCell(r, amountCol).address;
-
-        // Tabular template override if explicit Category column exists
-        let finalCatName = currentCategory;
-        if (catCol !== -1 && subcatCol !== -1) {
-          const directCat = String(row.getCell(catCol).value || '').trim();
-          const directSubcat = String(row.getCell(subcatCol).value || '').trim();
-          if (directCat) finalCatName = directCat;
-          if (directSubcat) finalItemName = directSubcat;
-          if (natureCol !== -1) {
-            const directNature = String(row.getCell(natureCol).value || '').trim();
-            if (directNature) budgetTypeName = directNature;
+      if (itemText.startsWith('(')) {
+        if (pendingParentItem) {
+          if (amountVal > 0) {
+            pushSubcategory(pendingParentItem.name, amountVal, sheet.getCell(r, amountCol).address, r, pendingParentItem.sl_no);
+            pendingParentItem = null;
           }
         }
-
-        if (!categoriesMap.has(finalCatName)) {
-          categoriesMap.set(finalCatName, {
-            category_name: finalCatName,
-            budget_type_name: budgetTypeName,
-            allocated_amount: 0,
-            cell_address: cellAddress,
-            subcategories: [],
-          });
-        }
-
-        const catData = categoriesMap.get(finalCatName)!;
-        catData.allocated_amount += amountVal;
-        catData.subcategories.push({
-          name: finalItemName,
-          allocated_amount: amountVal,
-          cell_address: cellAddress,
-          row: finalRow,
-          col: amountCol,
-        });
-
-        sheetCategories.add(finalCatName);
-        sheetExtractedTotal += amountVal;
-        sheetItemsCount++;
-        totalAllocated += amountVal;
+        continue;
       }
+
+      let nextRowHasIndentedNote = false;
+      if (amountVal === 0 && r + 1 <= sheet.rowCount) {
+        const nextItemVal = sheet.getRow(r + 1).getCell(itemCol).value;
+        const nextText = String(nextItemVal && typeof nextItemVal === 'object' && 'result' in nextItemVal ? (nextItemVal as any).result : nextItemVal || '').trim();
+        if (nextText.startsWith('(')) {
+          nextRowHasIndentedNote = true;
+        }
+      }
+
+      if (amountVal === 0 && nextRowHasIndentedNote) {
+        if (pendingParentItem) {
+          pushSubcategory(pendingParentItem.name, 0, sheet.getCell(pendingParentItem.row, amountCol).address, pendingParentItem.row, pendingParentItem.sl_no);
+        }
+        pendingParentItem = { name: itemText, row: r, sl_no: slCleanVal };
+        continue;
+      }
+
+      if (pendingParentItem) {
+        pushSubcategory(pendingParentItem.name, 0, sheet.getCell(pendingParentItem.row, amountCol).address, pendingParentItem.row, pendingParentItem.sl_no);
+        pendingParentItem = null;
+      }
+
+      const cellAddress = sheet.getCell(r, amountCol).address;
+      pushSubcategory(itemText, amountVal, cellAddress, r, slCleanVal);
+    }
+
+    if (pendingParentItem) {
+      pushSubcategory(pendingParentItem.name, 0, sheet.getCell(pendingParentItem.row, amountCol).address, pendingParentItem.row, pendingParentItem.sl_no);
+      pendingParentItem = null;
     }
 
     const variance = declaredTotal !== undefined ? sheetExtractedTotal - declaredTotal : undefined;
@@ -779,7 +849,11 @@ export async function applyMasterBudgetImport(
     let categorySum = 0;
     for (const subPreview of catPreview.subcategories) {
       let subcat = db.budget_subcategories.find(
-        (s) => s.department_id === dept!.id && s.budget_category_id === cat!.id && s.name.toLowerCase() === subPreview.name.toLowerCase()
+        (s) => s.department_id === dept!.id && s.budget_category_id === cat!.id && (
+          s.name.toLowerCase() === subPreview.name.toLowerCase() ||
+          normalizeSubcategoryName(s.name).toLowerCase() === subPreview.name.toLowerCase() ||
+          (subPreview.sl_no !== undefined && s.sl_no === subPreview.sl_no)
+        )
       );
 
       const cellMap = {
@@ -800,12 +874,15 @@ export async function applyMasterBudgetImport(
           approved_amount: 0,
           pending_amount: 0,
           cell_mapping: cellMap,
+          sl_no: subPreview.sl_no,
         };
         db.budget_subcategories.push(subcat);
       } else {
         subcat.allocated_amount = subPreview.allocated_amount;
         subcat.cell_mapping = cellMap;
         subcat.department_id = dept!.id;
+        subcat.name = subPreview.name;
+        if (subPreview.sl_no !== undefined) subcat.sl_no = subPreview.sl_no;
       }
 
       subcatsProcessed.add(subcat.id);

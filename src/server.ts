@@ -53,7 +53,7 @@ app.get('/api/signatures/:filename', requireAuth, (req: AuthedRequest, res) => {
   }
 
   const user = req.user!;
-  const isSenior = ['super_admin', 'director', 'finance', 'dean', 'associate_dean'].includes(user.role);
+  const isSenior = ['super_admin', 'director', 'finance', 'finance_head', 'dean', 'associate_dean', 'deans_office'].includes(user.role);
   const isSelf = safeFilename.startsWith(user.id);
 
   if (!isSenior && !isSelf) {

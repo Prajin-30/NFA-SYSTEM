@@ -12,6 +12,7 @@ export interface AuthedRequest extends Request {
     id: string;
     role: Role;
     department_id: string | null;
+    authorized_centre_ids?: string[];
     school?: string | null;
     name: string;
     email: string;
@@ -25,6 +26,7 @@ export function signToken(user: {
   id: string;
   role: Role;
   department_id: string | null;
+  authorized_centre_ids?: string[];
   school?: string | null;
   name: string;
   email: string;
@@ -60,7 +62,7 @@ export async function requireAuth(req: AuthedRequest, res: Response, next: NextF
     ) {
       try {
         const queryRes = await query(
-          'SELECT id, name, email, role, department_id, must_change_password, is_active, signature_image FROM user_profiles WHERE id = $1 LIMIT 1;',
+          'SELECT id, name, email, role, department_id, authorized_centre_ids, must_change_password, is_active, signature_image FROM user_profiles WHERE id = $1 LIMIT 1;',
           [decoded.id]
         );
         if (queryRes.rows.length > 0) {
@@ -83,6 +85,9 @@ export async function requireAuth(req: AuthedRequest, res: Response, next: NextF
         email: dbUser.email,
         role: dbUser.role, // Authoritative role from database
         department_id: dbUser.department_id,
+        authorized_centre_ids: Array.isArray(dbUser.authorized_centre_ids)
+          ? dbUser.authorized_centre_ids
+          : (Array.isArray(decoded.authorized_centre_ids) ? decoded.authorized_centre_ids : []),
         school: dbUser.school || (['super_admin', 'director', 'finance', 'dean', 'associate_dean'].includes(dbUser.role) ? 'SoET' : null),
         must_change_password: Boolean(dbUser.must_change_password || decoded.must_change_password),
         is_active: dbUser.is_active !== false,
@@ -91,6 +96,7 @@ export async function requireAuth(req: AuthedRequest, res: Response, next: NextF
     } else {
       req.user = {
         ...decoded,
+        authorized_centre_ids: Array.isArray(decoded.authorized_centre_ids) ? decoded.authorized_centre_ids : [],
         school: decoded.school || (['super_admin', 'director', 'finance', 'dean', 'associate_dean'].includes(decoded.role) ? 'SoET' : null),
       };
     }

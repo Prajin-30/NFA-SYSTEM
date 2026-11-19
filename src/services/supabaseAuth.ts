@@ -162,6 +162,7 @@ export interface InstitutionalUserProfile {
   email: string;
   role: Role;
   department_id: string | null;
+  authorized_centre_ids?: string[];
   school?: string | null;
   must_change_password: boolean;
   is_active: boolean;
@@ -183,10 +184,12 @@ export function isLiveSupabaseAuthConfigured(): boolean {
 export const APPROVED_DEMO_EMAILS = [
   'faculty@christ.edu',
   'hod@christ.edu',
+  'deansoffice@christ.edu',
   'dean@christ.edu',
   'associate_dean@christ.edu',
   'finance@christ.edu',
   'director@christ.edu',
+  'financehead@christ.edu',
   'student@christ.edu',
   'itadmin@christ.edu',
   'prajin.s@btech.christuniversity.in',
@@ -412,6 +415,7 @@ export async function authenticateInstitutionalUser(
       email: demoUser.email,
       role: demoUser.role,
       department_id: demoUser.department_id,
+      authorized_centre_ids: Array.isArray((demoUser as any).authorized_centre_ids) ? (demoUser as any).authorized_centre_ids : [],
       must_change_password: Boolean((demoUser as any).must_change_password),
       is_active: true,
       temp_password_created_at: (demoUser as any).temp_password_created_at || null,
@@ -470,7 +474,7 @@ export async function authenticateInstitutionalUser(
   if (process.env.DATABASE_URL && process.env.DATA_SOURCE !== 'json') {
     try {
       const dbRes = await query(
-        'SELECT id, name, email, role, department_id, must_change_password, is_active, temp_password_created_at, signature_image FROM user_profiles WHERE id = $1 OR lower(email) = $2 LIMIT 1;',
+        'SELECT id, name, email, role, department_id, authorized_centre_ids, must_change_password, is_active, temp_password_created_at, signature_image FROM user_profiles WHERE id = $1 OR lower(email) = $2 LIMIT 1;',
         [authUserId, cleanEmail]
       );
       if (dbRes.rows.length > 0) {
@@ -510,6 +514,7 @@ export async function authenticateInstitutionalUser(
     email: userRecord.email,
     role: userRecord.role,
     department_id: userRecord.department_id,
+    authorized_centre_ids: Array.isArray(userRecord.authorized_centre_ids) ? userRecord.authorized_centre_ids : [],
     must_change_password: mustChangePassword,
     is_active: true,
     temp_password_created_at: userRecord.temp_password_created_at || null,

@@ -1,10 +1,12 @@
 export type Role =
   | 'faculty'
   | 'hod'
+  | 'deans_office'
   | 'dean'
   | 'associate_dean'
   | 'finance'
   | 'director'
+  | 'finance_head'
   | 'super_admin'
   | 'it_admin'
   | 'student';
@@ -12,10 +14,16 @@ export type Role =
 export type NfaStatus =
   | 'draft'
   | 'submitted'
-  | 'under_review'
+  | 'pending_hod_review'
+  | 'pending_deans_office_verification'
+  | 'pending_associate_dean_approval'
   | 'dean_review'
+  | 'pending_dean_approval'
   | 'accounts_review'
+  | 'pending_finance_office_approval'
   | 'pending_director_approval'
+  | 'pending_finance_head_approval'
+  | 'under_review'
   | 'revision_required'
   | 'budget_validation'
   | 'pending_higher_approval'
@@ -29,6 +37,7 @@ export interface User {
   password_hash: string;
   role: Role;
   department_id: string | null;
+  authorized_centre_ids?: string[];
   school?: string | null;
   signature_image?: string;
   created_at: string;
@@ -86,6 +95,7 @@ export interface BudgetSubcategory {
   approved_amount: number;
   pending_amount: number;
   cell_mapping?: ExcelCellMapping;
+  sl_no?: number | string;
 }
 
 export interface DepartmentBudget {
@@ -182,6 +192,9 @@ export interface Nfa {
   ref_no: string;
   project_id?: string | null;
   department_id: string;
+  centre_id?: string | null;
+  organization_type?: 'department' | 'centre_or_office';
+  workflow_type?: 'department' | 'centre_or_office';
   financial_year_id: string;
   budget_type_id?: string;
   budget_category_id: string;
@@ -217,6 +230,8 @@ export interface Nfa {
   // set while a revision to an already-approved NFA awaits Finance sign-off
   pending_revision_amount?: number;
   pending_revision_reason?: string;
+  is_deleted?: boolean;
+  deleted_at?: string | null;
 }
 
 export interface Approval {
@@ -225,10 +240,30 @@ export interface Approval {
   approver_role: Role;
   approver_id: string;
   approver_name?: string;
-  decision: 'approved' | 'rejected' | 'revision_required' | 'recommended';
+  decision: 'approved' | 'rejected' | 'revision_required' | 'recommended' | 'verified';
   comments: string;
   level: number;
+  previous_status?: NfaStatus;
+  new_status?: NfaStatus;
   signature_image?: string;
+  created_at: string;
+}
+
+export interface MockEmail {
+  id: string;
+  nfa_id: string;
+  nfa_ref_no: string;
+  event: string;
+  recipient_role: string;
+  recipient_email: string;
+  recipient_name: string;
+  subject: string;
+  body: string;
+  html_body?: string;
+  attachment_name?: string;
+  has_pdf_attachment: boolean;
+  status: 'mock_delivered' | 'failed';
+  error_message?: string;
   created_at: string;
 }
 
@@ -293,6 +328,7 @@ export interface BudgetUpload {
 }
 
 export interface MasterBudgetSubcategoryPreview {
+  sl_no?: number | string;
   name: string;
   allocated_amount: number;
   cell_address: string;
@@ -367,4 +403,5 @@ export interface DB {
   excel_sync_records: ExcelSyncRecord[];
   budget_uploads: BudgetUpload[];
   budget_changes: BudgetChange[];
+  mock_emails?: MockEmail[];
 }

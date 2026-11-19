@@ -31,7 +31,11 @@ function formatDate(value?: string | null): string {
 }
 
 export function formatAmount(value: number): string {
-  return `₹${Number(value || 0).toLocaleString('en-IN')}`;
+  const num = Number(value || 0);
+  if (num < 0) {
+    return `Deficit: ₹${Math.abs(num).toLocaleString('en-IN')}`;
+  }
+  return `₹${num.toLocaleString('en-IN')}`;
 }
 
 function safeFileName(value: string): string {
@@ -114,13 +118,15 @@ export function renderNfaPdf(
     if (fs.existsSync(fontTimesBoldItalic)) doc.registerFont(fontBoldItalic, fontTimesBoldItalic);
   }
 
-  res.setHeader('Content-Type', 'application/pdf');
-  const reference = (nfa.ref_no || 'NFA').replace(/\//g, '_');
-  res.setHeader(
-    'Content-Disposition',
-    `attachment; filename="${safeFileName(nfa.title || projectName || reference)}_${reference}.pdf"`
-  );
-  doc.pipe(res);
+  if (typeof (res as any).setHeader === 'function') {
+    res.setHeader('Content-Type', 'application/pdf');
+    const reference = (nfa.ref_no || 'NFA').replace(/\//g, '_');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${safeFileName(nfa.title || projectName || reference)}_${reference}.pdf"`
+    );
+  }
+  doc.pipe(res as any);
 
   const pageWidth = 595.28;
   const leftMargin = 45;
@@ -203,8 +209,9 @@ export function renderNfaPdf(
   };
 
   // Point 1: Purpose & Objective
+  const isCentreForP1 = nfa.organization_type === 'centre_or_office' || dept.category === 'coe' || (dept.code && dept.code.startsWith('COE-'));
   const p1 = (nfa.point1 || nfa.purpose || '').trim() ||
-    `The Department of ${dept.name || 'Engineering and Technology'}, Bangalore Kengeri Campus, proposes to conduct the program to evaluate academic compliance and quality benchmarks.`;
+    `${isCentreForP1 ? '' : 'The '}${cleanDepartmentName(dept.name)}, Bangalore Kengeri Campus, proposes to conduct the program to evaluate academic compliance and quality benchmarks.`;
   renderBullet(p1);
 
   // Point 2: Operational Logistics / Scope
@@ -320,7 +327,13 @@ export function renderNfaPdf(
     balanceAfter: 0,
   };
 
+  const isCentreUnit = nfa.organization_type === 'centre_or_office' || dept.category === 'coe' || (dept.code && dept.code.startsWith('COE-'));
+  const pdfOrgType = isCentreUnit ? 'Centres or Offices' : 'Department';
+  const pdfOrgName = cleanDepartmentName(dept.name);
+
   const budgetRows: Array<[string, string]> = [
+    ['NFA Type', pdfOrgType],
+    ['Organization', pdfOrgName],
     ['Budget Nature', bDetails.classification],
     ['Main Budget Category', bDetails.categoryName],
     ['Budget Subcategory', bDetails.subcategoryName],
@@ -350,7 +363,7 @@ export function renderNfaPdf(
     doc.font(fontBold).fontSize(9.5).fillColor('#000000');
     doc.text(label, leftMargin + 6, rowY + 3.5, { width: bCol1Width - 12 });
 
-    const isAmount = val.startsWith('₹');
+    const isAmount = val.includes('₹');
     doc.font(isAmount ? fontBold : fontRegular).fontSize(9.5).fillColor('#000000');
     doc.text(val, leftMargin + bCol1Width + 8, rowY + 3.5, { width: bCol2Width - 14 });
   });
@@ -380,7 +393,7 @@ export function renderNfaPdf(
   const hodApproval = approvals.find((a) => a.approver_role === 'hod' && ['approved', 'recommended'].includes(a.decision));
   const deanApproval = approvals.find((a) => ['dean', 'associate_dean'].includes(a.approver_role) && ['approved', 'recommended'].includes(a.decision));
   const directorApproval = approvals.find((a) => a.approver_role === 'director' && ['approved', 'recommended'].includes(a.decision));
-  const financeApproval = approvals.find((a) => a.approver_role === 'finance' && ['approved', 'recommended'].includes(a.decision));
+  const financeApproval = approvals.find((a) => ['finance', 'finance_head'].includes(a.approver_role) && ['approved', 'recommended'].includes(a.decision));
 
   const deptFullName = cleanDepartmentName(dept.name);
 
@@ -414,14 +427,15 @@ export function renderNfaPdf(
   const colThirdWidth = (contentWidth - 24) / 3;
 
   // Column 1: Dean / Associate Dean
+  const isAssocDean = deanApproval?.approver_role === 'associate_dean';
   const deanX = leftMargin;
   const deanSigName = deanApproval ? (deanApproval.signature_image || `${deanApproval.approver_id}.png`) : undefined;
   renderSignatureImage(doc, deanSigName, deanX, row2Y, 100, sigBoxHeight);
   const deanTextY = row2Y + sigBoxHeight + 2;
   doc.font(fontBold).fontSize(10).fillColor('#000000');
-  doc.text(deanApproval?.approver_name || dept.dean_name || 'Dean / Associate Dean', deanX, deanTextY, { width: colThirdWidth });
+  doc.text(deanApproval?.approver_name || (isAssocDean ? (dept.associate_dean_name || 'Associate Dean') : (dept.dean_name || 'Dean')), deanX, deanTextY, { width: colThirdWidth });
   doc.font(fontRegular).fontSize(9).fillColor('#222222');
-  doc.text('Dean, School of Engineering & Technology', deanX, doc.y + 1, { width: colThirdWidth });
+  doc.text(isAssocDean ? 'Associate Dean, School of Engineering & Technology' : 'Dean, School of Engineering & Technology', deanX, doc.y + 1, { width: colThirdWidth });
   doc.text('Bangalore Kengeri Campus', deanX, doc.y + 1, { width: colThirdWidth });
 
   // Column 2: Director
@@ -436,14 +450,15 @@ export function renderNfaPdf(
   doc.text('Bangalore Kengeri Campus', dirX, doc.y + 1, { width: colThirdWidth });
 
   // Column 3: Finance Officer
+  const isFinHead = financeApproval?.approver_role === 'finance_head';
   const finX = leftMargin + (colThirdWidth + 12) * 2;
   const finSigName = financeApproval ? (financeApproval.signature_image || `${financeApproval.approver_id}.png`) : undefined;
   renderSignatureImage(doc, finSigName, finX, row2Y, 100, sigBoxHeight);
   const finTextY = row2Y + sigBoxHeight + 2;
   doc.font(fontBold).fontSize(10).fillColor('#000000');
-  doc.text(financeApproval?.approver_name || dept.finance_officer_name || 'Finance Officer', finX, finTextY, { width: colThirdWidth });
+  doc.text(financeApproval?.approver_name || (isFinHead ? (dept.finance_officer_name || 'Finance Officer (Head)') : (dept.finance_officer_name || 'Finance Officer')), finX, finTextY, { width: colThirdWidth });
   doc.font(fontRegular).fontSize(9).fillColor('#222222');
-  doc.text('Finance Officer', finX, doc.y + 1, { width: colThirdWidth });
+  doc.text(isFinHead ? 'Finance Officer (Head)' : 'Finance Officer', finX, doc.y + 1, { width: colThirdWidth });
   doc.text('Bangalore Kengeri Campus', finX, doc.y + 1, { width: colThirdWidth });
 
   // =========================================================================
@@ -605,4 +620,29 @@ export function renderNfaPdf(
   }
 
   doc.end();
+}
+
+/**
+ * Generate full PDF buffer in memory for mock email notifications / offline validation.
+ */
+export async function generateNfaPdfBuffer(
+  nfa: Nfa,
+  items: NfaItem[],
+  dept: Department,
+  category: BudgetCategory,
+  projectName?: string,
+  approvals: Approval[] = [],
+  fyLabel?: string,
+  budgetTypeName?: string,
+  budgetDetails?: BudgetDetailsInfo
+): Promise<Buffer> {
+  const { PassThrough } = await import('stream');
+  return new Promise((resolve, reject) => {
+    const stream = new PassThrough();
+    const chunks: Buffer[] = [];
+    stream.on('data', (d) => chunks.push(d));
+    stream.on('end', () => resolve(Buffer.concat(chunks)));
+    stream.on('error', reject);
+    renderNfaPdf(stream as any, nfa, items, dept, category, projectName, approvals, fyLabel, budgetTypeName, budgetDetails);
+  });
 }

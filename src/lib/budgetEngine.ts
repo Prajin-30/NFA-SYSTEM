@@ -372,3 +372,21 @@ export function finalizePendingRevision(
 
   return line;
 }
+
+/**
+ * Concurrency Protection: Row-level pessimistic locking for PostgreSQL mode.
+ * Acquires SELECT ... FOR UPDATE on target department budget line to prevent race conditions.
+ */
+export async function withPgBudgetLock<T>(
+  budgetLineId: string,
+  operation: (client: any) => Promise<T>
+): Promise<T> {
+  const { withTransaction } = await import('../db/pool.js');
+  return withTransaction(async (client) => {
+    await client.query(
+      'SELECT id, allocated_amount, approved_amount, pending_amount FROM department_budgets WHERE id = $1 FOR UPDATE',
+      [budgetLineId]
+    );
+    return await operation(client);
+  });
+}

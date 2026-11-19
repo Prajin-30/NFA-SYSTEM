@@ -110,6 +110,7 @@ usersRouter.get('/me', (req: AuthedRequest, res) => {
     email: user.email,
     role: user.role,
     department_id: user.department_id,
+    authorized_centre_ids: Array.isArray((user as any).authorized_centre_ids) ? (user as any).authorized_centre_ids : [],
     school: user.school || (['super_admin', 'director', 'finance', 'dean', 'associate_dean'].includes(user.role) ? 'SoET' : null),
     must_change_password: Boolean((user as any).must_change_password),
     has_signature: hasSignature,

@@ -914,7 +914,8 @@
       color: #475569;
     }
 
-    .b-submitted {
+    .b-submitted,
+    .b-pending_hod_review {
       background: var(--light-blue);
       color: var(--primary-blue);
     }
@@ -924,12 +925,21 @@
       color: #7e22ce;
     }
 
-    .b-dean_review {
+    .b-pending_deans_office_verification {
+      background: #e0e7ff;
+      color: #3730a3;
+      border: 1px solid #c7d2fe;
+    }
+
+    .b-dean_review,
+    .b-pending_associate_dean_approval,
+    .b-pending_dean_approval {
       background: #fef3c7;
       color: #92400e;
     }
 
-    .b-accounts_review {
+    .b-accounts_review,
+    .b-pending_finance_office_approval {
       background: #ede9fe;
       color: #5b21b6;
     }
@@ -939,6 +949,12 @@
       background: #fed7aa;
       color: #9a3412;
       animation: pulse 2s infinite;
+    }
+
+    .b-pending_finance_head_approval {
+      background: #fef08a;
+      color: #a16207;
+      font-weight: 700;
     }
 
     .b-approved {
@@ -952,8 +968,9 @@
     }
 
     .b-revision_required {
-      background: #fef08a;
-      color: #854d0e;
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
     }
 
     @keyframes pulse {
@@ -2057,6 +2074,14 @@
         </div>
       </div>
 
+      <div style="margin-bottom:14px;text-align:left;">
+        <label style="font-size:12px;font-weight:600;display:block;margin-bottom:6px;">Authorized Centres or Offices (Multi-Select)</label>
+        <div id="editUserCentresWrap" style="max-height:130px;overflow-y:auto;border:1px solid var(--border);border-radius:6px;padding:8px 10px;background:#FAFAFA;display:flex;flex-direction:column;gap:6px;">
+          <!-- Dynamically populated checkboxes -->
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Check each Centre or Office this faculty member is authorized to propose NFAs for.</div>
+      </div>
+
       <div id="editUserErr" style="color:var(--danger);font-size:12px;margin-bottom:10px;display:none;"></div>
 
       <div style="display:flex;gap:10px;justify-content:flex-end;">
@@ -2245,14 +2270,20 @@
       const map = {
         draft: 'Draft',
         submitted: 'Pending HOD Review',
+        pending_hod_review: 'Pending HOD Review',
         under_review: 'Pending HOD Review',
-        dean_review: 'Pending Dean Review',
-        accounts_review: 'Pending Accounts Verification',
-        pending_director_approval: 'Need Permission (Director Approval)',
-        pending_higher_approval: 'Need Permission (Director Approval)',
-        approved: 'Approved',
+        pending_deans_office_verification: "Pending Dean's Office Verification",
+        pending_associate_dean_approval: 'Pending Associate Dean Approval',
+        dean_review: 'Pending Dean Approval',
+        pending_dean_approval: 'Pending Dean Approval',
+        accounts_review: 'Pending Finance Office Approval',
+        pending_finance_office_approval: 'Pending Finance Office Approval',
+        pending_director_approval: 'Pending Director Approval',
+        pending_finance_head_approval: 'Pending Finance Head Approval',
+        pending_higher_approval: 'Pending Director Approval',
+        approved: 'Fully Approved',
         rejected: 'Rejected',
-        revision_required: 'Revision Required'
+        revision_required: 'Returned for Correction'
       };
       return map[s] || (s ? String(s).replace(/_/g, ' ') : '');
     }
@@ -2286,7 +2317,7 @@
     }
 
     const PREDEFINED_EVENT_PARTICULARS = [
-      { key: 'memento', name: 'Memento (including carry-back arrangements)', defaultLabel: 'Memento', notePlaceholder: 'Carry-back arrangement (optional)' },
+      { key: 'memento', name: 'Memento (including carry bag arrangements)', defaultLabel: 'Memento', notePlaceholder: 'Carry bag arrangement (optional)' },
       { key: 'travel_expenses', name: 'Travel Expenses (based on distance)', defaultLabel: 'Travel Expenses', notePlaceholder: 'Distance in km (optional)' },
       { key: 'ta', name: 'Travel Allowance (TA)', defaultLabel: 'Travel Allowance (TA)' },
       { key: 'da', name: 'Dearness Allowance (DA)', defaultLabel: 'Dearness Allowance (DA)' },
@@ -2552,6 +2583,7 @@
         row.dataset.distanceKm = val;
       } else if (key === 'memento') {
         pInput.value = val ? `Memento (${val})` : 'Memento';
+        row.dataset.carryBag = val;
         row.dataset.carryBack = val;
       }
     }
@@ -2575,7 +2607,10 @@
       row.className = 'item-row predefined-row';
       row.dataset.predefinedKey = key;
       if (dist) row.dataset.distanceKm = dist;
-      if (carryBack) row.dataset.carryBack = carryBack;
+      if (carryBack) {
+        row.dataset.carryBag = carryBack;
+        row.dataset.carryBack = carryBack;
+      }
       if (isSampling) row.dataset.sampling = 'true';
 
       row.innerHTML = `
@@ -3377,6 +3412,14 @@
       document.getElementById('whoamiName').textContent = USER ? USER.name : '';
       document.getElementById('whoamiRole').textContent = USER && USER.role ? String(USER.role).replace('_', ' ') : '';
 
+      try {
+        const me = await api('/users/me');
+        if (me) {
+          USER = { ...USER, ...me };
+          localStorage.setItem('user', JSON.stringify(USER));
+        }
+      } catch (e) { }
+
       const [depts, cats, subcats, fys, btypes] = await Promise.all([
         api('/budgets/departments'),
         api('/budgets/categories'),
@@ -3420,7 +3463,7 @@
       });
       html += `</optgroup>`;
 
-      html += `<optgroup label="Centres of Excellence (CoE)">`;
+      html += `<optgroup label="Centres or Offices">`;
       activeCoes.forEach(d => {
         html += `<option value="${d.id}" ${d.id === selectedId ? 'selected' : ''}>${escapeHtml(d.name)}</option>`;
       });
@@ -3683,8 +3726,8 @@
       <!-- Type Filter Pills -->
       <div class="type-filter-group">
         <div class="type-pill ${activeBudgetTypeFilter === 'all' ? 'active' : ''}" onclick="setBudgetTypeFilter('all')">All Categories (${summary.lines.length})</div>
-        <div class="type-pill ${activeBudgetTypeFilter === 'revenue' ? 'active' : ''}" onclick="setBudgetTypeFilter('revenue')">Revenue Expenditure</div>
         <div class="type-pill ${activeBudgetTypeFilter === 'capex' ? 'active' : ''}" onclick="setBudgetTypeFilter('capex')">Capital Expenditure (CAPEX)</div>
+        <div class="type-pill ${activeBudgetTypeFilter === 'revenue' ? 'active' : ''}" onclick="setBudgetTypeFilter('revenue')">Revenue Expenditure</div>
         <div class="type-pill ${activeBudgetTypeFilter === 'earnings' ? 'active' : ''}" onclick="setBudgetTypeFilter('earnings')">Revenue &amp; Earnings</div>
       </div>
   `;
@@ -3732,6 +3775,7 @@
           <table>
             <thead>
               <tr>
+                <th style="width:65px;text-align:center;">SL. NO.</th>
                 <th>Subcategory Item</th>
                 <th>Allocated Budget</th>
                 <th>Approved &amp; Debited</th>
@@ -3744,6 +3788,7 @@
             <tbody>
               ${subcats.length > 0 ? subcats.map(sub => `
                 <tr>
+                  <td style="text-align:center;font-weight:600;color:var(--text-muted);">${sub.sl_no !== undefined && sub.sl_no !== null && sub.sl_no !== '' ? escapeHtml(String(sub.sl_no)) : (idx + 1)}</td>
                   <td><strong>${escapeHtml(sub.name || 'Particulars')}</strong></td>
                   <td class="financial-amount">${inr(sub.allocated_amount)}</td>
                   <td style="color:var(--success)" class="financial-amount">${inr(sub.approved_amount)}</td>
@@ -3761,7 +3806,7 @@
                     </td>
                   ` : ''}
                 </tr>
-              `).join('') : `<tr><td colspan="${isAdmin ? 7 : 6}" class="muted">No specific subcategories registered. Directly charged to parent category.</td></tr>`}
+              `).join('') : `<tr><td colspan="${isAdmin ? 8 : 7}" class="muted">No specific subcategories registered. Directly charged to parent category.</td></tr>`}
               ${(() => {
             const subSumAlloc = subcats.reduce((sum, s) => sum + (s.allocated_amount || 0), 0);
             const subSumAppr = subcats.reduce((sum, s) => sum + (s.approved_amount || 0), 0);
@@ -3772,6 +3817,7 @@
             if (unallocatedAppr > 0 || unallocatedPend > 0) {
               return `
                     <tr style="background:#fafbfc;font-style:italic;">
+                      <td style="text-align:center;color:var(--text-muted);">—</td>
                       <td><strong>Direct Category Proposals (General)</strong></td>
                       <td class="financial-amount">${unallocatedAlloc > 0 ? inr(unallocatedAlloc) : '—'}</td>
                       <td style="color:var(--success)" class="financial-amount">${inr(unallocatedAppr)}</td>
@@ -3787,7 +3833,7 @@
             </tbody>
             <tfoot>
               <tr style="font-weight:700;background:#f8fafc;border-top:2px solid var(--border);">
-                <td>Category Total</td>
+                <td colspan="2">Category Total</td>
                 <td class="financial-amount">${inr(line.allocated_amount)}</td>
                 <td style="color:var(--success)" class="financial-amount">${inr(line.approved_amount)}</td>
                 <td style="color:var(--warning)" class="financial-amount">${inr(line.pending_amount)}</td>
@@ -4339,7 +4385,7 @@
         <tr>
           <th>Ref No.</th>
           <th>Title &amp; Proposer</th>
-          <th>Department</th>
+          <th>Organization</th>
           <th>Category &amp; Subcategory</th>
           <th class="nfa-amount-cell">Amount</th>
           <th>Current Status</th>
@@ -4350,11 +4396,17 @@
   `;
 
       inboxItems.forEach(n => {
+        const isCentreUnit = n.organization_type === 'centre_or_office' || (REF.departments.find(d => d.id === n.department_id)?.category === 'coe');
         html += `
       <tr>
         <td><strong>${escapeHtml(n.ref_no)}</strong><div class="muted">${escapeHtml(n.date)}</div></td>
         <td><strong>${escapeHtml(n.title)}</strong><div class="muted">${escapeHtml(n.submitted_by_name || 'Faculty')}</div></td>
-        <td>${escapeHtml(deptName(n.department_id))}</td>
+        <td>
+          <span class="badge" style="${isCentreUnit ? 'background:#e0e7ff;color:#3730a3;border:1px solid #c7d2fe;' : 'background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;'}font-size:10px;padding:2px 6px;margin-bottom:3px;display:inline-block;">
+            ${isCentreUnit ? 'Centres or Offices' : 'Department'}
+          </span>
+          <div style="font-weight:600;font-size:12.5px;line-height:1.3;">${escapeHtml(deptName(n.department_id))}</div>
+        </td>
         <td>
           <strong>${escapeHtml(catName(n.budget_category_id))}</strong>
           ${n.budget_subcategory_name ? `<div class="muted">↳ ${escapeHtml(n.budget_subcategory_name)}</div>` : ''}
@@ -4388,7 +4440,7 @@
           <tr>
             <th>Ref No.</th>
             <th>Title</th>
-            <th>Department</th>
+            <th>Organization</th>
             <th>Category &amp; Subcategory</th>
             <th class="nfa-amount-cell">Amount</th>
             <th>Status</th>
@@ -4402,11 +4454,17 @@
         html += `<tr><td colspan="7" class="muted" style="text-align:center;padding:30px;">No NFAs submitted yet. Click "+ Request New NFA" to propose one.</td></tr>`;
       } else {
         list.forEach(n => {
+          const isCentreUnit = n.organization_type === 'centre_or_office' || (REF.departments.find(d => d.id === n.department_id)?.category === 'coe');
           html += `
         <tr>
           <td><strong>${escapeHtml(n.ref_no)}</strong><div class="muted">${escapeHtml(n.date)}</div></td>
           <td><strong>${escapeHtml(n.title)}</strong><div class="muted">${escapeHtml(n.submitted_by_name || 'Faculty')}</div></td>
-          <td>${escapeHtml(deptName(n.department_id))}</td>
+          <td>
+            <span class="badge" style="${isCentreUnit ? 'background:#e0e7ff;color:#3730a3;border:1px solid #c7d2fe;' : 'background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;'}font-size:10px;padding:2px 6px;margin-bottom:3px;display:inline-block;">
+              ${isCentreUnit ? 'Centres or Offices' : 'Department'}
+            </span>
+            <div style="font-weight:600;font-size:12.5px;line-height:1.3;">${escapeHtml(deptName(n.department_id))}</div>
+          </td>
           <td>
             <strong>${escapeHtml(catName(n.budget_category_id))}</strong>
             ${n.budget_subcategory_name ? `<div class="muted">↳ ${escapeHtml(n.budget_subcategory_name)}</div>` : ''}
@@ -4434,14 +4492,73 @@
       quotationUploads = [null, null, null];
       comparativeStatementUpload = null;
       activeModalType = 'new_nfa';
-      const deptId = USER.department_id || REF.departments[0]?.id;
+
+      const userDept = USER.department_id ? REF.departments.find(d => d.id === USER.department_id) : null;
+      const deptId = userDept ? userDept.id : (USER.department_id || REF.departments[0]?.id);
       const fy = activeFy();
+
+      const userCentres = Array.isArray(USER.authorized_centre_ids) ? USER.authorized_centre_ids : [];
+      const authorizedCentres = (REF.departments || []).filter(d => d.is_active && (d.category === 'coe' || (d.code && d.code.startsWith('COE-'))) && (USER.role === 'super_admin' || userCentres.includes(d.id)));
 
       let autoRef = `NFA/CU/${fy.label}/${String(Date.now()).slice(-4)}`;
       try {
         const refData = await api(`/nfas/next-ref?department_id=${deptId}&financial_year_id=${fy.id}`);
         if (refData.ref_no) autoRef = refData.ref_no;
       } catch (e) { }
+
+      const isSeniorAdmin = ['super_admin'].includes(USER.role);
+      let deptSelectorHtml = '';
+      if (!isSeniorAdmin) {
+        if (userDept) {
+          deptSelectorHtml = `
+            <div style="padding:10px 14px;background:#F8FAFC;border:1px solid #CBD5E1;border-radius:6px;display:flex;align-items:center;gap:10px;">
+              <span style="font-size:16px;">🏛️</span>
+              <div style="flex:1;">
+                <div style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;">Assigned Department</div>
+                <div style="font-weight:700;color:#0F172A;font-size:13.5px;">${escapeHtml(userDept.name)} (${escapeHtml(userDept.code)})</div>
+              </div>
+              <span class="badge" style="background:#EBF5FF;color:#003D8F;border:1px solid #BFDBFE;font-size:11px;">Primary Department</span>
+            </div>
+            <input type="hidden" id="nfaDept" value="${userDept.id}" />
+          `;
+        } else {
+          deptSelectorHtml = `
+            <div style="padding:10px 14px;background:#FEF2F2;border:1px solid #FECACA;border-radius:6px;color:#991B1B;font-weight:600;font-size:13px;">
+              ⚠️ No valid department assignment exists on your profile. Please contact Super Admin before submitting an NFA.
+            </div>
+            <input type="hidden" id="nfaDept" value="" />
+          `;
+        }
+      } else {
+        const activeAcademic = (REF.departments || []).filter(d => d.is_active && d.category === 'academic');
+        deptSelectorHtml = `
+          <select id="nfaDept" onchange="onNfaDeptSelect(this.value)">
+            ${activeAcademic.map(d => `<option value="${d.id}" ${d.id === deptId ? 'selected' : ''}>${escapeHtml(d.name)} (${d.code})</option>`).join('')}
+            <option value="__custom__">Other / Enter Custom Department Name...</option>
+          </select>
+          <div id="customDeptWrap" style="display:none;margin-top:8px;">
+            <input id="customDeptName" placeholder="Enter Full Department Name (e.g. Dept. of Data Science)" style="margin-bottom:6px;" />
+            <input id="customDeptCode" placeholder="Department Code (optional, e.g. DS)" style="max-width:200px;" />
+          </div>
+        `;
+      }
+
+      let centreSelectorHtml = '';
+      if (authorizedCentres.length > 0) {
+        centreSelectorHtml = `
+          <select id="nfaCentreSelect" onchange="onNfaCentreSelect(this.value)" style="margin-bottom:0;">
+            <option value="">— Select an Authorized Centre or Office —</option>
+            ${authorizedCentres.map(c => `<option value="${c.id}">${escapeHtml(c.name)} (${c.code})</option>`).join('')}
+          </select>
+        `;
+      } else {
+        centreSelectorHtml = `
+          <div style="padding:10px 14px;background:#FFFBEB;border:1px solid #FEF3C7;border-radius:6px;color:#92400E;font-size:13px;line-height:1.4;">
+            ℹ️ You are not authorized for any Centres or Offices. Please select <strong>Department</strong> above, or contact Super Admin to assign you to a Centre or Office.
+          </div>
+          <input type="hidden" id="nfaCentreSelect" value="" />
+        `;
+      }
 
       openModal(`
     <button class="close-btn" type="button" onclick="handleCloseApplyNfa()">✕</button>
@@ -4469,17 +4586,34 @@
       </div>
     </div>
 
-    <div class="row" style="margin-top:10px;">
-      <div style="flex:1">
-        <label class="field-label">Department / Centre of Excellence</label>
-        <select id="nfaDept" onchange="onNfaDeptSelect(this.value)">
-          ${renderDeptSelectOptions(deptId, true)}
-        </select>
-        <div id="customDeptWrap" style="display:none;margin-top:8px;">
-          <input id="customDeptName" placeholder="Enter Full Department Name (e.g. Dept. of Data Science)" style="margin-bottom:6px;" />
-          <input id="customDeptCode" placeholder="Department Code (optional, e.g. DS)" style="max-width:200px;" />
-        </div>
+    <!-- Mandatory Select Organization Type -->
+    <div style="margin-top:12px;margin-bottom:12px;padding:12px 14px;background:var(--section-bg);border:1px solid var(--border);border-radius:var(--radius-sm);">
+      <label class="field-label" style="font-weight:700;color:var(--primary);margin-bottom:8px;">Select Organization Type <span style="color:var(--danger)">*</span></label>
+      <div style="display:flex;gap:24px;align-items:center;margin-bottom:12px;">
+        <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-weight:600;font-size:13.5px;">
+          <input type="radio" name="nfaOrgType" id="nfaOrgTypeDept" value="department" checked onchange="onNfaOrgTypeChange('department')" />
+          Department
+        </label>
+        <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-weight:600;font-size:13.5px;">
+          <input type="radio" name="nfaOrgType" id="nfaOrgTypeCentre" value="centre_or_office" onchange="onNfaOrgTypeChange('centre_or_office')" />
+          Centres or Offices
+        </label>
       </div>
+
+      <!-- Dynamic Container for Option A: Department -->
+      <div id="wrapOrgDept" style="display:block;">
+        <label class="field-label" style="font-weight:600;margin-bottom:4px;">Department</label>
+        ${deptSelectorHtml}
+      </div>
+
+      <!-- Dynamic Container for Option B: Centres or Offices -->
+      <div id="wrapOrgCentre" style="display:none;">
+        <label class="field-label" style="font-weight:600;margin-bottom:4px;">Centres or Offices <span style="color:var(--danger)">*</span></label>
+        ${centreSelectorHtml}
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:10px;">
       <div style="flex:1">
         <label class="field-label">Faculty Proposer Name</label>
         <input id="nfaFacultyName" value="${escapeHtml(USER.name)}" />
@@ -4697,26 +4831,72 @@
       }, 100);
     }
 
+    function getSelectedOrgUnitId() {
+      const orgType = document.querySelector('input[name="nfaOrgType"]:checked')?.value || 'department';
+      if (orgType === 'department') {
+        const d = document.getElementById('nfaDept');
+        return d ? (d.value === '__custom__' ? '' : d.value) : '';
+      } else {
+        const c = document.getElementById('nfaCentreSelect');
+        return c ? c.value : '';
+      }
+    }
+
+    async function onNfaOrgTypeChange(type) {
+      const isDept = type === 'department';
+      const wrapDept = document.getElementById('wrapOrgDept');
+      const wrapCentre = document.getElementById('wrapOrgCentre');
+      if (wrapDept) wrapDept.style.display = isDept ? 'block' : 'none';
+      if (wrapCentre) wrapCentre.style.display = isDept ? 'none' : 'block';
+
+      await onNfaFyOrDeptChange();
+
+      // Refresh category & subcategory lists for the newly selected organizational unit
+      const catSelect = document.getElementById('nfaCat');
+      const currentCatVal = catSelect ? catSelect.value : '';
+      if (currentCatVal) {
+        onCategorySelect(currentCatVal);
+      }
+      updateNfaBudgetStatusBanner();
+    }
+
+    async function onNfaCentreSelect(centreId) {
+      await onNfaFyOrDeptChange();
+      const catSelect = document.getElementById('nfaCat');
+      const currentCatVal = catSelect ? catSelect.value : '';
+      if (currentCatVal) {
+        onCategorySelect(currentCatVal);
+      }
+      updateNfaBudgetStatusBanner();
+    }
+
     async function onNfaDeptSelect(val) {
       const customWrap = document.getElementById('customDeptWrap');
       if (val === '__custom__') {
-        customWrap.style.display = 'block';
+        if (customWrap) customWrap.style.display = 'block';
       } else {
-        customWrap.style.display = 'none';
+        if (customWrap) customWrap.style.display = 'none';
         await onNfaFyOrDeptChange();
+        const catSelect = document.getElementById('nfaCat');
+        const currentCatVal = catSelect ? catSelect.value : '';
+        if (currentCatVal) {
+          onCategorySelect(currentCatVal);
+        }
+        updateNfaBudgetStatusBanner();
       }
     }
 
     async function onNfaFyOrDeptChange() {
-      const deptSelect = document.getElementById('nfaDept');
-      const deptId = deptSelect.value === '__custom__' ? '' : deptSelect.value;
-      const fyId = document.getElementById('nfaFy').value;
+      const deptId = getSelectedOrgUnitId();
+      const fySelect = document.getElementById('nfaFy');
+      const fyId = fySelect ? fySelect.value : '';
 
       if (deptId && fyId) {
         try {
           const refData = await api(`/nfas/next-ref?department_id=${deptId}&financial_year_id=${fyId}`);
           if (refData.ref_no) {
-            document.getElementById('nfaRefNo').value = refData.ref_no;
+            const refInput = document.getElementById('nfaRefNo');
+            if (refInput) refInput.value = refData.ref_no;
           }
         } catch (e) { }
       }
@@ -4792,7 +4972,8 @@
         return;
       }
 
-      const subs = (REF.subcategories || []).filter(s => s.budget_category_id === catId);
+      const unitId = getSelectedOrgUnitId();
+      const subs = (REF.subcategories || []).filter(s => s.budget_category_id === catId && (!unitId || s.department_id === unitId || !s.department_id));
       const selectedCat = (REF.categories || []).find(c => c.id === catId);
       const catNameStr = selectedCat ? formatCategoryOptionLabel(selectedCat.name, 50) : 'Category';
 
@@ -4938,7 +5119,8 @@
         }
       } else {
         const cat = (REF.categories || []).find(c => c.id === catId);
-        const catSubs = (REF.subcategories || []).filter(s => s.budget_category_id === catId);
+        const unitId = getSelectedOrgUnitId();
+        const catSubs = (REF.subcategories || []).filter(s => s.budget_category_id === catId && (!unitId || s.department_id === unitId || !s.department_id));
         if (catSubs.length > 0) {
           alloc = catSubs.reduce((s, x) => s + (x.allocated_amount || 0), 0);
           apprv = catSubs.reduce((s, x) => s + (x.approved_amount || 0), 0);
@@ -5030,8 +5212,17 @@
     }
 
     async function createNfa(andSubmit) {
-      const deptSelect = document.getElementById('nfaDept');
-      let deptId = deptSelect.value;
+      const orgType = document.querySelector('input[name="nfaOrgType"]:checked')?.value || 'department';
+      let deptId = '';
+      if (orgType === 'department') {
+        const deptSelect = document.getElementById('nfaDept');
+        deptId = deptSelect ? deptSelect.value : '';
+        if (!deptId) return toast('No valid department assignment exists for your profile. Please contact Super Admin.');
+      } else {
+        const centreSelect = document.getElementById('nfaCentreSelect');
+        deptId = centreSelect ? centreSelect.value : '';
+        if (!deptId) return toast('Please select an authorized Centre or Office before proceeding.');
+      }
       const customDeptName = document.getElementById('customDeptName')?.value?.trim() || '';
       const customDeptCode = document.getElementById('customDeptCode')?.value?.trim() || '';
 
@@ -5107,7 +5298,7 @@
         const key = r.dataset.predefinedKey || undefined;
         const isPredefined = Boolean(key);
         const dist = r.dataset.distanceKm || undefined;
-        const carryBack = r.dataset.carryBack || undefined;
+        const carryBack = r.dataset.carryBag || r.dataset.carryBack || undefined;
         const isSampling = r.dataset.sampling === 'true';
 
         return {
@@ -5187,7 +5378,10 @@
           body: {
             ref_no: refNo,
             project_id: projId,
+            organization_type: orgType,
+            workflow_type: orgType,
             department_id: deptId,
+            centre_id: orgType === 'centre_or_office' ? deptId : null,
             custom_department_name: customDeptName,
             custom_department_code: customDeptCode,
             financial_year_id: fyId,
@@ -5240,36 +5434,85 @@
         return toast(e.message);
       }
 
+      const isCentre = n.organization_type === 'centre_or_office' || (REF.departments.find(d => d.id === n.department_id)?.category === 'coe');
       const isOwner = n.created_by === USER.id;
-      const canOwnerEdit = isOwner && ['draft', 'submitted', 'revision_required'].includes(n.status);
-      const canHodEdit = USER.role === 'hod' && n.status === 'submitted' && USER.department_id === n.department_id;
-      const canDeanEdit = ['dean', 'associate_dean'].includes(USER.role) && n.status === 'dean_review';
+      const isDeleted = Boolean(n.is_deleted);
+      const canOwnerEdit = isOwner && ['draft', 'revision_required'].includes(n.status);
+      const canHodEdit = USER.role === 'hod' && (n.status === 'submitted' || n.status === 'pending_hod_review') && USER.department_id === n.department_id;
+      const canDeanEdit = ['dean', 'associate_dean'].includes(USER.role) && (n.status === 'dean_review' || n.status === 'pending_dean_approval');
       const canSuperAdminEdit = USER.role === 'super_admin' && n.status !== 'draft';
-      const canEdit = n.status === 'draft' ? isOwner : (canOwnerEdit || canHodEdit || canDeanEdit || canSuperAdminEdit);
-      const canDeleteDraft = n.status === 'draft' && isOwner;
+      const canEdit = !isDeleted && (n.status === 'draft' ? isOwner : (canOwnerEdit || canHodEdit || canDeanEdit || canSuperAdminEdit));
+      const canDeleteNfa = !isDeleted && isOwner && (n.status === 'draft' || n.status === 'revision_required');
 
-      const canSubmit = n.status === 'draft' && isOwner;
-      const canHodReview = (n.status === 'submitted' || n.status === 'under_review') && USER.role === 'hod' && USER.department_id === n.department_id;
-      const canDeanReview = n.status === 'dean_review' && ['dean', 'associate_dean', 'super_admin'].includes(USER.role);
-      const canAccountsReview = (n.status === 'accounts_review' || n.status === 'budget_validation') && ['finance', 'super_admin'].includes(USER.role);
-      const canDirectorApprove = (n.status === 'pending_director_approval' || n.status === 'pending_higher_approval') && ['director', 'super_admin'].includes(USER.role);
+      const deptObj = REF.departments.find(d => d.id === n.department_id);
+      const deptCode = (deptObj?.code || '').toUpperCase();
+      const isCseOrAdse = !isCentre && (deptCode === 'CSE' || deptCode === 'ADSE' || (deptObj?.name || '').toLowerCase().includes('computer science') || (deptObj?.name || '').toLowerCase().includes('data science'));
 
-      const stages = [
-        { key: 'draft', title: '1. Faculty', desc: 'Applied' },
-        { key: 'submitted', title: '2. HOD', desc: 'Department Review' },
-        { key: 'dean_review', title: '3. Dean', desc: 'School Endorsement' },
-        { key: 'accounts_review', title: '4. Accounts', desc: 'Budget Verification' },
-        { key: 'approved', title: '5. Director', desc: 'Sanction & Debit' },
-      ];
+      const canSubmit = !isDeleted && isOwner && (n.status === 'draft' || n.status === 'revision_required');
+      const canHodReview = !isDeleted && !isCentre && USER.role === 'hod' && USER.department_id === n.department_id &&
+        (n.status === 'pending_hod_review' || n.status === 'submitted' || n.status === 'under_review');
+      const canDeansOfficeVerify = !isDeleted && USER.role === 'deans_office' &&
+        n.status === 'pending_deans_office_verification';
+      const canAssociateDeanReview = !isDeleted && USER.role === 'associate_dean' &&
+        n.status === 'pending_associate_dean_approval';
+      const canDeanReview = !isDeleted && USER.role === 'dean' &&
+        (n.status === 'pending_dean_approval' || n.status === 'dean_review');
+      const canFinanceOfficeReview = !isDeleted && USER.role === 'finance' &&
+        (n.status === 'pending_finance_office_approval' || n.status === 'accounts_review' || n.status === 'budget_validation');
+      const canDirectorApprove = !isDeleted && USER.role === 'director' &&
+        (n.status === 'pending_director_approval' || n.status === 'pending_higher_approval');
+      const canFinanceHeadApprove = !isDeleted && USER.role === 'finance_head' &&
+        n.status === 'pending_finance_head_approval';
 
-      const stageOrder = ['draft', 'submitted', 'dean_review', 'accounts_review', 'pending_director_approval', 'approved'];
-      const currentIdx = stageOrder.indexOf(n.status);
+      // Stepper stages based on workflow type
+      const stages = isCentre
+        ? [
+            { key: 'draft', title: '1. Faculty', desc: 'Applied' },
+            { key: 'pending_deans_office_verification', title: "2. Dean's Office", desc: 'Verification' },
+            { key: 'pending_dean_approval', title: '3. Dean', desc: 'School Approval' },
+            { key: 'pending_finance_office_approval', title: '4. Finance Office', desc: 'Budget Review' },
+            { key: 'pending_director_approval', title: '5. Director', desc: 'Executive Sanction' },
+            { key: 'approved', title: '6. Finance Head', desc: 'Final Approval' },
+          ]
+        : isCseOrAdse
+        ? [
+            { key: 'draft', title: '1. Faculty', desc: 'Applied' },
+            { key: 'pending_hod_review', title: '2. HOD', desc: 'Dept Review' },
+            { key: 'pending_deans_office_verification', title: "3. Dean's Office", desc: 'Verification' },
+            { key: 'pending_associate_dean_approval', title: '4. Assoc Dean', desc: 'School Approval' },
+            { key: 'pending_finance_office_approval', title: '5. Finance Office', desc: 'Budget Review' },
+            { key: 'pending_director_approval', title: '6. Director', desc: 'Executive Sanction' },
+            { key: 'approved', title: '7. Finance Head', desc: 'Final Approval' },
+          ]
+        : [
+            { key: 'draft', title: '1. Faculty', desc: 'Applied' },
+            { key: 'pending_hod_review', title: '2. HOD', desc: 'Dept Review' },
+            { key: 'pending_deans_office_verification', title: "3. Dean's Office", desc: 'Verification' },
+            { key: 'pending_dean_approval', title: '4. Dean', desc: 'School Approval' },
+            { key: 'pending_finance_office_approval', title: '5. Finance Office', desc: 'Budget Review' },
+            { key: 'pending_director_approval', title: '6. Director', desc: 'Executive Sanction' },
+            { key: 'approved', title: '7. Finance Head', desc: 'Final Approval' },
+          ];
+
+      const stageOrder = isCentre
+        ? ['draft', 'pending_deans_office_verification', 'pending_dean_approval', 'pending_finance_office_approval', 'pending_director_approval', 'pending_finance_head_approval', 'approved']
+        : isCseOrAdse
+        ? ['draft', 'pending_hod_review', 'pending_deans_office_verification', 'pending_associate_dean_approval', 'pending_finance_office_approval', 'pending_director_approval', 'pending_finance_head_approval', 'approved']
+        : ['draft', 'pending_hod_review', 'pending_deans_office_verification', 'pending_dean_approval', 'pending_finance_office_approval', 'pending_director_approval', 'pending_finance_head_approval', 'approved'];
+
+      let normalizedStatus = n.status;
+      if (normalizedStatus === 'submitted' || normalizedStatus === 'under_review') normalizedStatus = 'pending_hod_review';
+      if (normalizedStatus === 'dean_review') normalizedStatus = isCseOrAdse ? 'pending_associate_dean_approval' : 'pending_dean_approval';
+      if (normalizedStatus === 'accounts_review' || normalizedStatus === 'budget_validation') normalizedStatus = 'pending_finance_office_approval';
+      if (normalizedStatus === 'pending_higher_approval') normalizedStatus = 'pending_director_approval';
+
+      const currentIdx = stageOrder.indexOf(normalizedStatus);
 
       let stepperHtml = `<div class="stepper">`;
       stages.forEach((st, idx) => {
         let stateClass = '';
         if (n.status === 'approved' || currentIdx > idx) stateClass = 'completed';
-        else if (currentIdx === idx || (idx === 4 && n.status === 'pending_director_approval')) stateClass = 'active';
+        else if (currentIdx === idx || (idx === stages.length - 1 && n.status === 'pending_finance_head_approval')) stateClass = 'active';
 
         stepperHtml += `
       <div class="step-node ${stateClass}">
@@ -5300,6 +5543,8 @@
 
     <div class="card" style="padding:16px;background:var(--section-bg);margin:16px 0;border-left:4px solid var(--accent)">
       <div class="row" style="gap:24px;flex-wrap:wrap;">
+        <div><span class="muted">NFA Type:</span> <strong>${(n.organization_type === 'centre_or_office' || (REF.departments.find(d => d.id === n.department_id)?.category === 'coe')) ? 'Centres or Offices' : 'Department'}</strong></div>
+        <div><span class="muted">Organization:</span> <strong style="color:var(--primary)">${escapeHtml(deptName(n.department_id))}</strong></div>
         <div><span class="muted">Main Category:</span> <strong>${escapeHtml(catName(n.budget_category_id))}</strong></div>
         ${n.budget_subcategory_name ? `<div><span class="muted">Subcategory:</span> <strong style="color:var(--primary)">${escapeHtml(n.budget_subcategory_name)}</strong></div>` : ''}
         <div><span class="muted">Proposer:</span> <strong>${escapeHtml(n.submitted_by_name || 'Faculty')}</strong> ${n.proposer_signature ? '<span class="badge b-approved" style="font-size:10px;margin-left:4px">Digitally Signed</span>' : ''}</div>
@@ -5449,38 +5694,59 @@
       <div class="row">
         <button class="secondary" onclick="downloadPdf('${n.id}')">Download Official PDF</button>
         ${canEdit ? `<button class="secondary" onclick="editNfaModal('${n.id}')">Edit Details</button>` : ''}
-        ${canDeleteDraft ? `<button class="danger" type="button" onclick="confirmDeleteDraft('${n.id}')">Delete Draft</button>` : ''}
+        ${canDeleteNfa ? `<button class="danger" type="button" onclick="confirmDeleteNfa('${n.id}', '${n.status}')">Delete NFA</button>` : ''}
         <button class="secondary" type="button" onclick="closeModal()">Close</button>
       </div>
       <div class="row">
   `;
 
       if (canSubmit) {
-        html += `<button class="green" onclick="submitNfa('${n.id}')">Submit to HOD</button>`;
+        const submitLabel = n.status === 'revision_required' ? 'Resubmit NFA' : (isCentre ? "Submit to Dean's Office" : 'Submit to HOD');
+        html += `<button class="green" onclick="submitNfa('${n.id}')">${submitLabel}</button>`;
       }
 
       if (canHodReview) {
         html += `
-      <button class="green" onclick="decideReview('${n.id}', 'approve', 'Recommend to Dean & Associate Dean')">Recommend to Dean</button>
-      <button class="amber" onclick="decideReview('${n.id}', 'revision_required')">Request Revision</button>
+      <button class="green" onclick="decideReview('${n.id}', 'approve', 'Endorse to Dean\\'s Office')">Endorse to Dean's Office</button>
+      <button class="amber" onclick="openReturnForCorrectionModal('${n.id}', '${escapeHtml(n.ref_no)}', '${escapeHtml(n.submitted_by_name || 'Faculty')}', 'Head of Department')">Return for Correction</button>
+      <button class="danger" onclick="decideReview('${n.id}', 'reject')">Reject</button>
+    `;
+      } else if (canDeansOfficeVerify) {
+        const verifyLabel = isCseOrAdse ? 'Verify & Forward to Associate Dean' : 'Verify & Forward to Dean';
+        html += `
+      <button class="green" onclick="decideReview('${n.id}', 'approve', '${verifyLabel}')">${verifyLabel}</button>
+      <button class="amber" onclick="openReturnForCorrectionModal('${n.id}', '${escapeHtml(n.ref_no)}', '${escapeHtml(n.submitted_by_name || 'Faculty')}', 'Dean\\'s Office')">Return for Correction</button>
+      <button class="danger" onclick="decideReview('${n.id}', 'reject')">Reject</button>
+    `;
+      } else if (canAssociateDeanReview) {
+        html += `
+      <button class="green" onclick="decideReview('${n.id}', 'approve', 'Approve & Forward to Finance Office')">Approve &amp; Forward to Finance</button>
+      <button class="amber" onclick="openReturnForCorrectionModal('${n.id}', '${escapeHtml(n.ref_no)}', '${escapeHtml(n.submitted_by_name || 'Faculty')}', 'Associate Dean')">Return for Correction</button>
       <button class="danger" onclick="decideReview('${n.id}', 'reject')">Reject</button>
     `;
       } else if (canDeanReview) {
         html += `
-      <button class="green" onclick="decideReview('${n.id}', 'approve', 'Endorse to Accounts Officer')">Endorse to Accounts</button>
-      <button class="amber" onclick="decideReview('${n.id}', 'revision_required')">Request Revision</button>
+      <button class="green" onclick="decideReview('${n.id}', 'approve', 'Approve & Forward to Finance Office')">Approve &amp; Forward to Finance</button>
+      <button class="amber" onclick="openReturnForCorrectionModal('${n.id}', '${escapeHtml(n.ref_no)}', '${escapeHtml(n.submitted_by_name || 'Faculty')}', 'Dean')">Return for Correction</button>
       <button class="danger" onclick="decideReview('${n.id}', 'reject')">Reject</button>
     `;
-      } else if (canAccountsReview) {
+      } else if (canFinanceOfficeReview) {
         html += `
-      <button class="green" onclick="decideReview('${n.id}', 'approve', 'Verify budget & forward to Director')">Verify & Forward to Director</button>
-      <button class="amber" onclick="decideReview('${n.id}', 'revision_required')">Request Revision</button>
+      <button class="green" onclick="decideReview('${n.id}', 'approve', 'Approve & Forward to Campus Director')">Approve &amp; Forward to Director</button>
+      <button class="amber" onclick="openReturnForCorrectionModal('${n.id}', '${escapeHtml(n.ref_no)}', '${escapeHtml(n.submitted_by_name || 'Faculty')}', 'Finance Office')">Return for Correction</button>
       <button class="danger" onclick="decideReview('${n.id}', 'reject')">Reject</button>
     `;
       } else if (canDirectorApprove) {
         html += `
-      <button class="green" style="font-size:13.5px;padding:11px 20px;" onclick="decideReview('${n.id}', 'approve', 'Sanction Proposal & Auto-Debit Department Budget')">Final Director Approval (Auto-Debit)</button>
-      <button class="danger" onclick="decideReview('${n.id}', 'reject')">Reject Proposal</button>
+      <button class="green" onclick="decideReview('${n.id}', 'approve', 'Approve & Forward to Chief Finance Officer (Head)')">Approve &amp; Forward to Finance Head</button>
+      <button class="amber" onclick="openReturnForCorrectionModal('${n.id}', '${escapeHtml(n.ref_no)}', '${escapeHtml(n.submitted_by_name || 'Faculty')}', 'Campus Director')">Return for Correction</button>
+      <button class="danger" onclick="decideReview('${n.id}', 'reject')">Reject</button>
+    `;
+      } else if (canFinanceHeadApprove) {
+        html += `
+      <button class="green" style="font-weight:700;font-size:13.5px;padding:10px 20px;" onclick="decideReview('${n.id}', 'approve', 'Grant Final Full Approval & Debit Department Budget')">Final Full Approval (Debit Budget)</button>
+      <button class="amber" onclick="openReturnForCorrectionModal('${n.id}', '${escapeHtml(n.ref_no)}', '${escapeHtml(n.submitted_by_name || 'Faculty')}', 'Chief Finance Officer (Head)')">Return for Correction</button>
+      <button class="danger" onclick="decideReview('${n.id}', 'reject')">Reject</button>
     `;
       }
 
@@ -5491,46 +5757,104 @@
     async function submitNfa(id) {
       try {
         await api(`/nfas/${id}/submit`, { method: 'POST' });
-        toast('NFA submitted to HOD!');
+        toast('NFA submitted successfully!');
         openNfa(id);
         if (currentTab === 'nfas') showTab('nfas');
       } catch (e) { toast(e.message); }
     }
 
-    function confirmDeleteDraft(nfaId) {
+    // Modal for Return for Correction (Replacing browser prompt)
+    function openReturnForCorrectionModal(nfaId, refNo, facultyName, reviewingAuthority) {
+      const existing = document.getElementById('returnForCorrectionModal');
+      if (existing) existing.remove();
+
+      const modal = document.createElement('div');
+      modal.id = 'returnForCorrectionModal';
+      modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.65);z-index:999999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px);';
+      modal.innerHTML = `
+        <div style="background:#ffffff;border-radius:12px;padding:24px 28px;max-width:520px;width:90%;box-shadow:0 25px 50px -12px rgba(0,0,0,0.35);border-top:5px solid #d97706;text-align:left;">
+          <h3 style="margin:0 0 14px;font-size:18px;font-weight:700;color:#0f172a;">Return NFA for Correction</h3>
+          <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:6px;padding:12px;font-size:13.5px;color:#92400e;margin-bottom:16px;">
+            <div><strong>NFA Reference:</strong> ${escapeHtml(refNo)}</div>
+            <div><strong>Faculty Name:</strong> ${escapeHtml(facultyName)}</div>
+            <div><strong>Reviewing Authority:</strong> ${escapeHtml(reviewingAuthority || USER.name)}</div>
+          </div>
+          <div style="margin-bottom:18px;">
+            <label style="display:block;font-size:13px;font-weight:600;color:#334155;margin-bottom:6px;">Mandatory Correction Reason <span style="color:#dc2626;">*</span></label>
+            <textarea id="correctionReasonInput" rows="4" placeholder="Detail the specific corrections, missing documents, or revisions required by the faculty..." style="width:100%;box-sizing:border-box;border:1px solid #cbd5e1;border-radius:6px;padding:10px;font-family:inherit;font-size:13.5px;"></textarea>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:12px;">
+            <button type="button" class="secondary" style="padding:9px 18px;font-size:13.5px;font-weight:600;" onclick="dismissReturnForCorrectionModal()">Cancel</button>
+            <button type="button" class="amber" style="padding:9px 18px;font-size:13.5px;font-weight:600;background:#d97706;color:#ffffff;" onclick="executeReturnForCorrection('${nfaId}')">Return NFA</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      document.getElementById('correctionReasonInput')?.focus();
+    }
+
+    function dismissReturnForCorrectionModal() {
+      const m = document.getElementById('returnForCorrectionModal');
+      if (m) m.remove();
+    }
+
+    async function executeReturnForCorrection(nfaId) {
+      const reason = document.getElementById('correctionReasonInput')?.value?.trim();
+      if (!reason) {
+        return alert('Please enter a mandatory correction reason before returning the NFA.');
+      }
+      dismissReturnForCorrectionModal();
+      try {
+        await api(`/nfas/${nfaId}/review`, {
+          method: 'POST',
+          body: { decision: 'revision_required', comments: reason }
+        });
+        toast('NFA returned for correction.');
+        openNfa(nfaId);
+        if (currentTab === 'inbox') showTab('inbox');
+        else if (currentTab === 'nfas') showTab('nfas');
+      } catch (err) {
+        toast(err.message || 'Failed to return NFA for correction');
+      }
+    }
+
+    function confirmDeleteNfa(nfaId, status) {
       const existing = document.getElementById('deleteDraftConfirmDialog');
       if (existing) existing.remove();
 
+      const isReturned = status === 'revision_required';
       const dialog = document.createElement('div');
       dialog.id = 'deleteDraftConfirmDialog';
       dialog.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.65);z-index:999999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px);';
       dialog.innerHTML = `
     <div style="background:#ffffff;border-radius:12px;padding:24px 28px;max-width:440px;width:90%;box-shadow:0 25px 50px -12px rgba(0,0,0,0.35);border-top:5px solid #dc2626;text-align:left;">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-        <h3 style="margin:0;font-size:18px;font-weight:700;color:#0f172a;">Delete Draft NFA</h3>
+        <h3 style="margin:0;font-size:18px;font-weight:700;color:#0f172a;">Delete NFA Proposal</h3>
       </div>
       <p style="margin:0 0 22px;font-size:14.5px;color:#334155;line-height:1.55;">
-        Are you sure you want to permanently delete this Draft NFA? This action cannot be undone.
+        ${isReturned 
+          ? 'Are you sure you want to permanently delete this Returned for Correction NFA? Any pending budget reservation will be released atomically.'
+          : 'Are you sure you want to delete this Draft NFA? This action cannot be undone.'}
       </p>
       <div style="display:flex;justify-content:flex-end;gap:12px;">
-        <button type="button" class="secondary" style="padding:9px 18px;font-size:13.5px;font-weight:600;" onclick="dismissDeleteDraftConfirmation()">Cancel</button>
-        <button type="button" class="danger" style="padding:9px 18px;font-size:13.5px;font-weight:600;" onclick="executeDeleteDraft('${nfaId}')">Delete Draft</button>
+        <button type="button" class="secondary" style="padding:9px 18px;font-size:13.5px;font-weight:600;" onclick="dismissDeleteNfaConfirmation()">Cancel</button>
+        <button type="button" class="danger" style="padding:9px 18px;font-size:13.5px;font-weight:600;" onclick="executeDeleteNfa('${nfaId}')">Delete NFA</button>
       </div>
     </div>
   `;
       document.body.appendChild(dialog);
     }
 
-    function dismissDeleteDraftConfirmation() {
+    function dismissDeleteNfaConfirmation() {
       const dialog = document.getElementById('deleteDraftConfirmDialog');
       if (dialog) dialog.remove();
     }
 
-    async function executeDeleteDraft(nfaId) {
-      dismissDeleteDraftConfirmation();
+    async function executeDeleteNfa(nfaId) {
+      dismissDeleteNfaConfirmation();
       try {
         await api(`/nfas/${nfaId}`, { method: 'DELETE' });
-        toast('Draft NFA permanently deleted successfully.');
+        toast('NFA deleted successfully.');
         closeModal();
         if (currentTab === 'nfas') {
           showTab('nfas');
@@ -5538,15 +5862,15 @@
           showTab(currentTab || 'home');
         }
       } catch (err) {
-        toast(err.message || 'Failed to delete draft NFA');
+        toast(err.message || 'Failed to delete NFA');
       }
     }
 
     async function decideReview(id, decision, promptTitle) {
       let comments = '';
-      if (decision !== 'approve') {
-        comments = prompt(`Enter comments or justification for ${decision}:`) || '';
-        if (!comments) return toast('Comments are required for this action');
+      if (decision === 'reject') {
+        comments = prompt('Mandatory rejection reason:') || '';
+        if (!comments || !comments.trim()) return toast('Rejection reason is mandatory.');
       } else if (promptTitle) {
         if (!confirm(`${promptTitle}?`)) return;
       }
@@ -5556,12 +5880,75 @@
           method: 'POST',
           body: { decision, comments }
         });
-        toast(decision === 'approve' ? 'Decision recorded successfully & budget updated!' : 'Decision submitted');
+        toast(decision === 'approve' ? 'Approval decision recorded successfully.' : 'Decision recorded.');
         openNfa(id);
         if (currentTab === 'inbox') showTab('inbox');
         else if (currentTab === 'nfas') showTab('nfas');
         else if (currentTab === 'dashboard') showTab('dashboard');
       } catch (e) { toast(e.message); }
+    }
+
+    // Modal viewer for Dev Mock Email Notification Logs
+    async function openMockEmailLogsModal() {
+      try {
+        const emails = await api('/nfas/dev/mock-emails');
+        let html = `
+          <button class="close-btn" onclick="closeModal()">✕</button>
+          <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <div>
+              <h2 style="margin:0;font-size:18px;">Mock Email Notification Audit Log (${emails.length})</h2>
+              <div class="card-sub">Simulated institutional outbox (Strictly Mock Delivery — Zero Real Emails Sent)</div>
+            </div>
+            <button class="secondary" onclick="clearMockEmailLogs()">Clear Mock Log</button>
+          </div>
+          <div class="table-wrap" style="max-height:500px;overflow-y:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>NFA Ref</th>
+                  <th>Event</th>
+                  <th>Recipient</th>
+                  <th>Subject</th>
+                  <th>Attachment</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+        `;
+        if (emails.length === 0) {
+          html += `<tr><td colspan="7" class="muted" style="text-align:center;padding:30px;">No mock emails sent yet. Actions like submit, review, and return will record here.</td></tr>`;
+        } else {
+          [...emails].reverse().forEach(m => {
+            html += `
+              <tr>
+                <td style="font-size:11.5px;white-space:nowrap;">${new Date(m.created_at).toLocaleString()}</td>
+                <td><strong>${escapeHtml(m.nfa_ref_no)}</strong></td>
+                <td><span class="role-pill" style="font-size:11px;">${escapeHtml(m.event)}</span></td>
+                <td><strong>${escapeHtml(m.recipient_name)}</strong><div class="muted" style="font-size:11px;">&lt;${escapeHtml(m.recipient_email)}&gt;</div></td>
+                <td><div style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(m.body)}">${escapeHtml(m.subject)}</div></td>
+                <td>${m.has_pdf_attachment ? `<span class="badge b-approved" style="font-size:10px;">${escapeHtml(m.attachment_name || 'PDF Attached')}</span>` : '<span class="muted" style="font-size:11px;">None</span>'}</td>
+                <td><span class="badge ${m.status === 'mock_delivered' ? 'b-approved' : 'b-rejected'}">${escapeHtml(m.status)}</span></td>
+              </tr>
+            `;
+          });
+        }
+        html += `</tbody></table></div>`;
+        openModal(html);
+      } catch (e) {
+        toast('Failed to load mock emails: ' + e.message);
+      }
+    }
+
+    async function clearMockEmailLogs() {
+      if (!confirm('Clear all recorded mock email logs?')) return;
+      try {
+        await api('/nfas/dev/mock-emails/clear', { method: 'POST' });
+        toast('Mock email log cleared.');
+        openMockEmailLogsModal();
+      } catch (e) {
+        toast(e.message);
+      }
     }
 
     // ---------------- EDIT NFA MODAL ----------------
@@ -5609,10 +5996,17 @@
 
     <div class="row" style="margin-top:10px;">
       <div style="flex:1">
-        <label class="field-label">Department</label>
-        <select id="editNfaDept">
-          ${renderDeptSelectOptions(n.department_id, false)}
-        </select>
+        <label class="field-label">NFA Type</label>
+        <div style="padding:9px 12px;background:#F8FAFC;border:1px solid #CBD5E1;border-radius:6px;font-weight:600;font-size:13px;color:#1E293B;">
+          ${(n.organization_type === 'centre_or_office' || (REF.departments.find(d => d.id === n.department_id)?.category === 'coe')) ? 'Centres or Offices' : 'Department'}
+        </div>
+      </div>
+      <div style="flex:1">
+        <label class="field-label">Organization</label>
+        <div style="padding:9px 12px;background:#F8FAFC;border:1px solid #CBD5E1;border-radius:6px;font-weight:600;font-size:13px;color:#1E293B;">
+          ${escapeHtml(deptName(n.department_id))}
+        </div>
+        <input type="hidden" id="editNfaDept" value="${n.department_id}" />
       </div>
       <div style="flex:1">
         <label class="field-label">Academic / Financial Year</label>
@@ -5825,7 +6219,8 @@
     function onEditCategorySelect(catId) {
       const subSelect = document.getElementById('editNfaSubcat');
       if (!subSelect) return;
-      const subs = (REF.subcategories || []).filter(s => s.budget_category_id === catId);
+      const unitId = getSelectedOrgUnitId();
+      const subs = (REF.subcategories || []).filter(s => s.budget_category_id === catId && (!unitId || s.department_id === unitId || !s.department_id));
       subSelect.innerHTML = `<option value="">— General Category Allocation —</option>` +
         subs.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('');
     }
@@ -5900,7 +6295,7 @@
         const key = r.dataset.predefinedKey || undefined;
         const isPredefined = Boolean(key);
         const dist = r.dataset.distanceKm || undefined;
-        const carryBack = r.dataset.carryBack || undefined;
+        const carryBack = r.dataset.carryBag || r.dataset.carryBack || undefined;
         const isSampling = r.dataset.sampling === 'true';
 
         return {
@@ -6148,7 +6543,7 @@
             <table style="width:100%;border-collapse:collapse;min-width:650px;">
               <thead>
                 <tr style="background:#f1f4f9;border-bottom:2px solid var(--border);">
-                  <th style="text-align:left;padding:10px 14px;font-size:12px;">Department / Centre of Excellence</th>
+                  <th style="text-align:left;padding:10px 14px;font-size:12px;">Department / Centres or Offices</th>
                   <th style="text-align:right;padding:10px 14px;font-size:12px;">Allocated</th>
                   <th style="text-align:right;padding:10px 14px;font-size:12px;">Approved</th>
                   <th style="text-align:right;padding:10px 14px;font-size:12px;">Pending / Reserved</th>
@@ -6274,6 +6669,7 @@
             <table>
               <thead>
                 <tr>
+                  <th style="width:65px;text-align:center;">SL. NO.</th>
                   <th>Subcategory Item</th>
                   <th style="text-align:right;">Allocated Budget</th>
                   <th style="text-align:right;">Approved &amp; Debited</th>
@@ -6286,6 +6682,7 @@
               <tbody>
                 ${subcats.length > 0 ? subcats.map(sub => `
                   <tr>
+                    <td style="text-align:center;font-weight:600;color:var(--text-muted);">${sub.sl_no !== undefined && sub.sl_no !== null && sub.sl_no !== '' ? escapeHtml(String(sub.sl_no)) : (idx + 1)}</td>
                     <td><strong>${escapeHtml(sub.name || 'Particulars')}</strong></td>
                     <td style="text-align:right;" class="financial-amount">${inr(sub.allocated_amount)}</td>
                     <td style="text-align:right;color:var(--success);" class="financial-amount">${inr(sub.approved_amount)}</td>
@@ -6303,7 +6700,7 @@
                       </td>
                     ` : ''}
                   </tr>
-                `).join('') : `<tr><td colspan="${isAdmin ? 7 : 6}" class="muted">No specific subcategories registered.</td></tr>`}
+                `).join('') : `<tr><td colspan="${isAdmin ? 8 : 7}" class="muted">No specific subcategories registered.</td></tr>`}
                 ${(() => {
             const subSumAlloc = subcats.reduce((sum, s) => sum + (s.allocated_amount || 0), 0);
             const subSumAppr = subcats.reduce((sum, s) => sum + (s.approved_amount || 0), 0);
@@ -6314,6 +6711,7 @@
             if (unallocatedAppr > 0 || unallocatedPend > 0) {
               return `
                       <tr style="background:#fafbfc;font-style:italic;">
+                        <td style="text-align:center;color:var(--text-muted);">—</td>
                         <td><strong>Direct Category Proposals (General)</strong></td>
                         <td style="text-align:right;" class="financial-amount">${unallocatedAlloc > 0 ? inr(unallocatedAlloc) : '—'}</td>
                         <td style="text-align:right;color:var(--success);" class="financial-amount">${inr(unallocatedAppr)}</td>
@@ -6329,7 +6727,7 @@
               </tbody>
               <tfoot>
                 <tr style="font-weight:700;background:#f8fafc;border-top:2px solid var(--border);">
-                  <td>Category Total</td>
+                  <td colspan="2">Category Total</td>
                   <td style="text-align:right;" class="financial-amount">${inr(line.allocated_amount)}</td>
                   <td style="text-align:right;color:var(--success);" class="financial-amount">${inr(line.approved_amount)}</td>
                   <td style="text-align:right;color:var(--warning);" class="financial-amount">${inr(line.pending_amount)}</td>
@@ -6674,7 +7072,36 @@
         <button class="danger" onclick="openClearBudgetModal()">Clear Previous Year / Budget Data</button>
         <button class="secondary" onclick="downloadBudgetTemplate()">Download Blank Template (.xlsx)</button>
         <button class="secondary" onclick="exportBudgetReport('')">Export Entire Master Workbook</button>
+        <button class="primary" style="background:#4338ca;" onclick="openMockEmailLogsModal()">View Mock Email Logs (Audit)</button>
       </div>
+    </div>
+
+    <!-- Email Notification & Delivery Testing (Super Admin Development Only) -->
+    <div class="card" id="emailTestingCard" style="border: 1px solid #c7d2fe; background: #ffffff;">
+      <div class="card-header" style="margin-bottom: 12px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:36px;height:36px;border-radius:8px;background:#e0e7ff;color:#4338ca;display:flex;align-items:center;justify-content:center;font-size:18px;">✉️</div>
+          <div>
+            <h2 class="card-title" style="margin:0;font-size:16px;">Email Notification &amp; Delivery Testing (Resend)</h2>
+            <div class="card-sub" style="font-size:12.5px;color:#64748b;">Deliberate Resend integration testing for Super Admin in development mode. Institutional NFA workflows remain mock-only.</div>
+          </div>
+        </div>
+        <div>
+          <span class="badge" style="background:#e0e7ff;color:#3730a3;font-weight:600;font-size:11px;">Resend Test Gateway</span>
+        </div>
+      </div>
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:14px;margin-bottom:14px;font-size:13px;">
+        <div class="row" style="gap:24px;flex-wrap:wrap;">
+          <div><span class="muted">Sender:</span> <strong id="emailTestingSender" style="font-family:monospace;color:#1e293b;">onboarding@resend.dev</strong></div>
+          <div><span class="muted">Configured Recipient:</span> <strong id="emailTestingRecipient" style="font-family:monospace;color:#1e293b;">Loading...</strong></div>
+          <div><span class="muted">Workflow Notifications:</span> <span class="badge" style="background:#f1f5f9;color:#475569;font-weight:600;">EMAIL_PROVIDER=mock (Active)</span></div>
+        </div>
+      </div>
+      <div class="row" style="gap:12px;align-items:center;">
+        <button id="btnSendTestEmail" class="btn btn-primary" style="background:#2563eb;padding:8px 18px;font-weight:600;" onclick="triggerResendTestEmail()">Send Test Email</button>
+        <span id="emailTestingStatus" style="font-size:13px;color:#64748b;"></span>
+      </div>
+      <div id="emailTestingResultBox" style="display:none;margin-top:14px;padding:12px 14px;border-radius:6px;font-size:13px;"></div>
     </div>
 
     <div class="card">
@@ -6779,6 +7206,83 @@
   `;
       main.innerHTML = html;
       renderAdminUserRows(users);
+      initEmailTestingStatus();
+    }
+
+    async function initEmailTestingStatus() {
+      const recipientEl = document.getElementById('emailTestingRecipient');
+      const senderEl = document.getElementById('emailTestingSender');
+      if (!recipientEl) return;
+      try {
+        const res = await api('/admin/email-testing/status');
+        if (senderEl) senderEl.textContent = res.fromEmail || 'onboarding@resend.dev';
+        if (recipientEl) {
+          if (res.hasTestRecipient) {
+            recipientEl.textContent = res.testRecipientMasked;
+            recipientEl.style.color = '#15803d';
+          } else {
+            recipientEl.textContent = 'RESEND_TEST_RECIPIENT not set in .env';
+            recipientEl.style.color = '#b91c1c';
+          }
+        }
+      } catch (err) {
+        if (recipientEl) recipientEl.textContent = 'Unavailable';
+      }
+    }
+
+    async function triggerResendTestEmail() {
+      const btn = document.getElementById('btnSendTestEmail');
+      const statusEl = document.getElementById('emailTestingStatus');
+      const resultBox = document.getElementById('emailTestingResultBox');
+      if (!btn) return;
+
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+      if (statusEl) statusEl.textContent = 'Contacting Resend API...';
+      if (resultBox) {
+        resultBox.style.display = 'none';
+        resultBox.innerHTML = '';
+      }
+
+      try {
+        const res = await api('/admin/email-testing/send', { method: 'POST' });
+        btn.disabled = false;
+        btn.textContent = 'Send Test Email';
+        if (statusEl) statusEl.textContent = '';
+        if (resultBox) {
+          resultBox.style.display = 'block';
+          resultBox.style.background = '#f0fdf4';
+          resultBox.style.border = '1px solid #bbf7d0';
+          resultBox.style.color = '#166534';
+          resultBox.innerHTML = `
+            <div style="font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:6px;">
+              <span>✓</span> <span>Request Accepted by Resend API</span>
+            </div>
+            <div style="font-size:12.5px;color:#14532d;line-height:1.5;">
+              <div>• <strong>Status:</strong> ${escapeHtml(res.status || 'Accepted by Resend')}</div>
+              <div>• <strong>Message ID:</strong> <code style="background:#dcfce7;padding:1px 5px;border-radius:3px;">${escapeHtml(res.messageId || 'N/A')}</code></div>
+              <div>• <strong>Delivered To:</strong> ${escapeHtml(res.recipient || 'Configured Recipient')}</div>
+              <div style="margin-top:6px;font-style:italic;color:#166534;">${escapeHtml(res.note || '')}</div>
+            </div>
+          `;
+        }
+        toast('Test email accepted by Resend!');
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = 'Send Test Email';
+        if (statusEl) statusEl.textContent = '';
+        if (resultBox) {
+          resultBox.style.display = 'block';
+          resultBox.style.background = '#fef2f2';
+          resultBox.style.border = '1px solid #fecaca';
+          resultBox.style.color = '#991b1b';
+          resultBox.innerHTML = `
+            <div style="font-weight:700;margin-bottom:4px;">✕ Delivery Request Failed</div>
+            <div style="font-size:12.5px;line-height:1.4;">${escapeHtml(err.message || 'Error communicating with Resend')}</div>
+          `;
+        }
+        toast(err.message || 'Failed to send test email');
+      }
     }
 
     let adminUsersListCache = [];
@@ -6810,12 +7314,15 @@
         <td class="col-name"><strong style="display:inline-block;line-height:1.35;word-break:normal;overflow-wrap:break-word;">${escapeHtml(u.name)}</strong></td>
         <td class="col-email">${escapeHtml(u.email)}</td>
         <td class="col-role"><span class="role-pill" style="color:var(--dark-blue);background:var(--light-blue);border:1px solid #BFDBFE;">${String(u.role || '').replace('_', ' ')}</span></td>
-        <td class="col-dept">${u.department_id ? escapeHtml(deptName(u.department_id)) : '<span style="color:var(--text-muted);">Institution-wide</span>'}</td>
+        <td class="col-dept">
+          <div>${u.department_id ? escapeHtml(deptName(u.department_id)) : '<span style="color:var(--text-muted);">Institution-wide</span>'}</div>
+          ${u.authorized_centre_ids && u.authorized_centre_ids.length > 0 ? `<div style="margin-top:3px;"><span class="badge" style="background:#e0e7ff;color:#3730a3;font-size:10.5px;padding:2px 6px;">+ ${u.authorized_centre_ids.length} Centre${u.authorized_centre_ids.length > 1 ? 's' : ''}</span></div>` : ''}
+        </td>
         <td class="col-status">${statusBadge}</td>
         <td class="col-pwd">${firstLoginBadge}</td>
         <td class="col-actions">
           <div class="admin-action-group">
-            <button class="secondary admin-action-btn" onclick="openEditUserModal('${u.id}', '${escapeHtml(u.name)}', '${escapeHtml(u.email)}', '${u.role}', '${u.department_id || ''}')" title="Edit Name, Role, or Department">Edit</button>
+            <button class="secondary admin-action-btn" onclick="openEditUserModal('${u.id}', '${escapeHtml(u.name)}', '${escapeHtml(u.email)}', '${u.role}', '${u.department_id || ''}', ${escapeHtml(JSON.stringify(u.authorized_centre_ids || []))})" title="Edit Name, Role, or Department">Edit</button>
             <button class="secondary admin-action-btn" onclick="adminResetUserPassword('${u.id}', '${escapeHtml(u.name)}', '${escapeHtml(u.email)}')" title="Generate new unique temporary password">Reset Pwd</button>
             <button class="${isActive ? 'secondary' : 'primary'} admin-action-btn" onclick="adminToggleUserActive('${u.id}', '${escapeHtml(u.name)}', ${isActive})" title="${isActive ? 'Deactivate account' : 'Activate account'}">
               ${isActive ? 'Deactivate' : 'Activate'}
@@ -6954,7 +7461,7 @@
       });
     }
 
-    function openEditUserModal(id, name, email, role, deptId) {
+    function openEditUserModal(id, name, email, role, deptId, authorizedCentres) {
       const modal = document.getElementById('modalEditUser');
       if (!modal) return;
       document.getElementById('editUserId').value = id;
@@ -6964,7 +7471,25 @@
 
       const deptSelect = document.getElementById('editUserDept');
       deptSelect.innerHTML = `<option value="">-- Institution-wide (No Dept) --</option>` +
-        (REF.departments || []).map(d => `<option value="${d.id}" ${d.id === deptId ? 'selected' : ''}>${escapeHtml(d.name)} (${d.code})</option>`).join('');
+        (REF.departments || []).filter(d => d.category !== 'coe' && !d.code.startsWith('COE-')).map(d => `<option value="${d.id}" ${d.id === deptId ? 'selected' : ''}>${escapeHtml(d.name)} (${d.code})</option>`).join('');
+
+      let authCentresList = [];
+      if (Array.isArray(authorizedCentres)) {
+        authCentresList = authorizedCentres;
+      } else if (typeof authorizedCentres === 'string' && authorizedCentres.trim()) {
+        try { authCentresList = JSON.parse(authorizedCentres); } catch (e) { authCentresList = []; }
+      }
+
+      const centresWrap = document.getElementById('editUserCentresWrap');
+      if (centresWrap) {
+        const coes = (REF.departments || []).filter(d => d.is_active && (d.category === 'coe' || d.code.startsWith('COE-')));
+        centresWrap.innerHTML = coes.map(c => `
+          <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;padding:2px 0;">
+            <input type="checkbox" name="editUserCentres" value="${c.id}" ${authCentresList.includes(c.id) ? 'checked' : ''} />
+            <span>${escapeHtml(c.name)} (${c.code})</span>
+          </label>
+        `).join('') || '<div style="font-size:12px;color:var(--text-muted);">No Centres or Offices found.</div>';
+      }
 
       onEditUserRoleChange();
       const errEl = document.getElementById('editUserErr');
@@ -6993,6 +7518,7 @@
       const email = (document.getElementById('editUserEmail').value || '').trim();
       const role = document.getElementById('editUserRole').value;
       const department_id = document.getElementById('editUserDept').value || null;
+      const authorized_centre_ids = [...document.querySelectorAll('input[name="editUserCentres"]:checked')].map(cb => cb.value);
       const errEl = document.getElementById('editUserErr');
       const btn = document.getElementById('btnSubmitEditUser');
 
@@ -7002,7 +7528,7 @@
         if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
         await api(`/admin/users/${id}`, {
           method: 'PUT',
-          body: { name, email, role, department_id }
+          body: { name, email, role, department_id, authorized_centre_ids }
         });
         closeEditUserModal();
         toast('User updated successfully');

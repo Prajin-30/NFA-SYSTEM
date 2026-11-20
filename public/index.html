@@ -4189,9 +4189,9 @@
               </tr>
             </thead>
             <tbody>
-              ${subcats.length > 0 ? subcats.map(sub => `
+              ${subcats.length > 0 ? subcats.map((sub, sIdx) => `
                 <tr>
-                  <td style="text-align:center;font-weight:600;color:var(--text-muted);">${sub.sl_no !== undefined && sub.sl_no !== null && sub.sl_no !== '' ? escapeHtml(String(sub.sl_no)) : (idx + 1)}</td>
+                  <td style="text-align:center;font-weight:600;color:var(--text-muted);">${sub.sl_no !== undefined && sub.sl_no !== null && sub.sl_no !== '' ? escapeHtml(String(sub.sl_no)) : (sIdx + 1)}</td>
                   <td><strong>${escapeHtml(sub.name || 'Particulars')}</strong></td>
                   <td class="financial-amount">${inr(sub.allocated_amount)}</td>
                   <td style="color:var(--success)" class="financial-amount">${inr(sub.approved_amount)}</td>
@@ -8283,9 +8283,9 @@
                 </tr>
               </thead>
               <tbody>
-                ${subcats.length > 0 ? subcats.map(sub => `
+                ${subcats.length > 0 ? subcats.map((sub, sIdx) => `
                   <tr>
-                    <td style="text-align:center;font-weight:600;color:var(--text-muted);">${sub.sl_no !== undefined && sub.sl_no !== null && sub.sl_no !== '' ? escapeHtml(String(sub.sl_no)) : (idx + 1)}</td>
+                    <td style="text-align:center;font-weight:600;color:var(--text-muted);">${sub.sl_no !== undefined && sub.sl_no !== null && sub.sl_no !== '' ? escapeHtml(String(sub.sl_no)) : (sIdx + 1)}</td>
                     <td><strong>${escapeHtml(sub.name || 'Particulars')}</strong></td>
                     <td style="text-align:right;" class="financial-amount">${inr(sub.allocated_amount)}</td>
                     <td style="text-align:right;color:var(--success);" class="financial-amount">${inr(sub.approved_amount)}</td>

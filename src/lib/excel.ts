@@ -408,7 +408,14 @@ export async function analyzeMasterBudgetWorkbook(
             headerRowIdx = r;
           }
         }
-        if (val.includes('sl no') || val === 'sl' || val === 'sl.') {
+        const normVal = val.replace(/[\._\-]/g, ' ').replace(/\s+/g, ' ').trim();
+        if (
+          normVal === 'sl no' || normVal === 's no' || normVal === 'sr no' ||
+          normVal === 'sno' || normVal === 'sl' || normVal === 'sr' ||
+          normVal === 'serial no' || normVal === 'serial number' || normVal === 'serial' ||
+          normVal === 'item no' || normVal.startsWith('sl no') || normVal.startsWith('s no') ||
+          normVal.startsWith('sr no') || normVal.startsWith('serial')
+        ) {
           if (slCol === -1) slCol = col;
         }
         if (val.includes('main category') || val === 'category' || val.includes('budget head')) catCol = col;
@@ -447,6 +454,7 @@ export async function analyzeMasterBudgetWorkbook(
     let sheetExtractedTotal = 0;
     let sheetItemsCount = 0;
     const sheetCategories = new Set<string>();
+    const seenSlNosInSheet = new Map<string | number, number>();
 
     let pendingParentItem: { name: string; row: number; sl_no?: number | string } | null = null;
 
@@ -458,6 +466,15 @@ export async function analyzeMasterBudgetWorkbook(
       slClean?: number | string
     ) => {
       const normalizedName = normalizeSubcategoryName(name);
+
+      // Track duplicate serial numbers in source sheet and report them in warnings
+      if (slClean !== undefined && slClean !== null && slClean !== '') {
+        const count = (seenSlNosInSheet.get(slClean) || 0) + 1;
+        seenSlNosInSheet.set(slClean, count);
+        if (count === 2) {
+          warnings.push(`Worksheet '${sName}': Duplicate serial number '${slClean}' detected in source Excel sheet. Preserving original source values without renumbering.`);
+        }
+      }
 
       // Tabular template override if explicit Category column exists
       let finalCatName = currentCategory;
@@ -486,10 +503,11 @@ export async function analyzeMasterBudgetWorkbook(
       const catData = categoriesMap.get(finalCatName)!;
       catData.allocated_amount += amt;
       catData.subcategories.push({
-        sl_no: slClean !== undefined ? slClean : (catData.subcategories.length + 1),
+        sl_no: slClean !== undefined ? slClean : undefined,
         name: finalItemName,
         allocated_amount: amt,
         cell_address: cellAddr,
+        sheet_name: sName,
         row: rowIdx,
         col: amountCol,
       });
@@ -848,20 +866,23 @@ export async function applyMasterBudgetImport(
 
     let categorySum = 0;
     for (const subPreview of catPreview.subcategories) {
+      // Match by exact name or normalized name. NEVER match by sl_no alone (which causes cross-sheet or duplicate sl_no collisions).
       let subcat = db.budget_subcategories.find(
         (s) => s.department_id === dept!.id && s.budget_category_id === cat!.id && (
           s.name.toLowerCase() === subPreview.name.toLowerCase() ||
-          normalizeSubcategoryName(s.name).toLowerCase() === subPreview.name.toLowerCase() ||
-          (subPreview.sl_no !== undefined && s.sl_no === subPreview.sl_no)
+          normalizeSubcategoryName(s.name).toLowerCase() === subPreview.name.toLowerCase()
         )
       );
 
+      const resolvedSheetName = subPreview.sheet_name || (catPreview.budget_type_name === 'CAPEX' ? 'CAPEX' : catPreview.budget_type_name === 'Revenue / Earnings' ? 'Revenue or Earnings' : 'Revenue Expenditures');
+
       const cellMap = {
-        sheet_name: catPreview.budget_type_name === 'CAPEX' ? 'CAPEX' : catPreview.budget_type_name === 'Revenue / Earnings' ? 'Revenue or Earnings' : 'Revenue Expenditures',
+        sheet_name: resolvedSheetName,
         cell_address: subPreview.cell_address,
         row: subPreview.row,
         col: subPreview.col,
         original_value: subPreview.allocated_amount,
+        sl_no: subPreview.sl_no,
       };
 
       if (!subcat) {
@@ -874,7 +895,7 @@ export async function applyMasterBudgetImport(
           approved_amount: 0,
           pending_amount: 0,
           cell_mapping: cellMap,
-          sl_no: subPreview.sl_no,
+          sl_no: subPreview.sl_no !== undefined ? subPreview.sl_no : undefined,
         };
         db.budget_subcategories.push(subcat);
       } else {

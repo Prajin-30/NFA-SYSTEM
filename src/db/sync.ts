@@ -37,6 +37,7 @@ export async function loadAllFromPostgres(client: pg.PoolClient): Promise<DB> {
     })) as any,
     budget_subcategories: subcatRes.rows.map((s) => ({
       ...s,
+      sl_no: s.sl_no !== undefined && s.sl_no !== null ? s.sl_no : s.cell_mapping?.sl_no,
       allocated_amount: Number(s.allocated_amount) || 0,
       approved_amount: Number(s.approved_amount) || 0,
       pending_amount: Number(s.pending_amount) || 0,
@@ -93,6 +94,68 @@ export async function loadAllFromPostgres(client: pg.PoolClient): Promise<DB> {
 }
 
 export async function persistDiffToPostgres(client: pg.PoolClient, before: DB, after: DB): Promise<void> {
+  // 0a. Departments
+  const beforeDepts = new Map((before.departments || []).map((d) => [d.id, JSON.stringify(d)]));
+  for (const d of after.departments || []) {
+    const prev = beforeDepts.get(d.id);
+    if (!prev || prev !== JSON.stringify(d)) {
+      await client.query(`
+        INSERT INTO departments (id, name, code, school, category, department_type, is_active)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        ON CONFLICT (id) DO UPDATE SET
+          name = EXCLUDED.name,
+          code = EXCLUDED.code,
+          school = EXCLUDED.school,
+          category = EXCLUDED.category,
+          department_type = EXCLUDED.department_type,
+          is_active = EXCLUDED.is_active;
+      `, [d.id, d.name, d.code, d.school || 'SoET', d.category || 'academic', d.department_type || 'academic', d.is_active ?? true]);
+    }
+  }
+
+  // 0b. Financial Years
+  const beforeFys = new Map((before.financial_years || []).map((f) => [f.id, JSON.stringify(f)]));
+  for (const f of after.financial_years || []) {
+    const prev = beforeFys.get(f.id);
+    if (!prev || prev !== JSON.stringify(f)) {
+      await client.query(`
+        INSERT INTO financial_years (id, label, is_active)
+        VALUES ($1, $2, $3)
+        ON CONFLICT (id) DO UPDATE SET
+          label = EXCLUDED.label,
+          is_active = EXCLUDED.is_active;
+      `, [f.id, f.label, f.is_active ?? false]);
+    }
+  }
+
+  // 0c. Budget Types
+  const beforeTypes = new Map((before.budget_types || []).map((t) => [t.id, JSON.stringify(t)]));
+  for (const t of after.budget_types || []) {
+    const prev = beforeTypes.get(t.id);
+    if (!prev || prev !== JSON.stringify(t)) {
+      await client.query(`
+        INSERT INTO budget_types (id, name)
+        VALUES ($1, $2)
+        ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name;
+      `, [t.id, t.name]);
+    }
+  }
+
+  // 0d. Budget Categories
+  const beforeCategories = new Map((before.budget_categories || []).map((c) => [c.id, JSON.stringify(c)]));
+  for (const c of after.budget_categories || []) {
+    const prev = beforeCategories.get(c.id);
+    if (!prev || prev !== JSON.stringify(c)) {
+      await client.query(`
+        INSERT INTO budget_categories (id, budget_type_id, name)
+        VALUES ($1, $2, $3)
+        ON CONFLICT (id) DO UPDATE SET
+          budget_type_id = EXCLUDED.budget_type_id,
+          name = EXCLUDED.name;
+      `, [c.id, c.budget_type_id, c.name]);
+    }
+  }
+
   // 1. Department Budgets
   const beforeBudgets = new Map((before.department_budgets || []).map((b) => [b.id, JSON.stringify(b)]));
   for (const b of after.department_budgets || []) {
@@ -121,18 +184,21 @@ export async function persistDiffToPostgres(client: pg.PoolClient, before: DB, a
   for (const s of after.budget_subcategories || []) {
     const prev = beforeSubcats.get(s.id);
     if (!prev || prev !== JSON.stringify(s)) {
+      const slValue = s.sl_no !== undefined && s.sl_no !== null ? String(s.sl_no) : (s.cell_mapping?.sl_no ? String(s.cell_mapping.sl_no) : null);
       await client.query(`
-        INSERT INTO budget_subcategories (id, budget_category_id, department_id, name, allocated_amount, approved_amount, pending_amount, cell_mapping)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        INSERT INTO budget_subcategories (id, budget_category_id, department_id, name, allocated_amount, approved_amount, pending_amount, cell_mapping, sl_no)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         ON CONFLICT (id) DO UPDATE SET
           allocated_amount = EXCLUDED.allocated_amount,
           approved_amount = EXCLUDED.approved_amount,
           pending_amount = EXCLUDED.pending_amount,
-          cell_mapping = EXCLUDED.cell_mapping;
+          cell_mapping = EXCLUDED.cell_mapping,
+          sl_no = EXCLUDED.sl_no;
       `, [
         s.id, s.budget_category_id, s.department_id || null, s.name,
         Number(s.allocated_amount) || 0, Number(s.approved_amount) || 0,
-        Number(s.pending_amount) || 0, s.cell_mapping ? JSON.stringify(s.cell_mapping) : null
+        Number(s.pending_amount) || 0, s.cell_mapping ? JSON.stringify(s.cell_mapping) : null,
+        slValue
       ]);
     }
   }

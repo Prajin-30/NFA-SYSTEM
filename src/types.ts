@@ -51,6 +51,7 @@ export interface Department {
   name: string;
   code: string;
   category?: 'academic' | 'coe';
+  department_type?: 'academic' | 'centre';
   school?: string | null;
   is_active?: boolean;
   hod_name?: string;
@@ -84,6 +85,7 @@ export interface ExcelCellMapping {
   row: number;
   col: number;
   original_value?: number;
+  sl_no?: number | string;
 }
 
 export interface BudgetSubcategory {
@@ -332,6 +334,7 @@ export interface MasterBudgetSubcategoryPreview {
   name: string;
   allocated_amount: number;
   cell_address: string;
+  sheet_name?: string;
   row: number;
   col: number;
 }

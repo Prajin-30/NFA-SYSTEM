@@ -110,7 +110,7 @@ export function getDbPool(): pg.Pool {
   poolInstance = new Pool({
     connectionString: dbUrl || undefined,
     ssl: ssl ? (ssl as any) : undefined,
-    max: connInfo.poolerMode === 'transaction' ? 10 : 20,
+    max: 10,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 10000,
   });

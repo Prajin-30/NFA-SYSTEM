@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import type { Request, Response, NextFunction } from 'express';
 import type { Role } from '../types.js';
 import { store } from '../store.js';
@@ -6,6 +7,89 @@ import { query } from '../db/pool.js';
 import { getSystemMode, isDemoAuthenticationAllowed } from '../services/supabaseAuth.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'change_this_secret_in_production';
+
+// In-memory set of revoked JWT tokens and token hashes for low-latency lookup
+export const revokedTokenSet = new Set<string>();
+
+function hashToken(token: string): string {
+  return crypto.createHash('sha256').update(token.trim()).digest('hex');
+}
+
+/**
+ * Loads unexpired revoked tokens from persistent store into in-memory set.
+ * Called on application startup and available to test harnesses simulating container restarts.
+ */
+export function loadRevokedTokensFromStore() {
+  const now = Date.now();
+  const list = store.data.revoked_tokens || [];
+  for (const item of list) {
+    if (item.expires_at > now) {
+      revokedTokenSet.add(item.token_hash);
+    }
+  }
+}
+
+// Initial hydration from persistent store
+loadRevokedTokensFromStore();
+
+/**
+ * Revokes a JWT token persistently.
+ * Persists to disk in store and prepares PostgreSQL persistence when table exists.
+ * Also prunes expired tokens to prevent unbounded memory growth.
+ */
+export async function revokeToken(token: string): Promise<void> {
+  if (!token || !token.trim()) return;
+  const rawToken = token.trim();
+  const hash = hashToken(rawToken);
+
+  revokedTokenSet.add(rawToken);
+  revokedTokenSet.add(hash);
+
+  let expiresAt = Date.now() + 12 * 3600 * 1000;
+  try {
+    const decoded = jwt.decode(rawToken) as any;
+    if (decoded && typeof decoded.exp === 'number') {
+      expiresAt = decoded.exp * 1000;
+    }
+  } catch { }
+
+  const now = Date.now();
+  await store.transact((db) => {
+    db.revoked_tokens = (db.revoked_tokens || []).filter((t) => t.expires_at > now);
+    db.revoked_tokens.push({ token_hash: hash, expires_at: expiresAt });
+  });
+
+  // Supabase PostgreSQL persistence (schema-tolerant)
+  if (process.env.DATABASE_URL && process.env.DATA_SOURCE === 'postgres') {
+    try {
+      await query(
+        'INSERT INTO revoked_tokens (token_hash, expires_at) VALUES ($1, $2) ON CONFLICT (token_hash) DO NOTHING;',
+        [hash, new Date(expiresAt).toISOString()]
+      );
+    } catch {
+      // Table does not exist yet (pre-migration)
+    }
+  }
+}
+
+export function isTokenRevoked(token: string): boolean {
+  if (!token || !token.trim()) return false;
+  const rawToken = token.trim();
+  if (revokedTokenSet.has(rawToken)) return true;
+
+  const hash = hashToken(rawToken);
+  if (revokedTokenSet.has(hash)) return true;
+
+  const now = Date.now();
+  const found = (store.data.revoked_tokens || []).some(
+    (t) => (t.token_hash === hash || t.token_hash === rawToken) && t.expires_at > now
+  );
+  if (found) {
+    revokedTokenSet.add(hash);
+    return true;
+  }
+  return false;
+}
 
 export interface AuthedRequest extends Request {
   user?: {
@@ -46,6 +130,16 @@ export async function requireAuth(req: AuthedRequest, res: Response, next: NextF
   if (!token) {
     return res.status(401).json({ error: 'Missing or invalid Authorization header' });
   }
+
+  // Check if token was explicitly revoked via logout (persistent + in-memory)
+  if (isTokenRevoked(token)) {
+    return res.status(401).json({ error: 'Session has been logged out and revoked. Please sign in again.' });
+  }
+
+  // Prevent browser caching of sensitive protected responses
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as any;

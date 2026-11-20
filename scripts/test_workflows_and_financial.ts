@@ -7,6 +7,7 @@ import { signToken } from '../src/middleware/auth.js';
 import { resetSentNotifications } from '../src/services/notifications.js';
 import { formatAmount } from '../src/lib/pdf.js';
 import { withPgBudgetLock } from '../src/lib/budgetEngine.js';
+import { query } from '../src/db/pool.js';
 
 function request(options: { method: string; url: string; headers?: Record<string, string>; body?: any }): Promise<{ status: number; body: any }> {
   return new Promise((resolve, reject) => {
@@ -47,14 +48,22 @@ async function runTests() {
   console.log('--- STARTING COMPREHENSIVE WORKFLOW & FINANCIAL TESTS ---');
   console.log('======================================================\n');
 
+  if (store.initPromise) {
+    await store.initPromise;
+  }
+
   resetSentNotifications();
   store.data.mock_emails = [];
 
-  const adseDeptId = '330ada81-5246-4c92-9ca2-688eae0f28d4'; // ADSE (Workflow A)
-  const mechDeptId = '11111111-m1m1-4004-8004-000000000004'; // MECH (Workflow B)
-  const autoCentreId = '22222222-a111-4001-8001-000000000001'; // COE-AUTO (Workflow C)
+  const adseDept = store.data.departments.find((d) => d.code === 'ADSE') || store.data.departments[0];
+  const mechDept = store.data.departments.find((d) => d.code === 'MECH') || store.data.departments[1];
+  const autoCentre = store.data.departments.find((d) => d.code.includes('AUTO')) || store.data.departments[2];
+  const adseDeptId = adseDept.id;
+  const mechDeptId = mechDept.id;
+  const autoCentreId = autoCentre.id;
   const fyId = store.data.financial_years.find((f) => f.is_active)!.id;
-  const catId = '8a82532c-e7f4-457a-a8f7-9979f008c616';
+  const cat = store.data.budget_categories[0];
+  const catId = cat.id;
 
   // Ensure department budget line exists for MECH for testing Workflow B
   let mechLine = store.data.department_budgets.find((b) => b.department_id === mechDeptId && b.financial_year_id === fyId && b.budget_category_id === catId);
@@ -72,95 +81,152 @@ async function runTests() {
     store.data.department_budgets.push(mechLine);
   }
 
+  // Ensure department budget line exists for AUTO Centre for testing Workflow C
+  let autoLine = store.data.department_budgets.find((b) => b.department_id === autoCentreId && b.financial_year_id === fyId && b.budget_category_id === catId);
+  if (!autoLine) {
+    autoLine = {
+      id: uuid(),
+      department_id: autoCentreId,
+      financial_year_id: fyId,
+      budget_category_id: catId,
+      allocated_amount: 5000000,
+      approved_amount: 0,
+      pending_amount: 0,
+      revised_amount: 0,
+    };
+    store.data.department_budgets.push(autoLine);
+  }
+
+  // Authoritative live users from store
+  const arulUser = store.data.users.find((u) => u.email === 'arul.v@christuniversity.in') || store.data.users[0];
+  arulUser.authorized_centre_ids = [autoCentreId];
+  if (process.env.DATABASE_URL) {
+    await query(`UPDATE user_profiles SET authorized_centre_ids = $1 WHERE id = $2`, [[autoCentreId], arulUser.id]);
+  }
+  const mosesUser = store.data.users.find((u) => u.email === 'michael.moses@christuniversity.in') || store.data.users[0];
+  const deansOfficeUser = store.data.users.find((u) => u.role === 'deans_office') || store.data.users[0];
+  const assocDeanUser = store.data.users.find((u) => u.role === 'associate_dean') || store.data.users[0];
+  const deanUser = store.data.users.find((u) => u.role === 'dean') || store.data.users[0];
+  const financeUser = store.data.users.find((u) => u.role === 'finance') || store.data.users[0];
+  const directorUser = store.data.users.find((u) => u.role === 'director') || store.data.users[0];
+  const financeHeadUser = store.data.users.find((u) => u.role === 'finance_head') || store.data.users[0];
+
+  // Dynamic Workflow B faculty
+  const facultyWorkflowB = store.data.users.find((u) => {
+    if (u.role !== 'faculty' || u.must_change_password) return false;
+    const d = store.data.departments.find(dept => dept.id === u.department_id);
+    return d && d.code !== 'CSE' && d.code !== 'ADSE' && !d.code.startsWith('COE-');
+  }) || arulUser;
+  const workflowBDeptId = facultyWorkflowB.department_id || mechDeptId;
+
+  // Designate / find active HOD for Workflow B department
+  let hodWorkflowB = store.data.users.find((u) => u.department_id === workflowBDeptId && u.role === 'hod');
+  if (!hodWorkflowB) {
+    const candidate = store.data.users.find((u) => u.department_id === workflowBDeptId && u.id !== facultyWorkflowB.id) || store.data.users.find((u) => u.department_id === workflowBDeptId);
+    if (candidate) {
+      candidate.role = 'hod';
+      candidate.must_change_password = false;
+      hodWorkflowB = candidate;
+      if (process.env.DATABASE_URL) {
+        await query(`UPDATE user_profiles SET role = 'hod', must_change_password = false WHERE id = $1`, [candidate.id]);
+      }
+    }
+  } else if (hodWorkflowB.must_change_password) {
+    hodWorkflowB.must_change_password = false;
+    if (process.env.DATABASE_URL) {
+      await query(`UPDATE user_profiles SET must_change_password = false WHERE id = $1`, [hodWorkflowB.id]);
+    }
+  }
+
   // Tokens for actors
   const facultyAdseToken = signToken({
-    id: '05fee8aa-7cd5-4168-bc21-3b20ea533f62',
-    name: 'Dr Arul V',
+    id: arulUser.id,
+    name: arulUser.name,
     role: 'faculty',
-    email: 'faculty@christ.edu',
+    email: arulUser.email,
     department_id: adseDeptId,
     authorized_centre_ids: [autoCentreId],
     is_active: true,
   });
 
   const facultyMechToken = signToken({
-    id: 'mech-fac-1',
-    name: 'Dr Mech Faculty',
+    id: facultyWorkflowB.id,
+    name: facultyWorkflowB.name,
     role: 'faculty',
-    email: 'mechfaculty@christ.edu',
-    department_id: mechDeptId,
+    email: facultyWorkflowB.email,
+    department_id: workflowBDeptId,
     authorized_centre_ids: [],
     is_active: true,
   });
 
   const hodAdseToken = signToken({
-    id: '53709076-c3be-46eb-a123-0be426a086ee',
-    name: 'Dr Michael Moses T',
+    id: mosesUser.id,
+    name: mosesUser.name,
     role: 'hod',
-    email: 'hod@christ.edu',
+    email: mosesUser.email,
     department_id: adseDeptId,
     is_active: true,
   });
 
   const hodMechToken = signToken({
-    id: 'mech-hod-1',
-    name: 'Dr Mech HOD',
+    id: hodWorkflowB ? hodWorkflowB.id : mosesUser.id,
+    name: hodWorkflowB ? hodWorkflowB.name : 'Department HOD',
     role: 'hod',
-    email: 'mechhod@christ.edu',
-    department_id: mechDeptId,
+    email: hodWorkflowB ? hodWorkflowB.email : 'hod@christuniversity.in',
+    department_id: workflowBDeptId,
     is_active: true,
   });
 
   const deansOfficeToken = signToken({
-    id: 'deans-office-user-id',
-    name: "Dean's Office Secretariat",
+    id: deansOfficeUser.id,
+    name: deansOfficeUser.name,
     role: 'deans_office',
-    email: 'deansoffice@christ.edu',
+    email: deansOfficeUser.email,
     school: 'SoET',
     is_active: true,
   });
 
   const associateDeanToken = signToken({
-    id: 'assoc-dean-user-id',
-    name: 'Dr Associate Dean',
+    id: assocDeanUser.id,
+    name: assocDeanUser.name,
     role: 'associate_dean',
-    email: 'associate_dean@christ.edu',
+    email: assocDeanUser.email,
     school: 'SoET',
     is_active: true,
   });
 
   const deanToken = signToken({
-    id: '7a91c842-15f3-4e89-a2e1-456987410231',
-    name: 'Dr Mary Anita E A',
+    id: deanUser.id,
+    name: deanUser.name,
     role: 'dean',
-    email: 'dean@christ.edu',
+    email: deanUser.email,
     school: 'SoET',
     is_active: true,
   });
 
   const financeToken = signToken({
-    id: '3db93f9d-d4b9-4534-a700-cdba8df2d6a0',
-    name: 'Fr Shijin P J',
+    id: financeUser.id,
+    name: financeUser.name,
     role: 'finance',
-    email: 'finance@christ.edu',
+    email: financeUser.email,
     school: 'SoET',
     is_active: true,
   });
 
   const directorToken = signToken({
-    id: '8b92d953-26a4-4f90-b3f2-567890123456',
-    name: 'Fr Jiby Jose',
+    id: directorUser.id,
+    name: directorUser.name,
     role: 'director',
-    email: 'director@christ.edu',
+    email: directorUser.email,
     school: 'SoET',
     is_active: true,
   });
 
   const financeHeadToken = signToken({
-    id: 'finance-head-user-id',
-    name: 'Chief Finance Officer',
+    id: financeHeadUser.id,
+    name: financeHeadUser.name,
     role: 'finance_head',
-    email: 'financehead@christ.edu',
+    email: financeHeadUser.email,
     school: 'SoET',
     is_active: true,
   });
@@ -315,7 +381,7 @@ async function runTests() {
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${facultyMechToken}` },
     body: {
       organization_type: 'department',
-      department_id: mechDeptId,
+      department_id: workflowBDeptId,
       financial_year_id: fyId,
       budget_category_id: catId,
       title: 'Workflow B - Robotics Workshop',
@@ -332,12 +398,13 @@ async function runTests() {
   // 1. Submit -> pending_hod_review
   await request({ method: 'POST', url: `/api/nfas/${nfaBId}/submit`, headers: { Authorization: `Bearer ${facultyMechToken}` } });
   // 2. HOD Review -> pending_deans_office_verification
-  await request({
+  const hodBRes = await request({
     method: 'POST',
     url: `/api/nfas/${nfaBId}/review`,
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${hodMechToken}` },
     body: { decision: 'approve', comments: 'Mech HOD recommends' },
   });
+  if (hodBRes.status !== 200) throw new Error('HOD review Workflow B failed: ' + JSON.stringify(hodBRes.body));
 
   // 3. Dean's Office Verification -> MUST route to pending_dean_approval for MECH!
   const doB = await request({
@@ -402,7 +469,7 @@ async function runTests() {
       items: [{ particulars: 'Testing Rig Hire', quantity: '1', rate: '40000', amount: 40000 }],
     },
   });
-  if (createC.status !== 201) throw new Error('Failed to create NFA C');
+  if (createC.status !== 201) throw new Error('Failed to create NFA C: ' + JSON.stringify(createC.body));
   const nfaCId = createC.body.id;
 
   // 1. Submit -> MUST enter pending_deans_office_verification (skips HOD!)

@@ -42726,5 +42726,13 @@
       "status": "mock_delivered",
       "created_at": "2026-11-19T09:48:25.096Z"
     }
+  ],
+  "resource_person_bank_details": [],
+  "purchase_invoices": [],
+  "revoked_tokens": [
+    {
+      "token_hash": "1bcb6610aed5f948724597f139b434ee0caed7e6b1328c67558b88a2dd785832",
+      "expires_at": 1795228506000
+    }
   ]
 }

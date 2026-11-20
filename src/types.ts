@@ -282,7 +282,7 @@ export interface BudgetTransaction {
 
 export interface AuditLog {
   id: string;
-  entity_type: 'nfa' | 'project' | 'department_budget' | 'excel_sync' | 'user_account';
+  entity_type: 'nfa' | 'project' | 'department_budget' | 'excel_sync' | 'user_account' | 'bank_detail' | 'purchase_invoice';
   entity_id: string;
   department_id: string;
   old_amount: number | null;
@@ -386,6 +386,110 @@ export interface BudgetChange {
   created_at: string;
 }
 
+export type InvoiceVerificationStatus = 'pending_verification' | 'verified' | 'returned';
+export type InvoicePaymentStatus = 'unpaid' | 'in_process' | 'paid';
+
+export interface PurchaseInvoice {
+  id: string;
+  nfa_id: string;
+  invoice_number: string;
+  invoice_date: string;
+  vendor_name: string;
+  invoice_amount: number;
+  gst_amount?: number;
+  file_id?: string;
+  original_filename?: string;
+  file_path: string;
+  file_size?: number;
+  mime_type?: string;
+  uploaded_by: string;
+  uploaded_by_name?: string;
+  uploaded_at: string;
+  verification_status: InvoiceVerificationStatus;
+  verified_by?: string;
+  verified_by_name?: string;
+  verified_at?: string;
+  return_reason?: string;
+  payment_status: InvoicePaymentStatus;
+  paid_amount?: number;
+  payment_date?: string;
+  payment_ref_utr?: string;
+  payment_remarks?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export type ResourcePersonPaymentStatus =
+  | 'details_pending'
+  | 'details_submitted'
+  | 'finance_verification'
+  | 'ready_for_payment'
+  | 'payment_processing'
+  | 'paid'
+  | 'returned_for_correction'
+  | 'payment_failed';
+
+export interface ResourcePersonBankDetail {
+  id: string;
+  nfa_id: string;
+  // Personal Details
+  resource_person_name: string;
+  designation?: string;
+  organization?: string;
+  email?: string;
+  mobile?: string;
+  honorarium_amount?: number;
+  // Banking Credentials (Encrypted at rest)
+  account_holder_name: string;
+  bank_name: string;
+  encrypted_account_number: string;
+  iv: string;
+  auth_tag: string;
+  masked_account_number: string;
+  ifsc_code: string;
+  branch_name?: string;
+  remarks?: string;
+  // Finance Honorarium Payment Tracking
+  tracking_status?: ResourcePersonPaymentStatus;
+  approved_honorarium?: number;
+  deductions?: number;
+  net_payable_amount?: number;
+  payment_date?: string;
+  payment_ref_utr?: string;
+  payment_remarks?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ResourcePersonBankDetailDTO {
+  id: string;
+  nfa_id: string;
+  // Personal Details
+  resource_person_name: string;
+  designation?: string;
+  organization?: string;
+  email?: string;
+  mobile?: string;
+  honorarium_amount?: number;
+  // Banking Details
+  account_holder_name: string;
+  bank_name: string;
+  masked_account_number: string;
+  ifsc_code: string;
+  branch_name?: string;
+  remarks?: string;
+  // Payment Tracking
+  tracking_status?: ResourcePersonPaymentStatus;
+  approved_honorarium?: number;
+  deductions?: number;
+  net_payable_amount?: number;
+  payment_date?: string;
+  payment_ref_utr?: string;
+  payment_remarks?: string;
+  created_at: string;
+  can_reveal?: boolean;
+}
+
 export interface DB {
   users: User[];
   departments: Department[];
@@ -404,4 +508,7 @@ export interface DB {
   budget_uploads: BudgetUpload[];
   budget_changes: BudgetChange[];
   mock_emails?: MockEmail[];
+  resource_person_bank_details?: ResourcePersonBankDetail[];
+  purchase_invoices?: PurchaseInvoice[];
+  revoked_tokens?: { token_hash: string; expires_at: number }[];
 }

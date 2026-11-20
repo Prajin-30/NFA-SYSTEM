@@ -19,6 +19,7 @@ import { auditRouter } from './routes/audit.js';
 import { excelRouter } from './routes/excel.js';
 import { adminRouter } from './routes/admin.js';
 import { usersRouter } from './routes/users.js';
+import { invoicesRouter } from './routes/invoices.js';
 import { requireAuth, AuthedRequest } from './middleware/auth.js';
 import { store } from './store.js';
 import { query } from './db/pool.js';
@@ -29,6 +30,16 @@ const signaturesDir = path.join(__dirname, '..', 'data', 'signatures');
 export const app = express();
 
 app.use(cors());
+app.use(async (_req, res, next) => {
+  if (store.initPromise) {
+    try {
+      await store.initPromise;
+    } catch (err: any) {
+      return res.status(503).json({ error: 'DATABASE_UNAVAILABLE', message: err.message });
+    }
+  }
+  next();
+});
 app.use(express.json({ limit: '5mb' }));
 app.use(express.static(path.join(__dirname, '..', 'public'), {
   setHeaders: (res, filePath) => {
@@ -84,6 +95,7 @@ app.use('/api/budgets', budgetsRouter);
 app.use('/api/projects', projectsRouter);
 app.use('/api/audit', auditRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/invoices', invoicesRouter);
 
 app.get('/api/health', async (_req, res) => {
   let dbConnected = false;

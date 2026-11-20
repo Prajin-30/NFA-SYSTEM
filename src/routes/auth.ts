@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { store } from '../store.js';
-import { requireAuth, signToken, AuthedRequest } from '../middleware/auth.js';
+import { requireAuth, signToken, revokeToken, AuthedRequest } from '../middleware/auth.js';
 import {
   authenticateInstitutionalUser,
   maskEmail,
@@ -211,10 +211,17 @@ authRouter.post('/forgot-password', async (req, res) => {
 
 /**
  * POST /api/auth/logout
- * Session logout endpoint.
+ * Session logout endpoint with server-side token revocation.
  */
-authRouter.post('/logout', (_req, res) => {
-  return res.json({ success: true, message: 'Logged out successfully' });
+authRouter.post('/logout', async (req, res) => {
+  const header = req.headers.authorization;
+  if (header && header.startsWith('Bearer ')) {
+    const token = header.slice('Bearer '.length).trim();
+    if (token) {
+      await revokeToken(token);
+    }
+  }
+  return res.json({ success: true, message: 'Logged out and token revoked successfully' });
 });
 
 /**

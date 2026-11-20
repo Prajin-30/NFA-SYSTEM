@@ -73,8 +73,148 @@
 
     * {
       box-sizing: border-box;
-      overflow-wrap: anywhere;
+    }
+
+    /* Selective word breaking for long prose, comments, and audit reasons */
+    p,
+    .card-sub,
+    .audit-reason,
+    .break-text,
+    .nfa-justification,
+    .comments-text {
+      overflow-wrap: break-word;
       word-break: break-word;
+    }
+
+    /* Radio & Checkbox labels — strict nowrap to prevent word/letter breaking */
+    .radio-label,
+    .checkbox-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13.5px;
+      white-space: nowrap;
+      user-select: none;
+      line-height: 1.2;
+    }
+
+    .radio-label input[type="radio"],
+    .checkbox-label input[type="checkbox"] {
+      margin: 0;
+      width: 16px;
+      height: 16px;
+      accent-color: var(--primary-blue);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    /* Inline Loading Spinner for Buttons */
+    .spinner-sm {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255, 255, 255, 0.35);
+      border-radius: 50%;
+      border-top-color: #ffffff;
+      animation: spin-sm 0.7s linear infinite;
+      vertical-align: middle;
+      flex-shrink: 0;
+      margin-right: 6px;
+    }
+
+    @keyframes spin-sm {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Modern Institutional File Dropzone */
+    .file-dropzone {
+      border: 2px dashed #CBD5E1;
+      border-radius: var(--radius);
+      padding: 22px 18px;
+      text-align: center;
+      background: #FAFBFC;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .file-dropzone:hover,
+    .file-dropzone.dragover {
+      border-color: var(--primary-blue);
+      background: #F0F5FF;
+    }
+
+    .file-dropzone-icon {
+      font-size: 28px;
+      margin-bottom: 6px;
+      color: var(--primary-blue);
+    }
+
+    .file-dropzone-prompt {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--primary-blue);
+      margin-bottom: 4px;
+    }
+
+    .file-dropzone-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .file-selected-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: #ffffff;
+      border: 1px solid #E2E8F0;
+      border-left: 4px solid var(--primary-blue);
+      border-radius: var(--radius-sm);
+      margin-top: 10px;
+      box-shadow: var(--shadow-sm);
+      gap: 12px;
+    }
+
+    .file-selected-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .file-selected-icon {
+      font-size: 22px;
+      flex-shrink: 0;
+      color: var(--primary-blue);
+    }
+
+    .file-selected-name {
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--text-primary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 280px;
+    }
+
+    .file-selected-size {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .file-selected-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
     }
 
     html,
@@ -112,11 +252,11 @@
     #login {
       max-width: 440px;
       width: 90%;
-      margin: 50px auto;
+      margin: 60px auto;
       background: var(--card);
-      padding: 38px 36px 34px;
+      padding: 40px 36px 36px;
       border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-lg);
+      box-shadow: 0 10px 25px -5px rgba(0, 45, 112, 0.1), 0 8px 10px -6px rgba(0, 45, 112, 0.05);
       border: 1px solid var(--border);
     }
 
@@ -124,15 +264,45 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
 
     .login-crest-wrap img {
-      max-width: 260px;
+      max-width: 250px;
       width: 100%;
       height: auto;
       display: block;
       object-fit: contain;
+    }
+
+    .login-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--dark-blue);
+      text-align: center;
+      margin: 0 0 4px;
+    }
+
+    .login-subtitle {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      text-align: center;
+      margin: 0 0 20px;
+    }
+
+    .login-alert-banner {
+      background: #FEF2F2;
+      border: 1px solid #FECACA;
+      border-left: 4px solid var(--danger);
+      color: #991B1B;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      line-height: 1.4;
     }
 
     /* FORMS & BUTTONS */
@@ -1675,66 +1845,81 @@
     }
 
     .pwd-input-wrap {
-      position: relative;
-      display: block;
-      width: 100%;
-      box-sizing: border-box;
+      position: relative !important;
+      display: block !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
     }
 
     .pwd-input-wrap input {
       width: 100% !important;
-      padding-right: 44px !important;
+      padding-right: 42px !important;
       margin-bottom: 0 !important;
       box-sizing: border-box !important;
-      display: block;
+      display: block !important;
     }
 
-    .pwd-toggle-btn {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
+    .pwd-toggle-btn,
+    button.pwd-toggle-btn {
+      position: absolute !important;
+      right: 12px !important;
+      top: 50% !important;
+      transform: translateY(-50%) !important;
       background: transparent !important;
       background-color: transparent !important;
       border: none !important;
       box-shadow: none !important;
-      cursor: pointer;
+      cursor: pointer !important;
       padding: 0 !important;
       margin: 0 !important;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
       color: #64748b !important;
-      border-radius: 4px;
-      line-height: 0;
-      width: 24px;
-      height: 24px;
+      border-radius: 4px !important;
+      line-height: 0 !important;
+      width: 24px !important;
+      height: 24px !important;
       min-height: 24px !important;
       max-height: 24px !important;
-      z-index: 5;
-      transition: color 0.15s ease;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      appearance: none;
+      z-index: 5 !important;
+      transition: color 0.15s ease !important;
+      -webkit-appearance: none !important;
+      -moz-appearance: none !important;
+      appearance: none !important;
     }
 
-    .pwd-toggle-btn:hover {
-      color: var(--primary-blue) !important;
+    .pwd-toggle-btn:hover,
+    button.pwd-toggle-btn:hover,
+    .pwd-toggle-btn:active,
+    button.pwd-toggle-btn:active,
+    .pwd-toggle-btn:focus,
+    button.pwd-toggle-btn:focus,
+    .pwd-toggle-btn:focus-visible,
+    button.pwd-toggle-btn:focus-visible {
+      transform: translateY(-50%) !important;
       background: transparent !important;
       background-color: transparent !important;
+      color: var(--primary-blue) !important;
+      box-shadow: none !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      outline: none !important;
     }
 
-    .pwd-toggle-btn:focus-visible {
-      outline: 2px solid var(--primary-blue) !important;
-      outline-offset: 2px;
+    .pwd-toggle-btn:focus-visible,
+    button.pwd-toggle-btn:focus-visible {
+      color: var(--primary-blue) !important;
+      outline: 2px solid rgba(0, 61, 143, 0.4) !important;
+      outline-offset: 1px !important;
     }
 
     .pwd-toggle-btn svg {
-      display: block;
-      width: 18px;
-      height: 18px;
-      pointer-events: none;
-      flex-shrink: 0;
+      display: block !important;
+      width: 18px !important;
+      height: 18px !important;
+      pointer-events: none !important;
+      flex-shrink: 0 !important;
     }
   </style>
 </head>
@@ -1748,12 +1933,14 @@
       <img src="/christ-logo.png" alt="CHRIST University" />
     </div>
 
+    <h2 class="login-title">Need For Approval (NFA) Portal</h2>
+    <div class="login-subtitle">Internal Financial &amp; Budget Management System</div>
+
     <div id="loginModeBadge" style="display:none;"></div>
 
-    <div style="margin-top:20px;text-align:left;">
-      <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:6px;">Official Email
-        ID</label>
-      <input id="loginEmail" type="email" placeholder="Official Email ID" autocomplete="username"
+    <div style="margin-top:16px;text-align:left;">
+      <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:6px;">Official Email ID</label>
+      <input id="loginEmail" type="email" placeholder="e.g. name@christuniversity.in" autocomplete="username"
         style="margin-bottom:14px;" />
 
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
@@ -1762,22 +1949,22 @@
           style="font-size:12px;color:var(--primary-blue);font-weight:600;text-decoration:none;">Forgot Password?</a>
       </div>
       <div class="pwd-input-wrap" style="margin-bottom:18px;">
-        <input id="loginPassword" type="password" placeholder="Password" autocomplete="current-password"
+        <input id="loginPassword" type="password" placeholder="Enter your password" autocomplete="current-password"
           style="margin-bottom:0;" onkeydown="if(event.key==='Enter')doLogin()" />
         <button type="button" class="pwd-toggle-btn" aria-label="Show password" title="Show password"
           onclick="togglePasswordVisibility('loginPassword', this)">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path
-              d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
-            </path>
-            <line x1="1" y1="1" x2="23" y2="23"></line>
+            <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
+            <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"></path>
+            <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"></path>
+            <line x1="2" y1="2" x2="22" y2="22"></line>
           </svg>
         </button>
       </div>
 
-      <button style="width:100%;padding:12px;font-size:14px;font-weight:600;" onclick="doLogin()">Sign In</button>
-      <div id="loginErr" style="color:var(--danger);font-size:13px;margin-top:12px;text-align:center;"></div>
+      <button id="btnLoginSubmit" style="width:100%;padding:12px;font-size:14px;font-weight:600;" onclick="doLogin()">Sign In</button>
+      <div id="loginErr" class="login-alert-banner" style="display:none;"></div>
     </div>
   </div>
 
@@ -1805,15 +1992,15 @@
         <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">New Password</label>
         <div class="pwd-input-wrap">
           <input id="mustChangeNewPwd" type="password" placeholder="At least 8 chars (upper, lower, digit, symbol)"
-            style="width:100%;padding:10px 44px 10px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;margin-bottom:0;" />
+            style="width:100%;padding:10px 42px 10px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;margin-bottom:0;" />
           <button type="button" class="pwd-toggle-btn" aria-label="Show password" title="Show password"
             onclick="togglePasswordVisibility('mustChangeNewPwd', this)">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path
-                d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
-              </path>
-              <line x1="1" y1="1" x2="23" y2="23"></line>
+              <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
+              <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"></path>
+              <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"></path>
+              <line x1="2" y1="2" x2="22" y2="22"></line>
             </svg>
           </button>
         </div>
@@ -1823,16 +2010,16 @@
         <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Confirm New Password</label>
         <div class="pwd-input-wrap">
           <input id="mustChangeConfirmPwd" type="password" placeholder="Re-enter new password"
-            style="width:100%;padding:10px 44px 10px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;margin-bottom:0;"
+            style="width:100%;padding:10px 42px 10px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;margin-bottom:0;"
             onkeydown="if(event.key==='Enter')submitMustChangePassword()" />
           <button type="button" class="pwd-toggle-btn" aria-label="Show password" title="Show password"
             onclick="togglePasswordVisibility('mustChangeConfirmPwd', this)">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path
-                d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
-              </path>
-              <line x1="1" y1="1" x2="23" y2="23"></line>
+              <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
+              <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"></path>
+              <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"></path>
+              <line x1="2" y1="2" x2="22" y2="22"></line>
             </svg>
           </button>
         </div>
@@ -2113,20 +2300,21 @@
 
       <!-- Step 1: Upload & Inspect -->
       <div id="excelStepUpload">
-        <div
-          style="background:#F8F9FA;border:1px dashed var(--border);border-radius:var(--radius);padding:18px;text-align:center;">
-          <input type="file" id="facultyExcelInput" accept=".xlsx" style="max-width:320px;margin-bottom:10px;"
+        <div id="facultyDropzone" class="file-dropzone" onclick="document.getElementById('facultyExcelInput').click()">
+          <input type="file" id="facultyExcelInput" accept=".xlsx" style="display:none;"
             onchange="onFacultyExcelSelected()" />
-          <div style="font-size:12px;color:var(--text-muted);">
-            Select the prepared Excel workbook (.xlsx). Required columns: <strong>Faculty Name</strong>,
-            <strong>Official Email ID</strong>, <strong>Department Code</strong>, <strong>Role</strong>.
+          <div class="file-dropzone-icon">📊</div>
+          <div class="file-dropzone-prompt">Choose an Excel Workbook (.xlsx) or drag &amp; drop here</div>
+          <div class="file-dropzone-sub">
+            Required columns: <strong>Faculty Name</strong>, <strong>Official Email ID</strong>, <strong>Department Code</strong>, <strong>Role</strong>
           </div>
-          <div style="margin-top:10px;">
-            <a href="/api/admin/users/template" download="CU_Faculty_Onboarding_Template.xlsx" class="secondary"
-              style="font-size:12px;text-decoration:none;display:inline-block;padding:6px 12px;border-radius:4px;border:1px solid var(--border);background:#fff;">
-              📥 Download Blank Excel Template (.xlsx)
-            </a>
-          </div>
+        </div>
+        <div id="facultyDropzoneCard" class="file-selected-card" style="display:none;"></div>
+        <div style="margin-top:12px;text-align:center;">
+          <a href="/api/admin/users/template" download="CU_Faculty_Onboarding_Template.xlsx" class="secondary"
+            style="font-size:12px;text-decoration:none;display:inline-block;padding:6px 12px;border-radius:4px;border:1px solid var(--border);background:#fff;">
+            📥 Download Blank Excel Template (.xlsx)
+          </a>
         </div>
         <div id="excelUploadErr" style="color:var(--danger);font-size:12px;margin-top:8px;display:none;"></div>
         <div style="margin-top:14px;display:flex;justify-content:flex-end;">
@@ -2245,6 +2433,8 @@
     let selectedDashboardDeptId = null;
     let selectedBudgetDeptId = null;
     let currentSelectedAvailableBudget = null;
+    let isNfaSubmitting = false;
+    let currentNfaFormIdempotencyKey = '';
 
     // SDG 17 List
     const SDG_LIST = [
@@ -2260,6 +2450,83 @@
       t.textContent = msg;
       t.style.display = 'block';
       setTimeout(() => t.style.display = 'none', 3800);
+    }
+
+    function setupFileDropzone(dropzoneId, inputId, cardId, options = {}) {
+      const dropzone = document.getElementById(dropzoneId);
+      const input = document.getElementById(inputId);
+      const card = document.getElementById(cardId);
+      if (!dropzone || !input) return;
+
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropzone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          dropzone.classList.add('dragover');
+        }, false);
+      });
+
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropzone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          dropzone.classList.remove('dragover');
+        }, false);
+      });
+
+      dropzone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files && files.length > 0) {
+          input.files = files;
+          input.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }, false);
+
+      input.addEventListener('change', () => {
+        if (!card) return;
+        const file = input.files && input.files[0];
+        if (file) {
+          dropzone.style.display = 'none';
+          const sizeKb = (file.size / 1024).toFixed(1);
+          const sizeStr = file.size > 1024 * 1024 ? `${(file.size / (1024 * 1024)).toFixed(2)} MB` : `${sizeKb} KB`;
+          card.style.display = 'flex';
+          card.innerHTML = `
+            <div class="file-selected-info">
+              <span class="file-selected-icon">${options.icon || '📄'}</span>
+              <div style="overflow:hidden;min-width:0;">
+                <div class="file-selected-name" title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</div>
+                <div class="file-selected-size">${sizeStr} &bull; Ready</div>
+              </div>
+            </div>
+            <div class="file-selected-actions">
+              <button type="button" class="secondary" style="padding:4px 9px;font-size:12px;min-height:auto;" onclick="document.getElementById('${inputId}').click()">Change</button>
+              <button type="button" class="del-item" style="padding:4px 9px;font-size:12px;min-height:auto;" onclick="clearFileDropzone('${inputId}', '${cardId}', '${dropzoneId}')">✕</button>
+            </div>
+          `;
+        } else {
+          dropzone.style.display = 'block';
+          card.style.display = 'none';
+          card.innerHTML = '';
+        }
+      });
+    }
+
+    function clearFileDropzone(inputId, cardId, dropzoneId) {
+      const input = document.getElementById(inputId);
+      const card = document.getElementById(cardId);
+      const dropzone = document.getElementById(dropzoneId);
+      if (input) {
+        input.value = '';
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      if (card) {
+        card.style.display = 'none';
+        card.innerHTML = '';
+      }
+      if (dropzone) {
+        dropzone.style.display = 'block';
+      }
     }
 
     function inr(n) {
@@ -2403,8 +2670,10 @@
       // 1. Details sections
       const eventDetails = isEdit ? document.getElementById('editEventCard') : document.getElementById('eventDetailsSection');
       const purchaseDetails = isEdit ? document.getElementById('editPurchaseCard') : document.getElementById('purchaseDetailsSection');
+      const bankDetails = isEdit ? document.getElementById('editBankDetailsCard') : document.getElementById('bankDetailsSection');
       if (eventDetails) eventDetails.style.display = isPur ? 'none' : 'block';
       if (purchaseDetails) purchaseDetails.style.display = isPur ? 'block' : 'none';
+      if (bankDetails) bankDetails.style.display = isPur ? 'none' : 'block';
 
       // 2. Budget Particulars sections
       const eventPredefined = document.getElementById(`${prefix}eventPredefinedSection`);
@@ -3015,8 +3284,14 @@
         <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">
           <label class="field-label" style="font-weight:700;">Upload New Signature (PNG format only)</label>
           <div class="field-help" style="margin-bottom:8px;">Min size: 200 × 70 px. Recommended: 600 × 200 px (transparent background PNG). Max file size: 2 MB.</div>
-          <div class="row" style="gap:10px;">
-            <input type="file" id="sigFileInput" accept="image/png" style="flex:1;margin-bottom:0;" />
+          <div id="sigDropzone" class="file-dropzone" style="padding:14px;margin-bottom:10px;" onclick="document.getElementById('sigFileInput').click()">
+            <input type="file" id="sigFileInput" accept="image/png" style="display:none;" />
+            <div class="file-dropzone-icon" style="font-size:22px;margin-bottom:2px;">✍️</div>
+            <div class="file-dropzone-prompt" style="font-size:12.5px;">Click to select official PNG signature image</div>
+            <div class="file-dropzone-sub">Transparent PNG recommended (Max 2 MB)</div>
+          </div>
+          <div id="sigDropzoneCard" class="file-selected-card" style="display:none;margin-bottom:10px;"></div>
+          <div class="row" style="justify-content:flex-end;">
             <button onclick="uploadMySignature()">Upload Signature</button>
           </div>
         </div>
@@ -3026,6 +3301,8 @@
         <button class="secondary" onclick="closeModal()">Close</button>
       </div>
     `);
+
+        setupFileDropzone('sigDropzone', 'sigFileInput', 'sigDropzoneCard', { icon: '✍️' });
       } catch (e) {
         toast(e.message);
       }
@@ -3121,13 +3398,21 @@
 
     <div style="margin:16px 0;">
       <label class="field-label" style="font-weight:700;">Select Signature File (.png)</label>
-      <input type="file" id="sigFileInput" accept="image/png" style="margin-bottom:12px;" />
-      <div class="row" style="gap:10px;">
-        <button onclick="uploadMySignature('${targetUserId}')">Upload Signature</button>
+      <div id="adminSigDropzone" class="file-dropzone" style="padding:14px;margin-bottom:10px;" onclick="document.getElementById('sigFileInput').click()">
+        <input type="file" id="sigFileInput" accept="image/png" style="display:none;" />
+        <div class="file-dropzone-icon" style="font-size:22px;margin-bottom:2px;">✍️</div>
+        <div class="file-dropzone-prompt" style="font-size:12.5px;">Click to select official PNG signature image</div>
+        <div class="file-dropzone-sub">Transparent PNG recommended (Max 2 MB)</div>
+      </div>
+      <div id="adminSigDropzoneCard" class="file-selected-card" style="display:none;margin-bottom:10px;"></div>
+      <div class="row" style="gap:10px;justify-content:flex-end;">
         <button class="danger" onclick="removeMySignature('${targetUserId}')">Remove Signature</button>
+        <button onclick="uploadMySignature('${targetUserId}')">Upload Signature</button>
       </div>
     </div>
   `);
+
+      setupFileDropzone('adminSigDropzone', 'sigFileInput', 'adminSigDropzoneCard', { icon: '✍️' });
     }
 
     async function api(path, opts = {}) {
@@ -3166,15 +3451,23 @@
       const input = document.getElementById(inputId);
       if (!input) return;
       const isCurrentlyPassword = input.type === 'password';
+      const start = input.selectionStart;
+      const end = input.selectionEnd;
       input.type = isCurrentlyPassword ? 'text' : 'password';
+      if (typeof start === 'number' && typeof end === 'number') {
+        try {
+          input.setSelectionRange(start, end);
+        } catch (_) {}
+      }
+      input.focus();
       if (btnEl) {
         const isNowVisible = input.type === 'text';
         btnEl.setAttribute('aria-label', isNowVisible ? 'Hide password' : 'Show password');
         btnEl.setAttribute('title', isNowVisible ? 'Hide password' : 'Show password');
-        // Open eye represents visible password; Crossed eye represents hidden/masked password
+        // Standard Lucide Eye (visible) & Eye-off (masked) icons with identical 18x18 dimensions
         btnEl.innerHTML = isNowVisible
-          ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`
-          : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
+          ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>`
+          : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"></path><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"></path><line x1="2" y1="2" x2="22" y2="22"></line></svg>`;
       }
     }
 
@@ -3182,15 +3475,31 @@
       // Direct login enabled for demo and institutional accounts; no mode badge required
     }
 
+    let isLoggingIn = false;
+
     async function doLogin() {
-      const email = (document.getElementById('loginEmail').value || '').trim();
-      const password = document.getElementById('loginPassword').value || '';
+      if (isLoggingIn) return;
+      const email = (document.getElementById('loginEmail')?.value || '').trim();
+      const password = document.getElementById('loginPassword')?.value || '';
+      const btn = document.getElementById('btnLoginSubmit');
       const errEl = document.getElementById('loginErr');
-      if (errEl) errEl.textContent = '';
+      if (errEl) {
+        errEl.innerHTML = '';
+        errEl.style.display = 'none';
+      }
 
       if (!email || !password) {
-        if (errEl) errEl.textContent = 'Please enter both Official Email ID and Password';
+        if (errEl) {
+          errEl.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><span>Please enter both Official Email ID and Password</span>`;
+          errEl.style.display = 'flex';
+        }
         return;
+      }
+
+      isLoggingIn = true;
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<span class="spinner-sm"></span> Signing In...`;
       }
 
       try {
@@ -3206,14 +3515,30 @@
         }
         boot();
       } catch (e) {
-        if (errEl) errEl.textContent = e.message;
+        if (errEl) {
+          errEl.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><span>${escapeHtml(e.message || 'Login failed')}</span>`;
+          errEl.style.display = 'flex';
+        }
+      } finally {
+        isLoggingIn = false;
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = `Sign In`;
+        }
       }
     }
 
-    function logout() {
+    async function logout() {
+      if (TOKEN) {
+        api('/auth/logout', { method: 'POST' }).catch(() => {});
+      }
       TOKEN = '';
       USER = null;
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
       localStorage.clear();
+      clearTimeout(inactivityTimer);
+
       const mustChangeModal = document.getElementById('modalMustChangePassword');
       if (mustChangeModal) mustChangeModal.style.display = 'none';
       const forgotModal = document.getElementById('modalForgotPassword');
@@ -3223,9 +3548,43 @@
       const pwdInput = document.getElementById('loginPassword');
       if (pwdInput) pwdInput.value = '';
       const errEl = document.getElementById('loginErr');
-      if (errEl) errEl.textContent = '';
+      if (errEl) {
+        errEl.innerHTML = '';
+        errEl.style.display = 'none';
+      }
       initLoginMode();
     }
+
+    // Cross-Tab Logout Synchronization: If another tab logs out, synchronize immediately
+    window.addEventListener('storage', (e) => {
+      if ((e.key === 'token' || e.key === null) && !localStorage.getItem('token')) {
+        TOKEN = '';
+        USER = null;
+        clearTimeout(inactivityTimer);
+        document.getElementById('app').style.display = 'none';
+        document.getElementById('login').style.display = 'block';
+        closeModal();
+        toast('Your session was closed from another browser tab. Please sign in again.');
+      }
+    });
+
+    // Inactivity Timeout (30 minutes of idle time automatically logs out)
+    let inactivityTimer = null;
+    const INACTIVITY_TIMEOUT_MS = 30 * 60 * 1000;
+    function resetInactivityTimer() {
+      clearTimeout(inactivityTimer);
+      if (TOKEN) {
+        inactivityTimer = setTimeout(() => {
+          if (TOKEN) {
+            toast('Session expired due to 30 minutes of inactivity. Please sign in again.');
+            logout();
+          }
+        }, INACTIVITY_TIMEOUT_MS);
+      }
+    }
+    ['mousedown', 'keydown', 'scroll', 'touchstart'].forEach(evt => {
+      window.addEventListener(evt, resetInactivityTimer, { passive: true });
+    });
 
     function showMustChangePasswordModal() {
       document.getElementById('login').style.display = 'none';
@@ -3380,14 +3739,16 @@
     }
 
     const TABS_BY_ROLE = {
-      faculty: ['dashboard', 'inbox', 'nfas', 'budgets', 'audit'],
-      hod: ['dashboard', 'inbox', 'nfas', 'budgets', 'excel', 'audit'],
-      dean: ['dashboard', 'inbox', 'nfas', 'budgets', 'audit'],
-      associate_dean: ['dashboard', 'inbox', 'nfas', 'budgets', 'audit'],
-      finance: ['dashboard', 'inbox', 'nfas', 'budgets', 'audit'],
-      director: ['dashboard', 'inbox', 'nfas', 'budgets', 'audit'],
-      super_admin: ['dashboard', 'inbox', 'nfas', 'budgets', 'excel', 'audit', 'admin'],
-      it_admin: ['dashboard', 'nfas', 'budgets', 'audit'],
+      faculty: ['dashboard', 'inbox', 'nfas', 'invoices', 'budgets', 'audit'],
+      hod: ['dashboard', 'inbox', 'nfas', 'invoices', 'budgets', 'excel', 'audit'],
+      deans_office: ['dashboard', 'inbox', 'nfas', 'invoices', 'budgets', 'audit'],
+      dean: ['dashboard', 'inbox', 'nfas', 'invoices', 'budgets', 'audit'],
+      associate_dean: ['dashboard', 'inbox', 'nfas', 'invoices', 'budgets', 'audit'],
+      finance: ['dashboard', 'inbox', 'nfas', 'invoices', 'budgets', 'audit'],
+      finance_head: ['dashboard', 'inbox', 'nfas', 'invoices', 'budgets', 'audit'],
+      director: ['dashboard', 'inbox', 'nfas', 'invoices', 'budgets', 'audit'],
+      super_admin: ['dashboard', 'inbox', 'nfas', 'invoices', 'budgets', 'excel', 'audit', 'admin'],
+      it_admin: ['dashboard', 'nfas', 'invoices', 'budgets', 'audit'],
     };
 
     // Requirement 3 & 4: Dashboard renamed to "Home" without emojis or diagrams in the line
@@ -3395,6 +3756,7 @@
       dashboard: 'Home',
       inbox: 'Approvals Inbox',
       nfas: 'Notes For Approval (NFAs)',
+      invoices: 'Purchase Invoices',
       projects: 'Projects',
       budgets: 'Department Budgets',
       excel: 'Excel Import',
@@ -3403,6 +3765,7 @@
     };
 
     async function boot() {
+      resetInactivityTimer();
       if (USER && USER.must_change_password) {
         showMustChangePasswordModal();
         return;
@@ -3501,6 +3864,7 @@
         if (tab === 'dashboard') await renderHome(main);
         else if (tab === 'inbox') await renderInbox(main);
         else if (tab === 'nfas') await renderNfas(main);
+        else if (tab === 'invoices') await renderInvoices(main);
         else if (tab === 'projects') await renderProjects(main);
         else if (tab === 'budgets') await renderBudgets(main);
         else if (tab === 'excel') await renderExcel(main);
@@ -3520,26 +3884,28 @@
     }
 
     async function renderHome(main) {
-      const isInstitutionalRole = ['super_admin', 'director', 'finance', 'dean', 'associate_dean'].includes(USER.role);
+      const isInstitutionalRole = ['super_admin', 'director', 'finance', 'finance_head', 'dean', 'associate_dean', 'deans_office'].includes(USER.role);
       if (!selectedDashboardDeptId) {
         selectedDashboardDeptId = USER.department_id || REF.departments[0]?.id;
       }
       const deptId = isInstitutionalRole ? (selectedDashboardDeptId || REF.departments[0]?.id) : (USER.department_id || REF.departments[0]?.id);
       const fy = activeFy();
 
-      let nfas, summary, inboxItems, schoolOverview = null;
+      let nfas, summary, inboxItems, schoolOverview = null, invSummary = null;
       if (isInstitutionalRole) {
-        [nfas, summary, inboxItems, schoolOverview] = await Promise.all([
+        [nfas, summary, inboxItems, schoolOverview, invSummary] = await Promise.all([
           api('/nfas'),
           api(`/budgets/${deptId}/summary?fy=${fy.id}`),
           api('/nfas/inbox'),
-          api(`/budgets/school/overview?fy=${fy.id}`)
+          api(`/budgets/school/overview?fy=${fy.id}`),
+          api(`/invoices/dashboard-summary?fy=${fy.id}`).catch(() => null)
         ]);
       } else {
-        [nfas, summary, inboxItems] = await Promise.all([
+        [nfas, summary, inboxItems, invSummary] = await Promise.all([
           api('/nfas'),
           api(`/budgets/${deptId}/summary?fy=${fy.id}`),
-          api('/nfas/inbox')
+          api('/nfas/inbox'),
+          api(`/invoices/dashboard-summary?fy=${fy.id}`).catch(() => null)
         ]);
       }
 
@@ -3712,6 +4078,43 @@
       </div>
     </div>
   `;
+
+      // PURCHASE INVOICE MONITOR (COMPACT WIDGET - ONLY SHOWN WHEN USER HAS FINALLY APPROVED PURCHASE NFAS IN ACTIVE YEAR)
+      if (invSummary && invSummary.has_approved_purchases) {
+        html += `
+    <div class="card" style="margin-bottom:24px;border-left:4px solid var(--primary-blue);">
+      <div class="card-header" style="align-items:center;flex-wrap:wrap;gap:10px;">
+        <div>
+          <h2 class="card-title" style="color:var(--primary-blue);margin:0;">Purchase Invoice Monitor</h2>
+          <div class="card-sub">Invoices and vendor disbursements for your approved purchase approvals · ${escapeHtml(fy.label)}</div>
+        </div>
+        <button class="primary" onclick="showTab('invoices')" style="padding:7px 14px;font-size:13px;">View Invoices →</button>
+      </div>
+      <div class="grid-4" style="margin-top:10px;">
+        <div class="stat-card">
+          <div class="stat-label">Total Invoices</div>
+          <div class="stat-val" style="color:var(--primary);font-size:24px;font-weight:700;">${invSummary.total_invoices}</div>
+          <div class="stat-desc">Submitted across approved Purchase NFAs</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Pending Verification</div>
+          <div class="stat-val" style="color:var(--warning);font-size:24px;font-weight:700;">${invSummary.pending_verification}</div>
+          <div class="stat-desc">Awaiting Finance Office review</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Awaiting Payment</div>
+          <div class="stat-val" style="color:#0284c7;font-size:24px;font-weight:700;">${invSummary.awaiting_payment}</div>
+          <div class="stat-desc">Verified by Finance · in payment queue</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Paid Invoices</div>
+          <div class="stat-val" style="color:var(--success);font-size:24px;font-weight:700;">${invSummary.paid}</div>
+          <div class="stat-desc">Settled with UTR / bank reference</div>
+        </div>
+      </div>
+    </div>
+  `;
+      }
 
       // CATEGORY & SUBCATEGORY ACCORDION WITH CAPEX FILTER
       html += `
@@ -3995,8 +4398,13 @@
         </div>
       </div>
 
-      <label class="field-label">Select Multi-Sheet Excel Workbook (.xlsx)</label>
-      <input type="file" id="masterExcelFileInput" accept=".xlsx" onchange="onMasterExcelFileSelected(this)" />
+      <div id="masterDropzone" class="file-dropzone" onclick="document.getElementById('masterExcelFileInput').click()">
+        <input type="file" id="masterExcelFileInput" accept=".xlsx" style="display:none;" onchange="onMasterExcelFileSelected(this)" />
+        <div class="file-dropzone-icon">📑</div>
+        <div class="file-dropzone-prompt">Select Multi-Sheet Excel Workbook (.xlsx) or drag &amp; drop here</div>
+        <div class="file-dropzone-sub">Ingests and validates multi-sheet departmental financial allocations</div>
+      </div>
+      <div id="masterDropzoneCard" class="file-selected-card" style="display:none;"></div>
     </div>
 
     <!-- Preview Container -->
@@ -4009,12 +4417,16 @@
       <button id="btnBackBudget" class="secondary" style="display:none;" onclick="resetMasterBudgetUpload()">Choose Another File</button>
     </div>
   `);
+
+      setupFileDropzone('masterDropzone', 'masterExcelFileInput', 'masterDropzoneCard', { icon: '📑' });
     }
 
     function onMasterExcelFileSelected(input) {
+      const btn = document.getElementById('btnAnalyzeBudget');
       if (input.files && input.files[0]) {
-        const btn = document.getElementById('btnAnalyzeBudget');
         if (btn) btn.textContent = `Analyze "${input.files[0].name}" & Preview`;
+      } else {
+        if (btn) btn.textContent = 'Analyze Workbook & Preview';
       }
     }
 
@@ -4188,6 +4600,7 @@
 
     function resetMasterBudgetUpload() {
       activeMasterBudgetPreview = null;
+      clearFileDropzone('masterExcelFileInput', 'masterDropzoneCard', 'masterDropzone');
       const previewArea = document.getElementById('masterUploadPreviewArea');
       const analyzeBtn = document.getElementById('btnAnalyzeBudget');
       const confirmBtn = document.getElementById('btnConfirmBudget');
@@ -4484,6 +4897,640 @@
       main.innerHTML = html;
     }
 
+    // ---------------- PURCHASE INVOICES VIEW ----------------
+    async function renderInvoices(main) {
+      const fy = activeFy();
+      const nfas = await api(`/invoices?fy=${fy.id}`);
+
+      let html = `
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card-header" style="flex-wrap:wrap;gap:10px;">
+            <div>
+              <h2 class="card-title" style="color:var(--primary-blue);">Purchase Invoices &amp; Vendor Disbursements</h2>
+              <div class="card-sub">Tracking invoices and vendor settlements for finally approved purchase proposals · Academic Year ${escapeHtml(fy.label)}</div>
+            </div>
+            <div class="row" style="gap:10px;align-items:center;">
+              <span class="badge" style="background:#e0f2fe;color:#0369a1;padding:5px 12px;font-size:12.5px;font-weight:600;">
+                Eligible Purchase NFAs: ${nfas.length}
+              </span>
+            </div>
+          </div>
+          
+          <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">
+            This page manages invoice submissions for finally approved Purchase NFAs. Invoices can be added in stages without modifying the approved department budget ceiling.
+          </div>
+      `;
+
+      if (nfas.length === 0) {
+        html += `
+          <div class="card" style="text-align:center;padding:40px 20px;background:#f8fafc;border:1px dashed #cbd5e1;border-radius:8px;">
+            <div style="font-size:28px;margin-bottom:8px;">📦</div>
+            <strong style="font-size:15px;color:#1e293b;">No Eligible Approved Purchase NFAs Found</strong>
+            <p style="color:#64748b;font-size:13px;margin:6px 0 0;">
+              Invoice monitoring is activated automatically once a Purchase NFA receives final institutional approval.
+            </p>
+          </div>
+        </div>`;
+        main.innerHTML = html;
+        return;
+      }
+
+      html += `<div style="display:flex;flex-direction:column;gap:16px;">`;
+
+      nfas.forEach((item) => {
+        const remaining = item.remaining_uninvoiced;
+        const totalInvoiced = item.total_invoiced;
+        const totalPaid = item.total_paid;
+        const approved = item.approved_amount;
+        const invoices = item.invoices || [];
+        const isOwner = item.created_by === USER.id;
+        const canUpload = (isOwner || USER.role === 'super_admin') && remaining > 0;
+
+        let statusBadge = '<span class="badge b-draft">Uninvoiced</span>';
+        if (item.invoice_status === 'fully_paid') {
+          statusBadge = '<span class="badge b-approved">Fully Paid</span>';
+        } else if (item.invoice_status === 'partially_paid') {
+          statusBadge = '<span class="badge b-under_review">Partially Paid</span>';
+        } else if (item.invoice_status === 'fully_invoiced') {
+          statusBadge = '<span class="badge" style="background:#e0e7ff;color:#3730a3;">Fully Invoiced</span>';
+        } else if (item.invoice_status === 'partially_invoiced') {
+          statusBadge = '<span class="badge" style="background:#fef3c7;color:#92400e;">Partially Invoiced</span>';
+        }
+
+        const invoicedPct = approved > 0 ? Math.min(100, Math.round((totalInvoiced / approved) * 100)) : 0;
+        const paidPct = approved > 0 ? Math.min(100, Math.round((totalPaid / approved) * 100)) : 0;
+
+        html += `
+          <div class="card" style="border:1px solid #cbd5e1;border-radius:8px;padding:16px;" id="nfa_inv_card_${item.nfa_id}">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:12px;">
+              <div>
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
+                  <span style="font-family:monospace;font-weight:700;font-size:14px;color:var(--primary-blue);">${escapeHtml(item.ref_no)}</span>
+                  ${statusBadge}
+                  <span class="badge" style="background:#f1f5f9;color:#475569;font-size:11px;">${escapeHtml(item.department_name)}</span>
+                </div>
+                <h3 style="margin:0;font-size:16px;color:#0f172a;">${escapeHtml(item.title)}</h3>
+                <div style="font-size:12.5px;color:#64748b;margin-top:2px;">
+                  <strong>Primary Item / Vendor:</strong> ${escapeHtml(item.vendor_name)} · <strong>Proposer:</strong> ${escapeHtml(item.submitted_by_name || 'Faculty')} · ${escapeHtml(item.date)}
+                </div>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                ${canUpload ? `
+                  <button class="primary" style="font-size:12px;padding:6px 12px;" onclick="openUploadInvoiceModal('${item.nfa_id}', '${escapeHtml(item.ref_no)}', ${approved}, ${remaining}, '${encodeURIComponent(item.vendor_name)}')">
+                    + Upload Invoice
+                  </button>
+                ` : ''}
+                <button class="secondary" style="font-size:12px;padding:6px 12px;" onclick="toggleInvoiceDrawer('${item.nfa_id}')">
+                  Invoices (${invoices.length}) ▼
+                </button>
+              </div>
+            </div>
+
+            <!-- Financial Metrics Grid -->
+            <div class="grid-4" style="background:#f8fafc;padding:12px;border-radius:6px;gap:12px;margin-bottom:12px;">
+              <div>
+                <div class="stat-label" style="font-size:11px;">Approved NFA Ceiling</div>
+                <div class="financial-amount" style="font-size:16px;font-weight:700;color:var(--primary);">${inr(approved)}</div>
+              </div>
+              <div>
+                <div class="stat-label" style="font-size:11px;">Total Invoiced Amount</div>
+                <div class="financial-amount" style="font-size:16px;font-weight:700;color:#0284c7;">${inr(totalInvoiced)}</div>
+                <div style="font-size:10.5px;color:#64748b;">${invoicedPct}% of ceiling</div>
+              </div>
+              <div>
+                <div class="stat-label" style="font-size:11px;">Total Paid Amount</div>
+                <div class="financial-amount" style="font-size:16px;font-weight:700;color:var(--success);">${inr(totalPaid)}</div>
+                <div style="font-size:10.5px;color:#64748b;">${paidPct}% disbursed</div>
+              </div>
+              <div>
+                <div class="stat-label" style="font-size:11px;">Remaining Uninvoiced</div>
+                <div class="financial-amount" style="font-size:16px;font-weight:700;color:${remaining > 0 ? '#b45309' : 'var(--success)'};">${inr(remaining)}</div>
+                <div style="font-size:10.5px;color:#64748b;">${remaining > 0 ? 'Headroom available' : 'Fully invoiced'}</div>
+              </div>
+            </div>
+
+            <!-- Invoices Accordion Table -->
+            <div id="inv_drawer_${item.nfa_id}" style="display:block;margin-top:12px;border-top:1px solid #e2e8f0;padding-top:12px;">
+              <h4 style="margin:0 0 8px;font-size:13px;color:#334155;">Submitted Invoices (${invoices.length})</h4>
+              ${invoices.length === 0 ? `
+                <div class="muted" style="padding:12px;font-size:12.5px;text-align:center;background:#fff;border:1px dashed #cbd5e1;border-radius:4px;">
+                  No invoices submitted yet for this purchase approval. Click "+ Upload Invoice" to submit vendor invoice.
+                </div>
+              ` : `
+                <div class="table-wrap">
+                  <table style="font-size:12px;">
+                    <thead>
+                      <tr>
+                        <th>Invoice No &amp; Date</th>
+                        <th>Vendor Name</th>
+                        <th>Amount</th>
+                        <th>GST</th>
+                        <th>Attachment</th>
+                        <th>Verification Status</th>
+                        <th>Payment Status</th>
+                        <th>UTR / Date</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${invoices.map((inv) => {
+                        let verBadge = '<span class="badge b-warning">Pending Review</span>';
+                        if (inv.verification_status === 'verified') verBadge = '<span class="badge b-approved">Verified</span>';
+                        else if (inv.verification_status === 'returned') verBadge = `<span class="badge b-rejected" title="${escapeHtml(inv.return_reason || '')}">Returned</span>`;
+
+                        let payBadge = '<span class="badge b-draft">Unpaid</span>';
+                        if (inv.payment_status === 'paid') payBadge = '<span class="badge b-approved">Paid</span>';
+                        else if (inv.payment_status === 'in_process') payBadge = '<span class="badge b-under_review">In Process</span>';
+
+                        const isFinanceOrAdmin = ['finance', 'finance_head', 'super_admin'].includes(USER.role);
+                        const canCorrect = isOwner && inv.verification_status === 'returned';
+
+                        return `
+                          <tr>
+                            <td>
+                              <strong>${escapeHtml(inv.invoice_number)}</strong>
+                              <div class="muted">${escapeHtml(inv.invoice_date)}</div>
+                            </td>
+                            <td>${escapeHtml(inv.vendor_name)}</td>
+                            <td><strong class="financial-amount">${inr(inv.invoice_amount)}</strong></td>
+                            <td>${inv.gst_amount ? inr(inv.gst_amount) : '—'}</td>
+                            <td>
+                              ${inv.file_path ? `
+                                <a href="/api/nfas/attachment-preview/${encodeURIComponent(inv.file_path)}" target="_blank" class="button secondary" style="padding:2px 8px;font-size:11px;text-decoration:none;">
+                                  📄 View Doc
+                                </a>
+                              ` : '—'}
+                            </td>
+                            <td>
+                              ${verBadge}
+                              ${inv.return_reason ? `<div style="font-size:10.5px;color:var(--danger);margin-top:2px;font-style:italic;">Reason: ${escapeHtml(inv.return_reason)}</div>` : ''}
+                            </td>
+                            <td>${payBadge}</td>
+                            <td>
+                              ${inv.payment_ref_utr ? `<strong>${escapeHtml(inv.payment_ref_utr)}</strong>` : '<span class="muted">—</span>'}
+                              ${inv.payment_date ? `<div class="muted">${escapeHtml(inv.payment_date)}</div>` : ''}
+                            </td>
+                            <td>
+                              <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                                ${canCorrect ? `
+                                  <button class="amber" style="padding:3px 6px;font-size:11px;" onclick="openEditInvoiceModal('${inv.id}')">Correct ✎</button>
+                                ` : ''}
+                                ${isFinanceOrAdmin ? `
+                                  <button class="secondary" style="padding:3px 6px;font-size:11px;" onclick="openVerifyInvoiceModal('${inv.id}', '${escapeHtml(inv.invoice_number)}', ${inv.invoice_amount}, '${encodeURIComponent(inv.vendor_name)}')">Verify</button>
+                                  <button class="secondary" style="padding:3px 6px;font-size:11px;" onclick="openPaymentInvoiceModal('${inv.id}', '${escapeHtml(inv.invoice_number)}', ${inv.invoice_amount}, '${encodeURIComponent(inv.vendor_name)}', '${inv.payment_status}', ${inv.paid_amount || inv.invoice_amount}, '${encodeURIComponent(inv.payment_ref_utr || '')}', '${encodeURIComponent(inv.payment_remarks || '')}')">Payment</button>
+                                ` : ''}
+                              </div>
+                            </td>
+                          </tr>
+                        `;
+                      }).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              `}
+            </div>
+          </div>
+        `;
+      });
+
+      html += `</div></div>`;
+      main.innerHTML = html;
+    }
+
+    function toggleInvoiceDrawer(nfaId) {
+      const d = document.getElementById(`inv_drawer_${nfaId}`);
+      if (d) {
+        d.style.display = d.style.display === 'none' ? 'block' : 'none';
+      }
+    }
+
+    // Invoice Modals
+    let currentUploadInvoiceFile = null;
+
+    function openUploadInvoiceModal(nfaId, refNo, approved, remaining, encodedVendor) {
+      const vendor = decodeURIComponent(encodedVendor || '');
+      currentUploadInvoiceFile = null;
+
+      const modalHtml = `
+        <div class="modal" id="uploadInvoiceModal" style="display:flex;">
+          <div class="modal-box" style="max-width:550px;">
+            <div class="modal-header">
+              <h3 class="modal-title" style="color:var(--primary-blue);">Upload Purchase Invoice</h3>
+              <button class="modal-close" onclick="closeUploadInvoiceModal()">✕</button>
+            </div>
+            <div style="font-size:12.5px;color:var(--text-muted);margin-bottom:12px;">
+              Uploading invoice for <strong>${escapeHtml(refNo)}</strong>. Remaining uninvoiced balance: <strong style="color:var(--success);">${inr(remaining)}</strong> (Approved: ${inr(approved)}).
+            </div>
+            <form id="uploadInvoiceForm" onsubmit="event.preventDefault(); submitUploadInvoice('${nfaId}', ${remaining});">
+              <div class="grid2" style="gap:10px;margin-bottom:10px;">
+                <div>
+                  <label class="field-label" style="font-size:11.5px;">Invoice Number *</label>
+                  <input id="invModalNumber" placeholder="e.g. INV-2026-001" required />
+                </div>
+                <div>
+                  <label class="field-label" style="font-size:11.5px;">Invoice Date *</label>
+                  <input id="invModalDate" type="date" value="${new Date().toISOString().split('T')[0]}" required />
+                </div>
+              </div>
+              <div class="grid2" style="gap:10px;margin-bottom:10px;">
+                <div>
+                  <label class="field-label" style="font-size:11.5px;">Vendor Name *</label>
+                  <input id="invModalVendor" value="${escapeHtml(vendor)}" placeholder="e.g. ABC Lab Equipment Ltd" required />
+                </div>
+                <div>
+                  <label class="field-label" style="font-size:11.5px;">Invoice Amount (₹) *</label>
+                  <input id="invModalAmount" type="number" min="0.01" step="any" placeholder="e.g. 20000" required />
+                </div>
+              </div>
+              <div class="grid2" style="gap:10px;margin-bottom:10px;">
+                <div>
+                  <label class="field-label" style="font-size:11.5px;">GST / Tax Amount (₹)</label>
+                  <input id="invModalGst" type="number" min="0" step="any" placeholder="e.g. 3600 (Optional)" />
+                </div>
+                <div>
+                  <label class="field-label" style="font-size:11.5px;">Invoice Document (PDF/Image) *</label>
+                  <input id="invModalFileInput" type="file" accept=".pdf,.png,.jpg,.jpeg" required onchange="handleInvoiceFileSelected(this)" />
+                  <div id="invModalFileStatus" style="font-size:11px;color:#64748b;margin-top:2px;"></div>
+                </div>
+              </div>
+              <div style="margin-bottom:14px;">
+                <label class="field-label" style="font-size:11.5px;">Remarks / Notes (Optional)</label>
+                <textarea id="invModalRemarks" rows="2" placeholder="e.g. Part 1 delivery received and verified"></textarea>
+              </div>
+              <div class="row" style="justify-content:flex-end;gap:10px;">
+                <button type="button" class="secondary" onclick="closeUploadInvoiceModal()">Cancel</button>
+                <button type="submit" class="primary" id="invModalSubmitBtn">Submit Invoice</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+
+      const existing = document.getElementById('uploadInvoiceModal');
+      if (existing) existing.remove();
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+
+    function closeUploadInvoiceModal() {
+      const el = document.getElementById('uploadInvoiceModal');
+      if (el) el.remove();
+    }
+
+    async function handleInvoiceFileSelected(input) {
+      const file = input.files?.[0];
+      if (!file) return;
+      if (file.size > 10 * 1024 * 1024) {
+        toast('File exceeds 10MB limit.');
+        input.value = '';
+        return;
+      }
+      const statusEl = document.getElementById('invModalFileStatus');
+      statusEl.textContent = 'Uploading file to secure storage…';
+
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await fetch('/api/invoices/upload-file', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${TOKEN}` },
+          body: formData,
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || 'Upload failed');
+        }
+        const data = await res.json();
+        currentUploadInvoiceFile = data;
+        statusEl.innerHTML = `<span style="color:var(--success);">✓ Attached: ${escapeHtml(data.original_filename)} (${Math.round(data.file_size / 1024)} KB)</span>`;
+      } catch (e) {
+        statusEl.innerHTML = `<span style="color:var(--danger);">✕ Upload failed: ${escapeHtml(e.message)}</span>`;
+        currentUploadInvoiceFile = null;
+      }
+    }
+
+    async function submitUploadInvoice(nfaId, remainingBalance) {
+      const btn = document.getElementById('invModalSubmitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Submitting…';
+
+      try {
+        if (!currentUploadInvoiceFile) {
+          throw new Error('Please select and upload an invoice document.');
+        }
+
+        const invNo = document.getElementById('invModalNumber')?.value?.trim();
+        const invDate = document.getElementById('invModalDate')?.value;
+        const vendor = document.getElementById('invModalVendor')?.value?.trim();
+        const amount = Number(document.getElementById('invModalAmount')?.value);
+        const gst = Number(document.getElementById('invModalGst')?.value) || 0;
+        const remarks = document.getElementById('invModalRemarks')?.value?.trim() || '';
+
+        if (!invNo) throw new Error('Invoice number is required.');
+        if (!invDate) throw new Error('Invoice date is required.');
+        if (!vendor) throw new Error('Vendor name is required.');
+        if (isNaN(amount) || amount <= 0) throw new Error('Valid invoice amount required.');
+        if (amount > remainingBalance + 0.01) {
+          throw new Error(`Invoice amount (${inr(amount)}) exceeds remaining balance of ${inr(remainingBalance)}.`);
+        }
+
+        await api(`/invoices/${nfaId}`, {
+          method: 'POST',
+          body: JSON.stringify({
+            invoice_number: invNo,
+            invoice_date: invDate,
+            vendor_name: vendor,
+            invoice_amount: amount,
+            gst_amount: gst,
+            file_path: currentUploadInvoiceFile.file_path,
+            original_filename: currentUploadInvoiceFile.original_filename,
+            file_id: currentUploadInvoiceFile.file_id,
+            file_size: currentUploadInvoiceFile.file_size,
+            mime_type: currentUploadInvoiceFile.mime_type,
+            remarks: remarks,
+          }),
+        });
+
+        toast('Invoice submitted successfully! Awaiting Finance verification.');
+        closeUploadInvoiceModal();
+        if (currentTab === 'invoices') showTab('invoices');
+        else if (currentTab === 'dashboard') showTab('dashboard');
+      } catch (e) {
+        toast(e.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Submit Invoice';
+      }
+    }
+
+    // Verify Invoice Modal (Finance)
+    function openVerifyInvoiceModal(invoiceId, invNo, amount, encodedVendor) {
+      const vendor = decodeURIComponent(encodedVendor || '');
+      const modalHtml = `
+        <div class="modal" id="verifyInvoiceModal" style="display:flex;">
+          <div class="modal-box" style="max-width:480px;">
+            <div class="modal-header">
+              <h3 class="modal-title" style="color:#0f766e;">Finance Verification: ${escapeHtml(invNo)}</h3>
+              <button class="modal-close" onclick="closeVerifyInvoiceModal()">✕</button>
+            </div>
+            <div style="font-size:13px;color:#475569;margin-bottom:12px;">
+              Vendor: <strong>${escapeHtml(vendor)}</strong> · Amount: <strong style="color:var(--primary);">${inr(amount)}</strong>
+            </div>
+            <form id="verifyInvoiceForm" onsubmit="event.preventDefault(); submitVerifyInvoice('${invoiceId}');">
+              <div style="margin-bottom:12px;">
+                <label class="field-label" style="font-size:12px;">Verification Decision *</label>
+                <div style="display:flex;gap:16px;margin-top:6px;">
+                  <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:600;color:var(--success);">
+                    <input type="radio" name="verifyDecision" value="verified" checked onchange="document.getElementById('returnReasonWrap').style.display='none'" />
+                    Verify &amp; Forward to Payment
+                  </label>
+                  <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:600;color:var(--danger);">
+                    <input type="radio" name="verifyDecision" value="returned" onchange="document.getElementById('returnReasonWrap').style.display='block'" />
+                    Return for Correction
+                  </label>
+                </div>
+              </div>
+              <div id="returnReasonWrap" style="display:none;margin-bottom:14px;">
+                <label class="field-label" style="font-size:12px;color:var(--danger);">Return Reason / Required Correction *</label>
+                <textarea id="verifyReturnRemarks" rows="2" placeholder="Specify why the invoice is returned (e.g. GST discrepancy, missing vendor stamp)"></textarea>
+              </div>
+              <div class="row" style="justify-content:flex-end;gap:10px;">
+                <button type="button" class="secondary" onclick="closeVerifyInvoiceModal()">Cancel</button>
+                <button type="submit" class="primary" id="verifyInvoiceBtn">Submit Decision</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+      const existing = document.getElementById('verifyInvoiceModal');
+      if (existing) existing.remove();
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+
+    function closeVerifyInvoiceModal() {
+      const el = document.getElementById('verifyInvoiceModal');
+      if (el) el.remove();
+    }
+
+    async function submitVerifyInvoice(invoiceId) {
+      const btn = document.getElementById('verifyInvoiceBtn');
+      btn.disabled = true;
+      try {
+        const decision = document.querySelector('input[name="verifyDecision"]:checked')?.value || 'verified';
+        const remarks = document.getElementById('verifyReturnRemarks')?.value?.trim() || '';
+        if (decision === 'returned' && !remarks) {
+          throw new Error('Please state the return reason for correction.');
+        }
+
+        await api(`/invoices/${invoiceId}/verify`, {
+          method: 'POST',
+          body: JSON.stringify({ decision, remarks }),
+        });
+
+        toast(`Invoice ${decision === 'verified' ? 'verified' : 'returned for correction'} successfully.`);
+        closeVerifyInvoiceModal();
+        if (currentTab === 'invoices') showTab('invoices');
+      } catch (e) {
+        toast(e.message);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // Payment Invoice Modal (Finance)
+    function openPaymentInvoiceModal(invoiceId, invNo, amount, encodedVendor, currentStatus, currentPaid, encodedUtr, encodedRemarks) {
+      const vendor = decodeURIComponent(encodedVendor || '');
+      const utr = decodeURIComponent(encodedUtr || '');
+      const remarks = decodeURIComponent(encodedRemarks || '');
+
+      const modalHtml = `
+        <div class="modal" id="paymentInvoiceModal" style="display:flex;">
+          <div class="modal-box" style="max-width:500px;">
+            <div class="modal-header">
+              <h3 class="modal-title" style="color:#1e40af;">Record Payment: ${escapeHtml(invNo)}</h3>
+              <button class="modal-close" onclick="closePaymentInvoiceModal()">✕</button>
+            </div>
+            <div style="font-size:13px;color:#475569;margin-bottom:12px;">
+              Vendor: <strong>${escapeHtml(vendor)}</strong> · Invoice Amount: <strong style="color:var(--primary);">${inr(amount)}</strong>
+            </div>
+            <form id="paymentInvoiceForm" onsubmit="event.preventDefault(); submitPaymentInvoice('${invoiceId}');">
+              <div class="grid2" style="gap:10px;margin-bottom:10px;">
+                <div>
+                  <label class="field-label" style="font-size:11.5px;">Payment Status *</label>
+                  <select id="payModalStatus" style="font-size:12.5px;">
+                    <option value="unpaid" ${currentStatus === 'unpaid' ? 'selected' : ''}>Unpaid</option>
+                    <option value="in_process" ${currentStatus === 'in_process' ? 'selected' : ''}>In Process (Disbursement Queue)</option>
+                    <option value="paid" ${currentStatus === 'paid' ? 'selected' : ''}>Paid (Settled)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="field-label" style="font-size:11.5px;">Disbursed Amount (₹) *</label>
+                  <input id="payModalAmount" type="number" step="any" value="${currentPaid || amount}" required />
+                </div>
+              </div>
+              <div class="grid2" style="gap:10px;margin-bottom:10px;">
+                <div>
+                  <label class="field-label" style="font-size:11.5px;">Payment Date</label>
+                  <input id="payModalDate" type="date" value="${new Date().toISOString().split('T')[0]}" />
+                </div>
+                <div>
+                  <label class="field-label" style="font-size:11.5px;">Payment Reference / UTR Number</label>
+                  <input id="payModalUtr" placeholder="e.g. UTR123456789" value="${escapeHtml(utr)}" />
+                </div>
+              </div>
+              <div style="margin-bottom:14px;">
+                <label class="field-label" style="font-size:11.5px;">Finance Payment Remarks (Optional)</label>
+                <textarea id="payModalRemarks" rows="2" placeholder="e.g. Bank transfer processed through NEFT/RTGS">${escapeHtml(remarks)}</textarea>
+              </div>
+              <div class="row" style="justify-content:flex-end;gap:10px;">
+                <button type="button" class="secondary" onclick="closePaymentInvoiceModal()">Cancel</button>
+                <button type="submit" class="primary" id="payModalSubmitBtn">Update Payment Record</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+      const existing = document.getElementById('paymentInvoiceModal');
+      if (existing) existing.remove();
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+
+    function closePaymentInvoiceModal() {
+      const el = document.getElementById('paymentInvoiceModal');
+      if (el) el.remove();
+    }
+
+    async function submitPaymentInvoice(invoiceId) {
+      const btn = document.getElementById('payModalSubmitBtn');
+      btn.disabled = true;
+      try {
+        const status = document.getElementById('payModalStatus')?.value || 'paid';
+        const paidAmount = Number(document.getElementById('payModalAmount')?.value);
+        const paymentDate = document.getElementById('payModalDate')?.value;
+        const utr = document.getElementById('payModalUtr')?.value?.trim();
+        const remarks = document.getElementById('payModalRemarks')?.value?.trim();
+
+        await api(`/invoices/${invoiceId}/payment`, {
+          method: 'POST',
+          body: JSON.stringify({
+            payment_status: status,
+            paid_amount: paidAmount,
+            payment_date: paymentDate,
+            payment_ref_utr: utr,
+            payment_remarks: remarks,
+          }),
+        });
+
+        toast('Payment record updated successfully.');
+        closePaymentInvoiceModal();
+        if (currentTab === 'invoices') showTab('invoices');
+      } catch (e) {
+        toast(e.message);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // Correct Returned Invoice Modal (Faculty)
+    async function openEditInvoiceModal(invoiceId) {
+      try {
+        const fy = activeFy();
+        const nfas = await api(`/invoices?fy=${fy.id}`);
+        let targetInvoice = null;
+        for (const n of nfas) {
+          const found = (n.invoices || []).find(i => i.id === invoiceId);
+          if (found) { targetInvoice = found; break; }
+        }
+        if (!targetInvoice) throw new Error('Invoice not found.');
+
+        const modalHtml = `
+          <div class="modal" id="editInvoiceModal" style="display:flex;">
+            <div class="modal-box" style="max-width:520px;">
+              <div class="modal-header">
+                <h3 class="modal-title" style="color:var(--primary-blue);">Correct Returned Invoice</h3>
+                <button class="modal-close" onclick="closeEditInvoiceModal()">✕</button>
+              </div>
+              ${targetInvoice.return_reason ? `
+                <div style="background:#fef2f2;border:1px solid #fecaca;color:#991b1b;padding:10px;border-radius:6px;font-size:12.5px;margin-bottom:12px;">
+                  <strong>Finance Return Reason:</strong> ${escapeHtml(targetInvoice.return_reason)}
+                </div>
+              ` : ''}
+              <form id="editInvoiceForm" onsubmit="event.preventDefault(); submitEditInvoice('${invoiceId}');">
+                <div class="grid2" style="gap:10px;margin-bottom:10px;">
+                  <div>
+                    <label class="field-label" style="font-size:11.5px;">Invoice Number *</label>
+                    <input id="editInvNumber" value="${escapeHtml(targetInvoice.invoice_number)}" required />
+                  </div>
+                  <div>
+                    <label class="field-label" style="font-size:11.5px;">Invoice Date *</label>
+                    <input id="editInvDate" type="date" value="${targetInvoice.invoice_date}" required />
+                  </div>
+                </div>
+                <div class="grid2" style="gap:10px;margin-bottom:10px;">
+                  <div>
+                    <label class="field-label" style="font-size:11.5px;">Vendor Name *</label>
+                    <input id="editInvVendor" value="${escapeHtml(targetInvoice.vendor_name)}" required />
+                  </div>
+                  <div>
+                    <label class="field-label" style="font-size:11.5px;">Invoice Amount (₹) *</label>
+                    <input id="editInvAmount" type="number" step="any" value="${targetInvoice.invoice_amount}" required />
+                  </div>
+                </div>
+                <div style="margin-bottom:14px;">
+                  <label class="field-label" style="font-size:11.5px;">Correction Remarks</label>
+                  <textarea id="editInvRemarks" rows="2" placeholder="Explain the corrections made for Finance review"></textarea>
+                </div>
+                <div class="row" style="justify-content:flex-end;gap:10px;">
+                  <button type="button" class="secondary" onclick="closeEditInvoiceModal()">Cancel</button>
+                  <button type="submit" class="primary" id="editInvSubmitBtn">Resubmit for Verification</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        `;
+        const existing = document.getElementById('editInvoiceModal');
+        if (existing) existing.remove();
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+      } catch (e) {
+        toast(e.message);
+      }
+    }
+
+    function closeEditInvoiceModal() {
+      const el = document.getElementById('editInvoiceModal');
+      if (el) el.remove();
+    }
+
+    async function submitEditInvoice(invoiceId) {
+      const btn = document.getElementById('editInvSubmitBtn');
+      btn.disabled = true;
+      try {
+        const invNo = document.getElementById('editInvNumber')?.value?.trim();
+        const invDate = document.getElementById('editInvDate')?.value;
+        const vendor = document.getElementById('editInvVendor')?.value?.trim();
+        const amount = Number(document.getElementById('editInvAmount')?.value);
+        const remarks = document.getElementById('editInvRemarks')?.value?.trim();
+
+        await api(`/invoices/${invoiceId}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            invoice_number: invNo,
+            invoice_date: invDate,
+            vendor_name: vendor,
+            invoice_amount: amount,
+            remarks: remarks,
+          }),
+        });
+
+        toast('Invoice corrected and resubmitted for Finance verification.');
+        closeEditInvoiceModal();
+        if (currentTab === 'invoices') showTab('invoices');
+      } catch (e) {
+        toast(e.message);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
     // ---------------- CREATE NEW NFA MODAL ----------------
     let selectedSdgs = [];
 
@@ -4492,6 +5539,7 @@
       quotationUploads = [null, null, null];
       comparativeStatementUpload = null;
       activeModalType = 'new_nfa';
+      currentNfaFormIdempotencyKey = 'nfa_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
 
       const userDept = USER.department_id ? REF.departments.find(d => d.id === USER.department_id) : null;
       const deptId = userDept ? userDept.id : (USER.department_id || REF.departments[0]?.id);
@@ -4589,14 +5637,14 @@
     <!-- Mandatory Select Organization Type -->
     <div style="margin-top:12px;margin-bottom:12px;padding:12px 14px;background:var(--section-bg);border:1px solid var(--border);border-radius:var(--radius-sm);">
       <label class="field-label" style="font-weight:700;color:var(--primary);margin-bottom:8px;">Select Organization Type <span style="color:var(--danger)">*</span></label>
-      <div style="display:flex;gap:24px;align-items:center;margin-bottom:12px;">
-        <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-weight:600;font-size:13.5px;">
+      <div style="display:flex;gap:24px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
+        <label class="radio-label">
           <input type="radio" name="nfaOrgType" id="nfaOrgTypeDept" value="department" checked onchange="onNfaOrgTypeChange('department')" />
-          Department
+          <span>Department</span>
         </label>
-        <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-weight:600;font-size:13.5px;">
+        <label class="radio-label">
           <input type="radio" name="nfaOrgType" id="nfaOrgTypeCentre" value="centre_or_office" onchange="onNfaOrgTypeChange('centre_or_office')" />
-          Centres or Offices
+          <span>Centres or Offices</span>
         </label>
       </div>
 
@@ -4744,6 +5792,23 @@
       </div>
     </div>
 
+    <!-- SECURE RESOURCE PERSON BANK DETAILS (EVENT NFAS) -->
+    <div id="bankDetailsSection" style="margin-top:14px;padding:14px;background:#f8fafc;border:1px solid #cbd5e1;border-radius:var(--radius-sm);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
+        <div>
+          <h3 style="margin:0;font-size:14px;color:var(--primary-blue);display:flex;align-items:center;gap:6px;">
+            <span>🔒</span> Resource Person — Bank Details (Confidential)
+          </h3>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">
+            Required for honorarium / travel disbursement. Encrypted with AES-256-GCM. Strictly restricted to Finance Office and Super Admin.
+          </div>
+        </div>
+        <button type="button" class="secondary" style="font-size:12px;padding:4px 10px;" onclick="addBankDetailRow({}, false)">+ Add Resource Person Bank Details</button>
+      </div>
+      <div id="bankDetailsRowsContainer"></div>
+      <div id="rpTotalHonorariumDisplay" style="margin-top:10px;font-size:12.5px;color:var(--primary-blue);font-weight:600;padding-top:6px;border-top:1px solid #e2e8f0;"></div>
+    </div>
+
     <div id="purchaseDetailsSection" style="display:none;margin-top:14px;padding:14px;background:#F0F4FA;border:1px solid #CCD6E8;border-radius:var(--radius-sm);">
       <h3 style="margin:0 0 10px;font-size:14px;color:var(--primary-blue);">Purchase / Item Details</h3>
       <div class="row" style="gap:10px;margin-bottom:8px;">
@@ -4813,9 +5878,9 @@
     ${renderPurchaseQuotationsHtml(false, [], null)}
 
     <div class="row" style="justify-content:flex-end;gap:12px">
-      <button class="secondary" type="button" onclick="handleCloseApplyNfa()">Cancel</button>
-      <button type="button" onclick="createNfa(false)">Save as Draft</button>
-      <button type="button" class="green" onclick="createNfa(true)">Submit to HOD</button>
+      <button id="btnCreateNfaCancel" class="secondary" type="button" onclick="handleCloseApplyNfa()">Cancel</button>
+      <button id="btnCreateNfaDraft" type="button" onclick="createNfa(false)">Save as Draft</button>
+      <button id="btnCreateNfaSubmit" type="button" class="green" onclick="createNfa(true)">Submit to HOD</button>
     </div>
   `);
 
@@ -5167,6 +6232,202 @@
       }
     }
 
+    // ---------------- SECURE RESOURCE PERSON BANK DETAILS UI HELPERS ----------------
+    function calcRpHonorariumTotal(isEdit = false) {
+      const containerId = isEdit ? 'editBankDetailsRowsContainer' : 'bankDetailsRowsContainer';
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      const inputs = container.querySelectorAll('.bd-honorarium');
+      let total = 0;
+      inputs.forEach(inp => {
+        const val = Number(inp.value) || 0;
+        total += val;
+      });
+      const dispId = isEdit ? 'editRpTotalHonorariumDisplay' : 'rpTotalHonorariumDisplay';
+      const disp = document.getElementById(dispId);
+      if (disp) {
+        disp.innerHTML = `Total Resource Person Honorarium: <strong style="color:var(--primary-blue);">${inr(total)}</strong>`;
+      }
+    }
+
+    function addBankDetailRow(data = {}, isEdit = false) {
+      const containerId = isEdit ? 'editBankDetailsRowsContainer' : 'bankDetailsRowsContainer';
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      const rowId = 'bdr_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+      const row = document.createElement('div');
+      row.className = 'bank-detail-card-row';
+      row.id = rowId;
+      if (data.id) row.dataset.id = data.id;
+      row.style.cssText = 'background:#ffffff;border:1px solid #cbd5e1;border-radius:6px;padding:12px;margin-bottom:12px;position:relative;';
+
+      const isExisting = Boolean(data.id);
+      const maskedAcct = data.masked_account_number || '';
+
+      row.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f1f5f9;">
+          <span style="font-weight:700;font-size:12.5px;color:var(--primary-blue);">👤 Resource Person &amp; Payment Details</span>
+          <button type="button" class="danger" style="font-size:11px;padding:2px 8px;" onclick="this.closest('.bank-detail-card-row').remove(); calcRpHonorariumTotal(${isEdit});">✕ Remove</button>
+        </div>
+        
+        <div style="font-size:11.5px;font-weight:700;color:#475569;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">1. Personal Details</div>
+        <div class="grid2" style="gap:10px;margin-bottom:8px;">
+          <div>
+            <label class="field-label" style="font-size:11.5px;margin-top:0;">Full Name *</label>
+            <input class="bd-rp-name" placeholder="e.g. Dr. Jane Smith" value="${escapeHtml(data.resource_person_name || '')}" />
+          </div>
+          <div>
+            <label class="field-label" style="font-size:11.5px;margin-top:0;">Designation *</label>
+            <input class="bd-designation" placeholder="e.g. Professor / Senior Scientist" value="${escapeHtml(data.designation || '')}" />
+          </div>
+        </div>
+        <div class="grid2" style="gap:10px;margin-bottom:8px;">
+          <div>
+            <label class="field-label" style="font-size:11.5px;margin-top:0;">Organization / Institution *</label>
+            <input class="bd-org" placeholder="e.g. IISc Bangalore / IIT Madras" value="${escapeHtml(data.organization || '')}" />
+          </div>
+          <div>
+            <label class="field-label" style="font-size:11.5px;margin-top:0;">Honorarium Amount (₹) *</label>
+            <input class="bd-honorarium" type="number" min="0" step="any" placeholder="e.g. 5000" value="${escapeHtml(data.honorarium_amount !== undefined ? data.honorarium_amount : '')}" oninput="calcRpHonorariumTotal(${isEdit})" style="font-weight:700;color:var(--primary-blue);" />
+          </div>
+        </div>
+        <div class="grid2" style="gap:10px;margin-bottom:12px;">
+          <div>
+            <label class="field-label" style="font-size:11.5px;margin-top:0;">Email Address *</label>
+            <input class="bd-email" type="email" placeholder="e.g. speaker@institution.ac.in" value="${escapeHtml(data.email || '')}" />
+          </div>
+          <div>
+            <label class="field-label" style="font-size:11.5px;margin-top:0;">Mobile Number *</label>
+            <input class="bd-mobile" placeholder="e.g. +91 9876543210" value="${escapeHtml(data.mobile || '')}" />
+          </div>
+        </div>
+
+        <div style="font-size:11.5px;font-weight:700;color:#0f766e;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;padding-top:8px;border-top:1px dashed #e2e8f0;">2. Bank Transfer Details (Encrypted at Rest)</div>
+        <div class="grid2" style="gap:10px;margin-bottom:8px;">
+          <div>
+            <label class="field-label" style="font-size:11.5px;margin-top:0;">Beneficiary / Account Holder Name *</label>
+            <input class="bd-holder-name" placeholder="Exact name as in passbook / bank" value="${escapeHtml(data.account_holder_name || '')}" />
+          </div>
+          <div>
+            <label class="field-label" style="font-size:11.5px;margin-top:0;">Bank Name *</label>
+            <input class="bd-bank-name" placeholder="e.g. State Bank of India / HDFC Bank" value="${escapeHtml(data.bank_name || '')}" />
+          </div>
+        </div>
+        <div class="grid2" style="gap:10px;margin-bottom:8px;">
+          <div>
+            <label class="field-label" style="font-size:11.5px;margin-top:0;">Bank Branch Name *</label>
+            <input class="bd-branch" placeholder="e.g. Koramangala Branch, Bangalore" value="${escapeHtml(data.branch_name || '')}" />
+          </div>
+          <div>
+            <label class="field-label" style="font-size:11.5px;margin-top:0;">IFSC Code (11 Chars) *</label>
+            <input class="bd-ifsc" style="text-transform:uppercase;font-family:monospace;" placeholder="e.g. SBIN0001234" value="${escapeHtml(data.ifsc_code || '')}" maxlength="11" />
+          </div>
+        </div>
+        <div class="grid2" style="gap:10px;margin-bottom:8px;">
+          <div>
+            <label class="field-label" style="font-size:11.5px;margin-top:0;">${isExisting ? 'Update Account Number (Leave blank to keep existing ' + escapeHtml(maskedAcct) + ')' : 'Bank Account Number *'}</label>
+            <input class="bd-acct-no" type="password" placeholder="${isExisting ? 'Enter new account number only if changing' : 'Enter bank account number'}" />
+          </div>
+          <div>
+            <label class="field-label" style="font-size:11.5px;margin-top:0;">Confirm Bank Account Number *</label>
+            <input class="bd-confirm-acct-no" type="password" placeholder="${isExisting ? 'Confirm new account number' : 'Re-enter bank account number'}" />
+          </div>
+        </div>
+        <div>
+          <label class="field-label" style="font-size:11.5px;margin-top:0;">Payment Reference / Remarks (Optional)</label>
+          <input class="bd-remarks" placeholder="e.g. Keynote speaker honorarium + local travel" value="${escapeHtml(data.remarks || '')}" />
+        </div>
+      `;
+      container.appendChild(row);
+      calcRpHonorariumTotal(isEdit);
+    }
+
+    function collectBankDetailsFromUi(isEdit = false) {
+      const containerId = isEdit ? 'editBankDetailsRowsContainer' : 'bankDetailsRowsContainer';
+      const container = document.getElementById(containerId);
+      if (!container) return [];
+      const rows = container.querySelectorAll('.bank-detail-card-row');
+      const details = [];
+
+      for (let i = 0; i < rows.length; i++) {
+        const r = rows[i];
+        const id = r.dataset.id || undefined;
+        const rpName = r.querySelector('.bd-rp-name')?.value?.trim() || '';
+        const designation = r.querySelector('.bd-designation')?.value?.trim() || '';
+        const org = r.querySelector('.bd-org')?.value?.trim() || '';
+        const honorarium = Number(r.querySelector('.bd-honorarium')?.value) || 0;
+        const email = r.querySelector('.bd-email')?.value?.trim() || '';
+        const mobile = r.querySelector('.bd-mobile')?.value?.trim() || '';
+        const holderName = r.querySelector('.bd-holder-name')?.value?.trim() || '';
+        const bankName = r.querySelector('.bd-bank-name')?.value?.trim() || '';
+        const branch = r.querySelector('.bd-branch')?.value?.trim() || '';
+        const acct = r.querySelector('.bd-acct-no')?.value?.trim() || '';
+        const conf = r.querySelector('.bd-confirm-acct-no')?.value?.trim() || '';
+        const ifsc = r.querySelector('.bd-ifsc')?.value?.trim()?.toUpperCase() || '';
+        const remarks = r.querySelector('.bd-remarks')?.value?.trim() || '';
+
+        // If all fields are completely blank, ignore this row
+        if (!rpName && !holderName && !bankName && !acct && !ifsc) continue;
+
+        if (!rpName) throw new Error(`Row ${i + 1}: Resource Person Full Name is required.`);
+        if (!designation) throw new Error(`Row ${i + 1}: Designation is required.`);
+        if (!org) throw new Error(`Row ${i + 1}: Organization / Institution is required.`);
+        if (!email) throw new Error(`Row ${i + 1}: Email address is required.`);
+        if (!mobile) throw new Error(`Row ${i + 1}: Mobile number is required.`);
+        if (!holderName) throw new Error(`Row ${i + 1}: Beneficiary / Account Holder Name is required.`);
+        if (!bankName) throw new Error(`Row ${i + 1}: Bank Name is required.`);
+        if (!branch) throw new Error(`Row ${i + 1}: Bank Branch Name is required.`);
+
+        if (id && !acct) {
+          // Existing record where user did not change account number
+          if (ifsc && !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc)) {
+            throw new Error(`Row ${i + 1}: Invalid IFSC Code "${ifsc}". Must match standard format (e.g. SBIN0001234).`);
+          }
+          details.push({
+            id,
+            resource_person_name: rpName,
+            designation: designation,
+            organization: org,
+            email: email,
+            mobile: mobile,
+            honorarium_amount: honorarium,
+            account_holder_name: holderName,
+            bank_name: bankName,
+            branch_name: branch,
+            ifsc_code: ifsc,
+            remarks: remarks,
+          });
+          continue;
+        }
+
+        if (!acct) throw new Error(`Row ${i + 1}: Bank Account Number is required.`);
+        if (acct.length < 6) throw new Error(`Row ${i + 1}: Bank Account Number must be at least 6 digits.`);
+        if (acct !== conf) throw new Error(`Row ${i + 1}: Bank Account Number and Confirmation do not match.`);
+        if (!ifsc) throw new Error(`Row ${i + 1}: IFSC Code is required.`);
+        if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc)) throw new Error(`Row ${i + 1}: Invalid IFSC Code "${ifsc}". Must match standard format (e.g. SBIN0001234).`);
+
+        details.push({
+          id,
+          resource_person_name: rpName,
+          designation: designation,
+          organization: org,
+          email: email,
+          mobile: mobile,
+          honorarium_amount: honorarium,
+          account_holder_name: holderName,
+          bank_name: bankName,
+          branch_name: branch,
+          account_number: acct,
+          confirm_account_number: conf,
+          ifsc_code: ifsc,
+          remarks: remarks,
+        });
+      }
+
+      return details;
+    }
+
     function addItemRow(p = '', q = '', r = '', a = '', isEdit = false) {
       const wrap = document.getElementById('itemsWrap');
       if (!wrap) return;
@@ -5212,6 +6473,8 @@
     }
 
     async function createNfa(andSubmit) {
+      if (isNfaSubmitting) return;
+
       const orgType = document.querySelector('input[name="nfaOrgType"]:checked')?.value || 'department';
       let deptId = '';
       if (orgType === 'department') {
@@ -5372,10 +6635,40 @@
         return toast(`Cannot submit NFA: Requested amount (${inr(totalReq)}) exceeds available budget (${inr(currentSelectedAvailableBudget)}).`);
       }
 
+      const btnSubmit = document.getElementById('btnCreateNfaSubmit');
+      const btnDraft = document.getElementById('btnCreateNfaDraft');
+      const btnCancel = document.getElementById('btnCreateNfaCancel');
+
+      isNfaSubmitting = true;
+      if (btnSubmit) btnSubmit.disabled = true;
+      if (btnDraft) btnDraft.disabled = true;
+      if (btnCancel) btnCancel.disabled = true;
+
+      let bankDetails = [];
+      if (nfaType === 'event') {
+        try {
+          bankDetails = collectBankDetailsFromUi(false);
+        } catch (err) {
+          isNfaSubmitting = false;
+          if (btnSubmit) { btnSubmit.disabled = false; btnSubmit.textContent = 'Submit Proposal'; }
+          if (btnDraft) { btnDraft.disabled = false; btnDraft.textContent = 'Save Draft'; }
+          if (btnCancel) btnCancel.disabled = false;
+          return toast(err.message);
+        }
+      }
+
+      if (andSubmit && btnSubmit) {
+        btnSubmit.innerHTML = `<span class="spinner-sm"></span> Submitting to HOD...`;
+      } else if (!andSubmit && btnDraft) {
+        btnDraft.innerHTML = `<span class="spinner-sm"></span> Saving Draft...`;
+      }
+
       try {
         const nfa = await api('/nfas', {
           method: 'POST',
+          headers: { 'Idempotency-Key': currentNfaFormIdempotencyKey },
           body: {
+            idempotency_key: currentNfaFormIdempotencyKey,
             ref_no: refNo,
             project_id: projId,
             organization_type: orgType,
@@ -5399,6 +6692,7 @@
             justification: point3,
             event_details: nfaType === 'event' ? eventDetails : undefined,
             purchase_details: nfaType === 'purchase' ? purchaseDetails : undefined,
+            resource_person_bank_details: nfaType === 'event' ? bankDetails : undefined,
             quotations: nfaType === 'purchase' ? quotations : [],
             comparative_statement: nfaType === 'purchase' ? comparativeStatement : undefined,
             sdgs: selectedSdgs.join('; '),
@@ -5420,6 +6714,19 @@
         openNfa(nfa.id);
       } catch (e) {
         toast(e.message);
+      } finally {
+        isNfaSubmitting = false;
+        if (btnSubmit) {
+          btnSubmit.disabled = false;
+          btnSubmit.innerHTML = `Submit to HOD`;
+        }
+        if (btnDraft) {
+          btnDraft.disabled = false;
+          btnDraft.innerHTML = `Save as Draft`;
+        }
+        if (btnCancel) {
+          btnCancel.disabled = false;
+        }
       }
     }
 
@@ -5437,6 +6744,16 @@
       const isCentre = n.organization_type === 'centre_or_office' || (REF.departments.find(d => d.id === n.department_id)?.category === 'coe');
       const isOwner = n.created_by === USER.id;
       const isDeleted = Boolean(n.is_deleted);
+      const isFinanceOrAdmin = ['finance', 'finance_head', 'super_admin'].includes(USER.role);
+
+      let bankDetailsList = [];
+      if (n.nfa_type === 'event' && (isOwner || isFinanceOrAdmin)) {
+        try {
+          bankDetailsList = await api(`/nfas/${n.id}/bank-details`);
+        } catch (e) {
+          console.warn('Bank details not accessible:', e.message);
+        }
+      }
       const canOwnerEdit = isOwner && ['draft', 'revision_required'].includes(n.status);
       const canHodEdit = USER.role === 'hod' && (n.status === 'submitted' || n.status === 'pending_hod_review') && USER.department_id === n.department_id;
       const canDeanEdit = ['dean', 'associate_dean'].includes(USER.role) && (n.status === 'dean_review' || n.status === 'pending_dean_approval');
@@ -5628,6 +6945,74 @@
       </div>
     `}
 
+    ${(n.nfa_type === 'event' && bankDetailsList && bankDetailsList.length > 0) ? `
+      <div class="card" style="padding:16px;margin:16px 0;background:#f8fafc;border:1px solid #cbd5e1;border-radius:6px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+          <div>
+            <h4 style="margin:0;color:${isFinanceOrAdmin ? '#0f766e' : '#1e40af'};font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px;">
+              <span>🔒</span> Resource Persons &amp; Payment Credentials ${isFinanceOrAdmin ? '(Authorized Finance Access)' : ''}
+            </h4>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">
+              ${isFinanceOrAdmin ? 'Encrypted with AES-256-GCM. Decrypted on-demand. Every access is logged to the security audit trail.' : 'Account numbers are encrypted with AES-256-GCM and securely stored for Finance disbursement.'}
+            </div>
+          </div>
+          <span class="badge b-approved" style="font-size:11px;">AES-256-GCM</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          ${bankDetailsList.map((bd, idx) => {
+            let trkBadge = '<span class="badge" style="background:#e0f2fe;color:#0369a1;">Details Submitted</span>';
+            const s = bd.tracking_status || 'details_submitted';
+            if (s === 'details_pending') trkBadge = '<span class="badge b-draft">Details Pending</span>';
+            else if (s === 'finance_verification') trkBadge = '<span class="badge b-warning">Finance Verification</span>';
+            else if (s === 'ready_for_payment') trkBadge = '<span class="badge" style="background:#fef3c7;color:#92400e;">Ready for Payment</span>';
+            else if (s === 'payment_processing') trkBadge = '<span class="badge b-under_review">Payment Processing</span>';
+            else if (s === 'paid') trkBadge = '<span class="badge b-approved">Paid (Settled)</span>';
+            else if (s === 'returned_for_correction') trkBadge = '<span class="badge b-rejected">Returned for Correction</span>';
+            else if (s === 'payment_failed') trkBadge = '<span class="badge b-rejected">Payment Failed</span>';
+
+            return `
+            <div id="bdCard_${bd.id}" style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:14px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <strong style="color:var(--primary-blue);font-size:14px;">${idx + 1}. ${escapeHtml(bd.resource_person_name)}</strong>
+                  ${trkBadge}
+                </div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                  ${isFinanceOrAdmin ? `
+                    <button class="secondary" style="font-size:11.5px;padding:3px 8px;" onclick="revealBankDetail('${n.id}', '${bd.id}')">👁️ Reveal Account</button>
+                    <button class="secondary" style="font-size:11.5px;padding:3px 8px;" onclick="openUpdateRpPaymentModal('${n.id}', '${bd.id}', '${escapeHtml(bd.resource_person_name)}', ${bd.honorarium_amount || 0}, '${bd.tracking_status || 'details_submitted'}', ${bd.deductions || 0}, '${escapeHtml(bd.payment_ref_utr || '')}', '${escapeHtml(bd.payment_date || '')}', '${escapeHtml(bd.payment_remarks || '')}')">💳 Payment Tracking</button>
+                  ` : ''}
+                </div>
+              </div>
+
+              <!-- Personal Information -->
+              <div class="grid2" style="gap:8px;font-size:12.5px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px dashed #e2e8f0;">
+                <div><span class="muted">Designation:</span> <strong>${escapeHtml(bd.designation || '—')}</strong></div>
+                <div><span class="muted">Organization:</span> <strong>${escapeHtml(bd.organization || '—')}</strong></div>
+                <div><span class="muted">Email:</span> <strong>${escapeHtml(bd.email || '—')}</strong></div>
+                <div><span class="muted">Mobile:</span> <strong>${escapeHtml(bd.mobile || '—')}</strong></div>
+                <div><span class="muted">Proposed Honorarium:</span> <strong style="color:var(--primary-blue);" class="financial-amount">${bd.honorarium_amount ? inr(bd.honorarium_amount) : '—'}</strong></div>
+                <div><span class="muted">Net Payable (Post-Deductions):</span> <strong style="color:var(--success);" class="financial-amount">${bd.net_payable_amount ? inr(bd.net_payable_amount) : (bd.honorarium_amount ? inr(bd.honorarium_amount) : '—')}</strong></div>
+              </div>
+
+              <!-- Banking Credentials -->
+              <div class="grid2" style="gap:8px;font-size:12.5px;">
+                <div><span class="muted">Beneficiary / Account Holder:</span> <strong>${escapeHtml(bd.account_holder_name)}</strong></div>
+                <div><span class="muted">Bank Name:</span> <strong>${escapeHtml(bd.bank_name)}</strong></div>
+                <div><span class="muted">Account Number:</span> <span id="acctNum_${bd.id}" style="font-family:monospace;font-weight:700;letter-spacing:1px;color:#1e293b;">${escapeHtml(bd.masked_account_number)}</span></div>
+                <div><span class="muted">IFSC Code:</span> <strong style="font-family:monospace;">${escapeHtml(bd.ifsc_code)}</strong></div>
+                ${bd.branch_name ? `<div><span class="muted">Branch:</span> ${escapeHtml(bd.branch_name)}</div>` : ''}
+                ${bd.payment_ref_utr ? `<div><span class="muted">Payment UTR:</span> <strong style="color:var(--success);font-family:monospace;">${escapeHtml(bd.payment_ref_utr)}</strong></div>` : ''}
+                ${bd.payment_date ? `<div><span class="muted">Payment Date:</span> ${escapeHtml(bd.payment_date)}</div>` : ''}
+                ${bd.remarks ? `<div style="grid-column:1/-1"><span class="muted">Remarks:</span> ${escapeHtml(bd.remarks)}</div>` : ''}
+              </div>
+            </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    ` : ''}
+
     <h3 style="margin-top:20px;font-size:16px;">Budget Items</h3>
     <div class="table-wrap">
     <table>
@@ -5755,12 +7140,18 @@
     }
 
     async function submitNfa(id) {
+      if (isNfaSubmitting) return;
+      isNfaSubmitting = true;
       try {
         await api(`/nfas/${id}/submit`, { method: 'POST' });
         toast('NFA submitted successfully!');
         openNfa(id);
         if (currentTab === 'nfas') showTab('nfas');
-      } catch (e) { toast(e.message); }
+      } catch (e) {
+        toast(e.message);
+      } finally {
+        isNfaSubmitting = false;
+      }
     }
 
     // Modal for Return for Correction (Replacing browser prompt)
@@ -5888,52 +7279,229 @@
       } catch (e) { toast(e.message); }
     }
 
-    // Modal viewer for Dev Mock Email Notification Logs
+    async function revealBankDetail(nfaId, bankDetailId) {
+      try {
+        const data = await api(`/nfas/${nfaId}/bank-details/${bankDetailId}/reveal`, { method: 'POST' });
+        const el = document.getElementById(`acctNum_${bankDetailId}`);
+        if (el) {
+          el.innerHTML = `<span style="background:#fef08a;color:#854d0e;padding:2px 6px;border-radius:4px;font-weight:700;">${escapeHtml(data.account_number)}</span> <button type="button" onclick="navigator.clipboard.writeText('${escapeHtml(data.account_number)}');toast('Account number copied!');" style="margin-left:6px;font-size:10px;padding:2px 6px;" class="secondary">Copy</button>`;
+        }
+        toast('Account number revealed & logged to security audit trail.');
+      } catch (e) {
+        toast('Failed to reveal bank details: ' + e.message);
+      }
+    }
+
+    function openUpdateRpPaymentModal(nfaId, bankDetailId, rpName, honorarium, currentStatus, deductions, utr, paymentDate, remarks) {
+      const modalHtml = `
+        <div class="modal" id="rpPaymentModal" style="display:flex;">
+          <div class="modal-box" style="max-width:500px;">
+            <div class="modal-header">
+              <h3 class="modal-title" style="color:#0f766e;">Honorarium Payment Tracking</h3>
+              <button class="modal-close" onclick="closeRpPaymentModal()">✕</button>
+            </div>
+            <div style="font-size:13px;color:#475569;margin-bottom:12px;">
+              Resource Person: <strong>${escapeHtml(rpName)}</strong> · Proposed Honorarium: <strong>${inr(honorarium)}</strong>
+            </div>
+            <form onsubmit="event.preventDefault(); submitRpPaymentTracking('${nfaId}', '${bankDetailId}');">
+              <div class="grid2" style="gap:10px;margin-bottom:10px;">
+                <div>
+                  <label class="field-label" style="font-size:11.5px;">Tracking Status *</label>
+                  <select id="rpPayStatus" style="font-size:12.5px;">
+                    <option value="details_submitted" ${currentStatus === 'details_submitted' ? 'selected' : ''}>Details Submitted</option>
+                    <option value="finance_verification" ${currentStatus === 'finance_verification' ? 'selected' : ''}>Finance Verification</option>
+                    <option value="ready_for_payment" ${currentStatus === 'ready_for_payment' ? 'selected' : ''}>Ready for Payment</option>
+                    <option value="payment_processing" ${currentStatus === 'payment_processing' ? 'selected' : ''}>Payment Processing</option>
+                    <option value="paid" ${currentStatus === 'paid' ? 'selected' : ''}>Paid (Settled)</option>
+                    <option value="returned_for_correction" ${currentStatus === 'returned_for_correction' ? 'selected' : ''}>Returned for Correction</option>
+                    <option value="payment_failed" ${currentStatus === 'payment_failed' ? 'selected' : ''}>Payment Failed</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="field-label" style="font-size:11.5px;">Approved Honorarium (₹)</label>
+                  <input id="rpPayApproved" type="number" step="any" value="${honorarium}" oninput="calcRpNet()" />
+                </div>
+              </div>
+              <div class="grid2" style="gap:10px;margin-bottom:10px;">
+                <div>
+                  <label class="field-label" style="font-size:11.5px;">Applicable Deductions / TDS (₹)</label>
+                  <input id="rpPayDeductions" type="number" step="any" value="${deductions || 0}" oninput="calcRpNet()" />
+                </div>
+                <div>
+                  <label class="field-label" style="font-size:11.5px;">Net Payable Amount (₹)</label>
+                  <input id="rpPayNet" type="number" step="any" value="${Math.max(0, honorarium - (deductions || 0))}" readonly style="background:#f1f5f9;font-weight:700;color:var(--primary-blue);" />
+                </div>
+              </div>
+              <div class="grid2" style="gap:10px;margin-bottom:10px;">
+                <div>
+                  <label class="field-label" style="font-size:11.5px;">Disbursement Date</label>
+                  <input id="rpPayDate" type="date" value="${paymentDate || new Date().toISOString().split('T')[0]}" />
+                </div>
+                <div>
+                  <label class="field-label" style="font-size:11.5px;">Payment Reference / UTR</label>
+                  <input id="rpPayUtr" placeholder="e.g. UTR-NEFT-99238" value="${escapeHtml(utr || '')}" />
+                </div>
+              </div>
+              <div style="margin-bottom:14px;">
+                <label class="field-label" style="font-size:11.5px;">Payment Remarks (Optional)</label>
+                <textarea id="rpPayRemarks" rows="2" placeholder="e.g. Processed via institutional net banking">${escapeHtml(remarks || '')}</textarea>
+              </div>
+              <div class="row" style="justify-content:flex-end;gap:10px;">
+                <button type="button" class="secondary" onclick="closeRpPaymentModal()">Cancel</button>
+                <button type="submit" class="primary" id="rpPaySubmitBtn">Save Payment Details</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+      const existing = document.getElementById('rpPaymentModal');
+      if (existing) existing.remove();
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+
+    function closeRpPaymentModal() {
+      const el = document.getElementById('rpPaymentModal');
+      if (el) el.remove();
+    }
+
+    function calcRpNet() {
+      const app = Number(document.getElementById('rpPayApproved')?.value) || 0;
+      const ded = Number(document.getElementById('rpPayDeductions')?.value) || 0;
+      const net = Math.max(0, app - ded);
+      const netEl = document.getElementById('rpPayNet');
+      if (netEl) netEl.value = net;
+    }
+
+    async function submitRpPaymentTracking(nfaId, bankDetailId) {
+      const btn = document.getElementById('rpPaySubmitBtn');
+      btn.disabled = true;
+      try {
+        const trackingStatus = document.getElementById('rpPayStatus')?.value;
+        const approvedHonorarium = Number(document.getElementById('rpPayApproved')?.value);
+        const deductions = Number(document.getElementById('rpPayDeductions')?.value) || 0;
+        const netPayable = Number(document.getElementById('rpPayNet')?.value);
+        const paymentDate = document.getElementById('rpPayDate')?.value;
+        const utr = document.getElementById('rpPayUtr')?.value?.trim();
+        const remarks = document.getElementById('rpPayRemarks')?.value?.trim();
+
+        await api(`/nfas/${nfaId}/bank-details/${bankDetailId}/payment-tracking`, {
+          method: 'POST',
+          body: JSON.stringify({
+            tracking_status: trackingStatus,
+            approved_honorarium: approvedHonorarium,
+            deductions: deductions,
+            net_payable_amount: netPayable,
+            payment_date: paymentDate,
+            payment_ref_utr: utr,
+            payment_remarks: remarks,
+          }),
+        });
+
+        toast('Resource person payment tracking updated successfully.');
+        closeRpPaymentModal();
+        openNfa(nfaId);
+      } catch (e) {
+        toast(e.message);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function renderMockEventBadge(event) {
+      const e = String(event || '').toLowerCase();
+      let bg = '#e2e8f0';
+      let color = '#334155';
+      let label = event || 'Notification';
+
+      if (e === 'nfa_submitted' || e === 'nfa_resubmitted') {
+        bg = '#dbeafe'; color = '#1e40af'; label = e === 'nfa_resubmitted' ? 'NFA Resubmitted' : 'NFA Submitted';
+      } else if (e === 'hod_reviewed') {
+        bg = '#ede9fe'; color = '#5b21b6'; label = 'HOD Reviewed';
+      } else if (e === 'deans_office_verified') {
+        bg = '#ccfbf1'; color = '#0f766e'; label = "Dean's Office Verified";
+      } else if (e === 'associate_dean_approved') {
+        bg = '#f3e8ff'; color = '#6b21a8'; label = 'Assoc. Dean Approved';
+      } else if (e === 'dean_approved') {
+        bg = '#e0e7ff'; color = '#3730a3'; label = 'Dean Approved';
+      } else if (e === 'finance_office_approved') {
+        bg = '#fef3c7'; color = '#92400e'; label = 'Finance Verified';
+      } else if (e === 'director_approved') {
+        bg = '#dcfce7'; color = '#15803d'; label = 'Director Approved';
+      } else if (e === 'finance_head_approved') {
+        bg = '#d1fae5'; color = '#065f46'; label = 'Finance Head (Final)';
+      } else if (e === 'revision_required') {
+        bg = '#ffedd5'; color = '#9a3412'; label = 'Revision Required';
+      } else if (e === 'rejected') {
+        bg = '#fee2e2'; color = '#991b1b'; label = 'Proposal Rejected';
+      }
+
+      return `<span style="display:inline-block;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:700;white-space:nowrap;background:${bg};color:${color};border:1px solid ${color}33;">${escapeHtml(label)}</span>`;
+    }
+
+    // Modal viewer for Dev Mock Email Notification Logs (High-Contrast Audit Redesign)
     async function openMockEmailLogsModal() {
       try {
         const emails = await api('/nfas/dev/mock-emails');
         let html = `
           <button class="close-btn" onclick="closeModal()">✕</button>
-          <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:16px;">
-            <div>
-              <h2 style="margin:0;font-size:18px;">Mock Email Notification Audit Log (${emails.length})</h2>
-              <div class="card-sub">Simulated institutional outbox (Strictly Mock Delivery — Zero Real Emails Sent)</div>
+          <div style="max-width:1050px;width:100%;margin:0 auto;">
+            <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+              <div>
+                <h2 style="margin:0;font-size:18px;color:#0b2545;">Mock Email Notification Audit Log (${emails.length})</h2>
+                <div class="card-sub" style="font-size:12.5px;color:#64748b;margin-top:3px;">
+                  Simulated institutional outbox (Strictly Mock Delivery — Zero Real Emails Sent)
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span class="badge b-approved" style="font-size:11px;padding:4px 8px;">Audit Mode Active</span>
+                <button type="button" class="secondary" style="font-size:12px;padding:6px 12px;" onclick="clearMockEmailLogs()">Clear Mock Log</button>
+              </div>
             </div>
-            <button class="secondary" onclick="clearMockEmailLogs()">Clear Mock Log</button>
-          </div>
-          <div class="table-wrap" style="max-height:500px;overflow-y:auto;">
-            <table>
-              <thead>
-                <tr>
-                  <th>Timestamp</th>
-                  <th>NFA Ref</th>
-                  <th>Event</th>
-                  <th>Recipient</th>
-                  <th>Subject</th>
-                  <th>Attachment</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
+            <div style="border:1px solid #cbd5e1;border-radius:8px;overflow:hidden;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+              <div class="table-wrap" style="max-height:520px;overflow-y:auto;margin:0;">
+                <table style="width:100%;min-width:920px;border-collapse:collapse;">
+                  <thead>
+                    <tr style="position:sticky;top:0;background:#002D70;color:#ffffff;z-index:2;box-shadow:0 2px 4px rgba(0,0,0,0.1);">
+                      <th style="padding:10px 12px;font-size:12px;font-weight:700;text-align:left;color:#ffffff;width:130px;">Timestamp</th>
+                      <th style="padding:10px 12px;font-size:12px;font-weight:700;text-align:left;color:#ffffff;width:150px;">NFA Ref</th>
+                      <th style="padding:10px 12px;font-size:12px;font-weight:700;text-align:left;color:#ffffff;width:160px;">Event</th>
+                      <th style="padding:10px 12px;font-size:12px;font-weight:700;text-align:left;color:#ffffff;width:200px;">Recipient</th>
+                      <th style="padding:10px 12px;font-size:12px;font-weight:700;text-align:left;color:#ffffff;">Subject</th>
+                      <th style="padding:10px 12px;font-size:12px;font-weight:700;text-align:center;color:#ffffff;width:120px;">Attachment</th>
+                      <th style="padding:10px 12px;font-size:12px;font-weight:700;text-align:center;color:#ffffff;width:115px;">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
         `;
         if (emails.length === 0) {
-          html += `<tr><td colspan="7" class="muted" style="text-align:center;padding:30px;">No mock emails sent yet. Actions like submit, review, and return will record here.</td></tr>`;
+          html += `<tr><td colspan="7" class="muted" style="text-align:center;padding:36px;font-size:13px;">No mock emails recorded yet. Workflow transitions like submit, review, and return will record here.</td></tr>`;
         } else {
           [...emails].reverse().forEach(m => {
             html += `
-              <tr>
-                <td style="font-size:11.5px;white-space:nowrap;">${new Date(m.created_at).toLocaleString()}</td>
-                <td><strong>${escapeHtml(m.nfa_ref_no)}</strong></td>
-                <td><span class="role-pill" style="font-size:11px;">${escapeHtml(m.event)}</span></td>
-                <td><strong>${escapeHtml(m.recipient_name)}</strong><div class="muted" style="font-size:11px;">&lt;${escapeHtml(m.recipient_email)}&gt;</div></td>
-                <td><div style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(m.body)}">${escapeHtml(m.subject)}</div></td>
-                <td>${m.has_pdf_attachment ? `<span class="badge b-approved" style="font-size:10px;">${escapeHtml(m.attachment_name || 'PDF Attached')}</span>` : '<span class="muted" style="font-size:11px;">None</span>'}</td>
-                <td><span class="badge ${m.status === 'mock_delivered' ? 'b-approved' : 'b-rejected'}">${escapeHtml(m.status)}</span></td>
+              <tr style="border-bottom:1px solid #e2e8f0;">
+                <td style="padding:10px 12px;font-size:11.5px;color:#475569;white-space:nowrap;vertical-align:top;">${new Date(m.created_at).toLocaleString()}</td>
+                <td style="padding:10px 12px;vertical-align:top;"><span style="font-family:monospace;font-size:12px;font-weight:700;color:#003D8F;background:#f0f7ff;padding:2px 6px;border-radius:4px;border:1px solid #bfdbfe;white-space:nowrap;">${escapeHtml(m.nfa_ref_no)}</span></td>
+                <td style="padding:10px 12px;vertical-align:top;">${renderMockEventBadge(m.event)}</td>
+                <td style="padding:10px 12px;vertical-align:top;font-size:12.5px;">
+                  <strong style="color:#1e293b;display:block;">${escapeHtml(m.recipient_name)}</strong>
+                  <div style="font-size:11px;color:#64748b;word-break:break-all;margin-top:2px;">&lt;${escapeHtml(m.recipient_email)}&gt;</div>
+                </td>
+                <td style="padding:10px 12px;vertical-align:top;font-size:12.5px;line-height:1.4;color:#334155;max-width:320px;">
+                  <div style="font-weight:600;color:#1e293b;" title="${escapeHtml(m.body)}">${escapeHtml(m.subject)}</div>
+                </td>
+                <td style="padding:10px 12px;vertical-align:top;text-align:center;">
+                  ${m.has_pdf_attachment ? `<span style="display:inline-block;padding:2px 6px;border-radius:4px;font-size:10.5px;font-weight:700;background:#dcfce7;color:#166534;border:1px solid #86efac;white-space:nowrap;">📄 ${escapeHtml(m.attachment_name || 'PDF Attached')}</span>` : `<span style="font-size:11.5px;color:#94a3b8;">None</span>`}
+                </td>
+                <td style="padding:10px 12px;vertical-align:top;text-align:center;">
+                  <span style="display:inline-block;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:700;white-space:nowrap;background:${m.status === 'mock_delivered' ? '#ecfdf5' : '#fef2f2'};color:${m.status === 'mock_delivered' ? '#047857' : '#b91c1c'};border:1px solid ${m.status === 'mock_delivered' ? '#a7f3d0' : '#fecaca'};">
+                    ${m.status === 'mock_delivered' ? '✓ Mock Delivered' : '✕ Failed'}
+                  </span>
+                </td>
               </tr>
             `;
           });
         }
-        html += `</tbody></table></div>`;
+        html += `</tbody></table></div></div></div>`;
         openModal(html);
       } catch (e) {
         toast('Failed to load mock emails: ' + e.message);
@@ -6116,6 +7684,23 @@
       </div>
     </div>
 
+    <!-- Edit Bank Details Card -->
+    <div id="editBankDetailsCard" class="card" style="padding:16px;background:#f8fafc;border:1px solid #cbd5e1;margin-bottom:16px;${isPurchase ? 'display:none;' : ''}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+        <div>
+          <h3 style="margin:0;font-size:14px;color:var(--primary-blue);display:flex;align-items:center;gap:6px;">
+            <span>🔒</span> Resource Person — Bank Details (Confidential)
+          </h3>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">
+            Encrypted with AES-256-GCM. Restricted strictly to Finance Office and Super Admin.
+          </div>
+        </div>
+        <button type="button" class="secondary" style="font-size:12px;padding:4px 10px;" onclick="addBankDetailRow({}, true)">+ Add Resource Person Bank Details</button>
+      </div>
+      <div id="editBankDetailsRowsContainer"></div>
+      <div id="editRpTotalHonorariumDisplay" style="margin-top:10px;font-size:12.5px;color:var(--primary-blue);font-weight:600;padding-top:6px;border-top:1px solid #e2e8f0;"></div>
+    </div>
+
     <!-- Purchase Details Card -->
     <div id="editPurchaseCard" class="card" style="padding:16px;background:linear-gradient(to right, #f0fdf4, #f8fafc);border:1px solid #bbf7d0;margin-bottom:16px;${!isPurchase ? 'display:none;' : ''}">
       <h3 style="margin-top:0;font-size:15px;color:#14532d;font-weight:700;">Purchase &amp; Procurement Details</h3>
@@ -6212,6 +7797,14 @@
         });
       } else {
         addItemRow('', '', '', '', true);
+      }
+      if (!isPurchase) {
+        try {
+          const existingBds = await api(`/nfas/${id}/bank-details`);
+          if (Array.isArray(existingBds)) {
+            existingBds.forEach(bd => addBankDetailRow(bd, true));
+          }
+        } catch (e) {}
       }
       initialApplyNfaSnapshot = captureApplyNfaSnapshot();
     }
@@ -6333,6 +7926,15 @@
 
       if (items.filter(i => i.amount > 0).length === 0 && (!samplingChecked || nfaType === 'purchase')) return toast(nfaType === 'purchase' ? 'Add at least one purchase item with description, quantity, rate, and amount' : 'Add at least one event expense item with quantity, rate, and amount');
 
+      let bankDetails = [];
+      if (nfaType === 'event') {
+        try {
+          bankDetails = collectBankDetailsFromUi(true);
+        } catch (err) {
+          return toast(err.message);
+        }
+      }
+
       try {
         await api(`/nfas/${id}`, {
           method: 'PUT',
@@ -6353,6 +7955,7 @@
             justification: point3,
             event_details: nfaType === 'event' ? eventDetails : undefined,
             purchase_details: nfaType === 'purchase' ? purchaseDetails : undefined,
+            resource_person_bank_details: nfaType === 'event' ? bankDetails : undefined,
             quotations: nfaType === 'purchase' ? quotations : [],
             comparative_statement: nfaType === 'purchase' ? comparativeStatement : undefined,
             sdgs: selectedSdgs.join('; '),
@@ -6463,7 +8066,7 @@
 
     // ---------------- BUDGETS VIEW ----------------
     async function renderBudgets(main) {
-      const isInstitutionalRole = ['super_admin', 'director', 'finance', 'dean', 'associate_dean'].includes(USER.role);
+      const isInstitutionalRole = ['super_admin', 'director', 'finance', 'finance_head', 'dean', 'associate_dean', 'deans_office'].includes(USER.role);
       if (!selectedBudgetDeptId) {
         selectedBudgetDeptId = USER.department_id || REF.departments[0]?.id;
       }
@@ -6945,7 +8548,13 @@
         </div>
       </div>
       <p class="card-sub">All workbook changes are previewed against the master ledger before any allocations are committed.</p>
-      <input type="file" id="excelFile" accept=".xlsx" style="max-width:400px" />
+      <div id="syncDropzone" class="file-dropzone" style="max-width:440px;margin-bottom:12px;" onclick="document.getElementById('excelFile').click()">
+        <input type="file" id="excelFile" accept=".xlsx" style="display:none;" />
+        <div class="file-dropzone-icon" style="font-size:24px;margin-bottom:2px;">📊</div>
+        <div class="file-dropzone-prompt" style="font-size:13px;">Choose modified Excel workbook (.xlsx) or drag &amp; drop here</div>
+        <div class="file-dropzone-sub">Preview differences against the master ledger</div>
+      </div>
+      <div id="syncDropzoneCard" class="file-selected-card" style="display:none;max-width:440px;margin-bottom:12px;"></div>
       <button onclick="previewExcel('${dept}')">Preview Workbook Diff</button>
       <div id="excelResult" style="margin-top:16px"></div>
     </div>
@@ -6976,6 +8585,7 @@
     </div>
   `;
       main.innerHTML = html;
+      setupFileDropzone('syncDropzone', 'excelFile', 'syncDropzoneCard', { icon: '📊' });
     }
 
     async function previewExcel(dept) {
@@ -7574,6 +9184,7 @@
       const modal = document.getElementById('modalExcelOnboarding');
       if (!modal) return;
       resetExcelOnboardingStep();
+      setupFileDropzone('facultyDropzone', 'facultyExcelInput', 'facultyDropzoneCard', { icon: '📊' });
       modal.style.display = 'flex';
     }
 
@@ -7586,7 +9197,7 @@
       document.getElementById('excelStepUpload').style.display = 'block';
       document.getElementById('excelStepPreview').style.display = 'none';
       document.getElementById('excelStepResults').style.display = 'none';
-      document.getElementById('facultyExcelInput').value = '';
+      clearFileDropzone('facultyExcelInput', 'facultyDropzoneCard', 'facultyDropzone');
       document.getElementById('btnInspectExcel').disabled = true;
       const errEl = document.getElementById('excelUploadErr');
       if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }

@@ -19,7 +19,31 @@ import {
 } from '../lib/budgetEngine.js';
 import { renderNfaPdf } from '../lib/pdf.js';
 import { dispatchWorkflowNotification } from '../services/notifications.js';
-import type { NfaStatus, Role } from '../types.js';
+import {
+  encryptAccountNumber,
+  decryptAccountNumber,
+  validateIfsc,
+} from '../lib/encryption.js';
+import type { NfaStatus, Role, ResourcePersonBankDetail, ResourcePersonBankDetailDTO } from '../types.js';
+
+// Server-side Idempotency Cache to prevent duplicate NFA creation
+interface IdempotencyRecord {
+  id: string;
+  ref_no: string;
+  payload: any;
+  timestamp: number;
+}
+const idempotencyCache = new Map<string, IdempotencyRecord>();
+const inFlightIdempotency = new Map<string, Promise<{ status: number; payload: any }>>();
+
+function cleanIdempotencyCache() {
+  const tenMinsAgo = Date.now() - 10 * 60 * 1000;
+  for (const [key, val] of idempotencyCache.entries()) {
+    if (val.timestamp < tenMinsAgo) {
+      idempotencyCache.delete(key);
+    }
+  }
+}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const signaturesDir = path.join(__dirname, '..', '..', 'data', 'signatures');
@@ -187,6 +211,180 @@ nfasRouter.get('/:id/attachments/:type/:index?', (req: AuthedRequest, res) => {
   fs.createReadStream(fullPath).pipe(res);
 });
 
+/** GET /api/nfas/:id/bank-details — Fetch masked bank details for Event NFA */
+nfasRouter.get('/:id/bank-details', async (req: AuthedRequest, res) => {
+  const nfa = store.data.nfas.find((n) => n.id === req.params.id && !n.is_deleted);
+  if (!nfa) return res.status(404).json({ error: 'NFA not found' });
+
+  const isCreator = req.user!.id === nfa.created_by;
+  const isFinanceOrAdmin = ['finance', 'finance_head', 'super_admin'].includes(req.user!.role);
+
+  // Strict RBAC: Creator gets masked details; Finance & Super Admin get reveal authorization; all others forbidden
+  if (!isCreator && !isFinanceOrAdmin) {
+    return res.status(403).json({ error: 'Forbidden: Access to confidential bank details is strictly restricted to Finance and Super Admin.' });
+  }
+
+  const details = (store.data.resource_person_bank_details || []).filter((d) => d.nfa_id === nfa.id);
+  const responseData: ResourcePersonBankDetailDTO[] = details.map((d) => ({
+    id: d.id,
+    nfa_id: d.nfa_id,
+    resource_person_name: d.resource_person_name,
+    designation: d.designation,
+    organization: d.organization,
+    email: d.email,
+    mobile: d.mobile,
+    honorarium_amount: d.honorarium_amount,
+    account_holder_name: d.account_holder_name,
+    bank_name: d.bank_name,
+    masked_account_number: d.masked_account_number,
+    ifsc_code: d.ifsc_code,
+    branch_name: d.branch_name,
+    remarks: d.remarks,
+    tracking_status: d.tracking_status || 'details_submitted',
+    approved_honorarium: d.approved_honorarium,
+    deductions: d.deductions,
+    net_payable_amount: d.net_payable_amount,
+    payment_date: d.payment_date,
+    payment_ref_utr: d.payment_ref_utr,
+    payment_remarks: d.payment_remarks,
+    created_at: d.created_at,
+    can_reveal: isFinanceOrAdmin,
+  }));
+
+  res.json(responseData);
+});
+
+/** POST /api/nfas/:id/bank-details/:bankDetailId/payment-tracking — Update payment tracking for Resource Person (Finance only) */
+nfasRouter.post('/:id/bank-details/:bankDetailId/payment-tracking', async (req: AuthedRequest, res) => {
+  const nfa = store.data.nfas.find((n) => n.id === req.params.id && !n.is_deleted);
+  if (!nfa) return res.status(404).json({ error: 'NFA not found' });
+
+  const isFinanceOrAdmin = ['finance', 'finance_head', 'super_admin'].includes(req.user!.role);
+  if (!isFinanceOrAdmin) {
+    return res.status(403).json({
+      error: 'Forbidden: Only Finance Office, Finance Officer (Head), and Super Admin may update payment tracking.',
+    });
+  }
+
+  const detail = (store.data.resource_person_bank_details || []).find(
+    (d) => d.id === req.params.bankDetailId && d.nfa_id === nfa.id
+  );
+  if (!detail) return res.status(404).json({ error: 'Bank details not found for this NFA' });
+
+  const {
+    tracking_status,
+    approved_honorarium,
+    deductions,
+    net_payable_amount,
+    payment_date,
+    payment_ref_utr,
+    payment_remarks,
+  } = req.body;
+
+  const validStatuses = [
+    'details_pending',
+    'details_submitted',
+    'finance_verification',
+    'ready_for_payment',
+    'payment_processing',
+    'paid',
+    'returned_for_correction',
+    'payment_failed',
+  ];
+
+  if (tracking_status && !validStatuses.includes(tracking_status)) {
+    return res.status(400).json({ error: 'Invalid tracking status value.' });
+  }
+
+  await store.transact((db) => {
+    const d = (db.resource_person_bank_details || []).find((x) => x.id === detail.id);
+    if (!d) return;
+
+    if (tracking_status) d.tracking_status = tracking_status;
+    if (approved_honorarium !== undefined) d.approved_honorarium = Number(approved_honorarium) || 0;
+    if (deductions !== undefined) d.deductions = Number(deductions) || 0;
+    if (net_payable_amount !== undefined) d.net_payable_amount = Number(net_payable_amount) || 0;
+    else if (d.approved_honorarium !== undefined) {
+      d.net_payable_amount = Math.max(0, (d.approved_honorarium || 0) - (d.deductions || 0));
+    }
+    if (payment_date !== undefined) d.payment_date = payment_date;
+    if (payment_ref_utr !== undefined) d.payment_ref_utr = String(payment_ref_utr).trim();
+    if (payment_remarks !== undefined) d.payment_remarks = String(payment_remarks).trim();
+    d.updated_at = new Date().toISOString();
+
+    db.audit_logs.push({
+      id: uuid(),
+      entity_type: 'bank_detail',
+      entity_id: d.id,
+      department_id: nfa.department_id,
+      old_amount: null,
+      new_amount: d.net_payable_amount || null,
+      difference: null,
+      changed_by: req.user!.id,
+      role: req.user!.role,
+      reason: `Honorarium payment tracking updated for "${d.resource_person_name}" to "${d.tracking_status}" (Net: ₹${d.net_payable_amount || 0}, UTR: ${d.payment_ref_utr || 'N/A'}) by ${req.user!.name} (${req.user!.role}).`,
+      source: 'portal',
+      approval_status: d.tracking_status || 'updated',
+      created_at: new Date().toISOString(),
+    });
+  });
+
+  res.json({ message: 'Honorarium payment tracking updated successfully.' });
+});
+
+/** POST /api/nfas/:id/bank-details/:bankDetailId/reveal — Decrypt and view plaintext account number with audit log */
+nfasRouter.post('/:id/bank-details/:bankDetailId/reveal', async (req: AuthedRequest, res) => {
+  const nfa = store.data.nfas.find((n) => n.id === req.params.id && !n.is_deleted);
+  if (!nfa) return res.status(404).json({ error: 'NFA not found' });
+
+  const isFinanceOrAdmin = ['finance', 'finance_head', 'super_admin'].includes(req.user!.role);
+  if (!isFinanceOrAdmin) {
+    return res.status(403).json({
+      error: 'Forbidden: Only Finance Office, Finance Officer (Head), and Super Admin are authorized to decrypt confidential bank details.',
+    });
+  }
+
+  const detail = (store.data.resource_person_bank_details || []).find(
+    (d) => d.id === req.params.bankDetailId && d.nfa_id === nfa.id
+  );
+  if (!detail) return res.status(404).json({ error: 'Bank details not found for this NFA' });
+
+  // Security Audit Logging: Log access action WITHOUT storing plaintext account number
+  await store.transact((db) => {
+    db.audit_logs.push({
+      id: uuid(),
+      entity_type: 'bank_detail',
+      entity_id: detail.id,
+      department_id: nfa.department_id,
+      old_amount: null,
+      new_amount: null,
+      difference: null,
+      changed_by: req.user!.id,
+      role: req.user!.role,
+      reason: `Confidential bank details revealed for Resource Person "${detail.resource_person_name}" on NFA ${nfa.ref_no} by ${req.user!.name} (${req.user!.role}).`,
+      source: 'portal',
+      approval_status: 'revealed',
+      created_at: new Date().toISOString(),
+    });
+  });
+
+  try {
+    const plainAccountNumber = decryptAccountNumber(detail.encrypted_account_number, detail.iv, detail.auth_tag);
+    res.json({
+      id: detail.id,
+      resource_person_name: detail.resource_person_name,
+      account_holder_name: detail.account_holder_name,
+      bank_name: detail.bank_name,
+      account_number: plainAccountNumber,
+      ifsc_code: detail.ifsc_code,
+      branch_name: detail.branch_name,
+      remarks: detail.remarks,
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: 'Failed to decrypt bank account number: ' + err.message });
+  }
+});
+
 function withItems(nfaId: string) {
   return store.data.nfa_items.filter((i) => i.nfa_id === nfaId).sort((a, b) => a.sl_no - b.sl_no);
 }
@@ -325,8 +523,13 @@ function generateUniqueNfaRefNo(db: any, departmentId: string, financialYearId: 
   }
 
   const deptCount = db.nfas.filter((n: any) => n.department_id === departmentId).length;
-  const nextSeq = Math.max(maxSeq + 1, deptCount + 1);
-  return `${prefix}${String(nextSeq).padStart(4, '0')}`;
+  let nextSeq = Math.max(maxSeq + 1, deptCount + 1);
+  let candidate = `${prefix}${String(nextSeq).padStart(4, '0')}`;
+  while (db.nfas.some((n: any) => n.ref_no && n.ref_no.toLowerCase() === candidate.toLowerCase())) {
+    nextSeq++;
+    candidate = `${prefix}${String(nextSeq).padStart(4, '0')}`;
+  }
+  return candidate;
 }
 
 /** GET /api/nfas/next-ref — generate auto reference number */
@@ -574,8 +777,33 @@ nfasRouter.delete('/:id', async (req: AuthedRequest, res) => {
  * Department can be chosen or custom entered.
  * Ref No is automatically generated if not provided.
  */
-nfasRouter.post('/', requireRole('faculty', 'hod', 'dean', 'super_admin'), (req: AuthedRequest, res) => {
+nfasRouter.post('/', requireRole('faculty', 'hod', 'dean', 'super_admin'), async (req: AuthedRequest, res) => {
   const b = req.body || {};
+  
+  // Idempotency check: if client sent an idempotency key and we already processed it, return cached response
+  const idempotencyKey = (req.headers['idempotency-key'] as string || b.idempotency_key || '').trim();
+  if (idempotencyKey) {
+    if (idempotencyCache.has(idempotencyKey)) {
+      const cached = idempotencyCache.get(idempotencyKey)!;
+      console.log(`[IDEMPOTENCY] Returning cached NFA ${cached.ref_no} (${cached.id}) for key ${idempotencyKey}`);
+      return res.status(200).json(cached.payload);
+    }
+    if (inFlightIdempotency.has(idempotencyKey)) {
+      console.log(`[IDEMPOTENCY] Awaiting in-flight submission for key ${idempotencyKey}`);
+      const inFlight = await inFlightIdempotency.get(idempotencyKey)!;
+      return res.status(200).json(inFlight.payload);
+    }
+  }
+
+  let resolveInFlight: ((val: { status: number; payload: any }) => void) | undefined;
+  let rejectInFlight: ((err: any) => void) | undefined;
+  if (idempotencyKey) {
+    const p = new Promise<{ status: number; payload: any }>((resolve, reject) => {
+      resolveInFlight = resolve;
+      rejectInFlight = reject;
+    });
+    inFlightIdempotency.set(idempotencyKey, p);
+  }
   
   // Organization Type: 'department' (Option A) vs 'centre_or_office' (Option B)
   const orgType: 'department' | 'centre_or_office' = b.organization_type === 'centre_or_office' ? 'centre_or_office' : 'department';
@@ -712,6 +940,38 @@ nfasRouter.post('/', requireRole('faculty', 'hod', 'dean', 'super_admin'), (req:
   });
   const total = processedItems.reduce((s: number, it: any) => s + (Number(it.amount) || 0), 0);
 
+  // Rapid submission debounce: detect identical submission within 15 seconds from the same user
+  const fifteenSecsAgo = Date.now() - 15 * 1000;
+  const recentDuplicate = store.data.nfas.find((n) => {
+    if (n.is_deleted || n.created_by !== req.user!.id) return false;
+    const createdTime = new Date(n.created_at).getTime();
+    if (createdTime < fifteenSecsAgo) return false;
+    return (
+      String(n.title || '').trim().toLowerCase() === String(b.title || '').trim().toLowerCase() &&
+      n.department_id === targetDepartmentId &&
+      Math.abs(n.total_amount - total) < 0.01
+    );
+  });
+  if (recentDuplicate) {
+    console.log(`[RAPID SUBMISSION BLOCKED] Duplicate NFA creation prevented: ${recentDuplicate.ref_no} (${recentDuplicate.id})`);
+    const existingPayload = {
+      ...recentDuplicate,
+      items: withItems(recentDuplicate.id),
+      approvals: withApprovals(recentDuplicate.id)
+    };
+    if (idempotencyKey) {
+      idempotencyCache.set(idempotencyKey, {
+        id: recentDuplicate.id,
+        ref_no: recentDuplicate.ref_no,
+        payload: existingPayload,
+        timestamp: Date.now()
+      });
+      resolveInFlight?.({ status: 200, payload: existingPayload });
+      inFlightIdempotency.delete(idempotencyKey);
+    }
+    return res.status(200).json(existingPayload);
+  }
+
   // Auto reference number calculation with enforced uniqueness
   let refNo = b.ref_no ? String(b.ref_no).trim() : '';
   const refExists = refNo && store.data.nfas.some((n) => n.ref_no.toLowerCase() === refNo.toLowerCase());
@@ -776,7 +1036,59 @@ nfasRouter.post('/', requireRole('faculty', 'hod', 'dean', 'super_admin'), (req:
     proposer_signature: proposerSig,
   };
 
-  store.transact((db) => {
+  const bankDetailEntries: ResourcePersonBankDetail[] = [];
+  if (!isPurchase && Array.isArray(b.resource_person_bank_details)) {
+    for (const bd of b.resource_person_bank_details) {
+      if (!bd || !bd.account_number) continue;
+      const acct = String(bd.account_number).trim();
+      const conf = bd.confirm_account_number !== undefined ? String(bd.confirm_account_number).trim() : acct;
+      if (acct !== conf) {
+        return res.status(400).json({
+          error: `Bank account number and confirmation do not match for "${bd.resource_person_name || 'Resource Person'}".`,
+        });
+      }
+      if (acct.length < 6) {
+        return res.status(400).json({
+          error: `Invalid account number for "${bd.resource_person_name || 'Resource Person'}": must be at least 6 digits.`,
+        });
+      }
+      const ifsc = String(bd.ifsc_code || '').trim().toUpperCase();
+      if (!validateIfsc(ifsc)) {
+        return res.status(400).json({
+          error: `Invalid IFSC Code "${ifsc}" for "${bd.resource_person_name || 'Resource Person'}". Must match standard format (e.g. SBIN0001234).`,
+        });
+      }
+      const enc = encryptAccountNumber(acct);
+      const honorarium = bd.honorarium_amount !== undefined ? Number(bd.honorarium_amount) || 0 : 0;
+      bankDetailEntries.push({
+        id: uuid(),
+        nfa_id: nfa.id,
+        resource_person_name: String(bd.resource_person_name || '').trim(),
+        designation: bd.designation ? String(bd.designation).trim() : '',
+        organization: bd.organization ? String(bd.organization).trim() : '',
+        email: bd.email ? String(bd.email).trim() : '',
+        mobile: bd.mobile ? String(bd.mobile).trim() : '',
+        honorarium_amount: honorarium,
+        account_holder_name: String(bd.account_holder_name || '').trim(),
+        bank_name: String(bd.bank_name || '').trim(),
+        encrypted_account_number: enc.encrypted_account_number,
+        iv: enc.iv,
+        auth_tag: enc.auth_tag,
+        masked_account_number: enc.masked_account_number,
+        ifsc_code: ifsc,
+        branch_name: bd.branch_name ? String(bd.branch_name).trim() : '',
+        remarks: bd.remarks ? String(bd.remarks).trim() : '',
+        tracking_status: 'details_submitted',
+        approved_honorarium: honorarium,
+        deductions: 0,
+        net_payable_amount: honorarium,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
+    }
+  }
+
+  await store.transact((db) => {
     db.nfas.push(nfa);
     processedItems.forEach((it: any) => {
       db.nfa_items.push({
@@ -784,9 +1096,26 @@ nfasRouter.post('/', requireRole('faculty', 'hod', 'dean', 'super_admin'), (req:
         nfa_id: nfa.id,
       });
     });
+    if (bankDetailEntries.length > 0) {
+      db.resource_person_bank_details = db.resource_person_bank_details || [];
+      bankDetailEntries.forEach((entry) => db.resource_person_bank_details!.push(entry));
+    }
   });
 
-  res.status(201).json({ ...nfa, items: withItems(nfa.id) });
+  const responsePayload = { ...nfa, items: withItems(nfa.id) };
+  if (idempotencyKey) {
+    cleanIdempotencyCache();
+    idempotencyCache.set(idempotencyKey, {
+      id: nfa.id,
+      ref_no: nfa.ref_no,
+      payload: responsePayload,
+      timestamp: Date.now()
+    });
+    resolveInFlight?.({ status: 201, payload: responsePayload });
+    inFlightIdempotency.delete(idempotencyKey);
+  }
+
+  res.status(201).json(responsePayload);
 });
 
 /**
@@ -1106,6 +1435,102 @@ nfasRouter.put('/:id', async (req: AuthedRequest, res) => {
       if (b.event_details !== undefined) {
         nfa.event_details = b.event_details;
       }
+      if (Array.isArray(b.resource_person_bank_details)) {
+        db.resource_person_bank_details = db.resource_person_bank_details || [];
+        const existingDetails = db.resource_person_bank_details.filter((d) => d.nfa_id === nfa.id);
+        const updatedList: ResourcePersonBankDetail[] = [];
+
+        for (const bd of b.resource_person_bank_details) {
+          if (!bd) continue;
+          if (bd.id) {
+            const existing = existingDetails.find((d) => d.id === bd.id);
+            if (existing) {
+              if (bd.account_number) {
+                const acct = String(bd.account_number).trim();
+                const conf = bd.confirm_account_number !== undefined ? String(bd.confirm_account_number).trim() : acct;
+                if (acct !== conf) {
+                  return { error: 400, msg: `Bank account number and confirmation do not match for "${bd.resource_person_name || 'Resource Person'}".` };
+                }
+                if (acct.length < 6) {
+                  return { error: 400, msg: `Invalid account number: must be at least 6 digits.` };
+                }
+                const enc = encryptAccountNumber(acct);
+                existing.encrypted_account_number = enc.encrypted_account_number;
+                existing.iv = enc.iv;
+                existing.auth_tag = enc.auth_tag;
+                existing.masked_account_number = enc.masked_account_number;
+              }
+              if (bd.ifsc_code) {
+                const ifsc = String(bd.ifsc_code).trim().toUpperCase();
+                if (!validateIfsc(ifsc)) {
+                  return { error: 400, msg: `Invalid IFSC Code "${ifsc}".` };
+                }
+                existing.ifsc_code = ifsc;
+              }
+              if (bd.resource_person_name !== undefined) existing.resource_person_name = String(bd.resource_person_name).trim();
+              if (bd.designation !== undefined) existing.designation = String(bd.designation).trim();
+              if (bd.organization !== undefined) existing.organization = String(bd.organization).trim();
+              if (bd.email !== undefined) existing.email = String(bd.email).trim();
+              if (bd.mobile !== undefined) existing.mobile = String(bd.mobile).trim();
+              if (bd.honorarium_amount !== undefined) {
+                existing.honorarium_amount = Number(bd.honorarium_amount) || 0;
+                if (!existing.approved_honorarium) existing.approved_honorarium = existing.honorarium_amount;
+                if (!existing.net_payable_amount) existing.net_payable_amount = existing.honorarium_amount;
+              }
+              if (bd.account_holder_name !== undefined) existing.account_holder_name = String(bd.account_holder_name).trim();
+              if (bd.bank_name !== undefined) existing.bank_name = String(bd.bank_name).trim();
+              if (bd.branch_name !== undefined) existing.branch_name = String(bd.branch_name).trim();
+              if (bd.remarks !== undefined) existing.remarks = String(bd.remarks).trim();
+              existing.updated_at = new Date().toISOString();
+              updatedList.push(existing);
+              continue;
+            }
+          }
+
+          if (bd.account_number) {
+            const acct = String(bd.account_number).trim();
+            const conf = bd.confirm_account_number !== undefined ? String(bd.confirm_account_number).trim() : acct;
+            if (acct !== conf) {
+              return { error: 400, msg: `Bank account number and confirmation do not match for "${bd.resource_person_name || 'Resource Person'}".` };
+            }
+            if (acct.length < 6) {
+              return { error: 400, msg: `Invalid account number: must be at least 6 digits.` };
+            }
+            const ifsc = String(bd.ifsc_code || '').trim().toUpperCase();
+            if (!validateIfsc(ifsc)) {
+              return { error: 400, msg: `Invalid IFSC Code "${ifsc}".` };
+            }
+            const enc = encryptAccountNumber(acct);
+            const honorarium = bd.honorarium_amount !== undefined ? Number(bd.honorarium_amount) || 0 : 0;
+            updatedList.push({
+              id: uuid(),
+              nfa_id: nfa.id,
+              resource_person_name: String(bd.resource_person_name || '').trim(),
+              designation: bd.designation ? String(bd.designation).trim() : '',
+              organization: bd.organization ? String(bd.organization).trim() : '',
+              email: bd.email ? String(bd.email).trim() : '',
+              mobile: bd.mobile ? String(bd.mobile).trim() : '',
+              honorarium_amount: honorarium,
+              account_holder_name: String(bd.account_holder_name || '').trim(),
+              bank_name: String(bd.bank_name || '').trim(),
+              encrypted_account_number: enc.encrypted_account_number,
+              iv: enc.iv,
+              auth_tag: enc.auth_tag,
+              masked_account_number: enc.masked_account_number,
+              ifsc_code: ifsc,
+              branch_name: bd.branch_name ? String(bd.branch_name).trim() : '',
+              remarks: bd.remarks ? String(bd.remarks).trim() : '',
+              tracking_status: 'details_submitted',
+              approved_honorarium: honorarium,
+              deductions: 0,
+              net_payable_amount: honorarium,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            });
+          }
+        }
+        db.resource_person_bank_details = db.resource_person_bank_details.filter((d) => d.nfa_id !== nfa.id).concat(updatedList);
+      }
     }
 
     if (b.point1) nfa.purpose = b.point1;
@@ -1135,7 +1560,13 @@ nfasRouter.post('/:id/submit', async (req: AuthedRequest, res) => {
     const nfa = db.nfas.find((n) => n.id === req.params.id && !n.is_deleted);
     if (!nfa) return { error: 404 as const };
     if (nfa.created_by !== req.user!.id) return { error: 403 as const };
-    if (!['draft', 'revision_required'].includes(nfa.status)) return { error: 'bad_status' as const };
+    if (!['draft', 'revision_required'].includes(nfa.status)) {
+      // Safe submission deduplication: if already submitted, return current NFA state
+      if (['pending_hod_review', 'pending_deans_office_verification', 'submitted', 'in_review'].includes(nfa.status)) {
+        return { error: 'already_submitted' as const, nfa };
+      }
+      return { error: 'bad_status' as const };
+    }
     
     const items = db.nfa_items.filter((i) => i.nfa_id === nfa.id);
     if (items.length === 0) return { error: 'no_items' as const };
@@ -1243,6 +1674,16 @@ nfasRouter.post('/:id/submit', async (req: AuthedRequest, res) => {
   });
 
   if ('error' in result) {
+    if (result.error === 'already_submitted') {
+      const existingNfa = result.nfa!;
+      console.log(`[SUBMIT DEDUPLICATED] NFA ${req.params.id} already submitted in status ${existingNfa.status}`);
+      return res.status(200).json({
+        ...existingNfa,
+        items: withItems(existingNfa.id),
+        approvals: withApprovals(existingNfa.id),
+        message: 'NFA has already been submitted for review'
+      });
+    }
     if (result.error === 'validation_error' || result.error === 'budget_error') {
       return res.status(400).json({ error: (result as any).msg });
     }

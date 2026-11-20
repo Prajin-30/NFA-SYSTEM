@@ -10,4 +10,5 @@ data/*.pre_*
 data/.super_admin_temp_credential*
 data/*credential*
 data/*.txt
+data/supabase_backup*
 scratch/

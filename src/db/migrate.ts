@@ -59,7 +59,9 @@ export async function runMigrations(): Promise<{ applied: string[]; skipped: str
     }
 
     const filePath = path.join(migrationsDir, file);
-    const sql = fs.readFileSync(filePath, 'utf-8');
+    let sql = fs.readFileSync(filePath, 'utf-8');
+    // Strip file-level BEGIN/COMMIT so withTransaction controls the atomic transaction boundary
+    sql = sql.replace(/^\s*BEGIN\s*;/gim, '-- BEGIN;').replace(/^\s*COMMIT\s*;/gim, '-- COMMIT;');
 
     console.log(`[MIGRATION] Applying migration: ${version}...`);
     await withTransaction(async (client) => {

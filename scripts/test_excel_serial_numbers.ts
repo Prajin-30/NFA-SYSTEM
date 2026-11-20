@@ -124,7 +124,8 @@ async function runExcelSerialTests() {
 
   if (!storedFdp || storedFdp.sl_no !== 1) throw new Error(`Stored FDP sl_no mismatch: ${storedFdp?.sl_no}`);
   if (!storedRack || String(storedRack.sl_no) !== '2.1') throw new Error(`Stored Rack sl_no mismatch: ${storedRack?.sl_no}`);
-  if (!storedUnnumbered || storedUnnumbered.sl_no !== undefined) throw new Error(`Stored unnumbered item must not have fabricated sl_no`);
+  if (!storedUnnumbered) throw new Error('storedUnnumbered not found!');
+  if (storedUnnumbered.sl_no !== undefined && storedUnnumbered.sl_no !== null) throw new Error(`Stored unnumbered item must not have fabricated sl_no: got ${storedUnnumbered.sl_no}`);
   console.log('  PASS: In-memory store subcategories retain exact source serial numbers.');
 
   // If in postgres mode, test round-trip through PostgreSQL

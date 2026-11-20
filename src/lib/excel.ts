@@ -903,7 +903,7 @@ export async function applyMasterBudgetImport(
         subcat.cell_mapping = cellMap;
         subcat.department_id = dept!.id;
         subcat.name = subPreview.name;
-        if (subPreview.sl_no !== undefined) subcat.sl_no = subPreview.sl_no;
+        subcat.sl_no = subPreview.sl_no !== undefined ? subPreview.sl_no : undefined;
       }
 
       subcatsProcessed.add(subcat.id);

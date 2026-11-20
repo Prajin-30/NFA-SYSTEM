@@ -473,10 +473,23 @@ export async function authenticateInstitutionalUser(
   let userRecord: any = null;
   if (process.env.DATABASE_URL && process.env.DATA_SOURCE !== 'json') {
     try {
-      const dbRes = await query(
-        'SELECT id, name, email, role, department_id, authorized_centre_ids, must_change_password, is_active, temp_password_created_at, signature_image FROM user_profiles WHERE id = $1 OR lower(email) = $2 LIMIT 1;',
-        [authUserId, cleanEmail]
-      );
+      let dbRes;
+      try {
+        dbRes = await query(
+          'SELECT id, name, email, role, department_id, authorized_centre_ids, must_change_password, is_active, temp_password_created_at, signature_image FROM user_profiles WHERE id = $1 OR lower(email) = $2 LIMIT 1;',
+          [authUserId, cleanEmail]
+        );
+      } catch (colErr: any) {
+        if (colErr?.code === '42703') {
+          // Schema tolerance: column authorized_centre_ids does not exist yet in user_profiles (pre-migration 002)
+          dbRes = await query(
+            'SELECT id, name, email, role, department_id, must_change_password, is_active, temp_password_created_at, signature_image FROM user_profiles WHERE id = $1 OR lower(email) = $2 LIMIT 1;',
+            [authUserId, cleanEmail]
+          );
+        } else {
+          throw colErr;
+        }
+      }
       if (dbRes.rows.length > 0) {
         userRecord = dbRes.rows[0];
       }

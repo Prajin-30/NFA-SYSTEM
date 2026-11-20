@@ -61,10 +61,23 @@ export async function requireAuth(req: AuthedRequest, res: Response, next: NextF
       process.env.MOCK_AUTH !== 'true'
     ) {
       try {
-        const queryRes = await query(
-          'SELECT id, name, email, role, department_id, authorized_centre_ids, must_change_password, is_active, signature_image FROM user_profiles WHERE id = $1 LIMIT 1;',
-          [decoded.id]
-        );
+        let queryRes;
+        try {
+          queryRes = await query(
+            'SELECT id, name, email, role, department_id, authorized_centre_ids, must_change_password, is_active, signature_image FROM user_profiles WHERE id = $1 LIMIT 1;',
+            [decoded.id]
+          );
+        } catch (colErr: any) {
+          if (colErr?.code === '42703') {
+            // Schema tolerance: column authorized_centre_ids does not exist yet (pre-migration 002)
+            queryRes = await query(
+              'SELECT id, name, email, role, department_id, must_change_password, is_active, signature_image FROM user_profiles WHERE id = $1 LIMIT 1;',
+              [decoded.id]
+            );
+          } else {
+            throw colErr;
+          }
+        }
         if (queryRes.rows.length > 0) {
           dbUser = queryRes.rows[0];
         }

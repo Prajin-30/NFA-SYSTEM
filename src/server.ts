@@ -24,6 +24,7 @@ import { requireAuth, AuthedRequest } from './middleware/auth.js';
 import { store } from './store.js';
 import { query } from './db/pool.js';
 import { isLiveSupabaseAuthConfigured, getSupabaseAdmin } from './services/supabaseAuth.js';
+import { isEmailTestingEnabled } from './services/resendService.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const signaturesDir = path.join(__dirname, '..', 'data', 'signatures');
@@ -139,6 +140,8 @@ app.get('/api/health', async (_req, res) => {
       data_source_value: process.env.DATA_SOURCE || null,
       app_env: process.env.APP_ENV || null,
       node_env: process.env.NODE_ENV || null,
+      email_test_mode: isEmailTestingEnabled(),
+      email_provider: (process.env.EMAIL_PROVIDER || 'mock').trim().toLowerCase(),
       node_version: process.version,
       has_websocket: typeof (globalThis as any).WebSocket !== 'undefined',
       live_auth_configured: isLiveSupabaseAuthConfigured(),

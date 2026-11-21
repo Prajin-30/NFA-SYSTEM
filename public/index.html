@@ -8686,32 +8686,60 @@
       </div>
     </div>
 
-    <!-- Email Notification & Delivery Testing (Super Admin Development Only) -->
+    <!-- Email Notification & Delivery Testing (Mock & Resend Gateway) -->
     <div class="card" id="emailTestingCard" style="border: 1px solid #c7d2fe; background: #ffffff;">
-      <div class="card-header" style="margin-bottom: 12px;">
+      <div class="card-header" style="margin-bottom: 12px; display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
         <div style="display:flex;align-items:center;gap:10px;">
           <div style="width:36px;height:36px;border-radius:8px;background:#e0e7ff;color:#4338ca;display:flex;align-items:center;justify-content:center;font-size:18px;">✉️</div>
           <div>
-            <h2 class="card-title" style="margin:0;font-size:16px;">Email Notification &amp; Delivery Testing (Resend)</h2>
-            <div class="card-sub" style="font-size:12.5px;color:#64748b;">Deliberate Resend integration testing for Super Admin in development mode. Institutional NFA workflows remain mock-only.</div>
+            <h2 class="card-title" style="margin:0;font-size:16px;">Email Notification &amp; Delivery Testing (Mock &amp; Resend)</h2>
+            <div class="card-sub" style="font-size:12.5px;color:#64748b;">Super Admin email verification. Workflow notifications remain strictly mock-only (zero real emails to faculty/staff).</div>
           </div>
         </div>
-        <div>
-          <span class="badge" style="background:#e0e7ff;color:#3730a3;font-weight:600;font-size:11px;">Resend Test Gateway</span>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+          <span id="emailTestingModeBadge" class="badge" style="background:#dcfce7;color:#166534;font-weight:700;font-size:11px;">EMAIL_TEST_MODE: Checking...</span>
+          <span class="badge" style="background:#e0e7ff;color:#3730a3;font-weight:600;font-size:11px;">Admin Testing Gateway</span>
         </div>
       </div>
       <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:14px;margin-bottom:14px;font-size:13px;">
-        <div class="row" style="gap:24px;flex-wrap:wrap;">
+        <div class="row" style="gap:20px;flex-wrap:wrap;">
+          <div><span class="muted">Workflow Notifications:</span> <span class="badge" style="background:#f1f5f9;color:#475569;font-weight:700;">EMAIL_PROVIDER=mock (Zero Faculty Emails)</span></div>
           <div><span class="muted">Sender:</span> <strong id="emailTestingSender" style="font-family:monospace;color:#1e293b;">onboarding@resend.dev</strong></div>
-          <div><span class="muted">Configured Recipient:</span> <strong id="emailTestingRecipient" style="font-family:monospace;color:#1e293b;">Loading...</strong></div>
-          <div><span class="muted">Workflow Notifications:</span> <span class="badge" style="background:#f1f5f9;color:#475569;font-weight:600;">EMAIL_PROVIDER=mock (Active)</span></div>
+          <div><span class="muted">Allowlisted Recipient:</span> <strong id="emailTestingRecipient" style="font-family:monospace;color:#1e293b;">Loading...</strong></div>
+          <div><span class="muted">Resend Live Gateway:</span> <span id="emailTestingGatewayBadge" class="badge" style="font-size:11px;font-weight:600;">Checking...</span></div>
         </div>
       </div>
-      <div class="row" style="gap:12px;align-items:center;">
-        <button id="btnSendTestEmail" class="btn btn-primary" style="background:#2563eb;padding:8px 18px;font-weight:600;" onclick="triggerResendTestEmail()">Send Test Email</button>
+      <div class="row" style="gap:10px;align-items:center;flex-wrap:wrap;">
+        <button id="btnSendMockTestEmail" class="btn btn-primary" style="background:#2563eb;padding:8px 16px;font-weight:600;font-size:12.5px;" onclick="triggerEmailTest('mock')">📨 Send Mock Test Email (Simulated)</button>
+        <button id="btnSendResendTestEmail" class="btn secondary" style="background:#f5f3ff;border:1px solid #ddd6fe;color:#5b21b6;padding:8px 16px;font-weight:600;font-size:12.5px;" onclick="triggerEmailTest('resend')">🚀 Send Live Resend Test Email</button>
+        <button type="button" class="secondary" style="padding:8px 14px;font-size:12.5px;" onclick="openMockEmailLogsModal()">📜 Full Audit Log Modal</button>
         <span id="emailTestingStatus" style="font-size:13px;color:#64748b;"></span>
       </div>
       <div id="emailTestingResultBox" style="display:none;margin-top:14px;padding:12px 14px;border-radius:6px;font-size:13px;"></div>
+
+      <!-- Live Mock Outbox Mini-Feed -->
+      <div style="margin-top:16px;border-top:1px solid #e2e8f0;padding-top:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <strong style="font-size:12.5px;color:#1e293b;">Recent Mock Email Outbox (Live Feed)</strong>
+          <a href="javascript:void(0)" onclick="loadRecentEmailTestingLogs()" style="font-size:12px;color:#2563eb;text-decoration:none;">🔄 Refresh Outbox</a>
+        </div>
+        <div class="table-wrap" style="margin:0;max-height:180px;overflow-y:auto;border:1px solid #e2e8f0;border-radius:4px;background:#ffffff;">
+          <table style="width:100%;font-size:11.5px;border-collapse:collapse;">
+            <thead style="background:#f1f5f9;position:sticky;top:0;">
+              <tr>
+                <th style="padding:6px 10px;text-align:left;">Time</th>
+                <th style="padding:6px 10px;text-align:left;">Ref / Event</th>
+                <th style="padding:6px 10px;text-align:left;">Recipient</th>
+                <th style="padding:6px 10px;text-align:left;">Subject</th>
+                <th style="padding:6px 10px;text-align:center;">Status</th>
+              </tr>
+            </thead>
+            <tbody id="emailTestingLogsTbody">
+              <tr><td colspan="5" style="text-align:center;padding:12px;color:var(--text-muted);">Loading recent email logs...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
     <div class="card">
@@ -8819,67 +8847,155 @@
       initEmailTestingStatus();
     }
 
+    let cachedEmailTestingConfig = null;
+
     async function initEmailTestingStatus() {
       const recipientEl = document.getElementById('emailTestingRecipient');
       const senderEl = document.getElementById('emailTestingSender');
+      const modeBadge = document.getElementById('emailTestingModeBadge');
+      const gatewayBadge = document.getElementById('emailTestingGatewayBadge');
+      const resendBtn = document.getElementById('btnSendResendTestEmail');
       if (!recipientEl) return;
+
       try {
         const res = await api('/admin/email-testing/status');
+        cachedEmailTestingConfig = res;
+
         if (senderEl) senderEl.textContent = res.fromEmail || 'onboarding@resend.dev';
+        
+        if (modeBadge) {
+          if (res.isTestingAllowed) {
+            modeBadge.textContent = 'EMAIL_TEST_MODE: Active';
+            modeBadge.style.background = '#dcfce7';
+            modeBadge.style.color = '#166534';
+          } else {
+            modeBadge.textContent = 'EMAIL_TEST_MODE: Disabled';
+            modeBadge.style.background = '#fee2e2';
+            modeBadge.style.color = '#991b1b';
+          }
+        }
+
         if (recipientEl) {
           if (res.hasTestRecipient) {
             recipientEl.textContent = res.testRecipientMasked;
             recipientEl.style.color = '#15803d';
           } else {
-            recipientEl.textContent = 'RESEND_TEST_RECIPIENT not set in .env';
-            recipientEl.style.color = '#b91c1c';
+            recipientEl.textContent = 'RESEND_TEST_RECIPIENT not set';
+            recipientEl.style.color = '#64748b';
           }
         }
+
+        if (gatewayBadge) {
+          if (res.canSendLiveResend) {
+            gatewayBadge.textContent = 'Live Ready (Key & Recipient Set)';
+            gatewayBadge.style.background = '#ede9fe';
+            gatewayBadge.style.color = '#5b21b6';
+          } else if (res.hasApiKey) {
+            gatewayBadge.textContent = 'Missing Test Recipient';
+            gatewayBadge.style.background = '#fef3c7';
+            gatewayBadge.style.color = '#92400e';
+          } else {
+            gatewayBadge.textContent = 'Mock Only (No Resend Key)';
+            gatewayBadge.style.background = '#f1f5f9';
+            gatewayBadge.style.color = '#475569';
+          }
+        }
+
+        if (resendBtn) {
+          if (!res.canSendLiveResend) {
+            resendBtn.style.opacity = '0.7';
+            resendBtn.title = 'Resend live test requires RESEND_API_KEY and RESEND_TEST_RECIPIENT configured in environment.';
+          } else {
+            resendBtn.style.opacity = '1';
+            resendBtn.title = `Sends real test email to ${res.testRecipientMasked}`;
+          }
+        }
+
+        loadRecentEmailTestingLogs();
       } catch (err) {
         if (recipientEl) recipientEl.textContent = 'Unavailable';
       }
     }
 
-    async function triggerResendTestEmail() {
-      const btn = document.getElementById('btnSendTestEmail');
+    async function loadRecentEmailTestingLogs() {
+      const tbody = document.getElementById('emailTestingLogsTbody');
+      if (!tbody) return;
+      try {
+        const data = await api('/admin/email-testing/logs?limit=5');
+        const logs = data.logs || [];
+        if (logs.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:12px;color:var(--text-muted);">No mock emails recorded yet. Click "Send Mock Test Email" to test.</td></tr>`;
+          return;
+        }
+        tbody.innerHTML = logs.map(m => `
+          <tr style="border-bottom:1px solid #f1f5f9;">
+            <td style="padding:6px 10px;white-space:nowrap;color:#64748b;">${new Date(m.created_at).toLocaleTimeString()}</td>
+            <td style="padding:6px 10px;font-family:monospace;font-weight:600;color:#003D8F;">${escapeHtml(m.nfa_ref_no || m.event || 'test')}</td>
+            <td style="padding:6px 10px;white-space:nowrap;">${escapeHtml(m.recipient_name || m.recipient_email)}</td>
+            <td style="padding:6px 10px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(m.subject)}">${escapeHtml(m.subject)}</td>
+            <td style="padding:6px 10px;text-align:center;">
+              <span class="badge" style="background:#ecfdf5;color:#047857;padding:1px 6px;font-size:10.5px;">✓ Mock Delivered</span>
+            </td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:12px;color:var(--danger);">Error loading logs: ${escapeHtml(e.message)}</td></tr>`;
+      }
+    }
+
+    async function triggerEmailTest(mode = 'mock') {
+      const btnMock = document.getElementById('btnSendMockTestEmail');
+      const btnResend = document.getElementById('btnSendResendTestEmail');
       const statusEl = document.getElementById('emailTestingStatus');
       const resultBox = document.getElementById('emailTestingResultBox');
-      if (!btn) return;
 
-      btn.disabled = true;
-      btn.textContent = 'Sending...';
-      if (statusEl) statusEl.textContent = 'Contacting Resend API...';
+      if (mode === 'resend' && cachedEmailTestingConfig && !cachedEmailTestingConfig.canSendLiveResend) {
+        if (!confirm('RESEND_API_KEY or RESEND_TEST_RECIPIENT is not configured on this instance. Live delivery will fail unless configured. Attempt anyway?')) {
+          return;
+        }
+      }
+
+      if (btnMock) btnMock.disabled = true;
+      if (btnResend) btnResend.disabled = true;
+      if (statusEl) statusEl.textContent = mode === 'resend' ? 'Contacting Resend API...' : 'Generating mock email notification...';
       if (resultBox) {
         resultBox.style.display = 'none';
         resultBox.innerHTML = '';
       }
 
       try {
-        const res = await api('/admin/email-testing/send', { method: 'POST' });
-        btn.disabled = false;
-        btn.textContent = 'Send Test Email';
+        const res = await api('/admin/email-testing/send', {
+          method: 'POST',
+          body: { mode }
+        });
+
+        if (btnMock) btnMock.disabled = false;
+        if (btnResend) btnResend.disabled = false;
         if (statusEl) statusEl.textContent = '';
+
         if (resultBox) {
           resultBox.style.display = 'block';
           resultBox.style.background = '#f0fdf4';
           resultBox.style.border = '1px solid #bbf7d0';
           resultBox.style.color = '#166534';
           resultBox.innerHTML = `
-            <div style="font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:6px;">
-              <span>✓</span> <span>Request Accepted by Resend API</span>
+            <div style="font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+              <span>✓</span> <span>${res.mode === 'mock' ? 'Mock Email Successfully Generated &amp; Delivered' : 'Request Accepted by Resend API'}</span>
             </div>
-            <div style="font-size:12.5px;color:#14532d;line-height:1.5;">
-              <div>• <strong>Status:</strong> ${escapeHtml(res.status || 'Accepted by Resend')}</div>
+            <div style="font-size:12.5px;color:#14532d;line-height:1.6;">
+              <div>• <strong>Mode:</strong> <span class="badge" style="background:#dcfce7;color:#166534;font-weight:700;">${escapeHtml((res.mode || mode).toUpperCase())}</span></div>
+              <div>• <strong>Status:</strong> ${escapeHtml(res.status || 'Delivered')}</div>
               <div>• <strong>Message ID:</strong> <code style="background:#dcfce7;padding:1px 5px;border-radius:3px;">${escapeHtml(res.messageId || 'N/A')}</code></div>
-              <div>• <strong>Delivered To:</strong> ${escapeHtml(res.recipient || 'Configured Recipient')}</div>
+              <div>• <strong>Recipient:</strong> ${escapeHtml(res.recipient || 'Simulated Outbox')}</div>
               <div style="margin-top:6px;font-style:italic;color:#166534;">${escapeHtml(res.note || '')}</div>
             </div>
           `;
         }
-        toast('Test email accepted by Resend!');
+        toast(res.mode === 'mock' ? 'Mock test email delivered to outbox!' : 'Test email accepted by Resend!');
+        loadRecentEmailTestingLogs();
       } catch (err) {
-        btn.disabled = false;
-        btn.textContent = 'Send Test Email';
+        if (btnMock) btnMock.disabled = false;
+        if (btnResend) btnResend.disabled = false;
         if (statusEl) statusEl.textContent = '';
         if (resultBox) {
           resultBox.style.display = 'block';
@@ -8887,13 +9003,16 @@
           resultBox.style.border = '1px solid #fecaca';
           resultBox.style.color = '#991b1b';
           resultBox.innerHTML = `
-            <div style="font-weight:700;margin-bottom:4px;">✕ Delivery Request Failed</div>
-            <div style="font-size:12.5px;line-height:1.4;">${escapeHtml(err.message || 'Error communicating with Resend')}</div>
+            <div style="font-weight:700;margin-bottom:4px;">✕ Test Execution Blocked / Failed</div>
+            <div style="font-size:12.5px;line-height:1.4;">${escapeHtml(err.message || 'Error executing email test')}</div>
           `;
         }
-        toast(err.message || 'Failed to send test email');
+        toast(err.message || 'Failed to execute test email');
       }
     }
+
+    // Retain backwards compatibility for any legacy callers
+    window.triggerResendTestEmail = () => triggerEmailTest('resend');
 
     let adminUsersListCache = [];
     let pendingExcelUploadRows = [];

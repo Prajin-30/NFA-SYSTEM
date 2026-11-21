@@ -13,13 +13,13 @@ import {
   DEFAULT_FACULTY_ONBOARDING_PASSWORD,
 } from '../services/supabaseAuth.js';
 import type { Role } from '../types.js';
-import { getResendConfigStatus, sendSuperAdminTestEmail } from '../services/resendService.js';
+import { getResendConfigStatus, sendSuperAdminTestEmail, isEmailTestingEnabled } from '../services/resendService.js';
 
 export const adminRouter = Router();
 adminRouter.use(requireAuth, requireRole('super_admin'));
 
 /**
- * GET /api/admin/email-testing/status — Super Admin view of Resend configuration
+ * GET /api/admin/email-testing/status — Super Admin view of email testing configuration
  */
 adminRouter.get('/email-testing/status', (req: AuthedRequest, res) => {
   const status = getResendConfigStatus();
@@ -27,15 +27,61 @@ adminRouter.get('/email-testing/status', (req: AuthedRequest, res) => {
 });
 
 /**
- * POST /api/admin/email-testing/send — Super Admin triggers deliberate Resend test email
+ * POST /api/admin/email-testing/send — Super Admin triggers deliberate test email (mock or resend)
  */
 adminRouter.post('/email-testing/send', async (req: AuthedRequest, res) => {
+  if (!isEmailTestingEnabled()) {
+    return res.status(403).json({
+      error: 'Email testing is disabled in production. Set EMAIL_TEST_MODE=true in environment variables to enable testing.',
+    });
+  }
+
   try {
-    const result = await sendSuperAdminTestEmail();
+    const mode = req.body?.mode === 'resend' ? 'resend' : 'mock';
+    const result = await sendSuperAdminTestEmail({
+      mode,
+      actor: req.user,
+    });
     res.json(result);
   } catch (err: any) {
-    res.status(400).json({ error: err.message || 'Failed to send test email via Resend' });
+    res.status(400).json({ error: err.message || 'Failed to execute test email' });
   }
+});
+
+/**
+ * GET /api/admin/email-testing/logs — Super Admin view of recent mock email logs
+ */
+adminRouter.get('/email-testing/logs', (req: AuthedRequest, res) => {
+  const limit = Math.min(Number(req.query.limit) || 20, 100);
+  const emails = (store.data.mock_emails || []).slice(-limit).reverse();
+  res.json({
+    total: (store.data.mock_emails || []).length,
+    logs: emails,
+  });
+});
+
+/**
+ * POST /api/admin/email-testing/logs/clear — Super Admin clears mock email logs
+ */
+adminRouter.post('/email-testing/logs/clear', (req: AuthedRequest, res) => {
+  store.data.mock_emails = [];
+  store.data.audit_logs = store.data.audit_logs || [];
+  store.data.audit_logs.push({
+    id: uuid(),
+    entity_type: 'user_account',
+    entity_id: req.user!.id,
+    department_id: req.user!.department_id || 'ALL',
+    old_amount: null,
+    new_amount: 0,
+    difference: 0,
+    changed_by: req.user!.id,
+    role: req.user!.role,
+    reason: 'Super Admin cleared mock email logs from Email Testing interface.',
+    source: 'portal',
+    approval_status: 'approved',
+    created_at: new Date().toISOString(),
+  });
+  res.json({ success: true, count: 0 });
 });
 
 const upload = multer({

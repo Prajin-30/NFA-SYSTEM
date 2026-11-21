@@ -1,10 +1,19 @@
+delete process.env.DATABASE_URL;
+process.env.DATA_SOURCE = 'json';
+process.env.APP_ENV = 'development';
+process.env.NODE_ENV = 'test';
+
 import http from 'http';
 import { Socket } from 'net';
-import { app } from '../src/server.js';
-import { store } from '../src/store.js';
-import { signToken } from '../src/middleware/auth.js';
-import { sendSuperAdminTestEmail, maskEmail, resetTestEmailRateLimit } from '../src/services/resendService.js';
-import { dispatchWorkflowNotification, resetSentNotifications } from '../src/services/notifications.js';
+
+let app: any;
+let store: any;
+let signToken: any;
+let sendSuperAdminTestEmail: any;
+let maskEmail: any;
+let resetTestEmailRateLimit: any;
+let dispatchWorkflowNotification: any;
+let resetSentNotifications: any;
 
 function request(options: { method: string; url: string; headers?: Record<string, string>; body?: any }): Promise<{ status: number; body: any }> {
   return new Promise((resolve, reject) => {
@@ -41,6 +50,26 @@ function request(options: { method: string; url: string; headers?: Record<string
 }
 
 async function runResendTests() {
+  const storeMod = await import('../src/store.js');
+  store = storeMod.store;
+  if (store.initPromise) {
+    store.initPromise.catch(() => {});
+  }
+  store.initPromise = Promise.resolve();
+  (store as any).loadFromPostgres = async () => {};
+
+  const serverMod = await import('../src/server.js');
+  app = serverMod.app;
+  const authMod = await import('../src/middleware/auth.js');
+  signToken = authMod.signToken;
+  const resendMod = await import('../src/services/resendService.js');
+  sendSuperAdminTestEmail = resendMod.sendSuperAdminTestEmail;
+  maskEmail = resendMod.maskEmail;
+  resetTestEmailRateLimit = resendMod.resetTestEmailRateLimit;
+  const notifMod = await import('../src/services/notifications.js');
+  dispatchWorkflowNotification = notifMod.dispatchWorkflowNotification;
+  resetSentNotifications = notifMod.resetSentNotifications;
+
   console.log('\n======================================================');
   console.log('--- STARTING RESEND EMAIL INTEGRATION & SECURITY TESTS ---');
   console.log('======================================================\n');
@@ -349,8 +378,108 @@ async function runResendTests() {
   if (masked3 !== 'Not configured') throw new Error(`Unexpected mask: ${masked3}`);
   console.log(`  PASS: Email masking verified: ${masked1}, ${masked2}, ${masked3}`);
 
+  // ----------------------------------------------------
+  // TEST 10: EMAIL_TEST_MODE Flag Enforcement
+  // ----------------------------------------------------
+  console.log('\n[TEST 10] Testing EMAIL_TEST_MODE Flag Enforcement...');
+  const origTestMode = process.env.EMAIL_TEST_MODE;
+  try {
+    // Explicitly disable test mode
+    process.env.EMAIL_TEST_MODE = 'false';
+    const disabledStatusRes = await request({
+      method: 'GET',
+      url: '/api/admin/email-testing/status',
+      headers: { Authorization: `Bearer ${superAdminToken}` },
+    });
+    if (disabledStatusRes.body.isTestingAllowed !== false || disabledStatusRes.body.emailTestMode !== false) {
+      throw new Error('Expected isTestingAllowed=false when EMAIL_TEST_MODE=false');
+    }
+
+    const disabledSendRes = await request({
+      method: 'POST',
+      url: '/api/admin/email-testing/send',
+      headers: { Authorization: `Bearer ${superAdminToken}`, 'Content-Type': 'application/json' },
+      body: { mode: 'mock' },
+    });
+    if (disabledSendRes.status !== 403) {
+      throw new Error(`Expected 403 when EMAIL_TEST_MODE=false, got ${disabledSendRes.status}`);
+    }
+    console.log('  PASS: EMAIL_TEST_MODE=false strictly blocked test email execution with HTTP 403.');
+
+    // Re-enable test mode
+    process.env.EMAIL_TEST_MODE = 'true';
+    const enabledStatusRes = await request({
+      method: 'GET',
+      url: '/api/admin/email-testing/status',
+      headers: { Authorization: `Bearer ${superAdminToken}` },
+    });
+    if (enabledStatusRes.body.isTestingAllowed !== true || enabledStatusRes.body.emailTestMode !== true) {
+      throw new Error('Expected isTestingAllowed=true when EMAIL_TEST_MODE=true');
+    }
+    console.log('  PASS: EMAIL_TEST_MODE=true successfully enables test mode.');
+  } finally {
+    process.env.EMAIL_TEST_MODE = origTestMode || 'true';
+  }
+
+  // ----------------------------------------------------
+  // TEST 11: Mock Email Test Execution (Zero External Calls)
+  // ----------------------------------------------------
+  console.log('\n[TEST 11] Testing Mock Email Test Execution via API...');
+  resetTestEmailRateLimit();
+  const mockEmailCountBefore = (store.data.mock_emails || []).length;
+  const auditLogCountBefore = (store.data.audit_logs || []).length;
+
+  const mockSendRes = await request({
+    method: 'POST',
+    url: '/api/admin/email-testing/send',
+    headers: { Authorization: `Bearer ${superAdminToken}`, 'Content-Type': 'application/json' },
+    body: { mode: 'mock' },
+  });
+
+  if (mockSendRes.status !== 200) {
+    throw new Error(`Expected 200 from mock send endpoint, got ${mockSendRes.status}: ${JSON.stringify(mockSendRes.body)}`);
+  }
+  if (mockSendRes.body.mode !== 'mock' || mockSendRes.body.status !== 'Mock Delivered') {
+    throw new Error(`Unexpected response for mock send: ${JSON.stringify(mockSendRes.body)}`);
+  }
+  if ((store.data.mock_emails || []).length !== mockEmailCountBefore + 1) {
+    throw new Error('Expected mock email to be appended to store.data.mock_emails');
+  }
+  if ((store.data.audit_logs || []).length !== auditLogCountBefore + 1) {
+    throw new Error('Expected audit log entry for mock email execution');
+  }
+  console.log(`  PASS: Mock email generated and recorded without external calls. Message ID: ${mockSendRes.body.messageId}`);
+
+  // ----------------------------------------------------
+  // TEST 12: Admin Mock Email Logs Retrieval and Clearing
+  // ----------------------------------------------------
+  console.log('\n[TEST 12] Testing Admin Mock Email Logs Retrieval and Clearing...');
+  const logsRes = await request({
+    method: 'GET',
+    url: '/api/admin/email-testing/logs',
+    headers: { Authorization: `Bearer ${superAdminToken}` },
+  });
+  if (logsRes.status !== 200 || !Array.isArray(logsRes.body.logs) || logsRes.body.logs.length === 0) {
+    throw new Error(`Expected mock email logs array, got: ${JSON.stringify(logsRes.body)}`);
+  }
+  console.log(`  PASS: GET /api/admin/email-testing/logs returned ${logsRes.body.logs.length} recorded emails.`);
+
+  // Test clear
+  const clearRes = await request({
+    method: 'POST',
+    url: '/api/admin/email-testing/logs/clear',
+    headers: { Authorization: `Bearer ${superAdminToken}` },
+  });
+  if (clearRes.status !== 200 || clearRes.body.count !== 0) {
+    throw new Error(`Expected clear count 0, got: ${JSON.stringify(clearRes.body)}`);
+  }
+  if ((store.data.mock_emails || []).length !== 0) {
+    throw new Error('Expected store.data.mock_emails to be empty after clear');
+  }
+  console.log('  PASS: POST /api/admin/email-testing/logs/clear successfully cleared mock logs.');
+
   console.log('\n======================================================');
-  console.log('ALL RESEND EMAIL INTEGRATION & SECURITY TESTS PASSED!');
+  console.log('ALL RESEND & MOCK EMAIL INTEGRATION TESTS PASSED (12/12)!');
   console.log('======================================================\n');
 }
 

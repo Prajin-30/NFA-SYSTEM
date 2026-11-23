@@ -273,12 +273,14 @@ async function runMasterUpgradeTestSuite() {
   const indexHtml = fs.readFileSync(indexPath, 'utf-8');
 
   // Verify exact 8 navigation tabs
-  const tabLabelMatch = indexHtml.includes("nfas: 'NFA'") &&
-    indexHtml.includes("inbox: 'Approvals'") &&
-    indexHtml.includes("invoices: 'Financial Records'") &&
-    indexHtml.includes("excel: 'Reports & Analytics'") &&
-    indexHtml.includes("audit: 'Financial Ledger'") &&
-    indexHtml.includes("admin: 'Settings'");
+  const tabLabelMatch = indexHtml.includes("dashboard: '01. Home'") &&
+    indexHtml.includes("nfas: '02. NFA'") &&
+    indexHtml.includes("inbox: '03. Approvals'") &&
+    indexHtml.includes("budgets: '04. Department Budgets'") &&
+    indexHtml.includes("invoices: '05. Financial Records'") &&
+    indexHtml.includes("excel: '06. Reports & Analytics'") &&
+    indexHtml.includes("audit: '07. Financial Ledger'") &&
+    indexHtml.includes("admin: '08. Settings'");
   assert(tabLabelMatch, 'Frontend TAB_LABEL contains exact required labels without decorative emojis');
 
   // Verify tab order in TABS_BY_ROLE

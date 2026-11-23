@@ -20,6 +20,8 @@ import { excelRouter } from './routes/excel.js';
 import { adminRouter } from './routes/admin.js';
 import { usersRouter } from './routes/users.js';
 import { invoicesRouter } from './routes/invoices.js';
+import { revenueRouter } from './routes/revenue.js';
+import { reportsRouter } from './routes/reports.js';
 import { requireAuth, AuthedRequest } from './middleware/auth.js';
 import { store } from './store.js';
 import { query } from './db/pool.js';
@@ -97,6 +99,8 @@ app.use('/api/projects', projectsRouter);
 app.use('/api/audit', auditRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/invoices', invoicesRouter);
+app.use('/api/revenue', revenueRouter);
+app.use('/api/reports', reportsRouter);
 
 app.get('/api/health', async (_req, res) => {
   let dbConnected = false;

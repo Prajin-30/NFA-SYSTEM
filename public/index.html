@@ -2262,7 +2262,7 @@
       </div>
 
       <div style="margin-bottom:14px;text-align:left;">
-        <label style="font-size:12px;font-weight:600;display:block;margin-bottom:6px;">Authorized Centres or Offices (Multi-Select)</label>
+        <label style="font-size:12px;font-weight:600;display:block;margin-bottom:6px;">Authorized Centres / Offices (Multi-Select)</label>
         <div id="editUserCentresWrap" style="max-height:130px;overflow-y:auto;border:1px solid var(--border);border-radius:6px;padding:8px 10px;background:#FAFAFA;display:flex;flex-direction:column;gap:6px;">
           <!-- Dynamically populated checkboxes -->
         </div>
@@ -3739,27 +3739,25 @@
     }
 
     const TABS_BY_ROLE = {
-      faculty: ['dashboard', 'inbox', 'nfas', 'invoices', 'budgets', 'audit'],
-      hod: ['dashboard', 'inbox', 'nfas', 'invoices', 'budgets', 'excel', 'audit'],
-      deans_office: ['dashboard', 'inbox', 'nfas', 'invoices', 'budgets', 'audit'],
-      dean: ['dashboard', 'inbox', 'nfas', 'invoices', 'budgets', 'audit'],
-      associate_dean: ['dashboard', 'inbox', 'nfas', 'invoices', 'budgets', 'audit'],
-      finance: ['dashboard', 'inbox', 'nfas', 'invoices', 'budgets', 'audit'],
-      finance_head: ['dashboard', 'inbox', 'nfas', 'invoices', 'budgets', 'audit'],
-      director: ['dashboard', 'inbox', 'nfas', 'invoices', 'budgets', 'audit'],
-      super_admin: ['dashboard', 'inbox', 'nfas', 'invoices', 'budgets', 'excel', 'audit', 'admin'],
-      it_admin: ['dashboard', 'nfas', 'invoices', 'budgets', 'audit'],
+      faculty: ['dashboard', 'nfas', 'inbox', 'budgets', 'invoices', 'excel', 'audit'],
+      hod: ['dashboard', 'nfas', 'inbox', 'budgets', 'invoices', 'excel', 'audit'],
+      deans_office: ['dashboard', 'nfas', 'inbox', 'budgets', 'invoices', 'excel', 'audit'],
+      dean: ['dashboard', 'nfas', 'inbox', 'budgets', 'invoices', 'excel', 'audit'],
+      associate_dean: ['dashboard', 'nfas', 'inbox', 'budgets', 'invoices', 'excel', 'audit'],
+      finance: ['dashboard', 'nfas', 'inbox', 'budgets', 'invoices', 'excel', 'audit'],
+      finance_head: ['dashboard', 'nfas', 'inbox', 'budgets', 'invoices', 'excel', 'audit'],
+      director: ['dashboard', 'nfas', 'inbox', 'budgets', 'invoices', 'excel', 'audit'],
+      super_admin: ['dashboard', 'nfas', 'inbox', 'budgets', 'invoices', 'excel', 'audit', 'admin'],
+      it_admin: ['dashboard', 'nfas', 'inbox', 'budgets', 'invoices', 'excel', 'audit'],
     };
 
-    // Requirement 3 & 4: Dashboard renamed to "Home" without emojis or diagrams in the line
     const TAB_LABEL = {
       dashboard: 'Home',
-      inbox: 'Approvals Inbox',
-      nfas: 'Notes For Approval (NFAs)',
-      invoices: 'Purchase Invoices',
-      projects: 'Projects',
+      nfas: 'NFA',
+      inbox: 'Approvals',
       budgets: 'Department Budgets',
-      excel: 'Excel Import',
+      invoices: 'Financial Records',
+      excel: 'Reports & Analytics',
       audit: 'Financial Ledger',
       admin: 'Settings'
     };
@@ -3826,7 +3824,7 @@
       });
       html += `</optgroup>`;
 
-      html += `<optgroup label="Centres or Offices">`;
+      html += `<optgroup label="Centres / Offices">`;
       activeCoes.forEach(d => {
         html += `<option value="${d.id}" ${d.id === selectedId ? 'selected' : ''}>${escapeHtml(d.name)}</option>`;
       });
@@ -4779,7 +4777,7 @@
     <div class="card">
       <div class="card-header">
         <div>
-          <h2 class="card-title">Approvals Inbox (${inboxItems.length} Action Needed)</h2>
+          <h2 class="card-title">Approvals (${inboxItems.length} Action Needed)</h2>
           <div class="card-sub">Official requests currently awaiting your review, validation, or endorsement</div>
         </div>
       </div>
@@ -4816,7 +4814,7 @@
         <td><strong>${escapeHtml(n.title)}</strong><div class="muted">${escapeHtml(n.submitted_by_name || 'Faculty')}</div></td>
         <td>
           <span class="badge" style="${isCentreUnit ? 'background:#e0e7ff;color:#3730a3;border:1px solid #c7d2fe;' : 'background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;'}font-size:10px;padding:2px 6px;margin-bottom:3px;display:inline-block;">
-            ${isCentreUnit ? 'Centres or Offices' : 'Department'}
+            ${isCentreUnit ? 'Centres / Offices' : 'Department'}
           </span>
           <div style="font-weight:600;font-size:12.5px;line-height:1.3;">${escapeHtml(deptName(n.department_id))}</div>
         </td>
@@ -4842,7 +4840,7 @@
     <div class="card">
       <div class="card-header">
         <div>
-          <h2 class="card-title">Notes For Approval (NFAs)</h2>
+          <h2 class="card-title">Note for Approval (NFA)</h2>
           <div class="card-sub">Institutional master ledger of requested, reviewed, and debited expenditures</div>
         </div>
         <button onclick="newNfaModal()">+ Request New NFA</button>
@@ -4874,7 +4872,7 @@
           <td><strong>${escapeHtml(n.title)}</strong><div class="muted">${escapeHtml(n.submitted_by_name || 'Faculty')}</div></td>
           <td>
             <span class="badge" style="${isCentreUnit ? 'background:#e0e7ff;color:#3730a3;border:1px solid #c7d2fe;' : 'background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;'}font-size:10px;padding:2px 6px;margin-bottom:3px;display:inline-block;">
-              ${isCentreUnit ? 'Centres or Offices' : 'Department'}
+              ${isCentreUnit ? 'Centres / Offices' : 'Department'}
             </span>
             <div style="font-weight:600;font-size:12.5px;line-height:1.3;">${escapeHtml(deptName(n.department_id))}</div>
           </td>
@@ -4897,12 +4895,40 @@
       main.innerHTML = html;
     }
 
-    // ---------------- PURCHASE INVOICES VIEW ----------------
+    // ---------------- FINANCIAL RECORDS VIEW (INVOICES & REVENUE) ----------------
+    let currentFinancialRecordsSubTab = 'invoices';
+
+    async function switchFinancialRecordsTab(subTab) {
+      currentFinancialRecordsSubTab = subTab;
+      const main = document.getElementById('main');
+      await renderInvoices(main);
+    }
+
     async function renderInvoices(main) {
       const fy = activeFy();
+
+      const subTabsHtml = `
+        <div class="row" style="gap:10px;margin-bottom:18px;border-bottom:2px solid #e2e8f0;padding-bottom:12px;">
+          <button class="${currentFinancialRecordsSubTab === 'invoices' ? 'primary' : 'secondary'}" style="font-weight:600;padding:8px 18px;" onclick="switchFinancialRecordsTab('invoices')">
+            Purchase Invoices
+          </button>
+          <button class="${currentFinancialRecordsSubTab === 'revenue' ? 'primary' : 'secondary'}" style="font-weight:600;padding:8px 18px;" onclick="switchFinancialRecordsTab('revenue')">
+            Revenue &amp; Earnings
+          </button>
+        </div>
+      `;
+
+      if (currentFinancialRecordsSubTab === 'revenue') {
+        const revContainer = document.createElement('div');
+        main.innerHTML = subTabsHtml;
+        main.appendChild(revContainer);
+        await renderRevenueEarnings(revContainer);
+        return;
+      }
+
       const nfas = await api(`/invoices?fy=${fy.id}`);
 
-      let html = `
+      let html = subTabsHtml + `
         <div class="card" style="margin-bottom:20px;">
           <div class="card-header" style="flex-wrap:wrap;gap:10px;">
             <div>
@@ -5531,6 +5557,412 @@
       }
     }
 
+    // ---------------- REVENUE & EARNINGS VIEW ----------------
+    async function renderRevenueEarnings(container) {
+      let summary, entries, eligibleNfas;
+      try {
+        [summary, entries, eligibleNfas] = await Promise.all([
+          api('/revenue/summary'),
+          api('/revenue/entries'),
+          api('/revenue/eligible-nfas')
+        ]);
+      } catch (err) {
+        container.innerHTML = `<div class="card" style="color:var(--danger)">Failed to load revenue data: ${escapeHtml(err.message)}</div>`;
+        return;
+      }
+
+      const isFinance = ['finance', 'finance_head', 'super_admin'].includes(USER.role);
+
+      let html = `
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card-header" style="flex-wrap:wrap;gap:12px;">
+            <div>
+              <h2 class="card-title" style="color:var(--primary-blue);">Revenue &amp; Earnings Ledger</h2>
+              <div class="card-sub">Institutional tracking &amp; audit of event collections (Registration fees, sponsorships, participation fees, other income)</div>
+            </div>
+            <div class="row" style="gap:10px;align-items:center;flex-wrap:wrap;">
+              <button class="primary" style="font-size:12.5px;padding:6px 14px;" onclick="openRecordRevenueModal()">
+                + Record Revenue / Earnings
+              </button>
+              <button class="secondary" style="font-size:12.5px;padding:6px 14px;" onclick="openCompleteEventModal()">
+                ✓ Mark Event as Completed
+              </button>
+            </div>
+          </div>
+
+          <div style="font-size:12.5px;color:var(--text-muted);margin-bottom:16px;">
+            Revenue and earnings collections constitute an independent institutional reporting ledger. In accordance with university financial regulations, revenue entries do not offset expenditures or alter approved department budget ceilings.
+          </div>
+
+          <!-- Stat Cards Grid -->
+          <div class="grid-4" style="gap:14px;margin-bottom:20px;">
+            <div class="stat-card" style="background:#f0f9ff;border:1px solid #bae6fd;padding:14px;border-radius:8px;">
+              <div class="stat-label" style="font-size:11.5px;color:#0369a1;font-weight:600;">Total Revenue Collected</div>
+              <div style="font-size:20px;font-weight:700;color:#0284c7;margin-top:4px;">${inr(summary.total_collected)}</div>
+              <div style="font-size:11px;color:#64748b;margin-top:2px;">Across ${summary.total_entries} collection entries</div>
+            </div>
+            <div class="stat-card" style="background:#f0fdf4;border:1px solid #bbf7d0;padding:14px;border-radius:8px;">
+              <div class="stat-label" style="font-size:11.5px;color:#15803d;font-weight:600;">Verified by Finance</div>
+              <div style="font-size:20px;font-weight:700;color:#16a34a;margin-top:4px;">${inr(summary.total_verified)}</div>
+              <div style="font-size:11px;color:#64748b;margin-top:2px;">Audited &amp; verified</div>
+            </div>
+            <div class="stat-card" style="background:#fefce8;border:1px solid #fef08a;padding:14px;border-radius:8px;">
+              <div class="stat-label" style="font-size:11.5px;color:#a16207;font-weight:600;">Pending Verification</div>
+              <div style="font-size:20px;font-weight:700;color:#ca8a04;margin-top:4px;">${inr(summary.total_pending)}</div>
+              <div style="font-size:11px;color:#64748b;margin-top:2px;">Awaiting Finance review</div>
+            </div>
+            <div class="stat-card" style="background:#fff1f2;border:1px solid #fecdd3;padding:14px;border-radius:8px;">
+              <div class="stat-label" style="font-size:11.5px;color:#be123c;font-weight:600;">Returned for Correction</div>
+              <div style="font-size:20px;font-weight:700;color:#e11d48;margin-top:4px;">${inr(summary.total_returned)}</div>
+              <div style="font-size:11px;color:#64748b;margin-top:2px;">Clarification required</div>
+            </div>
+          </div>
+
+          <!-- Source Breakdown Chips -->
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;padding:12px;background:#f8fafc;border-radius:6px;border:1px solid #e2e8f0;">
+            <span style="font-size:12px;font-weight:600;color:#475569;display:flex;align-items:center;">By Source:</span>
+            <span class="badge" style="background:#e0f2fe;color:#0369a1;padding:4px 10px;">Registration: ${inr(summary.by_source?.registration_fee || 0)}</span>
+            <span class="badge" style="background:#e0e7ff;color:#3730a3;padding:4px 10px;">Sponsorships: ${inr(summary.by_source?.sponsorship || 0)}</span>
+            <span class="badge" style="background:#fef3c7;color:#92400e;padding:4px 10px;">Participation: ${inr(summary.by_source?.participation_fee || 0)}</span>
+            <span class="badge" style="background:#dcfce7;color:#166534;padding:4px 10px;">Event Collection: ${inr(summary.by_source?.event_collection || 0)}</span>
+            <span class="badge" style="background:#f1f5f9;color:#334155;padding:4px 10px;">Other Income: ${inr(summary.by_source?.other_income || 0)}</span>
+          </div>
+
+          <!-- Entries Table -->
+          <h3 style="font-size:15px;color:var(--primary-blue);margin-bottom:10px;">Revenue Collection Records (${entries.length})</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:45px;">S.No</th>
+                  <th>Date</th>
+                  <th>NFA Reference</th>
+                  <th>Event Title</th>
+                  <th>Dept / Centre</th>
+                  <th>Source</th>
+                  <th>Description</th>
+                  <th style="text-align:right;">Amount</th>
+                  <th>Payment Method</th>
+                  <th>Receipt</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${entries.length === 0 ? '<tr><td colspan="12" class="muted" style="text-align:center;padding:24px;">No revenue records logged yet. Use "+ Record Revenue / Earnings" to submit income for completed events.</td></tr>' : ''}
+                ${entries.map((r, idx) => {
+                  let badge = '<span class="badge b-submitted">Submitted</span>';
+                  if (r.status === 'verified') badge = '<span class="badge b-approved">Verified</span>';
+                  if (r.status === 'returned') badge = '<span class="badge b-rejected">Returned</span>';
+
+                  const canDelete = (r.submitted_by === USER.id && r.status !== 'verified') || USER.role === 'super_admin';
+
+                  return `
+                    <tr>
+                      <td>${idx + 1}</td>
+                      <td>${escapeHtml(r.collection_date)}</td>
+                      <td><strong style="font-family:monospace;color:var(--primary);">${escapeHtml(r.nfa_ref_no)}</strong></td>
+                      <td>${escapeHtml(r.nfa_title)}</td>
+                      <td><span class="badge" style="background:#f1f5f9;color:#475569;">${escapeHtml(r.department_code || '—')}</span></td>
+                      <td><span class="badge" style="background:#e0f2fe;color:#0369a1;font-size:11px;">${escapeHtml(r.revenue_source.replace(/_/g, ' ').toUpperCase())}</span></td>
+                      <td style="max-width:200px;font-size:12px;">${escapeHtml(r.description)}</td>
+                      <td style="text-align:right;font-weight:700;color:var(--primary);">${inr(r.amount)}</td>
+                      <td style="font-size:11.5px;text-transform:capitalize;">${escapeHtml(r.payment_method || 'Online')}</td>
+                      <td>
+                        ${r.receipt_url ? `
+                          <a href="${r.receipt_url}" target="_blank" style="color:var(--primary-blue);text-decoration:underline;font-size:11.5px;">View Receipt</a>
+                        ` : '<span class="muted" style="font-size:11px;">None</span>'}
+                      </td>
+                      <td>
+                        ${badge}
+                        ${r.verification_remarks ? `<div style="font-size:10.5px;color:#64748b;margin-top:2px;">${escapeHtml(r.verification_remarks)}</div>` : ''}
+                      </td>
+                      <td>
+                        <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                          ${isFinance && r.status === 'submitted' ? `
+                            <button class="primary" style="font-size:11px;padding:3px 8px;background:#16a34a;" onclick="verifyRevenueEntry('${r.id}', 'verified')">Verify</button>
+                            <button class="secondary" style="font-size:11px;padding:3px 8px;color:#dc2626;" onclick="verifyRevenueEntry('${r.id}', 'returned')">Return</button>
+                          ` : ''}
+                          ${canDelete ? `
+                            <button class="secondary" style="font-size:11px;padding:3px 8px;" onclick="deleteRevenueEntry('${r.id}')">✕</button>
+                          ` : ''}
+                        </div>
+                      </td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    async function openRecordRevenueModal() {
+      let eligible = [];
+      try {
+        eligible = await api('/revenue/eligible-nfas');
+      } catch (e) {
+        return toast('Failed to load eligible events: ' + e.message);
+      }
+
+      if (eligible.length === 0) {
+        return toast('No approved Event NFAs available for revenue recording.');
+      }
+
+      const modalHtml = `
+        <div class="modal" id="recordRevenueModal" style="display:flex;">
+          <div class="modal-box" style="max-width:550px;">
+            <div class="modal-header">
+              <h3 class="modal-title" style="color:var(--primary-blue);">Record Revenue / Earnings</h3>
+              <button class="modal-close" onclick="closeRecordRevenueModal()">✕</button>
+            </div>
+            <div style="font-size:12.5px;color:var(--text-muted);margin-bottom:14px;">
+              Log revenue collected from completed events. Supporting receipts or bank credit advice must be attached for Finance Office verification.
+            </div>
+            <form id="recordRevenueForm" onsubmit="event.preventDefault(); submitRecordRevenue();">
+              <div style="margin-bottom:10px;">
+                <label class="field-label" style="font-size:11.5px;">Select Approved Event Note for Approval *</label>
+                <select id="revModalNfa" required style="font-size:12.5px;">
+                  <option value="">— Select Event NFA —</option>
+                  ${eligible.map(n => `<option value="${n.id}">${escapeHtml(n.ref_no)} — ${escapeHtml(n.title)} (${escapeHtml(n.department_code)})</option>`).join('')}
+                </select>
+              </div>
+              <div class="grid2" style="gap:10px;margin-bottom:10px;">
+                <div>
+                  <label class="field-label" style="font-size:11.5px;">Revenue Source *</label>
+                  <select id="revModalSource" required style="font-size:12.5px;">
+                    <option value="registration_fee">Registration Fees</option>
+                    <option value="sponsorship">Sponsorships</option>
+                    <option value="participation_fee">Participation Fees</option>
+                    <option value="event_collection">Event Collections</option>
+                    <option value="other_income">Other Income</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="field-label" style="font-size:11.5px;">Amount Collected (₹) *</label>
+                  <input id="revModalAmount" type="number" min="1" step="any" placeholder="e.g. 25000" required />
+                </div>
+              </div>
+              <div class="grid2" style="gap:10px;margin-bottom:10px;">
+                <div>
+                  <label class="field-label" style="font-size:11.5px;">Collection Date *</label>
+                  <input id="revModalDate" type="date" value="${new Date().toISOString().split('T')[0]}" required />
+                </div>
+                <div>
+                  <label class="field-label" style="font-size:11.5px;">Payment / Settlement Method</label>
+                  <select id="revModalMethod" style="font-size:12.5px;">
+                    <option value="online">Online Payment Gateway</option>
+                    <option value="bank_transfer">Bank Transfer / NEFT / RTGS</option>
+                    <option value="upi">UPI / QR Code</option>
+                    <option value="cheque">Cheque / Demand Draft</option>
+                    <option value="pos">Campus POS Terminal</option>
+                    <option value="cash">Cash Collection (Accounts Counter)</option>
+                  </select>
+                </div>
+              </div>
+              <div style="margin-bottom:10px;">
+                <label class="field-label" style="font-size:11.5px;">Collection Description *</label>
+                <input id="revModalDescription" placeholder="e.g. 50 Delegate registrations for National AI Workshop" required />
+              </div>
+              <div style="margin-bottom:10px;">
+                <label class="field-label" style="font-size:11.5px;">Receipt / Challan / Credit Advice Attachment (PDF/Image)</label>
+                <input id="revModalReceiptFile" type="file" accept=".pdf,.png,.jpg,.jpeg" />
+                <div style="font-size:10.5px;color:#64748b;margin-top:2px;">PDF, PNG, JPG (Max 10MB)</div>
+              </div>
+              <div style="margin-bottom:14px;">
+                <label class="field-label" style="font-size:11.5px;">Remarks (Optional)</label>
+                <textarea id="revModalRemarks" rows="2" placeholder="Additional notes or reconciliation references"></textarea>
+              </div>
+              <div class="row" style="justify-content:flex-end;gap:10px;">
+                <button type="button" class="secondary" onclick="closeRecordRevenueModal()">Cancel</button>
+                <button type="submit" class="primary" id="revModalSubmitBtn">Submit Revenue Entry</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+
+      const existing = document.getElementById('recordRevenueModal');
+      if (existing) existing.remove();
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+
+    function closeRecordRevenueModal() {
+      const el = document.getElementById('recordRevenueModal');
+      if (el) el.remove();
+    }
+
+    async function submitRecordRevenue() {
+      const btn = document.getElementById('revModalSubmitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Submitting...';
+
+      const nfaId = document.getElementById('revModalNfa')?.value;
+      const source = document.getElementById('revModalSource')?.value;
+      const amount = document.getElementById('revModalAmount')?.value;
+      const date = document.getElementById('revModalDate')?.value;
+      const method = document.getElementById('revModalMethod')?.value;
+      const desc = document.getElementById('revModalDescription')?.value?.trim();
+      const remarks = document.getElementById('revModalRemarks')?.value?.trim();
+      const file = document.getElementById('revModalReceiptFile')?.files?.[0];
+
+      const formData = new FormData();
+      formData.append('nfa_id', nfaId);
+      formData.append('revenue_source', source);
+      formData.append('amount', amount);
+      formData.append('collection_date', date);
+      formData.append('payment_method', method);
+      formData.append('description', desc);
+      if (remarks) formData.append('remarks', remarks);
+      if (file) formData.append('receipt', file);
+
+      try {
+        const res = await fetch('/api/revenue/entries', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${TOKEN}` },
+          body: formData,
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ error: 'Submission failed' }));
+          throw new Error(err.error || 'Submission failed');
+        }
+
+        toast('Revenue collection logged successfully and sent to Finance for verification.');
+        closeRecordRevenueModal();
+        if (currentTab === 'invoices') showTab('invoices');
+      } catch (err) {
+        toast(err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Submit Revenue Entry';
+      }
+    }
+
+    async function openCompleteEventModal(preSelectedNfaId = null) {
+      let eligible = [];
+      try {
+        eligible = await api('/revenue/eligible-nfas');
+      } catch (e) {
+        return toast('Failed to load eligible events: ' + e.message);
+      }
+
+      const pendingCompletion = eligible.filter(n => n.event_completion_status !== 'completed' || n.id === preSelectedNfaId);
+
+      if (pendingCompletion.length === 0) {
+        return toast('No approved Event NFAs pending completion.');
+      }
+
+      const modalHtml = `
+        <div class="modal" id="completeEventModal" style="display:flex;">
+          <div class="modal-box" style="max-width:500px;">
+            <div class="modal-header">
+              <h3 class="modal-title" style="color:var(--primary-blue);">Mark Event as Completed</h3>
+              <button class="modal-close" onclick="closeCompleteEventModal()">✕</button>
+            </div>
+            <div style="font-size:12.5px;color:var(--text-muted);margin-bottom:14px;">
+              Marking an approved event as completed records its operational conclusion and automatically triggers revenue submission notifications for revenue-generating events.
+            </div>
+            <form id="completeEventForm" onsubmit="event.preventDefault(); submitCompleteEvent();">
+              <div style="margin-bottom:12px;">
+                <label class="field-label" style="font-size:11.5px;">Select Event Note for Approval *</label>
+                <select id="completeModalNfa" required style="font-size:12.5px;">
+                  <option value="">— Select Event NFA —</option>
+                  ${pendingCompletion.map(n => `<option value="${n.id}" ${n.id === preSelectedNfaId ? 'selected' : ''}>${escapeHtml(n.ref_no)} — ${escapeHtml(n.title)} ${n.will_generate_revenue ? '(Revenue Enabled)' : ''}</option>`).join('')}
+                </select>
+              </div>
+              <div style="margin-bottom:12px;">
+                <label class="field-label" style="font-size:11.5px;">Event Conclusion Date *</label>
+                <input id="completeModalDate" type="date" value="${new Date().toISOString().split('T')[0]}" required />
+              </div>
+              <div style="margin-bottom:16px;">
+                <label class="field-label" style="font-size:11.5px;">Completion Summary / Remarks</label>
+                <textarea id="completeModalRemarks" rows="2" placeholder="e.g. Conducted successfully with 120 attendees across 2 sessions."></textarea>
+              </div>
+              <div class="row" style="justify-content:flex-end;gap:10px;">
+                <button type="button" class="secondary" onclick="closeCompleteEventModal()">Cancel</button>
+                <button type="submit" class="primary" id="completeModalBtn">Confirm Event Completion</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+
+      const existing = document.getElementById('completeEventModal');
+      if (existing) existing.remove();
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+
+    function closeCompleteEventModal() {
+      const el = document.getElementById('completeEventModal');
+      if (el) el.remove();
+    }
+
+    async function submitCompleteEvent() {
+      const btn = document.getElementById('completeModalBtn');
+      btn.disabled = true;
+      btn.textContent = 'Updating...';
+
+      const nfaId = document.getElementById('completeModalNfa')?.value;
+      const date = document.getElementById('completeModalDate')?.value;
+      const remarks = document.getElementById('completeModalRemarks')?.value?.trim();
+
+      try {
+        const res = await api(`/revenue/nfas/${nfaId}/complete-event`, {
+          method: 'POST',
+          body: { completion_date: date, completion_remarks: remarks },
+        });
+
+        if (res.reminder_sent) {
+          toast('Event marked as completed! Revenue submission reminder dispatched to proposer.');
+        } else {
+          toast('Event marked as completed successfully.');
+        }
+
+        closeCompleteEventModal();
+        if (currentTab === 'invoices') showTab('invoices');
+        else if (currentTab === 'nfas') showTab('nfas');
+      } catch (err) {
+        toast(err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Confirm Event Completion';
+      }
+    }
+
+    async function verifyRevenueEntry(id, status) {
+      const promptText = status === 'verified'
+        ? 'Enter optional Finance verification remarks / audit note:'
+        : 'Enter reason for returning revenue entry for correction:';
+      const remarks = prompt(promptText, status === 'verified' ? 'Verified against university account statement' : '');
+      if (remarks === null) return;
+
+      try {
+        await api(`/revenue/entries/${id}/verify`, {
+          method: 'PUT',
+          body: { status, remarks: remarks.trim() },
+        });
+        toast(`Revenue entry successfully ${status}.`);
+        if (currentTab === 'invoices') showTab('invoices');
+      } catch (err) {
+        toast(err.message);
+      }
+    }
+
+    async function deleteRevenueEntry(id) {
+      if (!confirm('Are you sure you want to remove this revenue entry?')) return;
+      try {
+        await api(`/revenue/entries/${id}`, { method: 'DELETE' });
+        toast('Revenue entry deleted.');
+        if (currentTab === 'invoices') showTab('invoices');
+      } catch (err) {
+        toast(err.message);
+      }
+    }
+
     // ---------------- CREATE NEW NFA MODAL ----------------
     let selectedSdgs = [];
 
@@ -5602,7 +6034,7 @@
       } else {
         centreSelectorHtml = `
           <div style="padding:10px 14px;background:#FFFBEB;border:1px solid #FEF3C7;border-radius:6px;color:#92400E;font-size:13px;line-height:1.4;">
-            ℹ️ You are not authorized for any Centres or Offices. Please select <strong>Department</strong> above, or contact Super Admin to assign you to a Centre or Office.
+            ℹ️ You are not authorized for any Centres / Offices. Please select <strong>Department</strong> above, or contact Super Admin to assign you to a Centre or Office.
           </div>
           <input type="hidden" id="nfaCentreSelect" value="" />
         `;
@@ -5644,7 +6076,7 @@
         </label>
         <label class="radio-label">
           <input type="radio" name="nfaOrgType" id="nfaOrgTypeCentre" value="centre_or_office" onchange="onNfaOrgTypeChange('centre_or_office')" />
-          <span>Centres or Offices</span>
+          <span>Centres / Offices</span>
         </label>
       </div>
 
@@ -5654,9 +6086,9 @@
         ${deptSelectorHtml}
       </div>
 
-      <!-- Dynamic Container for Option B: Centres or Offices -->
+      <!-- Dynamic Container for Option B: Centres / Offices -->
       <div id="wrapOrgCentre" style="display:none;">
-        <label class="field-label" style="font-weight:600;margin-bottom:4px;">Centres or Offices <span style="color:var(--danger)">*</span></label>
+        <label class="field-label" style="font-weight:600;margin-bottom:4px;">Centres / Offices <span style="color:var(--danger)">*</span></label>
         ${centreSelectorHtml}
       </div>
     </div>
@@ -5789,6 +6221,23 @@
       <div>
         <label class="field-label">Additional Relevant Information</label>
         <textarea id="eventAdditionalInfo" rows="2" placeholder="Any further details regarding schedule, session tracks, travel, or accommodations"></textarea>
+      </div>
+
+      <!-- Event Revenue Generation -->
+      <div style="margin-top:12px;padding:10px 14px;background:#ffffff;border:1px solid #bfdbfe;border-radius:6px;">
+        <label class="field-label" style="font-weight:700;color:var(--primary-blue);margin-bottom:6px;">
+          Will this event generate revenue? <span style="font-size:11.5px;font-weight:normal;color:#64748b;">(Registration fees, sponsorships, participation fees, or other income)</span>
+        </label>
+        <div style="display:flex;gap:24px;align-items:center;">
+          <label class="radio-label" style="font-size:13px;cursor:pointer;">
+            <input type="radio" name="nfaWillGenerateRevenue" id="revNo" value="false" checked />
+            <span>No</span>
+          </label>
+          <label class="radio-label" style="font-size:13px;cursor:pointer;">
+            <input type="radio" name="nfaWillGenerateRevenue" id="revYes" value="true" />
+            <span>Yes</span>
+          </label>
+        </div>
       </div>
     </div>
 
@@ -6691,6 +7140,7 @@
             description: point2,
             justification: point3,
             event_details: nfaType === 'event' ? eventDetails : undefined,
+            will_generate_revenue: nfaType === 'event' && ((document.querySelector('input[name="editNfaWillGenerateRevenue"]:checked')?.value === 'true') || (document.querySelector('input[name="nfaWillGenerateRevenue"]:checked')?.value === 'true')),
             purchase_details: nfaType === 'purchase' ? purchaseDetails : undefined,
             resource_person_bank_details: nfaType === 'event' ? bankDetails : undefined,
             quotations: nfaType === 'purchase' ? quotations : [],
@@ -6860,7 +7310,7 @@
 
     <div class="card" style="padding:16px;background:var(--section-bg);margin:16px 0;border-left:4px solid var(--accent)">
       <div class="row" style="gap:24px;flex-wrap:wrap;">
-        <div><span class="muted">NFA Type:</span> <strong>${(n.organization_type === 'centre_or_office' || (REF.departments.find(d => d.id === n.department_id)?.category === 'coe')) ? 'Centres or Offices' : 'Department'}</strong></div>
+        <div><span class="muted">NFA Type:</span> <strong>${(n.organization_type === 'centre_or_office' || (REF.departments.find(d => d.id === n.department_id)?.category === 'coe')) ? 'Centres / Offices' : 'Department'}</strong></div>
         <div><span class="muted">Organization:</span> <strong style="color:var(--primary)">${escapeHtml(deptName(n.department_id))}</strong></div>
         <div><span class="muted">Main Category:</span> <strong>${escapeHtml(catName(n.budget_category_id))}</strong></div>
         ${n.budget_subcategory_name ? `<div><span class="muted">Subcategory:</span> <strong style="color:var(--primary)">${escapeHtml(n.budget_subcategory_name)}</strong></div>` : ''}
@@ -7566,7 +8016,7 @@
       <div style="flex:1">
         <label class="field-label">NFA Type</label>
         <div style="padding:9px 12px;background:#F8FAFC;border:1px solid #CBD5E1;border-radius:6px;font-weight:600;font-size:13px;color:#1E293B;">
-          ${(n.organization_type === 'centre_or_office' || (REF.departments.find(d => d.id === n.department_id)?.category === 'coe')) ? 'Centres or Offices' : 'Department'}
+          ${(n.organization_type === 'centre_or_office' || (REF.departments.find(d => d.id === n.department_id)?.category === 'coe')) ? 'Centres / Offices' : 'Department'}
         </div>
       </div>
       <div style="flex:1">
@@ -7680,6 +8130,21 @@
         <div style="grid-column: 1 / -1;">
           <label class="field-label" style="margin-top:0">Additional Info</label>
           <textarea id="editEventAdditionalInfo" rows="2" placeholder="Target audience, expected attendees, etc.">${escapeHtml(ed.additional_info || '')}</textarea>
+        </div>
+        <div style="grid-column: 1 / -1;margin-top:4px;padding:8px 12px;background:#ffffff;border:1px solid #bfdbfe;border-radius:6px;">
+          <label class="field-label" style="font-weight:700;color:var(--primary-blue);margin-bottom:4px;">
+            Will this event generate revenue?
+          </label>
+          <div style="display:flex;gap:20px;align-items:center;">
+            <label class="radio-label" style="font-size:13px;cursor:pointer;">
+              <input type="radio" name="editNfaWillGenerateRevenue" id="editRevNo" value="false" ${!nfa.will_generate_revenue ? 'checked' : ''} />
+              <span>No</span>
+            </label>
+            <label class="radio-label" style="font-size:13px;cursor:pointer;">
+              <input type="radio" name="editNfaWillGenerateRevenue" id="editRevYes" value="true" ${nfa.will_generate_revenue ? 'checked' : ''} />
+              <span>Yes</span>
+            </label>
+          </div>
         </div>
       </div>
     </div>
@@ -7954,6 +8419,7 @@
             description: point2,
             justification: point3,
             event_details: nfaType === 'event' ? eventDetails : undefined,
+            will_generate_revenue: nfaType === 'event' && ((document.querySelector('input[name="editNfaWillGenerateRevenue"]:checked')?.value === 'true') || (document.querySelector('input[name="nfaWillGenerateRevenue"]:checked')?.value === 'true')),
             purchase_details: nfaType === 'purchase' ? purchaseDetails : undefined,
             resource_person_bank_details: nfaType === 'event' ? bankDetails : undefined,
             quotations: nfaType === 'purchase' ? quotations : [],
@@ -8146,7 +8612,7 @@
             <table style="width:100%;border-collapse:collapse;min-width:650px;">
               <thead>
                 <tr style="background:#f1f4f9;border-bottom:2px solid var(--border);">
-                  <th style="text-align:left;padding:10px 14px;font-size:12px;">Department / Centres or Offices</th>
+                  <th style="text-align:left;padding:10px 14px;font-size:12px;">Department / Centres / Offices</th>
                   <th style="text-align:right;padding:10px 14px;font-size:12px;">Allocated</th>
                   <th style="text-align:right;padding:10px 14px;font-size:12px;">Approved</th>
                   <th style="text-align:right;padding:10px 14px;font-size:12px;">Pending / Reserved</th>
@@ -8535,11 +9001,55 @@
       } catch (e) { toast(e.message); }
     }
 
-    // ---------------- EXCEL IMPORT ----------------
+    // ---------------- REPORTS & ANALYTICS VIEW ----------------
+    let currentReportsAnalyticsSubTab = 'summary';
+    let currentSummaryScope = 'department';
+    let currentSummaryTargetId = null;
+    let currentSelectedReport = 'nfa_activity';
+
+    async function switchReportsAnalyticsTab(subTab) {
+      currentReportsAnalyticsSubTab = subTab;
+      const main = document.getElementById('main');
+      await renderExcel(main);
+    }
+
     async function renderExcel(main) {
+      const isSenior = ['super_admin', 'director', 'finance', 'finance_head'].includes(USER.role);
+      const isDean = ['dean', 'associate_dean', 'deans_office'].includes(USER.role);
+
+      const subTabsHtml = `
+        <div class="row" style="gap:10px;margin-bottom:18px;border-bottom:2px solid #e2e8f0;padding-bottom:12px;">
+          <button class="${currentReportsAnalyticsSubTab === 'summary' ? 'primary' : 'secondary'}" style="font-weight:600;padding:8px 18px;" onclick="switchReportsAnalyticsTab('summary')">
+            Summary Generation
+          </button>
+          <button class="${currentReportsAnalyticsSubTab === 'reports' ? 'primary' : 'secondary'}" style="font-weight:600;padding:8px 18px;" onclick="switchReportsAnalyticsTab('reports')">
+            Report Generation
+          </button>
+          <button class="${currentReportsAnalyticsSubTab === 'excel' ? 'primary' : 'secondary'}" style="font-weight:600;padding:8px 18px;" onclick="switchReportsAnalyticsTab('excel')">
+            Excel Import / Export
+          </button>
+        </div>
+      `;
+
+      if (currentReportsAnalyticsSubTab === 'summary') {
+        const sumContainer = document.createElement('div');
+        main.innerHTML = subTabsHtml;
+        main.appendChild(sumContainer);
+        await renderSummaryGeneration(sumContainer);
+        return;
+      }
+
+      if (currentReportsAnalyticsSubTab === 'reports') {
+        const repContainer = document.createElement('div');
+        main.innerHTML = subTabsHtml;
+        main.appendChild(repContainer);
+        await renderReportGeneration(repContainer);
+        return;
+      }
+
       const dept = USER.department_id || REF.departments[0]?.id;
       const records = await api(`/budgets/import/records?department=${dept}`);
-      let html = `
+      let html = subTabsHtml + `
     <div class="card">
       <div class="card-header">
         <div>
@@ -8586,6 +9096,411 @@
   `;
       main.innerHTML = html;
       setupFileDropzone('syncDropzone', 'excelFile', 'syncDropzoneCard', { icon: '📊' });
+    }
+
+    async function renderSummaryGeneration(container) {
+      const isSenior = ['super_admin', 'director', 'finance', 'finance_head'].includes(USER.role);
+      const isDean = ['dean', 'associate_dean', 'deans_office'].includes(USER.role);
+
+      if (!currentSummaryScope) {
+        currentSummaryScope = isSenior ? 'campus' : isDean ? 'school' : 'department';
+      }
+
+      if (!REF.schools || REF.schools.length === 0) {
+        try {
+          const camp = await api('/reports/summary/campus').catch(() => null);
+          if (camp && camp.schools) {
+            REF.schools = camp.schools;
+          } else {
+            REF.schools = [
+              { id: 'soet', code: 'SOET', name: 'School of Engineering and Technology' },
+              { id: 'soa', code: 'SOA', name: 'School of Arts' },
+              { id: 'sbm', code: 'SBM', name: 'School of Business and Management' },
+              { id: 'sps', code: 'SPS', name: 'School of Psychological Sciences' },
+            ];
+          }
+        } catch {
+          REF.schools = [];
+        }
+      }
+
+      const academicDepts = REF.departments.filter(d => d.category !== 'coe' && !d.code.startsWith('COE-'));
+      const centreDepts = REF.departments.filter(d => d.category === 'coe' || d.code.startsWith('COE-'));
+
+      if (!currentSummaryTargetId) {
+        if (currentSummaryScope === 'school') currentSummaryTargetId = REF.schools[0]?.id || 'SOET';
+        else if (currentSummaryScope === 'department') currentSummaryTargetId = USER.department_id || academicDepts[0]?.id;
+        else if (currentSummaryScope === 'centre') currentSummaryTargetId = centreDepts[0]?.id;
+      }
+
+      let summaryData = null;
+      let errorMsg = null;
+      try {
+        if (currentSummaryScope === 'campus') {
+          summaryData = await api('/reports/summary/campus');
+        } else if (currentSummaryScope === 'school') {
+          summaryData = await api(`/reports/summary/school/${currentSummaryTargetId || 'SOET'}`);
+        } else if (currentSummaryScope === 'department') {
+          summaryData = await api(`/reports/summary/department/${currentSummaryTargetId || academicDepts[0]?.id}`);
+        } else if (currentSummaryScope === 'centre') {
+          summaryData = await api(`/reports/summary/centre/${currentSummaryTargetId || centreDepts[0]?.id}`);
+        }
+      } catch (err) {
+        errorMsg = err.message;
+      }
+
+      const m = summaryData?.metrics || {
+        allocated: 0, approved: 0, pending: 0, available: 0,
+        total_revenue: 0, verified_revenue: 0, invoices_paid: 0, invoices_pending: 0,
+        total_nfas: 0, approved_nfas: 0, pending_nfas: 0, rejected_nfas: 0
+      };
+
+      let html = `
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card-header" style="flex-wrap:wrap;gap:12px;">
+            <div>
+              <h2 class="card-title" style="color:var(--primary-blue);">Institutional Summary Generation</h2>
+              <div class="card-sub">Generate real-time executive summaries at Campus, School, Department, and Centre levels</div>
+            </div>
+            <div class="row" style="gap:8px;flex-wrap:wrap;">
+              <button class="secondary" style="font-size:12.5px;padding:6px 14px;" onclick="exportSummary('pdf')">
+                📥 Download Summary (PDF)
+              </button>
+              <button class="secondary" style="font-size:12.5px;padding:6px 14px;" onclick="exportSummary('excel')">
+                📊 Download Summary (Excel)
+              </button>
+            </div>
+          </div>
+
+          <!-- Scope Selection Bar -->
+          <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;background:#f8fafc;padding:10px 14px;border-radius:6px;border:1px solid #e2e8f0;">
+            <span style="font-size:12px;font-weight:600;color:#475569;">Summary Level:</span>
+            ${isSenior ? `
+              <button class="${currentSummaryScope === 'campus' ? 'primary' : 'secondary'}" style="font-size:11.5px;padding:4px 10px;" onclick="onSummaryScopeChange('campus')">
+                Campus Summary
+              </button>
+            ` : ''}
+            ${(isSenior || isDean) ? `
+              <button class="${currentSummaryScope === 'school' ? 'primary' : 'secondary'}" style="font-size:11.5px;padding:4px 10px;" onclick="onSummaryScopeChange('school')">
+                School-Wise Summary
+              </button>
+            ` : ''}
+            <button class="${currentSummaryScope === 'department' ? 'primary' : 'secondary'}" style="font-size:11.5px;padding:4px 10px;" onclick="onSummaryScopeChange('department')">
+              Department Summary
+            </button>
+            <button class="${currentSummaryScope === 'centre' ? 'primary' : 'secondary'}" style="font-size:11.5px;padding:4px 10px;" onclick="onSummaryScopeChange('centre')">
+              Centres / Offices Summary
+            </button>
+
+            <!-- Dynamic Entity Dropdown -->
+            ${currentSummaryScope === 'school' ? `
+              <div style="display:inline-flex;align-items:center;gap:6px;margin-left:auto;">
+                <span style="font-size:11.5px;font-weight:600;color:#334155;">School:</span>
+                <select style="font-size:12px;padding:3px 8px;" onchange="onSummaryTargetChange(this.value)">
+                  ${(REF.schools || []).map(s => `<option value="${s.id || s.code}" ${(currentSummaryTargetId === s.id || currentSummaryTargetId === s.code) ? 'selected' : ''}>${escapeHtml(s.name)} (${s.code})</option>`).join('')}
+                </select>
+              </div>
+            ` : ''}
+
+            ${currentSummaryScope === 'department' ? `
+              <div style="display:inline-flex;align-items:center;gap:6px;margin-left:auto;">
+                <span style="font-size:11.5px;font-weight:600;color:#334155;">Department:</span>
+                <select style="font-size:12px;padding:3px 8px;" onchange="onSummaryTargetChange(this.value)" ${(!isSenior && !isDean) ? 'disabled' : ''}>
+                  ${academicDepts.map(d => `<option value="${d.id}" ${currentSummaryTargetId === d.id ? 'selected' : ''}>${escapeHtml(d.name)} (${d.code})</option>`).join('')}
+                </select>
+              </div>
+            ` : ''}
+
+            ${currentSummaryScope === 'centre' ? `
+              <div style="display:inline-flex;align-items:center;gap:6px;margin-left:auto;">
+                <span style="font-size:11.5px;font-weight:600;color:#334155;">Centre / Office:</span>
+                <select style="font-size:12px;padding:3px 8px;" onchange="onSummaryTargetChange(this.value)">
+                  ${centreDepts.map(c => `<option value="${c.id}" ${currentSummaryTargetId === c.id ? 'selected' : ''}>${escapeHtml(c.name)} (${c.code})</option>`).join('')}
+                </select>
+              </div>
+            ` : ''}
+          </div>
+
+          ${errorMsg ? `<div class="card" style="color:var(--danger);padding:14px;">${escapeHtml(errorMsg)}</div>` : `
+            <!-- Executive Metrics 4-Column Grid -->
+            <div class="grid-4" style="gap:14px;margin-bottom:20px;">
+              <div class="stat-card" style="background:#f8fafc;border:1px solid #cbd5e1;padding:14px;border-radius:8px;">
+                <div class="stat-label" style="font-size:11.5px;">Allocated Expenditure Budget</div>
+                <div style="font-size:20px;font-weight:700;color:var(--primary);margin-top:4px;">${inr(m.allocated)}</div>
+                <div style="font-size:11px;color:#64748b;margin-top:2px;">Master approved ceiling</div>
+              </div>
+              <div class="stat-card" style="background:#f0fdf4;border:1px solid #bbf7d0;padding:14px;border-radius:8px;">
+                <div class="stat-label" style="font-size:11.5px;color:#15803d;">Approved Spend</div>
+                <div style="font-size:20px;font-weight:700;color:#16a34a;margin-top:4px;">${inr(m.approved)}</div>
+                <div style="font-size:11px;color:#64748b;margin-top:2px;">${m.allocated > 0 ? Math.round((m.approved / m.allocated) * 100) : 0}% of allocation</div>
+              </div>
+              <div class="stat-card" style="background:#fefce8;border:1px solid #fef08a;padding:14px;border-radius:8px;">
+                <div class="stat-label" style="font-size:11.5px;color:#a16207;">Pending Commitments (NFAs)</div>
+                <div style="font-size:20px;font-weight:700;color:#ca8a04;margin-top:4px;">${inr(m.pending)}</div>
+                <div style="font-size:11px;color:#64748b;margin-top:2px;">Under multi-tier review</div>
+              </div>
+              <div class="stat-card" style="background:#f0f9ff;border:1px solid #bae6fd;padding:14px;border-radius:8px;">
+                <div class="stat-label" style="font-size:11.5px;color:#0369a1;">Available Expenditure Balance</div>
+                <div style="font-size:20px;font-weight:700;color:#0284c7;margin-top:4px;">${inr(m.available)}</div>
+                <div style="font-size:11px;color:#64748b;margin-top:2px;">Unencumbered funds</div>
+              </div>
+            </div>
+
+            <!-- Secondary Metrics: Revenue, Invoices, NFAs -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:14px;margin-bottom:20px;">
+              <div style="background:#ffffff;border:1px solid #e2e8f0;padding:14px;border-radius:8px;">
+                <div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:6px;">💰 Revenue &amp; Earnings Generated</div>
+                <div style="font-size:18px;font-weight:700;color:#059669;">${inr(m.total_revenue)}</div>
+                <div style="font-size:11px;color:#64748b;margin-top:2px;">Verified: ${inr(m.verified_revenue)} · Separate ledger</div>
+              </div>
+              <div style="background:#ffffff;border:1px solid #e2e8f0;padding:14px;border-radius:8px;">
+                <div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:6px;">🧾 Purchase Invoices &amp; Settlements</div>
+                <div style="font-size:18px;font-weight:700;color:#2563eb;">Paid: ${inr(m.invoices_paid)}</div>
+                <div style="font-size:11px;color:#64748b;margin-top:2px;">Pending Payment: ${inr(m.invoices_pending)}</div>
+              </div>
+              <div style="background:#ffffff;border:1px solid #e2e8f0;padding:14px;border-radius:8px;">
+                <div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:6px;">📑 Total Notes for Approval (NFAs)</div>
+                <div style="font-size:18px;font-weight:700;color:var(--primary);">${m.total_nfas} Total</div>
+                <div style="font-size:11px;color:#64748b;margin-top:2px;">Approved: ${m.approved_nfas} · In-Flight: ${m.pending_nfas} · Rejected: ${m.rejected_nfas}</div>
+              </div>
+            </div>
+
+            <!-- Breakdown Table -->
+            ${summaryData?.departments ? `
+              <h3 style="font-size:15px;color:var(--primary-blue);margin-bottom:10px;">Department Breakdown</h3>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Department</th>
+                      <th style="text-align:right;">Allocated</th>
+                      <th style="text-align:right;">Approved Spend</th>
+                      <th style="text-align:right;">Pending</th>
+                      <th style="text-align:right;">Available Balance</th>
+                      <th style="text-align:right;">Revenue Generated</th>
+                      <th style="text-align:center;">NFAs</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${summaryData.departments.map(d => `
+                      <tr>
+                        <td><strong>${escapeHtml(d.name)}</strong> (${escapeHtml(d.code)})</td>
+                        <td style="text-align:right;">${inr(d.metrics.allocated)}</td>
+                        <td style="text-align:right;color:#16a34a;">${inr(d.metrics.approved)}</td>
+                        <td style="text-align:right;color:#ca8a04;">${inr(d.metrics.pending)}</td>
+                        <td style="text-align:right;font-weight:700;color:var(--primary);">${inr(d.metrics.available)}</td>
+                        <td style="text-align:right;color:#059669;">${inr(d.metrics.total_revenue)}</td>
+                        <td style="text-align:center;">${d.metrics.total_nfas}</td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+            ` : ''}
+
+            ${summaryData?.categories ? `
+              <h3 style="font-size:15px;color:var(--primary-blue);margin-bottom:10px;">Budget Category Breakdown</h3>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Budget Category</th>
+                      <th style="text-align:right;">Allocated Amount</th>
+                      <th style="text-align:right;">Approved / Spent</th>
+                      <th style="text-align:right;">Pending Approval</th>
+                      <th style="text-align:right;">Available Balance</th>
+                      <th style="text-align:right;">Utilization %</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${summaryData.categories.map(c => `
+                      <tr>
+                        <td><strong>${escapeHtml(c.category_name)}</strong></td>
+                        <td style="text-align:right;">${inr(c.allocated)}</td>
+                        <td style="text-align:right;color:#16a34a;">${inr(c.approved)}</td>
+                        <td style="text-align:right;color:#ca8a04;">${inr(c.pending)}</td>
+                        <td style="text-align:right;font-weight:700;color:var(--primary);">${inr(c.available)}</td>
+                        <td style="text-align:right;">${c.allocated > 0 ? Math.round(((c.approved + c.pending) / c.allocated) * 100) : 0}%</td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+            ` : ''}
+          `}
+        </div>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    async function onSummaryScopeChange(scope) {
+      currentSummaryScope = scope;
+      currentSummaryTargetId = null;
+      const main = document.getElementById('main');
+      await renderExcel(main);
+    }
+
+    async function onSummaryTargetChange(targetId) {
+      currentSummaryTargetId = targetId;
+      const main = document.getElementById('main');
+      await renderExcel(main);
+    }
+
+    async function exportSummary(format) {
+      const reportType = currentSummaryScope === 'campus' ? 'campus_budget' : currentSummaryScope === 'school' ? 'school_budget' : 'department_budget';
+      const ext = format === 'pdf' ? 'pdf' : 'xlsx';
+      const filename = `CU_Summary_${currentSummaryScope}_${Date.now()}.${ext}`;
+      await downloadReportFile(`/api/reports/export/${reportType}/${format}`, filename, { scope: currentSummaryScope, targetId: currentSummaryTargetId });
+    }
+
+    const REPORT_DEFINITIONS = [
+      { id: 'nfa_activity', name: 'NFA Activity Report', desc: 'Comprehensive log of all submitted, approved, and active Notes for Approval.' },
+      { id: 'department_budget', name: 'Department Budget Report', desc: 'Allocated vs spent budgets across all department categories and line items.' },
+      { id: 'school_budget', name: 'School Budget Report', desc: 'Roll-up comparison of budgets and expenditures across schools (SOET, SOA, SBM, SPS).' },
+      { id: 'campus_budget', name: 'Campus Budget Report', desc: 'Executive institutional financial overview covering academic and research centres.' },
+      { id: 'capex', name: 'Capital Expenditure (CAPEX) Report', desc: 'Equipment, software licenses, laboratory investments, and computing assets.' },
+      { id: 'revenue_earnings', name: 'Revenue & Earnings Report', desc: 'Earnings ledger: registrations, sponsorships, participation fees, verified collections.' },
+      { id: 'event_activity', name: 'Event Activity Report', desc: 'Workshops, conferences, resource persons, venue, dates, and completion status.' },
+      { id: 'purchase_activity', name: 'Purchase Activity Report', desc: 'Procurement NFAs, 3 vendor quotations, comparative statements, and item specs.' },
+      { id: 'purchase_invoice', name: 'Purchase Invoice & Settlement Report', desc: 'Vendor invoice submissions, GST amounts, Finance verification, and paid amounts.' },
+      { id: 'payment_status', name: 'Payment Status Report', desc: 'Real-time disbursement tracker for vendor invoices and resource person honorariums.' },
+      { id: 'financial_ledger', name: 'Financial Ledger & Audit Trail Report', desc: 'Immutable chronology of financial transactions, revisions, and status transitions.' },
+      { id: 'faculty_nfa', name: 'Faculty-wise NFA Activity Report', desc: 'Faculty proposal metrics: submissions, approval rates, and total sanctioned amounts.' },
+      { id: 'centres_offices', name: 'Centres / Offices Activity Report', desc: 'Centres of Excellence (COEs) and specialized research laboratory operations.' },
+      { id: 'pending_approvals', name: 'Pending Approvals & Bottleneck Report', desc: 'In-flight proposals, current review stages, and approval duration tracking.' },
+    ];
+
+    async function renderReportGeneration(container) {
+      if (!currentSelectedReport) currentSelectedReport = 'nfa_activity';
+
+      let reportData = null;
+      let errorMsg = null;
+      try {
+        reportData = await api(`/reports/data/${currentSelectedReport}`);
+      } catch (err) {
+        errorMsg = err.message;
+      }
+
+      const activeDef = REPORT_DEFINITIONS.find(r => r.id === currentSelectedReport) || REPORT_DEFINITIONS[0];
+      const records = reportData?.data || [];
+
+      let html = `
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card-header" style="flex-wrap:wrap;gap:12px;">
+            <div>
+              <h2 class="card-title" style="color:var(--primary-blue);">Official Institutional Reports (14 Report Types)</h2>
+              <div class="card-sub">Generate and export official CHRIST University audit and governance reports in PDF and Excel formats</div>
+            </div>
+            <div class="row" style="gap:8px;flex-wrap:wrap;">
+              <button class="primary" style="font-size:12.5px;padding:6px 14px;" onclick="downloadActiveReport('pdf')">
+                📥 Download Official PDF Report
+              </button>
+              <button class="secondary" style="font-size:12.5px;padding:6px 14px;" onclick="downloadActiveReport('excel')">
+                📊 Download Formatted Excel
+              </button>
+            </div>
+          </div>
+
+          <!-- Report Selector Grid (14 items) -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(210px, 1fr));gap:8px;margin-bottom:20px;">
+            ${REPORT_DEFINITIONS.map(r => `
+              <button
+                type="button"
+                class="${currentSelectedReport === r.id ? 'primary' : 'secondary'}"
+                style="text-align:left;padding:8px 10px;font-size:11.5px;font-weight:600;display:flex;align-items:center;gap:6px;border-radius:6px;"
+                onclick="selectReportType('${r.id}')"
+              >
+                <span>${currentSelectedReport === r.id ? '▶' : '•'}</span>
+                <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(r.name)}</span>
+              </button>
+            `).join('')}
+          </div>
+
+          <!-- Active Report Header & Description -->
+          <div style="background:#f8fafc;border-left:4px solid var(--primary-blue);padding:12px 16px;margin-bottom:16px;border-radius:0 6px 6px 0;">
+            <h3 style="margin:0 0 4px;font-size:15px;color:var(--primary-blue);">${escapeHtml(activeDef.name)}</h3>
+            <div style="font-size:12.5px;color:#475569;">${escapeHtml(activeDef.desc)}</div>
+          </div>
+
+          ${errorMsg ? `<div class="card" style="color:var(--danger);padding:14px;">${escapeHtml(errorMsg)}</div>` : `
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+              <span style="font-size:12.5px;font-weight:600;color:#334155;">Previewing Records (${records.length} total)</span>
+              <span style="font-size:11px;color:#64748b;">Showing first 25 records below. Full records exported in PDF &amp; Excel.</span>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    ${records.length > 0 ? Object.keys(records[0]).map(k => `<th>${escapeHtml(k.replace(/_/g, ' ').toUpperCase())}</th>`).join('') : '<th>Records</th>'}
+                  </tr>
+                </thead>
+                <tbody>
+                  ${records.length === 0 ? '<tr><td colspan="10" class="muted" style="text-align:center;padding:24px;">No records available for this report type.</td></tr>' : ''}
+                  ${records.slice(0, 25).map(row => `
+                    <tr>
+                      ${Object.keys(row).map(k => {
+                        let val = row[k];
+                        if (typeof val === 'number' && (k.includes('amount') || k.includes('allocated') || k.includes('approved') || k.includes('pending') || k.includes('available') || k.includes('revenue'))) {
+                          val = inr(val);
+                        }
+                        return `<td>${escapeHtml(String(val ?? '—'))}</td>`;
+                      }).join('')}
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          `}
+        </div>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    async function selectReportType(typeId) {
+      currentSelectedReport = typeId;
+      const main = document.getElementById('main');
+      await renderExcel(main);
+    }
+
+    async function downloadActiveReport(format) {
+      const ext = format === 'pdf' ? 'pdf' : 'xlsx';
+      const filename = `CU_Report_${currentSelectedReport}_${Date.now()}.${ext}`;
+      await downloadReportFile(`/api/reports/export/${currentSelectedReport}/${format}`, filename);
+    }
+
+    async function downloadReportFile(url, fileName, postBody = null) {
+      try {
+        toast('Generating report export...');
+        const res = await fetch(url, {
+          method: postBody ? 'POST' : 'GET',
+          headers: {
+            Authorization: `Bearer ${TOKEN}`,
+            ...(postBody ? { 'Content-Type': 'application/json' } : {})
+          },
+          ...(postBody ? { body: JSON.stringify(postBody) } : {})
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ error: 'Export failed' }));
+          throw new Error(err.error || 'Export failed');
+        }
+
+        const blob = await res.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+        toast('Download complete');
+      } catch (err) {
+        toast(err.message);
+      }
     }
 
     async function previewExcel(dept) {
@@ -9217,7 +10132,7 @@
             <input type="checkbox" name="editUserCentres" value="${c.id}" ${authCentresList.includes(c.id) ? 'checked' : ''} />
             <span>${escapeHtml(c.name)} (${c.code})</span>
           </label>
-        `).join('') || '<div style="font-size:12px;color:var(--text-muted);">No Centres or Offices found.</div>';
+        `).join('') || '<div style="font-size:12px;color:var(--text-muted);">No Centres / Offices found.</div>';
       }
 
       onEditUserRoleChange();

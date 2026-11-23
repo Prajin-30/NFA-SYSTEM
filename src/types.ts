@@ -46,6 +46,15 @@ export interface User {
   temp_password_created_at?: string | null;
 }
 
+export interface School {
+  id: string;
+  code: string;
+  name: string;
+  campus: string;
+  dean_id?: string | null;
+  created_at?: string;
+}
+
 export interface Department {
   id: string;
   name: string;
@@ -53,6 +62,7 @@ export interface Department {
   category?: 'academic' | 'coe';
   department_type?: 'academic' | 'centre';
   school?: string | null;
+  school_id?: string | null;
   is_active?: boolean;
   hod_name?: string;
   dean_name?: string;
@@ -234,6 +244,13 @@ export interface Nfa {
   pending_revision_reason?: string;
   is_deleted?: boolean;
   deleted_at?: string | null;
+  // Event Revenue Generation & Completion
+  will_generate_revenue?: boolean;
+  event_completion_status?: 'not_started' | 'scheduled' | 'completed' | 'cancelled';
+  event_completion_date?: string;
+  event_completion_remarks?: string;
+  event_completed_by?: string;
+  event_completed_at?: string;
 }
 
 export interface Approval {
@@ -284,7 +301,7 @@ export interface BudgetTransaction {
 
 export interface AuditLog {
   id: string;
-  entity_type: 'nfa' | 'project' | 'department_budget' | 'excel_sync' | 'user_account' | 'bank_detail' | 'purchase_invoice';
+  entity_type: 'nfa' | 'project' | 'department_budget' | 'excel_sync' | 'user_account' | 'bank_detail' | 'purchase_invoice' | 'event_revenue';
   entity_id: string;
   department_id: string;
   old_amount: number | null;
@@ -493,9 +510,53 @@ export interface ResourcePersonBankDetailDTO {
   can_reveal?: boolean;
 }
 
+export type EventRevenueSource =
+  | 'registration_fee'
+  | 'sponsorship'
+  | 'participation_fee'
+  | 'event_collection'
+  | 'other_income';
+
+export type EventRevenueStatus = 'submitted' | 'verified' | 'returned';
+
+export interface EventRevenue {
+  id: string;
+  nfa_id: string;
+  department_id?: string | null;
+  revenue_source: EventRevenueSource;
+  description: string;
+  amount: number;
+  collection_date: string;
+  payment_method?: string;
+  receipt_url?: string;
+  receipt_filename?: string;
+  remarks?: string;
+  submitted_by: string;
+  submitted_by_name?: string;
+  status: EventRevenueStatus;
+  verified_by?: string;
+  verified_by_name?: string;
+  verified_at?: string;
+  verification_remarks?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EventRevenueReminder {
+  id: string;
+  nfa_id: string;
+  sent_to: string;
+  sent_to_email: string;
+  sent_at: string;
+  status: 'mock_delivered' | 'delivered' | 'failed';
+  error_message?: string;
+  created_at?: string;
+}
+
 export interface DB {
   users: User[];
   departments: Department[];
+  schools?: School[];
   financial_years: FinancialYear[];
   budget_types: BudgetType[];
   budget_categories: BudgetCategory[];
@@ -513,5 +574,7 @@ export interface DB {
   mock_emails?: MockEmail[];
   resource_person_bank_details?: ResourcePersonBankDetail[];
   purchase_invoices?: PurchaseInvoice[];
+  event_revenues?: EventRevenue[];
+  event_revenue_reminders?: EventRevenueReminder[];
   revoked_tokens?: { token_hash: string; expires_at: number }[];
 }

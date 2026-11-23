@@ -12,6 +12,7 @@ function emptyDb(): DB {
   return {
     users: [],
     departments: [],
+    schools: [],
     financial_years: [],
     budget_types: [],
     budget_categories: [],
@@ -27,6 +28,8 @@ function emptyDb(): DB {
     budget_changes: [],
     resource_person_bank_details: [],
     purchase_invoices: [],
+    event_revenues: [],
+    event_revenue_reminders: [],
     revoked_tokens: [],
   };
 }
@@ -51,6 +54,9 @@ class Store {
       this.db.budget_subcategories ||= [];
       this.db.resource_person_bank_details ||= [];
       this.db.purchase_invoices ||= [];
+      this.db.event_revenues ||= [];
+      this.db.event_revenue_reminders ||= [];
+      this.db.schools ||= [];
       this.db.mock_emails ||= [];
       this.db.revoked_tokens ||= [];
     } else {

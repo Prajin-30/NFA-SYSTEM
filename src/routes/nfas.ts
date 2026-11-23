@@ -1034,6 +1034,8 @@ nfasRouter.post('/', requireRole('faculty', 'hod', 'dean', 'super_admin'), async
     quotations: isPurchase && Array.isArray(b.quotations) ? b.quotations : [],
     comparative_statement: isPurchase ? (b.comparative_statement || undefined) : undefined,
     proposer_signature: proposerSig,
+    will_generate_revenue: !isPurchase && Boolean(b.will_generate_revenue),
+    event_completion_status: 'not_started' as const,
   };
 
   const bankDetailEntries: ResourcePersonBankDetail[] = [];
@@ -1419,6 +1421,7 @@ nfasRouter.put('/:id', async (req: AuthedRequest, res) => {
 
     if (isPurchase) {
       nfa.event_details = undefined;
+      nfa.will_generate_revenue = false;
       if (b.purchase_details !== undefined) {
         nfa.purchase_details = b.purchase_details;
       }
@@ -1432,6 +1435,9 @@ nfasRouter.put('/:id', async (req: AuthedRequest, res) => {
       nfa.purchase_details = undefined;
       nfa.quotations = [];
       nfa.comparative_statement = undefined;
+      if (b.will_generate_revenue !== undefined) {
+        nfa.will_generate_revenue = Boolean(b.will_generate_revenue);
+      }
       if (b.event_details !== undefined) {
         nfa.event_details = b.event_details;
       }
@@ -2008,6 +2014,85 @@ nfasRouter.post('/:id/review', async (req: AuthedRequest, res) => {
     items: withItems(result.nfa!.id),
     approvals: withApprovals(result.nfa!.id),
     validation: (result as any).validation,
+  });
+});
+
+/**
+ * POST /api/nfas/:id/complete-event — Mark an approved event as completed
+ */
+nfasRouter.post('/:id/complete-event', async (req: AuthedRequest, res) => {
+  const user = req.user!;
+  const { id } = req.params;
+  const { completion_date, completion_remarks } = req.body || {};
+
+  const nfa = store.data.nfas.find((n) => n.id === id);
+  if (!nfa) {
+    return res.status(404).json({ error: 'Note for Approval not found' });
+  }
+
+  if (nfa.nfa_type !== 'event') {
+    return res.status(400).json({ error: 'Event completion tracking only applies to Event NFAs' });
+  }
+
+  if (nfa.status !== 'approved') {
+    return res.status(400).json({ error: 'Only finally approved events can be marked as completed' });
+  }
+
+  const isOwner = nfa.created_by === user.id;
+  const isHod = user.role === 'hod' && user.department_id === nfa.department_id;
+  const isCentre = Boolean(nfa.centre_id && user.authorized_centre_ids?.includes(nfa.centre_id));
+  const isSenior = ['super_admin', 'director', 'finance', 'finance_head', 'dean', 'associate_dean', 'deans_office'].includes(user.role);
+
+  if (!isOwner && !isHod && !isCentre && !isSenior) {
+    return res.status(403).json({ error: 'Forbidden: You do not have permission to manage this NFA' });
+  }
+
+  const finalDate = completion_date ? String(completion_date).slice(0, 10) : new Date().toISOString().slice(0, 10);
+  const finalRemarks = completion_remarks ? String(completion_remarks).trim() : 'Event completed successfully';
+
+  await store.transact((db) => {
+    const target = db.nfas.find((n) => n.id === id);
+    if (target) {
+      target.event_completion_status = 'completed';
+      target.event_completion_date = finalDate;
+      target.event_completion_remarks = finalRemarks;
+      target.event_completed_by = user.id;
+      target.event_completed_at = new Date().toISOString();
+      target.updated_at = new Date().toISOString();
+    }
+
+    db.audit_logs.push({
+      id: uuid(),
+      entity_type: 'nfa',
+      entity_id: nfa.id,
+      department_id: nfa.department_id,
+      old_amount: null,
+      new_amount: null,
+      difference: null,
+      changed_by: user.name,
+      role: user.role,
+      reason: `Event marked as COMPLETED by ${user.name} on ${finalDate}: ${finalRemarks}`,
+      source: 'portal',
+      approval_status: 'completed',
+      created_at: new Date().toISOString(),
+    });
+  });
+
+  let reminderSent = false;
+  if (nfa.will_generate_revenue) {
+    try {
+      const { sendRevenueReminderNotification } = await import('../services/revenueReminder.js');
+      await sendRevenueReminderNotification({ ...nfa, event_completion_date: finalDate, event_completion_remarks: finalRemarks }, user.name);
+      reminderSent = true;
+    } catch (err: any) {
+      console.warn('[REVENUE REMINDER] Notification warning:', err.message);
+    }
+  }
+
+  res.json({
+    success: true,
+    message: 'Event successfully marked as completed',
+    reminder_sent: reminderSent,
   });
 });
 

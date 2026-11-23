@@ -21,6 +21,9 @@ export async function loadAllFromPostgres(client: pg.PoolClient): Promise<DB> {
   const bankRes = await client.query('SELECT * FROM resource_person_bank_details');
   const invoicesRes = await client.query('SELECT * FROM purchase_invoices');
   const tokensRes = await client.query('SELECT * FROM revoked_tokens');
+  const schoolsRes = await client.query('SELECT * FROM schools ORDER BY code ASC');
+  const revRes = await client.query('SELECT * FROM event_revenues ORDER BY created_at DESC');
+  const revRemRes = await client.query('SELECT * FROM event_revenue_reminders ORDER BY sent_at DESC');
 
   return {
     users: usersRes.rows as any,
@@ -50,6 +53,12 @@ export async function loadAllFromPostgres(client: pg.PoolClient): Promise<DB> {
       ...n,
       total_amount: Number(n.total_amount) || 0,
       date: n.date ? new Date(n.date).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
+      will_generate_revenue: Boolean(n.will_generate_revenue),
+      event_completion_status: n.event_completion_status || 'not_started',
+      event_completion_date: n.event_completion_date ? new Date(n.event_completion_date).toISOString().slice(0, 10) : undefined,
+      event_completion_remarks: n.event_completion_remarks || '',
+      event_completed_by: n.event_completed_by || undefined,
+      event_completed_at: n.event_completed_at || undefined,
     })) as any,
     nfa_items: nfaItemsRes.rows.map((i) => ({
       ...i,
@@ -90,6 +99,13 @@ export async function loadAllFromPostgres(client: pg.PoolClient): Promise<DB> {
       token_hash: t.token_hash,
       expires_at: new Date(t.expires_at).getTime(),
     })) as any,
+    schools: schoolsRes.rows as any,
+    event_revenues: revRes.rows.map((r) => ({
+      ...r,
+      amount: Number(r.amount) || 0,
+      collection_date: r.collection_date ? new Date(r.collection_date).toISOString().slice(0, 10) : '',
+    })) as any,
+    event_revenue_reminders: revRemRes.rows as any,
   };
 }
 
@@ -100,16 +116,15 @@ export async function persistDiffToPostgres(client: pg.PoolClient, before: DB, a
     const prev = beforeDepts.get(d.id);
     if (!prev || prev !== JSON.stringify(d)) {
       await client.query(`
-        INSERT INTO departments (id, name, code, school, category, department_type, is_active)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        INSERT INTO departments (id, name, code, category, school_id, is_active)
+        VALUES ($1, $2, $3, $4, $5, $6)
         ON CONFLICT (id) DO UPDATE SET
           name = EXCLUDED.name,
           code = EXCLUDED.code,
-          school = EXCLUDED.school,
           category = EXCLUDED.category,
-          department_type = EXCLUDED.department_type,
+          school_id = EXCLUDED.school_id,
           is_active = EXCLUDED.is_active;
-      `, [d.id, d.name, d.code, d.school || 'SoET', d.category || 'academic', d.department_type || 'academic', d.is_active ?? true]);
+      `, [d.id, d.name, d.code, d.category || 'academic', d.school_id || null, d.is_active ?? true]);
     }
   }
 
@@ -234,9 +249,11 @@ export async function persistDiffToPostgres(client: pg.PoolClient, before: DB, a
           budget_subcategory_name, title, purpose, description, justification, sdgs, requirements,
           total_amount, status, created_by, submitted_by_name, submitted_by_designation, hod_name,
           date, point1, point2, point3, point4, nfa_type, event_details, purchase_details,
-          quotations, comparative_statement, proposer_signature
+          quotations, comparative_statement, proposer_signature,
+          will_generate_revenue, event_completion_status, event_completion_date,
+          event_completion_remarks, event_completed_by, event_completed_at
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41)
         ON CONFLICT (id) DO UPDATE SET
           status = EXCLUDED.status,
           total_amount = EXCLUDED.total_amount,
@@ -251,6 +268,12 @@ export async function persistDiffToPostgres(client: pg.PoolClient, before: DB, a
           quotations = EXCLUDED.quotations,
           comparative_statement = EXCLUDED.comparative_statement,
           proposer_signature = EXCLUDED.proposer_signature,
+          will_generate_revenue = EXCLUDED.will_generate_revenue,
+          event_completion_status = EXCLUDED.event_completion_status,
+          event_completion_date = EXCLUDED.event_completion_date,
+          event_completion_remarks = EXCLUDED.event_completion_remarks,
+          event_completed_by = EXCLUDED.event_completed_by,
+          event_completed_at = EXCLUDED.event_completed_at,
           updated_at = NOW();
       `, [
         n.id, n.ref_no, n.project_id || null, n.department_id, n.centre_id || null,
@@ -268,7 +291,13 @@ export async function persistDiffToPostgres(client: pg.PoolClient, before: DB, a
         n.purchase_details ? JSON.stringify(n.purchase_details) : null,
         n.quotations ? JSON.stringify(n.quotations) : '[]',
         n.comparative_statement ? JSON.stringify(n.comparative_statement) : null,
-        n.proposer_signature || null
+        n.proposer_signature || null,
+        Boolean(n.will_generate_revenue),
+        n.event_completion_status || 'not_started',
+        n.event_completion_date || null,
+        n.event_completion_remarks || null,
+        n.event_completed_by || null,
+        n.event_completed_at || null
       ]);
     }
   }
@@ -340,6 +369,8 @@ export async function persistDiffToPostgres(client: pg.PoolClient, before: DB, a
   const beforeLogs = new Set((before.audit_logs || []).map((l) => l.id));
   for (const log of after.audit_logs || []) {
     if (!beforeLogs.has(log.id)) {
+      const validUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      const changerId = validUuid.test(log.changed_by) ? log.changed_by : (after.users[0]?.id || null);
       await client.query(`
         INSERT INTO audit_logs (id, entity_type, entity_id, department_id, old_amount, new_amount, difference, changed_by, role, reason, source, approval_status)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
@@ -349,7 +380,7 @@ export async function persistDiffToPostgres(client: pg.PoolClient, before: DB, a
         log.old_amount !== null && log.old_amount !== undefined ? Number(log.old_amount) : null,
         log.new_amount !== null && log.new_amount !== undefined ? Number(log.new_amount) : null,
         log.difference !== null && log.difference !== undefined ? Number(log.difference) : null,
-        log.changed_by, log.role || 'faculty', log.reason || '', log.source || 'portal',
+        changerId, log.role || 'faculty', log.reason || '', log.source || 'portal',
         log.approval_status || 'submitted'
       ]);
     }
@@ -437,6 +468,67 @@ export async function persistDiffToPostgres(client: pg.PoolClient, before: DB, a
         VALUES ($1, $2)
         ON CONFLICT (token_hash) DO NOTHING;
       `, [t.token_hash, typeof t.expires_at === 'number' ? new Date(t.expires_at).toISOString() : t.expires_at]);
+    }
+  }
+
+  // 12. Event Revenues
+  const beforeRevs = new Map((before.event_revenues || []).map((r) => [r.id, JSON.stringify(r)]));
+  for (const rev of after.event_revenues || []) {
+    const prev = beforeRevs.get(rev.id);
+    if (!prev || prev !== JSON.stringify(rev)) {
+      await client.query(`
+        INSERT INTO event_revenues (
+          id, nfa_id, department_id, revenue_source, description, amount,
+          collection_date, payment_method, receipt_url, receipt_filename,
+          remarks, submitted_by, submitted_by_name, status,
+          verified_by, verified_by_name, verified_at, verification_remarks
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+        ON CONFLICT (id) DO UPDATE SET
+          revenue_source = EXCLUDED.revenue_source,
+          description = EXCLUDED.description,
+          amount = EXCLUDED.amount,
+          collection_date = EXCLUDED.collection_date,
+          payment_method = EXCLUDED.payment_method,
+          receipt_url = EXCLUDED.receipt_url,
+          receipt_filename = EXCLUDED.receipt_filename,
+          remarks = EXCLUDED.remarks,
+          status = EXCLUDED.status,
+          verified_by = EXCLUDED.verified_by,
+          verified_by_name = EXCLUDED.verified_by_name,
+          verified_at = EXCLUDED.verified_at,
+          verification_remarks = EXCLUDED.verification_remarks,
+          updated_at = NOW();
+      `, [
+        rev.id, rev.nfa_id, rev.department_id || null, rev.revenue_source, rev.description,
+        Number(rev.amount), rev.collection_date, rev.payment_method || 'online',
+        rev.receipt_url || null, rev.receipt_filename || null, rev.remarks || null,
+        rev.submitted_by, rev.submitted_by_name || 'Faculty', rev.status || 'submitted',
+        rev.verified_by || null, rev.verified_by_name || null, rev.verified_at || null,
+        rev.verification_remarks || null
+      ]);
+    }
+  }
+
+  // Handle Event Revenue Deletions if any
+  const afterRevIds = new Set((after.event_revenues || []).map((r) => r.id));
+  for (const r of before.event_revenues || []) {
+    if (!afterRevIds.has(r.id)) {
+      await client.query('DELETE FROM event_revenues WHERE id = $1', [r.id]);
+    }
+  }
+
+  // 13. Event Revenue Reminders
+  const beforeReminders = new Set((before.event_revenue_reminders || []).map((rem) => rem.id));
+  for (const rem of after.event_revenue_reminders || []) {
+    if (!beforeReminders.has(rem.id)) {
+      await client.query(`
+        INSERT INTO event_revenue_reminders (id, nfa_id, sent_to, sent_to_email, sent_at, status, error_message)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        ON CONFLICT (id) DO NOTHING;
+      `, [
+        rem.id, rem.nfa_id, rem.sent_to, rem.sent_to_email, rem.sent_at, rem.status || 'mock_delivered', rem.error_message || null
+      ]);
     }
   }
 }

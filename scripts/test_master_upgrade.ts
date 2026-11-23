@@ -1,6 +1,7 @@
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
+import vm from 'vm';
 import { fileURLToPath } from 'url';
 import { store } from '../src/store.js';
 import { app } from '../src/server.js';
@@ -268,9 +269,32 @@ async function runMasterUpgradeTestSuite() {
   const facVerifyRes = await request('PUT', `/api/revenue/entries/${createdRevenueId}/verify`, facultyMechToken, { status: 'verified' });
   assert(facVerifyRes.status === 403, 'RBAC: Faculty cannot verify revenue entries (returns 403 Forbidden)');
 
-  console.log('\n--- PHASE 7: FRONTEND NAVIGATION & RENAMING INTEGRITY ---');
+  console.log('\n--- PHASE 7: FRONTEND JAVASCRIPT SYNTAX, NAVIGATION & RENAMING INTEGRITY ---');
   const indexPath = path.join(__dirname, '..', 'public', 'index.html');
   const indexHtml = fs.readFileSync(indexPath, 'utf-8');
+
+  // Verify inline JavaScript syntax with Node vm compiler
+  let scriptValid = true;
+  let scriptSyntaxError = '';
+  const scriptRegex = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
+  let sMatch;
+  while ((sMatch = scriptRegex.exec(indexHtml)) !== null) {
+    try {
+      new vm.Script(sMatch[1], { filename: 'public/index.html' });
+    } catch (err: any) {
+      scriptValid = false;
+      scriptSyntaxError = `${err.message} at line ${err.stack}`;
+      break;
+    }
+  }
+  assert(scriptValid, 'Frontend inline <script> compiles with 100% valid JavaScript syntax (zero syntax errors)', scriptSyntaxError);
+
+  // Verify critical login functions exist in script
+  const hasDoLogin = indexHtml.includes('async function doLogin(') || indexHtml.includes('function doLogin(');
+  assert(hasDoLogin, 'Frontend script defines doLogin() function');
+
+  const hasTogglePassword = indexHtml.includes('function togglePasswordVisibility(');
+  assert(hasTogglePassword, 'Frontend script defines togglePasswordVisibility() function');
 
   // Verify exact 8 unnumbered navigation tabs
   const tabLabelMatch = indexHtml.includes("dashboard: 'Home'") &&

@@ -1,3 +1,5 @@
+import vm from 'vm';
+
 async function main() {
   console.log('===============================================================');
   console.log('--- VERIFYING CU-NFA MASTER UPGRADE ON LIVE RENDER SERVICE ---');
@@ -213,6 +215,33 @@ async function main() {
   // Check live HTML navigation tabs
   const htmlRes = await fetch(`${baseUrl}/`, { signal: AbortSignal.timeout(15000) });
   const html = await htmlRes.text();
+
+  // Validate live JavaScript syntax using Node vm compiler
+  const scriptRegex = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
+  let sMatch;
+  let scriptCount = 0;
+  while ((sMatch = scriptRegex.exec(html)) !== null) {
+    scriptCount++;
+    try {
+      new vm.Script(sMatch[1], { filename: 'live_render_index.html' });
+    } catch (err: any) {
+      throw new Error(`Live frontend JavaScript SyntaxError: ${err.message}`);
+    }
+  }
+  if (scriptCount === 0) {
+    throw new Error('No <script> tag detected on live service');
+  }
+  console.log(`  ✅ Live frontend JavaScript compiled with 100% valid syntax (zero syntax errors across ${scriptCount} scripts)`);
+
+  if (!html.includes('async function doLogin(') && !html.includes('function doLogin(')) {
+    throw new Error('Live frontend missing doLogin() function');
+  }
+  console.log('  ✅ Live doLogin() function confirmed declared');
+
+  if (!html.includes('function togglePasswordVisibility(')) {
+    throw new Error('Live frontend missing togglePasswordVisibility() function');
+  }
+  console.log('  ✅ Live togglePasswordVisibility() function confirmed declared');
   const requiredTabs = [
     "dashboard: 'Home'",
     "nfas: 'NFA'",

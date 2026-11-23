@@ -6076,6 +6076,7 @@
 
         closeModal();
         if (currentTab === 'invoices') showTab('invoices');
+        else if (currentTab === 'nfas') showTab('nfas');
       } catch (err) {
         toast(err.message);
       } finally {
@@ -6083,15 +6084,6 @@
           btn.disabled = false;
           btn.textContent = 'Confirm Event Completion';
         }
-      }
-    }
-        if (currentTab === 'invoices') showTab('invoices');
-        else if (currentTab === 'nfas') showTab('nfas');
-      } catch (err) {
-        toast(err.message);
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'Confirm Event Completion';
       }
     }
 

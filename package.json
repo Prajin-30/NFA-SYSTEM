@@ -9,7 +9,9 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "start": "tsx src/server.ts",
-    "seed": "tsx src/seed.ts"
+    "seed": "tsx src/seed.ts",
+    "check:frontend": "tsx scripts/validate_frontend_syntax.ts",
+    "test": "tsx scripts/validate_frontend_syntax.ts && tsx scripts/test_master_upgrade.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.119.0",

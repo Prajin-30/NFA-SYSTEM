@@ -38,6 +38,9 @@ app.use(async (_req, res, next) => {
     try {
       await store.initPromise;
     } catch (err: any) {
+      if (process.env.NODE_ENV !== 'production') {
+        return next();
+      }
       return res.status(503).json({ error: 'DATABASE_UNAVAILABLE', message: err.message });
     }
   }

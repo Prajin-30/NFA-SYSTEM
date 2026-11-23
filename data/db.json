@@ -128,7 +128,8 @@
       "hod_name": "Dr M Balamurugan",
       "dean_name": "Dr Raghunandhankumar",
       "category": "academic",
-      "is_active": true
+      "is_active": true,
+      "school_id": "11111111-0000-0000-0000-000000000001"
     },
     {
       "id": "330ada81-5246-4c92-9ca2-688eae0f28d4",
@@ -137,49 +138,56 @@
       "hod_name": "Dr Michael Moses T",
       "dean_name": "Dr Mary Anita E A",
       "category": "academic",
-      "is_active": true
+      "is_active": true,
+      "school_id": "11111111-0000-0000-0000-000000000001"
     },
     {
       "id": "5d7b435a-35cf-4970-b2ff-85b1646efa88",
       "name": "Department of Robotics and Autonomous Systems",
       "code": "DRAS",
       "hod_name": "",
-      "category": "academic"
+      "category": "academic",
+      "school_id": "11111111-0000-0000-0000-000000000001"
     },
     {
       "id": "11111111-c1f1-4001-8001-000000000001",
       "name": "Department of Civil Engineering",
       "code": "CIVIL",
       "category": "academic",
-      "is_active": true
+      "is_active": true,
+      "school_id": "11111111-0000-0000-0000-000000000001"
     },
     {
       "id": "11111111-e1e1-4002-8002-000000000002",
       "name": "Department of Electrical and Electronics Engineering",
       "code": "EEE",
       "category": "academic",
-      "is_active": true
+      "is_active": true,
+      "school_id": "11111111-0000-0000-0000-000000000001"
     },
     {
       "id": "11111111-e2e2-4003-8003-000000000003",
       "name": "Department of Electronics and Communication Engineering",
       "code": "ECE",
       "category": "academic",
-      "is_active": true
+      "is_active": true,
+      "school_id": "11111111-0000-0000-0000-000000000001"
     },
     {
       "id": "11111111-m1m1-4004-8004-000000000004",
       "name": "Department of Mechanical and Automobile Engineering",
       "code": "MECH",
       "category": "academic",
-      "is_active": true
+      "is_active": true,
+      "school_id": "11111111-0000-0000-0000-000000000001"
     },
     {
       "id": "11111111-s1h1-4005-8005-000000000005",
       "name": "Department of Sciences and Humanities (Engineering)",
       "code": "S&H",
       "category": "academic",
-      "is_active": true
+      "is_active": true,
+      "school_id": "11111111-0000-0000-0000-000000000001"
     },
     {
       "id": "22222222-a111-4001-8001-000000000001",
@@ -42733,6 +42741,32 @@
     {
       "token_hash": "1bcb6610aed5f948724597f139b434ee0caed7e6b1328c67558b88a2dd785832",
       "expires_at": 1795228506000
+    }
+  ],
+  "schools": [
+    {
+      "id": "11111111-0000-0000-0000-000000000001",
+      "code": "SOET",
+      "name": "School of Engineering and Technology",
+      "campus": "Bengaluru – Kengeri Campus"
+    },
+    {
+      "id": "11111111-0000-0000-0000-000000000002",
+      "code": "SOA",
+      "name": "School of Arts",
+      "campus": "Bengaluru Central Campus"
+    },
+    {
+      "id": "11111111-0000-0000-0000-000000000003",
+      "code": "SBM",
+      "name": "School of Business and Management",
+      "campus": "Bengaluru Central Campus"
+    },
+    {
+      "id": "11111111-0000-0000-0000-000000000004",
+      "code": "SPS",
+      "name": "School of Psychological Sciences",
+      "campus": "Bengaluru Bannerghatta Road Campus"
     }
   ]
 }

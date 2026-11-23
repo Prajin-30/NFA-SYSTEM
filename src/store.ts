@@ -57,6 +57,22 @@ class Store {
       this.db.event_revenues ||= [];
       this.db.event_revenue_reminders ||= [];
       this.db.schools ||= [];
+      if (this.db.schools.length === 0) {
+        this.db.schools = [
+          { id: '11111111-0000-0000-0000-000000000001', code: 'SOET', name: 'School of Engineering and Technology', campus: 'Bengaluru – Kengeri Campus' },
+          { id: '11111111-0000-0000-0000-000000000002', code: 'SOA', name: 'School of Arts', campus: 'Bengaluru Central Campus' },
+          { id: '11111111-0000-0000-0000-000000000003', code: 'SBM', name: 'School of Business and Management', campus: 'Bengaluru Central Campus' },
+          { id: '11111111-0000-0000-0000-000000000004', code: 'SPS', name: 'School of Psychological Sciences', campus: 'Bengaluru Bannerghatta Road Campus' },
+        ];
+      }
+      const soetId = this.db.schools[0]?.id;
+      if (soetId && Array.isArray(this.db.departments)) {
+        this.db.departments.forEach((d) => {
+          if (d.category !== 'coe' && !d.code.startsWith('COE-') && !d.school_id) {
+            d.school_id = soetId;
+          }
+        });
+      }
       this.db.mock_emails ||= [];
       this.db.revoked_tokens ||= [];
     } else {

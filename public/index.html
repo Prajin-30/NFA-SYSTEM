@@ -9258,7 +9258,13 @@
     let currentReportsAnalyticsSubTab = 'summary';
     let currentSummaryScope = 'department';
     let currentSummaryTargetId = null;
+    let currentSummaryFyId = null;
+    let currentSummaryIncludeAllFaculty = false;
     let currentSelectedReport = 'nfa_activity';
+    let currentReportScope = 'campus';
+    let currentReportTargetId = null;
+    let currentReportFyId = null;
+    let currentReportIncludeAllFaculty = false;
 
     async function switchReportsAnalyticsTab(subTab) {
       currentReportsAnalyticsSubTab = subTab;
@@ -9366,10 +9372,10 @@
             REF.schools = camp.schools;
           } else {
             REF.schools = [
-              { id: 'soet', code: 'SOET', name: 'School of Engineering and Technology' },
-              { id: 'soa', code: 'SOA', name: 'School of Arts' },
-              { id: 'sbm', code: 'SBM', name: 'School of Business and Management' },
-              { id: 'sps', code: 'SPS', name: 'School of Psychological Sciences' },
+              { id: '11111111-0000-0000-0000-000000000001', code: 'SOET', name: 'School of Engineering and Technology' },
+              { id: '11111111-0000-0000-0000-000000000002', code: 'SOA', name: 'School of Arts' },
+              { id: '11111111-0000-0000-0000-000000000003', code: 'SBM', name: 'School of Business and Management' },
+              { id: '11111111-0000-0000-0000-000000000004', code: 'SPS', name: 'School of Psychological Sciences' },
             ];
           }
         } catch {
@@ -9377,8 +9383,8 @@
         }
       }
 
-      const academicDepts = REF.departments.filter(d => d.category !== 'coe' && !d.code.startsWith('COE-'));
-      const centreDepts = REF.departments.filter(d => d.category === 'coe' || d.code.startsWith('COE-'));
+      const academicDepts = (REF.departments || []).filter(d => d.category !== 'coe' && !d.code.startsWith('COE-'));
+      const centreDepts = (REF.departments || []).filter(d => d.category === 'coe' || d.code.startsWith('COE-'));
 
       if (!currentSummaryTargetId) {
         if (currentSummaryScope === 'school') currentSummaryTargetId = REF.schools[0]?.id || 'SOET';
@@ -9386,18 +9392,19 @@
         else if (currentSummaryScope === 'centre') currentSummaryTargetId = centreDepts[0]?.id;
       }
 
+      const activeFy = (REF.financial_years || []).find(f => f.is_active) || (REF.financial_years && REF.financial_years[0]);
+      if (!currentSummaryFyId && activeFy) {
+        currentSummaryFyId = activeFy.id;
+      }
+
       let summaryData = null;
       let errorMsg = null;
       try {
-        if (currentSummaryScope === 'campus') {
-          summaryData = await api('/reports/summary/campus');
-        } else if (currentSummaryScope === 'school') {
-          summaryData = await api(`/reports/summary/school/${currentSummaryTargetId || 'SOET'}`);
-        } else if (currentSummaryScope === 'department') {
-          summaryData = await api(`/reports/summary/department/${currentSummaryTargetId || academicDepts[0]?.id}`);
-        } else if (currentSummaryScope === 'centre') {
-          summaryData = await api(`/reports/summary/centre/${currentSummaryTargetId || centreDepts[0]?.id}`);
-        }
+        const qParts = [`scope=${encodeURIComponent(currentSummaryScope)}`];
+        if (currentSummaryTargetId) qParts.push(`id=${encodeURIComponent(currentSummaryTargetId)}`);
+        if (currentSummaryFyId) qParts.push(`fy_id=${encodeURIComponent(currentSummaryFyId)}`);
+        if (currentSummaryIncludeAllFaculty) qParts.push('include_all_faculty=true');
+        summaryData = await api(`/reports/summary/overview?${qParts.join('&')}`);
       } catch (err) {
         errorMsg = err.message;
       }
@@ -9405,8 +9412,14 @@
       const m = summaryData?.metrics || {
         allocated: 0, approved: 0, pending: 0, available: 0,
         total_revenue: 0, verified_revenue: 0, invoices_paid: 0, invoices_pending: 0,
-        total_nfas: 0, approved_nfas: 0, pending_nfas: 0, rejected_nfas: 0
+        total_nfas: 0, approved_nfas: 0, pending_nfas: 0, rejected_nfas: 0,
+        event_nfas_count: 0, purchase_nfas_count: 0, events_completed_count: 0
       };
+
+      const facultyList = summaryData?.faculty_activity || [];
+      const detailedNfas = summaryData?.detailed_nfas || [];
+      const categories = summaryData?.categories || [];
+      const departmentsList = summaryData?.departments || [];
 
       let html = `
         <div class="card" style="margin-bottom:20px;">
@@ -9425,58 +9438,86 @@
             </div>
           </div>
 
-          <!-- Scope Selection Bar -->
-          <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;background:#f8fafc;padding:10px 14px;border-radius:6px;border:1px solid #e2e8f0;">
-            <span style="font-size:12px;font-weight:600;color:#475569;">Summary Level:</span>
-            ${isSenior ? `
-              <button class="${currentSummaryScope === 'campus' ? 'primary' : 'secondary'}" style="font-size:11.5px;padding:4px 10px;" onclick="onSummaryScopeChange('campus')">
-                Campus Summary
+          <!-- Scope Selection & Filter Bar -->
+          <div style="display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;align-items:center;background:#f8fafc;padding:12px 16px;border-radius:6px;border:1px solid #e2e8f0;">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <span style="font-size:12px;font-weight:600;color:#475569;">Scope:</span>
+              ${isSenior ? `
+                <button class="${currentSummaryScope === 'campus' ? 'primary' : 'secondary'}" style="font-size:11.5px;padding:4px 10px;" onclick="onSummaryScopeChange('campus')">
+                  Campus
+                </button>
+              ` : ''}
+              ${(isSenior || isDean) ? `
+                <button class="${currentSummaryScope === 'school' ? 'primary' : 'secondary'}" style="font-size:11.5px;padding:4px 10px;" onclick="onSummaryScopeChange('school')">
+                  School-Wise
+                </button>
+              ` : ''}
+              <button class="${currentSummaryScope === 'department' ? 'primary' : 'secondary'}" style="font-size:11.5px;padding:4px 10px;" onclick="onSummaryScopeChange('department')">
+                Department
               </button>
-            ` : ''}
-            ${(isSenior || isDean) ? `
-              <button class="${currentSummaryScope === 'school' ? 'primary' : 'secondary'}" style="font-size:11.5px;padding:4px 10px;" onclick="onSummaryScopeChange('school')">
-                School-Wise Summary
+              <button class="${currentSummaryScope === 'centre' ? 'primary' : 'secondary'}" style="font-size:11.5px;padding:4px 10px;" onclick="onSummaryScopeChange('centre')">
+                Centres / Offices
               </button>
-            ` : ''}
-            <button class="${currentSummaryScope === 'department' ? 'primary' : 'secondary'}" style="font-size:11.5px;padding:4px 10px;" onclick="onSummaryScopeChange('department')">
-              Department Summary
-            </button>
-            <button class="${currentSummaryScope === 'centre' ? 'primary' : 'secondary'}" style="font-size:11.5px;padding:4px 10px;" onclick="onSummaryScopeChange('centre')">
-              Centres / Offices Summary
-            </button>
+            </div>
 
             <!-- Dynamic Entity Dropdown -->
             ${currentSummaryScope === 'school' ? `
-              <div style="display:inline-flex;align-items:center;gap:6px;margin-left:auto;">
+              <div style="display:inline-flex;align-items:center;gap:6px;">
                 <span style="font-size:11.5px;font-weight:600;color:#334155;">School:</span>
-                <select style="font-size:12px;padding:3px 8px;" onchange="onSummaryTargetChange(this.value)">
+                <select style="font-size:12px;padding:4px 8px;" onchange="onSummaryTargetChange(this.value)">
                   ${(REF.schools || []).map(s => `<option value="${s.id || s.code}" ${(currentSummaryTargetId === s.id || currentSummaryTargetId === s.code) ? 'selected' : ''}>${escapeHtml(s.name)} (${s.code})</option>`).join('')}
                 </select>
               </div>
             ` : ''}
 
             ${currentSummaryScope === 'department' ? `
-              <div style="display:inline-flex;align-items:center;gap:6px;margin-left:auto;">
+              <div style="display:inline-flex;align-items:center;gap:6px;">
                 <span style="font-size:11.5px;font-weight:600;color:#334155;">Department:</span>
-                <select style="font-size:12px;padding:3px 8px;" onchange="onSummaryTargetChange(this.value)" ${(!isSenior && !isDean) ? 'disabled' : ''}>
+                <select style="font-size:12px;padding:4px 8px;" onchange="onSummaryTargetChange(this.value)" ${(!isSenior && !isDean) ? 'disabled' : ''}>
                   ${academicDepts.map(d => `<option value="${d.id}" ${currentSummaryTargetId === d.id ? 'selected' : ''}>${escapeHtml(d.name)} (${d.code})</option>`).join('')}
                 </select>
               </div>
             ` : ''}
 
             ${currentSummaryScope === 'centre' ? `
-              <div style="display:inline-flex;align-items:center;gap:6px;margin-left:auto;">
-                <span style="font-size:11.5px;font-weight:600;color:#334155;">Centre / Office:</span>
-                <select style="font-size:12px;padding:3px 8px;" onchange="onSummaryTargetChange(this.value)">
+              <div style="display:inline-flex;align-items:center;gap:6px;">
+                <span style="font-size:11.5px;font-weight:600;color:#334155;">Centre:</span>
+                <select style="font-size:12px;padding:4px 8px;" onchange="onSummaryTargetChange(this.value)">
                   ${centreDepts.map(c => `<option value="${c.id}" ${currentSummaryTargetId === c.id ? 'selected' : ''}>${escapeHtml(c.name)} (${c.code})</option>`).join('')}
                 </select>
               </div>
             ` : ''}
+
+            <!-- Academic Year Dropdown -->
+            <div style="display:inline-flex;align-items:center;gap:6px;margin-left:auto;">
+              <span style="font-size:11.5px;font-weight:600;color:#334155;">Academic Year:</span>
+              <select style="font-size:12px;padding:4px 8px;" onchange="onSummaryFyChange(this.value)">
+                ${(REF.financial_years || []).map(f => `<option value="${f.id}" ${currentSummaryFyId === f.id ? 'selected' : ''}>${escapeHtml(f.label)}${f.is_active ? ' (Active)' : ''}</option>`).join('')}
+              </select>
+            </div>
+
+            <!-- Zero Activity Faculty Toggle -->
+            <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#475569;cursor:pointer;">
+              <input type="checkbox" ${currentSummaryIncludeAllFaculty ? 'checked' : ''} onchange="onSummaryFacultyToggle(this.checked)" />
+              Include 0-activity faculty
+            </label>
           </div>
 
           ${errorMsg ? `<div class="card" style="color:var(--danger);padding:14px;">${escapeHtml(errorMsg)}</div>` : `
-            <!-- Executive Metrics 4-Column Grid -->
-            <div class="grid-4" style="gap:14px;margin-bottom:20px;">
+            <!-- Organization Title Banner -->
+            <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:10px 14px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+              <div>
+                <span style="font-size:14px;font-weight:700;color:var(--primary-blue);">${escapeHtml(summaryData?.org_name || 'CHRIST University')}</span>
+                <span style="font-size:12px;color:#64748b;margin-left:6px;">(${escapeHtml(summaryData?.org_code || 'CAMPUS')})</span>
+              </div>
+              <div style="font-size:12px;color:#1e40af;font-weight:600;">
+                Academic Year: ${escapeHtml(summaryData?.financial_year || '2026-27')} · Scope: ${escapeHtml((summaryData?.scope || currentSummaryScope).toUpperCase())}
+              </div>
+            </div>
+
+            <!-- SECTION 1: Executive Metrics 4-Column Grid -->
+            <h3 style="font-size:14px;font-weight:700;color:var(--primary-blue);margin-bottom:10px;">SECTION 1: FINANCIAL CEILING & COMMITMENTS OVERVIEW</h3>
+            <div class="grid-4" style="gap:14px;margin-bottom:16px;">
               <div class="stat-card" style="background:#f8fafc;border:1px solid #cbd5e1;padding:14px;border-radius:8px;">
                 <div class="stat-label" style="font-size:11.5px;">Allocated Expenditure Budget</div>
                 <div style="font-size:20px;font-weight:700;color:var(--primary);margin-top:4px;">${inr(m.allocated)}</div>
@@ -9488,23 +9529,23 @@
                 <div style="font-size:11px;color:#64748b;margin-top:2px;">${m.allocated > 0 ? Math.round((m.approved / m.allocated) * 100) : 0}% of allocation</div>
               </div>
               <div class="stat-card" style="background:#fefce8;border:1px solid #fef08a;padding:14px;border-radius:8px;">
-                <div class="stat-label" style="font-size:11.5px;color:#a16207;">Pending Commitments (NFAs)</div>
+                <div class="stat-label" style="font-size:11.5px;color:#a16207;">Pending Commitments (Active Reservations)</div>
                 <div style="font-size:20px;font-weight:700;color:#ca8a04;margin-top:4px;">${inr(m.pending)}</div>
-                <div style="font-size:11px;color:#64748b;margin-top:2px;">Under multi-tier review</div>
+                <div style="font-size:11px;color:#64748b;margin-top:2px;">Proposals in active review</div>
               </div>
               <div class="stat-card" style="background:#f0f9ff;border:1px solid #bae6fd;padding:14px;border-radius:8px;">
                 <div class="stat-label" style="font-size:11.5px;color:#0369a1;">Available Expenditure Balance</div>
                 <div style="font-size:20px;font-weight:700;color:#0284c7;margin-top:4px;">${inr(m.available)}</div>
-                <div style="font-size:11px;color:#64748b;margin-top:2px;">Unencumbered funds</div>
+                <div style="font-size:11px;color:#64748b;margin-top:2px;">Allocated - Approved - Pending</div>
               </div>
             </div>
 
             <!-- Secondary Metrics: Revenue, Invoices, NFAs -->
-            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:14px;margin-bottom:20px;">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));gap:14px;margin-bottom:24px;">
               <div style="background:#ffffff;border:1px solid #e2e8f0;padding:14px;border-radius:8px;">
                 <div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:6px;">💰 Revenue &amp; Earnings Generated</div>
                 <div style="font-size:18px;font-weight:700;color:#059669;">${inr(m.total_revenue)}</div>
-                <div style="font-size:11px;color:#64748b;margin-top:2px;">Verified: ${inr(m.verified_revenue)} · Separate ledger</div>
+                <div style="font-size:11px;color:#64748b;margin-top:2px;">Verified: ${inr(m.verified_revenue)} · Strictly independent ledger</div>
               </div>
               <div style="background:#ffffff;border:1px solid #e2e8f0;padding:14px;border-radius:8px;">
                 <div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:6px;">🧾 Purchase Invoices &amp; Settlements</div>
@@ -9513,71 +9554,166 @@
               </div>
               <div style="background:#ffffff;border:1px solid #e2e8f0;padding:14px;border-radius:8px;">
                 <div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:6px;">📑 Total Notes for Approval (NFAs)</div>
-                <div style="font-size:18px;font-weight:700;color:var(--primary);">${m.total_nfas} Total</div>
-                <div style="font-size:11px;color:#64748b;margin-top:2px;">Approved: ${m.approved_nfas} · In-Flight: ${m.pending_nfas} · Rejected: ${m.rejected_nfas}</div>
+                <div style="font-size:18px;font-weight:700;color:var(--primary);">${m.total_nfas} Submitted</div>
+                <div style="font-size:11px;color:#64748b;margin-top:2px;">Approved: ${m.approved_nfas} · In-Flight: ${m.pending_nfas} · Rejected: ${m.rejected_nfas} · Events Completed: ${m.events_completed_count}/${m.event_nfas_count}</div>
               </div>
             </div>
 
-            <!-- Breakdown Table -->
-            ${summaryData?.departments ? `
-              <h3 style="font-size:15px;color:var(--primary-blue);margin-bottom:10px;">Department Breakdown</h3>
+            <!-- SECTION 2: Faculty-wise NFA Activity Table -->
+            <div style="margin-bottom:24px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                <h3 style="font-size:14px;font-weight:700;color:var(--primary-blue);margin:0;">SECTION 2: FACULTY-WISE NFA ACTIVITY (${facultyList.length} Faculty Members)</h3>
+                <span style="font-size:11px;color:#64748b;">${currentSummaryIncludeAllFaculty ? 'Showing all department faculty' : 'Zero-activity faculty hidden'}</span>
+              </div>
               <div class="table-wrap">
                 <table>
                   <thead>
                     <tr>
-                      <th>Department</th>
-                      <th style="text-align:right;">Allocated</th>
-                      <th style="text-align:right;">Approved Spend</th>
-                      <th style="text-align:right;">Pending</th>
-                      <th style="text-align:right;">Available Balance</th>
-                      <th style="text-align:right;">Revenue Generated</th>
-                      <th style="text-align:center;">NFAs</th>
+                      <th style="width:40px;text-align:center;">#</th>
+                      <th>Faculty Name</th>
+                      <th>Email</th>
+                      <th>Dept</th>
+                      <th style="text-align:center;">Submitted</th>
+                      <th style="text-align:center;">Approved</th>
+                      <th style="text-align:center;">Pending</th>
+                      <th style="text-align:center;">Rejected</th>
+                      <th style="text-align:right;">Requested Amt</th>
+                      <th style="text-align:right;">Approved Amt</th>
+                      <th style="text-align:center;">Events Done</th>
                     </tr>
                   </thead>
                   <tbody>
-                    ${summaryData.departments.map(d => `
+                    ${facultyList.length === 0 ? '<tr><td colspan="11" class="muted" style="text-align:center;padding:18px;">No active faculty submissions found for this organization. Check "Include 0-activity faculty" to view all rostered staff.</td></tr>' : ''}
+                    ${facultyList.map(f => `
                       <tr>
-                        <td><strong>${escapeHtml(d.name)}</strong> (${escapeHtml(d.code)})</td>
-                        <td style="text-align:right;">${inr(d.metrics.allocated)}</td>
-                        <td style="text-align:right;color:#16a34a;">${inr(d.metrics.approved)}</td>
-                        <td style="text-align:right;color:#ca8a04;">${inr(d.metrics.pending)}</td>
-                        <td style="text-align:right;font-weight:700;color:var(--primary);">${inr(d.metrics.available)}</td>
-                        <td style="text-align:right;color:#059669;">${inr(d.metrics.total_revenue)}</td>
-                        <td style="text-align:center;">${d.metrics.total_nfas}</td>
+                        <td style="text-align:center;">${f.sl_no}</td>
+                        <td><strong>${escapeHtml(f.faculty_name)}</strong></td>
+                        <td style="font-size:11.5px;color:#64748b;">${escapeHtml(f.email)}</td>
+                        <td><span class="badge b-submitted" style="font-size:10.5px;">${escapeHtml(f.department)}</span></td>
+                        <td style="text-align:center;font-weight:600;">${f.total_submitted}</td>
+                        <td style="text-align:center;color:#16a34a;font-weight:600;">${f.total_approved}</td>
+                        <td style="text-align:center;color:#ca8a04;">${f.total_pending}</td>
+                        <td style="text-align:center;color:#dc2626;">${f.total_rejected}</td>
+                        <td style="text-align:right;">${inr(f.total_requested)}</td>
+                        <td style="text-align:right;font-weight:600;color:#16a34a;">${inr(f.total_approved_amount)}</td>
+                        <td style="text-align:center;">${f.events_completed}</td>
                       </tr>
                     `).join('')}
                   </tbody>
                 </table>
               </div>
-            ` : ''}
+            </div>
 
-            ${summaryData?.categories ? `
-              <h3 style="font-size:15px;color:var(--primary-blue);margin-bottom:10px;">Budget Category Breakdown</h3>
+            <!-- SECTION 3: Detailed NFA Proposals Table -->
+            <div style="margin-bottom:24px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                <h3 style="font-size:14px;font-weight:700;color:var(--primary-blue);margin:0;">SECTION 3: DETAILED NFA PROPOSALS (${detailedNfas.length} Records)</h3>
+                <span style="font-size:11px;color:#64748b;">Non-draft proposals for selected organization</span>
+              </div>
               <div class="table-wrap">
                 <table>
                   <thead>
                     <tr>
-                      <th>Budget Category</th>
-                      <th style="text-align:right;">Allocated Amount</th>
-                      <th style="text-align:right;">Approved / Spent</th>
-                      <th style="text-align:right;">Pending Approval</th>
-                      <th style="text-align:right;">Available Balance</th>
-                      <th style="text-align:right;">Utilization %</th>
+                      <th style="width:40px;text-align:center;">#</th>
+                      <th>Ref No</th>
+                      <th>Date</th>
+                      <th>Proposer</th>
+                      <th>Title</th>
+                      <th>Type</th>
+                      <th style="text-align:right;">Requested</th>
+                      <th style="text-align:right;">Approved</th>
+                      <th style="text-align:center;">Status</th>
+                      <th style="text-align:center;">Event Done</th>
+                      <th style="text-align:center;">Revenue</th>
                     </tr>
                   </thead>
                   <tbody>
-                    ${summaryData.categories.map(c => `
+                    ${detailedNfas.length === 0 ? '<tr><td colspan="11" class="muted" style="text-align:center;padding:18px;">No submitted NFA proposals found matching the criteria.</td></tr>' : ''}
+                    ${detailedNfas.map(n => `
                       <tr>
-                        <td><strong>${escapeHtml(c.category_name)}</strong></td>
-                        <td style="text-align:right;">${inr(c.allocated)}</td>
-                        <td style="text-align:right;color:#16a34a;">${inr(c.approved)}</td>
-                        <td style="text-align:right;color:#ca8a04;">${inr(c.pending)}</td>
-                        <td style="text-align:right;font-weight:700;color:var(--primary);">${inr(c.available)}</td>
-                        <td style="text-align:right;">${c.allocated > 0 ? Math.round(((c.approved + c.pending) / c.allocated) * 100) : 0}%</td>
+                        <td style="text-align:center;">${n.sl_no}</td>
+                        <td><code>${escapeHtml(n.ref_no)}</code></td>
+                        <td>${escapeHtml(n.date)}</td>
+                        <td><strong>${escapeHtml(n.proposer)}</strong></td>
+                        <td style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(n.title)}">${escapeHtml(n.title)}</td>
+                        <td><span class="badge ${n.type === 'EVENT' ? 'b-submitted' : 'b-draft'}">${n.type}</span></td>
+                        <td style="text-align:right;">${inr(n.requested_amount)}</td>
+                        <td style="text-align:right;font-weight:600;color:#16a34a;">${inr(n.approved_amount)}</td>
+                        <td style="text-align:center;"><span class="badge ${n.status === 'APPROVED' ? 'b-approved' : n.status === 'REJECTED' ? 'b-rejected' : 'b-submitted'}">${n.status}</span></td>
+                        <td style="text-align:center;">${n.completion_status}</td>
+                        <td style="text-align:center;"><span class="badge ${n.will_generate_revenue === 'YES' ? 'b-approved' : 'b-draft'}">${n.will_generate_revenue}</span></td>
                       </tr>
                     `).join('')}
                   </tbody>
                 </table>
+              </div>
+            </div>
+
+            <!-- Optional Section: Department Breakdown (for School) -->
+            ${departmentsList.length > 0 ? `
+              <div style="margin-bottom:24px;">
+                <h3 style="font-size:14px;font-weight:700;color:var(--primary-blue);margin-bottom:10px;">DEPARTMENT-WISE METRICS BREAKDOWN</h3>
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Department</th>
+                        <th style="text-align:right;">Allocated</th>
+                        <th style="text-align:right;">Approved Spend</th>
+                        <th style="text-align:right;">Pending</th>
+                        <th style="text-align:right;">Available Balance</th>
+                        <th style="text-align:right;">Revenue Generated</th>
+                        <th style="text-align:center;">NFAs</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${departmentsList.map(d => `
+                        <tr>
+                          <td><strong>${escapeHtml(d.name)}</strong> (${escapeHtml(d.code)})</td>
+                          <td style="text-align:right;">${inr(d.metrics.allocated)}</td>
+                          <td style="text-align:right;color:#16a34a;">${inr(d.metrics.approved)}</td>
+                          <td style="text-align:right;color:#ca8a04;">${inr(d.metrics.pending)}</td>
+                          <td style="text-align:right;font-weight:700;color:var(--primary);">${inr(d.metrics.available)}</td>
+                          <td style="text-align:right;color:#059669;">${inr(d.metrics.total_revenue)}</td>
+                          <td style="text-align:center;">${d.metrics.total_nfas}</td>
+                        </tr>
+                      `).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ` : ''}
+
+            <!-- Optional Section: Budget Category Breakdown (for Department/Centre) -->
+            ${categories.length > 0 ? `
+              <div style="margin-bottom:20px;">
+                <h3 style="font-size:14px;font-weight:700;color:var(--primary-blue);margin-bottom:10px;">BUDGET CATEGORY ALLOCATIONS &amp; UTILIZATION</h3>
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Budget Category</th>
+                        <th style="text-align:right;">Allocated Amount</th>
+                        <th style="text-align:right;">Approved / Spent</th>
+                        <th style="text-align:right;">Pending Approval</th>
+                        <th style="text-align:right;">Available Balance</th>
+                        <th style="text-align:right;">Utilization %</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${categories.map(c => `
+                        <tr>
+                          <td><strong>${escapeHtml(c.category_name)}</strong></td>
+                          <td style="text-align:right;">${inr(c.allocated)}</td>
+                          <td style="text-align:right;color:#16a34a;">${inr(c.approved)}</td>
+                          <td style="text-align:right;color:#ca8a04;">${inr(c.pending)}</td>
+                          <td style="text-align:right;font-weight:700;color:var(--primary);">${inr(c.available)}</td>
+                          <td style="text-align:right;">${c.utilization || (c.allocated > 0 ? Math.round(((c.approved + c.pending) / c.allocated) * 100) + '%' : '0%')}</td>
+                        </tr>
+                      `).join('')}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             ` : ''}
           `}
@@ -9600,11 +9736,27 @@
       await renderExcel(main);
     }
 
+    async function onSummaryFyChange(fyId) {
+      currentSummaryFyId = fyId;
+      const main = document.getElementById('main');
+      await renderExcel(main);
+    }
+
+    async function onSummaryFacultyToggle(checked) {
+      currentSummaryIncludeAllFaculty = checked;
+      const main = document.getElementById('main');
+      await renderExcel(main);
+    }
+
     async function exportSummary(format) {
-      const reportType = currentSummaryScope === 'campus' ? 'campus_budget' : currentSummaryScope === 'school' ? 'school_budget' : 'department_budget';
       const ext = format === 'pdf' ? 'pdf' : 'xlsx';
-      const filename = `CU_Summary_${currentSummaryScope}_${Date.now()}.${ext}`;
-      await downloadReportFile(`/api/reports/export/${reportType}/${format}`, filename, { scope: currentSummaryScope, targetId: currentSummaryTargetId });
+      const filename = `CU_Executive_Summary_${currentSummaryScope}_${Date.now()}.${ext}`;
+      const qParts = [`scope=${encodeURIComponent(currentSummaryScope)}`];
+      if (currentSummaryTargetId) qParts.push(`id=${encodeURIComponent(currentSummaryTargetId)}`);
+      if (currentSummaryFyId) qParts.push(`financial_year_id=${encodeURIComponent(currentSummaryFyId)}`);
+      if (currentSummaryIncludeAllFaculty) qParts.push('include_all_faculty=true');
+
+      await downloadReportFile(`/api/reports/summary/export/${format}?${qParts.join('&')}`, filename);
     }
 
     const REPORT_DEFINITIONS = [
@@ -9625,12 +9777,40 @@
     ];
 
     async function renderReportGeneration(container) {
+      const isSenior = ['super_admin', 'director', 'finance', 'finance_head'].includes(USER.role);
+      const isDean = ['dean', 'associate_dean', 'deans_office'].includes(USER.role);
+
       if (!currentSelectedReport) currentSelectedReport = 'nfa_activity';
+      if (!currentReportScope) currentReportScope = isSenior ? 'campus' : isDean ? 'school' : 'department';
+
+      const academicDepts = (REF.departments || []).filter(d => d.category !== 'coe' && !d.code.startsWith('COE-'));
+      const centreDepts = (REF.departments || []).filter(d => d.category === 'coe' || d.code.startsWith('COE-'));
+
+      if (!currentReportTargetId && (USER.role === 'hod' || USER.role === 'faculty')) {
+        currentReportTargetId = USER.department_id;
+      }
+
+      const activeFy = (REF.financial_years || []).find(f => f.is_active) || (REF.financial_years && REF.financial_years[0]);
+      if (!currentReportFyId && activeFy) {
+        currentReportFyId = activeFy.id;
+      }
+
+      const qParts = [];
+      if (currentReportScope) qParts.push(`scope=${encodeURIComponent(currentReportScope)}`);
+      if (currentReportTargetId) {
+        if (currentReportScope === 'department') qParts.push(`department_id=${encodeURIComponent(currentReportTargetId)}`);
+        else if (currentReportScope === 'centre') qParts.push(`centre_id=${encodeURIComponent(currentReportTargetId)}`);
+        else if (currentReportScope === 'school') qParts.push(`school_id=${encodeURIComponent(currentReportTargetId)}`);
+      }
+      if (currentReportFyId) qParts.push(`financial_year_id=${encodeURIComponent(currentReportFyId)}`);
+      if (currentReportIncludeAllFaculty) qParts.push('include_all_faculty=true');
+
+      const queryString = qParts.length > 0 ? `?${qParts.join('&')}` : '';
 
       let reportData = null;
       let errorMsg = null;
       try {
-        reportData = await api(`/reports/data/${currentSelectedReport}`);
+        reportData = await api(`/reports/data/${currentSelectedReport}${queryString}`);
       } catch (err) {
         errorMsg = err.message;
       }
@@ -9656,7 +9836,7 @@
           </div>
 
           <!-- Report Selector Grid (14 items) -->
-          <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(210px, 1fr));gap:8px;margin-bottom:20px;">
+          <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(210px, 1fr));gap:8px;margin-bottom:16px;">
             ${REPORT_DEFINITIONS.map(r => `
               <button
                 type="button"
@@ -9668,6 +9848,76 @@
                 <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(r.name)}</span>
               </button>
             `).join('')}
+          </div>
+
+          <!-- Scope & Organization Filter Bar -->
+          <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center;background:#f8fafc;padding:10px 14px;border-radius:6px;border:1px solid #e2e8f0;">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <span style="font-size:12px;font-weight:600;color:#475569;">Scope:</span>
+              ${isSenior ? `
+                <button class="${currentReportScope === 'campus' ? 'primary' : 'secondary'}" style="font-size:11.5px;padding:3px 9px;" onclick="onReportScopeChange('campus')">
+                  Campus
+                </button>
+              ` : ''}
+              ${(isSenior || isDean) ? `
+                <button class="${currentReportScope === 'school' ? 'primary' : 'secondary'}" style="font-size:11.5px;padding:3px 9px;" onclick="onReportScopeChange('school')">
+                  School-Wise
+                </button>
+              ` : ''}
+              <button class="${currentReportScope === 'department' ? 'primary' : 'secondary'}" style="font-size:11.5px;padding:3px 9px;" onclick="onReportScopeChange('department')">
+                Department
+              </button>
+              <button class="${currentReportScope === 'centre' ? 'primary' : 'secondary'}" style="font-size:11.5px;padding:3px 9px;" onclick="onReportScopeChange('centre')">
+                Centres / Offices
+              </button>
+            </div>
+
+            <!-- Dynamic Entity Dropdown -->
+            ${currentReportScope === 'school' ? `
+              <div style="display:inline-flex;align-items:center;gap:6px;">
+                <span style="font-size:11.5px;font-weight:600;color:#334155;">School:</span>
+                <select style="font-size:12px;padding:3px 8px;" onchange="onReportTargetChange(this.value)">
+                  <option value="">All Schools</option>
+                  ${(REF.schools || []).map(s => `<option value="${s.id || s.code}" ${(currentReportTargetId === s.id || currentReportTargetId === s.code) ? 'selected' : ''}>${escapeHtml(s.name)} (${s.code})</option>`).join('')}
+                </select>
+              </div>
+            ` : ''}
+
+            ${currentReportScope === 'department' ? `
+              <div style="display:inline-flex;align-items:center;gap:6px;">
+                <span style="font-size:11.5px;font-weight:600;color:#334155;">Department:</span>
+                <select style="font-size:12px;padding:3px 8px;" onchange="onReportTargetChange(this.value)" ${(!isSenior && !isDean) ? 'disabled' : ''}>
+                  ${isSenior || isDean ? '<option value="">All Departments</option>' : ''}
+                  ${academicDepts.map(d => `<option value="${d.id}" ${currentReportTargetId === d.id ? 'selected' : ''}>${escapeHtml(d.name)} (${d.code})</option>`).join('')}
+                </select>
+              </div>
+            ` : ''}
+
+            ${currentReportScope === 'centre' ? `
+              <div style="display:inline-flex;align-items:center;gap:6px;">
+                <span style="font-size:11.5px;font-weight:600;color:#334155;">Centre:</span>
+                <select style="font-size:12px;padding:3px 8px;" onchange="onReportTargetChange(this.value)">
+                  <option value="">All Centres / Offices</option>
+                  ${centreDepts.map(c => `<option value="${c.id}" ${currentReportTargetId === c.id ? 'selected' : ''}>${escapeHtml(c.name)} (${c.code})</option>`).join('')}
+                </select>
+              </div>
+            ` : ''}
+
+            <!-- Academic Year Dropdown -->
+            <div style="display:inline-flex;align-items:center;gap:6px;margin-left:auto;">
+              <span style="font-size:11.5px;font-weight:600;color:#334155;">Academic Year:</span>
+              <select style="font-size:12px;padding:3px 8px;" onchange="onReportFyChange(this.value)">
+                ${(REF.financial_years || []).map(f => `<option value="${f.id}" ${currentReportFyId === f.id ? 'selected' : ''}>${escapeHtml(f.label)}${f.is_active ? ' (Active)' : ''}</option>`).join('')}
+              </select>
+            </div>
+
+            <!-- Zero Activity Faculty Toggle for faculty report -->
+            ${currentSelectedReport === 'faculty_nfa' ? `
+              <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#475569;cursor:pointer;">
+                <input type="checkbox" ${currentReportIncludeAllFaculty ? 'checked' : ''} onchange="onReportFacultyToggle(this.checked)" />
+                Include 0-activity faculty
+              </label>
+            ` : ''}
           </div>
 
           <!-- Active Report Header & Description -->
@@ -9695,7 +9945,7 @@
                     <tr>
                       ${Object.keys(row).map(k => {
                         let val = row[k];
-                        if (typeof val === 'number' && (k.includes('amount') || k.includes('allocated') || k.includes('approved') || k.includes('pending') || k.includes('available') || k.includes('revenue'))) {
+                        if (typeof val === 'number' && (k.includes('amount') || k.includes('allocated') || k.includes('approved') || k.includes('pending') || k.includes('available') || k.includes('revenue') || k.includes('requested'))) {
                           val = inr(val);
                         }
                         return `<td>${escapeHtml(String(val ?? '—'))}</td>`;
@@ -9718,10 +9968,47 @@
       await renderExcel(main);
     }
 
+    async function onReportScopeChange(scope) {
+      currentReportScope = scope;
+      currentReportTargetId = null;
+      const main = document.getElementById('main');
+      await renderExcel(main);
+    }
+
+    async function onReportTargetChange(targetId) {
+      currentReportTargetId = targetId;
+      const main = document.getElementById('main');
+      await renderExcel(main);
+    }
+
+    async function onReportFyChange(fyId) {
+      currentReportFyId = fyId;
+      const main = document.getElementById('main');
+      await renderExcel(main);
+    }
+
+    async function onReportFacultyToggle(checked) {
+      currentReportIncludeAllFaculty = checked;
+      const main = document.getElementById('main');
+      await renderExcel(main);
+    }
+
     async function downloadActiveReport(format) {
       const ext = format === 'pdf' ? 'pdf' : 'xlsx';
       const filename = `CU_Report_${currentSelectedReport}_${Date.now()}.${ext}`;
-      await downloadReportFile(`/api/reports/export/${currentSelectedReport}/${format}`, filename);
+
+      const qParams = [];
+      if (currentReportScope) qParams.push(`scope=${encodeURIComponent(currentReportScope)}`);
+      if (currentReportTargetId) {
+        if (currentReportScope === 'department') qParams.push(`department_id=${encodeURIComponent(currentReportTargetId)}`);
+        else if (currentReportScope === 'centre') qParams.push(`centre_id=${encodeURIComponent(currentReportTargetId)}`);
+        else if (currentReportScope === 'school') qParams.push(`school_id=${encodeURIComponent(currentReportTargetId)}`);
+      }
+      if (currentReportFyId) qParams.push(`financial_year_id=${encodeURIComponent(currentReportFyId)}`);
+      if (currentReportIncludeAllFaculty) qParams.push('include_all_faculty=true');
+
+      const queryString = qParams.length > 0 ? `?${qParams.join('&')}` : '';
+      await downloadReportFile(`/api/reports/export/${currentSelectedReport}/${format}${queryString}`, filename);
     }
 
     async function downloadReportFile(url, fileName, postBody = null) {

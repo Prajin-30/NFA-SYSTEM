@@ -116,7 +116,9 @@ async function runMasterUpgradeTestSuite() {
   const mechDept = store.data.departments.find((d) => d.code === 'MECH');
   const cseDept = store.data.departments.find((d) => d.code === 'CSE');
   const facultyMech = store.data.users.find((u) => u.role === 'faculty' && u.department_id === mechDept?.id) || store.data.users.find((u) => u.role === 'faculty');
-  const facultyCse = store.data.users.find((u) => u.role === 'faculty' && u.department_id === cseDept?.id && u.id !== facultyMech?.id) || store.data.users.filter((u) => u.role === 'faculty')[1];
+  const facultyCse = store.data.users.find((u) => u.role === 'faculty' && u.department_id === cseDept?.id && u.id !== facultyMech?.id)
+    || store.data.users.filter((u) => u.role === 'faculty')[1]
+    || facultyMech;
 
   assert(Boolean(superAdmin), 'Super Admin user profile exists in authoritative store');
   assert(Boolean(financeUser), 'Finance Office user profile exists in authoritative store');
@@ -248,13 +250,13 @@ async function runMasterUpgradeTestSuite() {
   const pdfRes = await request('POST', '/api/reports/export/nfa_activity/pdf', adminToken);
   assert(pdfRes.status === 200, 'POST /api/reports/export/nfa_activity/pdf returns 200 OK');
   assert(pdfRes.headers['content-type'] === 'application/pdf', 'PDF export content-type is application/pdf');
-  assert(pdfRes.buffer && pdfRes.buffer.subarray(0, 4).toString() === '%PDF', 'PDF export generates valid %PDF document stream');
+  assert(Boolean(pdfRes.buffer && pdfRes.buffer.subarray(0, 4).toString() === '%PDF'), 'PDF export generates valid %PDF document stream');
 
   // Test Excel Export
   const excelRes = await request('POST', '/api/reports/export/department_budget/excel', adminToken);
   assert(excelRes.status === 200, 'POST /api/reports/export/department_budget/excel returns 200 OK');
-  assert(excelRes.headers['content-type'].includes('spreadsheetml'), 'Excel export content-type is xlsx spreadsheet');
-  assert(excelRes.buffer && excelRes.buffer.subarray(0, 2).toString() === 'PK', 'Excel export generates valid PK zip container for xlsx');
+  assert(excelRes.headers['content-type'] ? excelRes.headers['content-type'].includes('spreadsheetml') : false, 'Excel export content-type is xlsx spreadsheet');
+  assert(Boolean(excelRes.buffer && excelRes.buffer.subarray(0, 2).toString() === 'PK'), 'Excel export generates valid PK zip container for xlsx');
 
   console.log('\n--- PHASE 6: STRICT ROLE-BASED ACCESS CONTROL (RBAC) ---');
   // Faculty cannot access campus summary
@@ -339,13 +341,13 @@ async function runMasterUpgradeTestSuite() {
   // Test multi-sheet school_budget Excel export
   const schoolExcelRes = await request('POST', '/api/reports/export/school_budget/excel', adminToken);
   assert(schoolExcelRes.status === 200, 'POST /api/reports/export/school_budget/excel returns 200 OK');
-  assert(schoolExcelRes.headers['content-type'].includes('spreadsheetml'), 'School budget export is xlsx workbook');
-  assert(schoolExcelRes.buffer && schoolExcelRes.buffer.subarray(0, 2).toString() === 'PK', 'School budget Excel export is valid multi-sheet workbook');
+  assert(schoolExcelRes.headers['content-type'] ? schoolExcelRes.headers['content-type'].includes('spreadsheetml') : false, 'School budget export is xlsx workbook');
+  assert(Boolean(schoolExcelRes.buffer && schoolExcelRes.buffer.subarray(0, 2).toString() === 'PK'), 'School budget Excel export is valid multi-sheet workbook');
 
   // Test A4 PDF export for school_budget
   const schoolPdfRes = await request('POST', '/api/reports/export/school_budget/pdf', adminToken);
   assert(schoolPdfRes.status === 200, 'POST /api/reports/export/school_budget/pdf returns 200 OK');
-  assert(schoolPdfRes.buffer && schoolPdfRes.buffer.subarray(0, 4).toString() === '%PDF', 'School budget PDF export generates valid %PDF stream');
+  assert(Boolean(schoolPdfRes.buffer && schoolPdfRes.buffer.subarray(0, 4).toString() === '%PDF'), 'School budget PDF export generates valid %PDF stream');
 
   // Clean up test revenue entry
   await request('DELETE', `/api/revenue/entries/${createdRevenueId}`, adminToken);

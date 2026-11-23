@@ -59,19 +59,198 @@ export function checkReportScopeAuthorization(
   return false;
 }
 
+export interface ScopeResolution {
+  scope: 'campus' | 'school' | 'department' | 'centre';
+  targetDeptIds: Set<string>;
+  financialYear: { id: string; label: string; is_active?: boolean };
+  isSpecificFilter: boolean;
+  selectedSchool?: { id: string; code: string; name: string };
+  selectedDept?: Department;
+  selectedCentre?: Department;
+  includeAllFaculty: boolean;
+}
+
 /**
- * Helper to compute summary metrics for a list of departments
+ * Resolves authorized organization scope and academic year based on user role and request filters.
+ * Guarantees strict isolation: selecting Automation will NOT include ARDC or E-Mobility;
+ * selecting a department will NOT include other departments' records or faculty.
  */
-function computeDepartmentMetrics(deptIds: string[]) {
+export function resolveAuthorizedScope(
+  user: { id: string; role: Role; department_id: string | null; authorized_centre_ids?: string[]; name?: string },
+  filters: any = {}
+): ScopeResolution {
+  const db = store.data;
+  const isSenior = ['super_admin', 'director', 'finance', 'finance_head'].includes(user.role);
+  const isDean = ['dean', 'associate_dean', 'deans_office'].includes(user.role);
+
+  // 1. Resolve Financial Year
+  const requestedFyId = filters.financial_year_id || filters.fy_id;
+  const activeFy = (db.financial_years || []).find((f) => f.id === requestedFyId)
+    || (db.financial_years || []).find((f) => f.is_active)
+    || (db.financial_years && db.financial_years[0])
+    || { id: 'default-fy', label: '2026-27', is_active: true };
+
+  const includeAllFaculty = filters.include_all_faculty === true || filters.include_all_faculty === 'true' || filters.include_all_faculty === '1';
+
+  // 2. Identify requested parameters
+  const requestedDeptId = filters.department_id || filters.dept_id;
+  const requestedCentreId = filters.centre_id || filters.centre;
+  const requestedSchoolId = filters.school_id || filters.school;
+  const requestedScope = filters.scope as ('campus' | 'school' | 'department' | 'centre' | undefined);
+
+  // 3. Department-level filter
+  if (requestedDeptId) {
+    const dept = db.departments.find((d) => d.id === requestedDeptId || d.code.toUpperCase() === String(requestedDeptId).toUpperCase());
+    if (dept) {
+      const isCoe = dept.category === 'coe' || dept.code.startsWith('COE-');
+      // Authorization check
+      if (isSenior || isDean || (user.role === 'hod' && user.department_id === dept.id) || (user.role === 'faculty' && user.department_id === dept.id)) {
+        return {
+          scope: isCoe ? 'centre' : 'department',
+          targetDeptIds: new Set([dept.id]),
+          financialYear: activeFy,
+          isSpecificFilter: true,
+          selectedDept: !isCoe ? dept : undefined,
+          selectedCentre: isCoe ? dept : undefined,
+          includeAllFaculty,
+        };
+      }
+    }
+  }
+
+  // 4. Centre-level filter
+  if (requestedCentreId) {
+    const centre = db.departments.find(
+      (d) => (d.category === 'coe' || d.code.startsWith('COE-')) && (d.id === requestedCentreId || d.code.toUpperCase() === String(requestedCentreId).toUpperCase())
+    );
+    if (centre) {
+      if (isSenior || isDean || (user.authorized_centre_ids && user.authorized_centre_ids.includes(centre.id))) {
+        return {
+          scope: 'centre',
+          targetDeptIds: new Set([centre.id]),
+          financialYear: activeFy,
+          isSpecificFilter: true,
+          selectedCentre: centre,
+          includeAllFaculty,
+        };
+      }
+    }
+  }
+
+  // 5. School-level filter
+  if (requestedSchoolId || requestedScope === 'school') {
+    const targetSchoolId = requestedSchoolId || 'SOET';
+    const school = (db.schools || []).find((s) => s.id === targetSchoolId || s.code.toUpperCase() === String(targetSchoolId).toUpperCase())
+      || (db.schools && db.schools[0]);
+    if (school && (isSenior || isDean)) {
+      const schoolDepts = db.departments.filter((d) => d.school_id === school.id || (!d.school_id && school.code === 'SOET' && d.category === 'academic'));
+      return {
+        scope: 'school',
+        targetDeptIds: new Set(schoolDepts.map((d) => d.id)),
+        financialYear: activeFy,
+        isSpecificFilter: true,
+        selectedSchool: school,
+        includeAllFaculty,
+      };
+    }
+  }
+
+  // 6. Centre scope (all centres)
+  if (requestedScope === 'centre') {
+    const centres = db.departments.filter((d) => d.category === 'coe' || d.code.startsWith('COE-'));
+    let allowedCentres = centres;
+    if (!isSenior && !isDean) {
+      allowedCentres = centres.filter((c) => user.authorized_centre_ids?.includes(c.id));
+    }
+    return {
+      scope: 'centre',
+      targetDeptIds: new Set(allowedCentres.map((c) => c.id)),
+      financialYear: activeFy,
+      isSpecificFilter: false,
+      includeAllFaculty,
+    };
+  }
+
+  // 7. Role-based fallback scope
+  if (user.role === 'hod' && user.department_id) {
+    const dept = db.departments.find((d) => d.id === user.department_id);
+    return {
+      scope: 'department',
+      targetDeptIds: new Set([user.department_id]),
+      financialYear: activeFy,
+      isSpecificFilter: true,
+      selectedDept: dept,
+      includeAllFaculty,
+    };
+  }
+
+  if (user.role === 'faculty') {
+    const targetIds: string[] = [];
+    if (user.department_id) targetIds.push(user.department_id);
+    if (user.authorized_centre_ids) targetIds.push(...user.authorized_centre_ids);
+    const dept = user.department_id ? db.departments.find((d) => d.id === user.department_id) : undefined;
+    return {
+      scope: 'department',
+      targetDeptIds: new Set(targetIds),
+      financialYear: activeFy,
+      isSpecificFilter: true,
+      selectedDept: dept,
+      includeAllFaculty,
+    };
+  }
+
+  if (isDean) {
+    const school = (db.schools && db.schools[0]) || { id: 'soet', code: 'SOET', name: 'School of Engineering and Technology' };
+    const schoolDepts = db.departments.filter((d) => d.school_id === school.id || (!d.school_id && d.category === 'academic'));
+    return {
+      scope: 'school',
+      targetDeptIds: new Set(schoolDepts.map((d) => d.id)),
+      financialYear: activeFy,
+      isSpecificFilter: false,
+      selectedSchool: school,
+      includeAllFaculty,
+    };
+  }
+
+  // Senior Admin Campus Scope
+  return {
+    scope: 'campus',
+    targetDeptIds: new Set(db.departments.map((d) => d.id)),
+    financialYear: activeFy,
+    isSpecificFilter: false,
+    includeAllFaculty,
+  };
+}
+
+/**
+ * Computes financial and operational summary metrics for a list of department IDs within a financial year
+ */
+export function computeDepartmentMetrics(deptIds: string[], fyId?: string) {
   const db = store.data;
   const deptSet = new Set(deptIds);
 
-  const budgets = db.department_budgets.filter((b) => deptSet.has(b.department_id));
-  const nfas = db.nfas.filter((n) => deptSet.has(n.department_id) || (n.centre_id && deptSet.has(n.centre_id)));
-  const revenues = (db.event_revenues || []).filter((r) => r.department_id && deptSet.has(r.department_id));
+  const budgets = db.department_budgets.filter(
+    (b) => deptSet.has(b.department_id) && (!fyId || b.financial_year_id === fyId)
+  );
+
+  const nfas = db.nfas.filter(
+    (n) => (deptSet.has(n.department_id) || (n.centre_id && deptSet.has(n.centre_id))) && (!fyId || n.financial_year_id === fyId)
+  );
+
+  const revenues = (db.event_revenues || []).filter((r) => {
+    if (!r.department_id || !deptSet.has(r.department_id)) return false;
+    if (fyId) {
+      const nfa = db.nfas.find((n) => n.id === r.nfa_id);
+      if (nfa && nfa.financial_year_id !== fyId) return false;
+    }
+    return true;
+  });
+
   const invoices = (db.purchase_invoices || []).filter((i) => {
     const nfa = db.nfas.find((n) => n.id === i.nfa_id);
-    return nfa && (deptSet.has(nfa.department_id) || (nfa.centre_id && deptSet.has(nfa.centre_id)));
+    if (!nfa) return false;
+    if (fyId && nfa.financial_year_id !== fyId) return false;
+    return deptSet.has(nfa.department_id) || (nfa.centre_id && deptSet.has(nfa.centre_id));
   });
 
   const allocated = budgets.reduce((sum, b) => sum + (Number(b.allocated_amount) || 0), 0);
@@ -85,6 +264,11 @@ function computeDepartmentMetrics(deptIds: string[]) {
   const invoicesPaid = invoices.filter((i) => i.payment_status === 'paid').reduce((sum, i) => sum + (Number(i.invoice_amount) || 0), 0);
   const invoicesPending = invoices.filter((i) => i.payment_status !== 'paid').reduce((sum, i) => sum + (Number(i.invoice_amount) || 0), 0);
 
+  const submittedNfas = nfas.filter((n) => n.status !== 'draft');
+  const eventNfas = submittedNfas.filter((n) => n.nfa_type === 'event');
+  const purchaseNfas = submittedNfas.filter((n) => n.nfa_type === 'purchase');
+  const completedEvents = eventNfas.filter((n) => n.event_completion_status === 'completed');
+
   return {
     allocated,
     approved,
@@ -94,16 +278,159 @@ function computeDepartmentMetrics(deptIds: string[]) {
     verified_revenue: verifiedRevenue,
     invoices_paid: invoicesPaid,
     invoices_pending: invoicesPending,
-    total_nfas: nfas.length,
-    approved_nfas: nfas.filter((n) => n.status === 'approved').length,
-    pending_nfas: nfas.filter((n) => !['approved', 'rejected', 'draft'].includes(n.status)).length,
-    rejected_nfas: nfas.filter((n) => n.status === 'rejected').length,
+    total_nfas: submittedNfas.length,
+    approved_nfas: submittedNfas.filter((n) => n.status === 'approved').length,
+    pending_nfas: submittedNfas.filter((n) => !['approved', 'rejected', 'draft'].includes(n.status)).length,
+    rejected_nfas: submittedNfas.filter((n) => n.status === 'rejected').length,
+    event_nfas_count: eventNfas.length,
+    purchase_nfas_count: purchaseNfas.length,
+    events_completed_count: completedEvents.length,
+  };
+}
+
+/**
+ * Builds the complete 3-section executive summary payload:
+ * Section 1: Executive KPI Overview (Expenditures, Commitments, Revenues, Invoices, NFAs)
+ * Section 2: Faculty-wise NFA Activity Table (with optional zero-activity filtering)
+ * Section 3: Detailed NFA Activity Table
+ */
+export function getExecutiveSummaryData(
+  user: { id: string; role: Role; department_id: string | null; authorized_centre_ids?: string[]; name?: string },
+  filters: any = {}
+) {
+  const db = store.data;
+  const resolution = resolveAuthorizedScope(user, filters);
+  const targetDeptIds = resolution.targetDeptIds;
+  const fyId = resolution.financialYear.id;
+  const fyLabel = resolution.financialYear.label;
+
+  const deptMap = new Map(db.departments.map((d) => [d.id, d]));
+  const catMap = new Map(db.budget_categories.map((c) => [c.id, c.name]));
+  const userMap = new Map(db.users.map((u) => [u.id, u.name]));
+
+  // 1. Executive Metrics
+  const metrics = computeDepartmentMetrics(Array.from(targetDeptIds), fyId);
+
+  // 2. Budget Category Breakdown (for Department or Centre)
+  const budgets = db.department_budgets.filter((b) => targetDeptIds.has(b.department_id) && b.financial_year_id === fyId);
+  const categories = budgets.map((b) => {
+    const alloc = Number(b.allocated_amount) || 0;
+    const app = Number(b.approved_amount) || 0;
+    const pend = Number(b.pending_amount) || 0;
+    return {
+      category_id: b.budget_category_id,
+      category_name: catMap.get(b.budget_category_id) || 'Category Allocation',
+      allocated: alloc,
+      approved: app,
+      pending: pend,
+      available: alloc - app - pend,
+      utilization: alloc > 0 ? `${Math.round(((app + pend) / alloc) * 100)}%` : '0%',
+    };
+  });
+
+  // 3. Faculty-wise Activity Table
+  const facultyList = db.users.filter((u) => u.role === 'faculty' && u.department_id && targetDeptIds.has(u.department_id));
+  const facultyActivity: any[] = [];
+  let facSl = 1;
+
+  facultyList.forEach((f) => {
+    const fNfas = db.nfas.filter((n) => n.created_by === f.id && n.status !== 'draft' && n.financial_year_id === fyId);
+    if (!resolution.includeAllFaculty && fNfas.length === 0) {
+      return; // Exclude zero-activity faculty unless explicitly requested
+    }
+    const approved = fNfas.filter((n) => n.status === 'approved');
+    const pending = fNfas.filter((n) => !['approved', 'rejected', 'draft'].includes(n.status));
+    const rejected = fNfas.filter((n) => n.status === 'rejected');
+    const requestedAmt = fNfas.reduce((sum, n) => sum + (Number(n.total_amount) || 0), 0);
+    const approvedAmt = approved.reduce((sum, n) => sum + (Number(n.total_amount) || 0), 0);
+    const eventsCompleted = fNfas.filter((n) => n.nfa_type === 'event' && n.event_completion_status === 'completed').length;
+
+    facultyActivity.push({
+      sl_no: facSl++,
+      faculty_name: f.name,
+      email: f.email,
+      department: f.department_id ? (deptMap.get(f.department_id)?.code || '') : '',
+      total_submitted: fNfas.length,
+      total_approved: approved.length,
+      total_pending: pending.length,
+      total_rejected: rejected.length,
+      total_requested: requestedAmt,
+      total_approved_amount: approvedAmt,
+      events_completed: eventsCompleted,
+    });
+  });
+
+  // 4. Detailed NFA Activity Table
+  const detailedNfas = db.nfas
+    .filter((n) => (targetDeptIds.has(n.department_id) || (n.centre_id && targetDeptIds.has(n.centre_id))) && n.status !== 'draft' && n.financial_year_id === fyId)
+    .map((n, idx) => ({
+      sl_no: idx + 1,
+      ref_no: n.ref_no,
+      date: n.date,
+      proposer: n.submitted_by_name || userMap.get(n.created_by) || 'Faculty',
+      department: deptMap.get(n.department_id)?.code || '',
+      title: n.title,
+      type: (n.nfa_type || 'event').toUpperCase(),
+      requested_amount: Number(n.total_amount) || 0,
+      approved_amount: n.status === 'approved' ? (Number(n.total_amount) || 0) : 0,
+      status: n.status.toUpperCase(),
+      completion_status: n.nfa_type === 'event' ? (n.event_completion_status || 'scheduled').toUpperCase() : 'N/A',
+      will_generate_revenue: n.will_generate_revenue ? 'YES' : 'NO',
+    }));
+
+  // Organization name & title resolution
+  let orgName = 'CHRIST (Deemed to be University)';
+  let orgCode = 'CAMPUS';
+  if (resolution.scope === 'school' && resolution.selectedSchool) {
+    orgName = resolution.selectedSchool.name;
+    orgCode = resolution.selectedSchool.code;
+  } else if (resolution.scope === 'department' && resolution.selectedDept) {
+    orgName = resolution.selectedDept.name;
+    orgCode = resolution.selectedDept.code;
+  } else if (resolution.scope === 'centre' && resolution.selectedCentre) {
+    orgName = resolution.selectedCentre.name;
+    orgCode = resolution.selectedCentre.code;
+  }
+
+  // School departments breakdown if scope is school
+  let departmentsBreakdown: any[] | undefined;
+  if (resolution.scope === 'school') {
+    const depts = db.departments.filter((d) => targetDeptIds.has(d.id));
+    departmentsBreakdown = depts.map((d) => ({
+      id: d.id,
+      name: d.name,
+      code: d.code,
+      metrics: computeDepartmentMetrics([d.id], fyId),
+    }));
+  }
+
+  return {
+    scope: resolution.scope,
+    org_name: orgName,
+    org_code: orgCode,
+    financial_year: fyLabel,
+    financial_year_id: fyId,
+    include_all_faculty: resolution.includeAllFaculty,
+    metrics,
+    categories,
+    faculty_activity: facultyActivity,
+    detailed_nfas: detailedNfas,
+    departments: departmentsBreakdown,
   };
 }
 
 // ==========================================
 // 1. SUMMARY GENERATION ENDPOINTS
 // ==========================================
+
+/**
+ * GET /api/reports/summary/overview
+ * Unified executive summary endpoint serving complete 3-section institutional reports
+ */
+reportsRouter.get('/summary/overview', (req: AuthedRequest, res) => {
+  const data = getExecutiveSummaryData(req.user!, req.query);
+  res.json(data);
+});
 
 /**
  * GET /api/reports/summary/campus
@@ -113,20 +440,21 @@ reportsRouter.get('/summary/campus', (req: AuthedRequest, res) => {
     return res.status(403).json({ error: 'Forbidden: Campus summary requires institutional executive role' });
   }
 
+  const fyId = (req.query.financial_year_id as string) || (req.query.fy_id as string);
   const allDepts = store.data.departments;
   const academicDepts = allDepts.filter((d) => d.category !== 'coe' && !d.code.startsWith('COE-'));
   const centreDepts = allDepts.filter((d) => d.category === 'coe' || d.code.startsWith('COE-'));
 
-  const overallMetrics = computeDepartmentMetrics(allDepts.map((d) => d.id));
-  const academicMetrics = computeDepartmentMetrics(academicDepts.map((d) => d.id));
-  const centreMetrics = computeDepartmentMetrics(centreDepts.map((d) => d.id));
+  const overallMetrics = computeDepartmentMetrics(allDepts.map((d) => d.id), fyId);
+  const academicMetrics = computeDepartmentMetrics(academicDepts.map((d) => d.id), fyId);
+  const centreMetrics = computeDepartmentMetrics(centreDepts.map((d) => d.id), fyId);
 
   const schools = (store.data.schools || []).map((s) => {
     const sDepts = allDepts.filter((d) => d.school_id === s.id);
     return {
       ...s,
       departments_count: sDepts.length,
-      metrics: computeDepartmentMetrics(sDepts.map((d) => d.id)),
+      metrics: computeDepartmentMetrics(sDepts.map((d) => d.id), fyId),
     };
   });
 
@@ -157,14 +485,15 @@ reportsRouter.get('/summary/school/:id', (req: AuthedRequest, res) => {
     return res.status(403).json({ error: 'Forbidden: You do not have permission to view this school summary' });
   }
 
+  const fyId = (req.query.financial_year_id as string) || (req.query.fy_id as string);
   const depts = store.data.departments.filter((d) => d.school_id === school.id);
-  const metrics = computeDepartmentMetrics(depts.map((d) => d.id));
+  const metrics = computeDepartmentMetrics(depts.map((d) => d.id), fyId);
 
   const departmentBreakdown = depts.map((d) => ({
     id: d.id,
     name: d.name,
     code: d.code,
-    metrics: computeDepartmentMetrics([d.id]),
+    metrics: computeDepartmentMetrics([d.id], fyId),
   }));
 
   res.json({
@@ -190,8 +519,9 @@ reportsRouter.get('/summary/department/:id', (req: AuthedRequest, res) => {
     return res.status(403).json({ error: 'Forbidden: You do not have permission to view this department summary' });
   }
 
-  const metrics = computeDepartmentMetrics([dept.id]);
-  const budgets = store.data.department_budgets.filter((b) => b.department_id === dept.id);
+  const fyId = (req.query.financial_year_id as string) || (req.query.fy_id as string);
+  const metrics = computeDepartmentMetrics([dept.id], fyId);
+  const budgets = store.data.department_budgets.filter((b) => b.department_id === dept.id && (!fyId || b.financial_year_id === fyId));
   const catMap = new Map(store.data.budget_categories.map((c) => [c.id, c.name]));
 
   const categories = budgets.map((b) => ({
@@ -227,7 +557,8 @@ reportsRouter.get('/summary/centre/:id', (req: AuthedRequest, res) => {
     return res.status(403).json({ error: 'Forbidden: You do not have permission to view this Centre / Office summary' });
   }
 
-  const metrics = computeDepartmentMetrics([centre.id]);
+  const fyId = (req.query.financial_year_id as string) || (req.query.fy_id as string);
+  const metrics = computeDepartmentMetrics([centre.id], fyId);
 
   res.json({
     scope: 'centre',
@@ -240,7 +571,7 @@ reportsRouter.get('/summary/centre/:id', (req: AuthedRequest, res) => {
 // 2. SCHOOL COMPREHENSIVE BUNDLE HELPER
 // ==========================================
 
-export function getSchoolReportBundle(schoolCodeOrId: string = 'SOET', _user: any) {
+export function getSchoolReportBundle(schoolCodeOrId: string = 'SOET', _user: any, fyId?: string) {
   const db = store.data;
   const targetCode = String(schoolCodeOrId || 'SOET').toUpperCase();
   const school = (db.schools || []).find((s) => s.id === schoolCodeOrId || s.code.toUpperCase() === targetCode)
@@ -257,13 +588,13 @@ export function getSchoolReportBundle(schoolCodeOrId: string = 'SOET', _user: an
 
   // Department Details
   const deptDetails = depts.map((d, idx) => {
-    const dNfas = db.nfas.filter((n) => n.department_id === d.id);
+    const dNfas = db.nfas.filter((n) => n.department_id === d.id && (!fyId || n.financial_year_id === fyId));
     const facultyWithNfas = new Set(dNfas.map((n) => n.created_by));
     const approved = dNfas.filter((n) => n.status === 'approved');
     const pending = dNfas.filter((n) => !['approved', 'rejected', 'draft'].includes(n.status));
     const rejected = dNfas.filter((n) => n.status === 'rejected');
 
-    const budgets = db.department_budgets.filter((b) => b.department_id === d.id);
+    const budgets = db.department_budgets.filter((b) => b.department_id === d.id && (!fyId || b.financial_year_id === fyId));
     const alloc = budgets.reduce((sum, b) => sum + (Number(b.allocated_amount) || 0), 0);
     const app = budgets.reduce((sum, b) => sum + (Number(b.approved_amount) || 0), 0);
     const pend = budgets.reduce((sum, b) => sum + (Number(b.pending_amount) || 0), 0);
@@ -291,7 +622,7 @@ export function getSchoolReportBundle(schoolCodeOrId: string = 'SOET', _user: an
   const totalApp = deptDetails.reduce((sum, d) => sum + d.approved, 0);
   const totalPend = deptDetails.reduce((sum, d) => sum + d.pending, 0);
   const totalRem = totalAlloc - totalApp - totalPend;
-  const allSchoolNfas = db.nfas.filter((n) => deptIds.has(n.department_id));
+  const allSchoolNfas = db.nfas.filter((n) => deptIds.has(n.department_id) && (!fyId || n.financial_year_id === fyId));
   const uniqueFaculty = new Set(allSchoolNfas.map((n) => n.created_by));
 
   const overview = {
@@ -344,7 +675,7 @@ export function getSchoolReportBundle(schoolCodeOrId: string = 'SOET', _user: an
   const budgetDetails: any[] = [];
   let bIdx = 1;
   depts.forEach((d) => {
-    const lines = db.department_budgets.filter((b) => b.department_id === d.id);
+    const lines = db.department_budgets.filter((b) => b.department_id === d.id && (!fyId || b.financial_year_id === fyId));
     lines.forEach((l) => {
       const subcats = db.budget_subcategories.filter((s) => s.budget_category_id === l.budget_category_id && s.department_id === d.id);
       if (subcats.length > 0) {
@@ -378,7 +709,7 @@ export function getSchoolReportBundle(schoolCodeOrId: string = 'SOET', _user: an
   // Revenue & Earnings
   const revenueEntries = (db.event_revenues || []).filter((r) => {
     const nfa = db.nfas.find((n) => n.id === r.nfa_id);
-    return nfa && deptIds.has(nfa.department_id);
+    return nfa && deptIds.has(nfa.department_id) && (!fyId || nfa.financial_year_id === fyId);
   }).map((r, idx) => {
     const nfa = db.nfas.find((n) => n.id === r.nfa_id);
     return {
@@ -397,7 +728,7 @@ export function getSchoolReportBundle(schoolCodeOrId: string = 'SOET', _user: an
   // Purchase Invoices
   const invoices = (db.purchase_invoices || []).filter((i) => {
     const nfa = db.nfas.find((n) => n.id === i.nfa_id);
-    return nfa && deptIds.has(nfa.department_id);
+    return nfa && deptIds.has(nfa.department_id) && (!fyId || nfa.financial_year_id === fyId);
   }).map((i, idx) => {
     const nfa = db.nfas.find((n) => n.id === i.nfa_id);
     return {
@@ -432,13 +763,20 @@ export function getSchoolReportBundle(schoolCodeOrId: string = 'SOET', _user: an
 // 3. REPORT DATA ENGINE (14 REPORT TYPES)
 // ==========================================
 
-export function getReportDataset(reportType: string, user: { id: string; role: Role; department_id: string | null; authorized_centre_ids?: string[]; name?: string }, filters: any = {}) {
+export function getReportDataset(
+  reportType: string,
+  user: { id: string; role: Role; department_id: string | null; authorized_centre_ids?: string[]; name?: string },
+  filters: any = {}
+) {
   const db = store.data;
+  const resolution = resolveAuthorizedScope(user, filters);
+  const targetDeptIds = resolution.targetDeptIds;
+  const targetFyId = resolution.financialYear.id;
+
   const deptMap = new Map(db.departments.map((d) => [d.id, d]));
   const catMap = new Map(db.budget_categories.map((c) => [c.id, c.name]));
   const userMap = new Map(db.users.map((u) => [u.id, u.name]));
 
-  // Base scope filters for NFAs
   const isSenior = ['super_admin', 'director', 'finance', 'finance_head'].includes(user.role);
   const isDean = ['dean', 'associate_dean', 'deans_office'].includes(user.role);
 
@@ -455,7 +793,11 @@ export function getReportDataset(reportType: string, user: { id: string; role: R
 
   switch (reportType) {
     case 'nfa_activity': {
-      const list = db.nfas.filter(nfaInScope);
+      const list = db.nfas.filter((n) => {
+        if (!targetDeptIds.has(n.department_id) && (!n.centre_id || !targetDeptIds.has(n.centre_id))) return false;
+        if (targetFyId && n.financial_year_id !== targetFyId) return false;
+        return nfaInScope(n);
+      });
       return list.map((n, idx) => ({
         sl_no: idx + 1,
         ref_no: n.ref_no,
@@ -471,14 +813,11 @@ export function getReportDataset(reportType: string, user: { id: string; role: R
     }
 
     case 'department_budget': {
-      let depts = db.departments;
-      if (!isSenior && !isDean) {
-        depts = depts.filter((d) => d.id === user.department_id);
-      }
+      const depts = db.departments.filter((d) => targetDeptIds.has(d.id));
       const rows: any[] = [];
       let sl = 1;
       depts.forEach((d) => {
-        const budgets = db.department_budgets.filter((b) => b.department_id === d.id);
+        const budgets = db.department_budgets.filter((b) => b.department_id === d.id && (!targetFyId || b.financial_year_id === targetFyId));
         budgets.forEach((b) => {
           const alloc = Number(b.allocated_amount) || 0;
           const app = Number(b.approved_amount) || 0;
@@ -502,9 +841,13 @@ export function getReportDataset(reportType: string, user: { id: string; role: R
     case 'school_budget': {
       const rows: any[] = [];
       let sl = 1;
-      (db.schools || []).forEach((s) => {
+      let schools = db.schools || [];
+      if (resolution.selectedSchool) {
+        schools = schools.filter((s) => s.id === resolution.selectedSchool?.id);
+      }
+      schools.forEach((s) => {
         const sDepts = db.departments.filter((d) => d.school_id === s.id);
-        const m = computeDepartmentMetrics(sDepts.map((d) => d.id));
+        const m = computeDepartmentMetrics(sDepts.map((d) => d.id), targetFyId);
         rows.push({
           sl_no: sl++,
           school_code: s.code,
@@ -522,9 +865,9 @@ export function getReportDataset(reportType: string, user: { id: string; role: R
     }
 
     case 'campus_budget': {
-      const overall = computeDepartmentMetrics(db.departments.map((d) => d.id));
-      const academic = computeDepartmentMetrics(db.departments.filter((d) => d.category !== 'coe').map((d) => d.id));
-      const coe = computeDepartmentMetrics(db.departments.filter((d) => d.category === 'coe').map((d) => d.id));
+      const overall = computeDepartmentMetrics(db.departments.map((d) => d.id), targetFyId);
+      const academic = computeDepartmentMetrics(db.departments.filter((d) => d.category !== 'coe' && !d.code.startsWith('COE-')).map((d) => d.id), targetFyId);
+      const coe = computeDepartmentMetrics(db.departments.filter((d) => d.category === 'coe' || d.code.startsWith('COE-')).map((d) => d.id), targetFyId);
       return [
         { sl_no: 1, segment: 'Academic Schools & Departments', ...academic },
         { sl_no: 2, segment: 'Centres / Offices of Excellence', ...coe },
@@ -538,7 +881,12 @@ export function getReportDataset(reportType: string, user: { id: string; role: R
         return bt?.name.toLowerCase().includes('capex') || bt?.name.toLowerCase().includes('capital');
       });
       const capexCatIds = new Set(capexCat.map((c) => c.id));
-      const capexNfas = db.nfas.filter((n) => capexCatIds.has(n.budget_category_id) && nfaInScope(n));
+      const capexNfas = db.nfas.filter((n) => {
+        if (!capexCatIds.has(n.budget_category_id)) return false;
+        if (!targetDeptIds.has(n.department_id) && (!n.centre_id || !targetDeptIds.has(n.centre_id))) return false;
+        if (targetFyId && n.financial_year_id !== targetFyId) return false;
+        return nfaInScope(n);
+      });
       return capexNfas.map((n, idx) => ({
         sl_no: idx + 1,
         ref_no: n.ref_no,
@@ -553,8 +901,10 @@ export function getReportDataset(reportType: string, user: { id: string; role: R
 
     case 'revenue_earnings': {
       const revs = (db.event_revenues || []).filter((r) => {
+        if (!r.department_id || !targetDeptIds.has(r.department_id)) return false;
         const nfa = db.nfas.find((n) => n.id === r.nfa_id);
-        return nfa && nfaInScope(nfa);
+        if (nfa && targetFyId && nfa.financial_year_id !== targetFyId) return false;
+        return !nfa || nfaInScope(nfa);
       });
       return revs.map((r, idx) => {
         const nfa = db.nfas.find((n) => n.id === r.nfa_id);
@@ -575,7 +925,12 @@ export function getReportDataset(reportType: string, user: { id: string; role: R
     }
 
     case 'event_activity': {
-      const events = db.nfas.filter((n) => n.nfa_type === 'event' && nfaInScope(n));
+      const events = db.nfas.filter((n) => {
+        if (n.nfa_type !== 'event') return false;
+        if (!targetDeptIds.has(n.department_id) && (!n.centre_id || !targetDeptIds.has(n.centre_id))) return false;
+        if (targetFyId && n.financial_year_id !== targetFyId) return false;
+        return nfaInScope(n);
+      });
       return events.map((n, idx) => ({
         sl_no: idx + 1,
         ref_no: n.ref_no,
@@ -592,7 +947,12 @@ export function getReportDataset(reportType: string, user: { id: string; role: R
     }
 
     case 'purchase_activity': {
-      const purchases = db.nfas.filter((n) => (n.nfa_type === 'purchase' || n.purchase_details) && nfaInScope(n));
+      const purchases = db.nfas.filter((n) => {
+        if (n.nfa_type !== 'purchase' && !n.purchase_details) return false;
+        if (!targetDeptIds.has(n.department_id) && (!n.centre_id || !targetDeptIds.has(n.centre_id))) return false;
+        if (targetFyId && n.financial_year_id !== targetFyId) return false;
+        return nfaInScope(n);
+      });
       return purchases.map((n, idx) => ({
         sl_no: idx + 1,
         ref_no: n.ref_no,
@@ -609,7 +969,10 @@ export function getReportDataset(reportType: string, user: { id: string; role: R
     case 'purchase_invoice': {
       const invoices = (db.purchase_invoices || []).filter((i) => {
         const nfa = db.nfas.find((n) => n.id === i.nfa_id);
-        return nfa && nfaInScope(nfa);
+        if (!nfa) return false;
+        if (!targetDeptIds.has(nfa.department_id) && (!nfa.centre_id || !targetDeptIds.has(nfa.centre_id))) return false;
+        if (targetFyId && nfa.financial_year_id !== targetFyId) return false;
+        return nfaInScope(nfa);
       });
       return invoices.map((i, idx) => {
         const nfa = db.nfas.find((n) => n.id === i.nfa_id);
@@ -633,34 +996,42 @@ export function getReportDataset(reportType: string, user: { id: string; role: R
       let sl = 1;
       (db.purchase_invoices || []).forEach((i) => {
         const nfa = db.nfas.find((n) => n.id === i.nfa_id);
-        if (nfa && nfaInScope(nfa)) {
-          rows.push({
-            sl_no: sl++,
-            type: 'Purchase Invoice',
-            ref_no: i.invoice_number,
-            nfa_ref: nfa.ref_no,
-            beneficiary: i.vendor_name,
-            amount: Number(i.invoice_amount) || 0,
-            status: i.payment_status.toUpperCase(),
-            utr_ref: i.payment_ref_utr || '—',
-            payment_date: i.payment_date || '—',
-          });
+        if (nfa && (targetDeptIds.has(nfa.department_id) || (nfa.centre_id && targetDeptIds.has(nfa.centre_id)))) {
+          if (!targetFyId || nfa.financial_year_id === targetFyId) {
+            if (nfaInScope(nfa)) {
+              rows.push({
+                sl_no: sl++,
+                type: 'Purchase Invoice',
+                ref_no: i.invoice_number,
+                nfa_ref: nfa.ref_no,
+                beneficiary: i.vendor_name,
+                amount: Number(i.invoice_amount) || 0,
+                status: i.payment_status.toUpperCase(),
+                utr_ref: i.payment_ref_utr || '—',
+                payment_date: i.payment_date || '—',
+              });
+            }
+          }
         }
       });
       (db.resource_person_bank_details || []).forEach((b) => {
         const nfa = db.nfas.find((n) => n.id === b.nfa_id);
-        if (nfa && nfaInScope(nfa)) {
-          rows.push({
-            sl_no: sl++,
-            type: 'Honorarium Payment',
-            ref_no: b.resource_person_name,
-            nfa_ref: nfa.ref_no,
-            beneficiary: b.account_holder_name || b.resource_person_name,
-            amount: Number(b.net_payable_amount || b.honorarium_amount) || 0,
-            status: (b.tracking_status || 'details_submitted').toUpperCase(),
-            utr_ref: b.payment_ref_utr || '—',
-            payment_date: b.payment_date || '—',
-          });
+        if (nfa && (targetDeptIds.has(nfa.department_id) || (nfa.centre_id && targetDeptIds.has(nfa.centre_id)))) {
+          if (!targetFyId || nfa.financial_year_id === targetFyId) {
+            if (nfaInScope(nfa)) {
+              rows.push({
+                sl_no: sl++,
+                type: 'Honorarium Payment',
+                ref_no: b.resource_person_name,
+                nfa_ref: nfa.ref_no,
+                beneficiary: b.account_holder_name || b.resource_person_name,
+                amount: Number(b.net_payable_amount || b.honorarium_amount) || 0,
+                status: (b.tracking_status || 'details_submitted').toUpperCase(),
+                utr_ref: b.payment_ref_utr || '—',
+                payment_date: b.payment_date || '—',
+              });
+            }
+          }
         }
       });
       return rows;
@@ -668,8 +1039,8 @@ export function getReportDataset(reportType: string, user: { id: string; role: R
 
     case 'financial_ledger': {
       const logs = db.audit_logs.filter((l) => {
-        if (isSenior) return true;
-        if (isDean) return true;
+        if (l.department_id && !targetDeptIds.has(l.department_id)) return false;
+        if (isSenior || isDean) return true;
         if (user.role === 'hod') return l.department_id === user.department_id;
         return l.changed_by === user.name;
       });
@@ -687,33 +1058,49 @@ export function getReportDataset(reportType: string, user: { id: string; role: R
     }
 
     case 'faculty_nfa': {
-      const facultyList = db.users.filter((u) => u.role === 'faculty');
-      const filteredFaculty = isSenior || isDean
-        ? facultyList
-        : facultyList.filter((f) => f.department_id === user.department_id);
+      // Filter faculty strictly to authorized target departments
+      const facultyList = db.users.filter((u) => u.role === 'faculty' && u.department_id && targetDeptIds.has(u.department_id));
+      const rows: any[] = [];
+      let sl = 1;
 
-      return filteredFaculty.map((f, idx) => {
-        const fNfas = db.nfas.filter((n) => n.created_by === f.id);
+      facultyList.forEach((f) => {
+        const fNfas = db.nfas.filter((n) => n.created_by === f.id && n.status !== 'draft' && (!targetFyId || n.financial_year_id === targetFyId));
+        // Exclude faculty with 0 submitted proposals unless include_all_faculty is requested
+        if (!resolution.includeAllFaculty && fNfas.length === 0) {
+          return;
+        }
+
         const approved = fNfas.filter((n) => n.status === 'approved');
+        const pending = fNfas.filter((n) => !['approved', 'rejected', 'draft'].includes(n.status));
+        const rejected = fNfas.filter((n) => n.status === 'rejected');
         const requestedAmt = fNfas.reduce((sum, n) => sum + (Number(n.total_amount) || 0), 0);
         const approvedAmt = approved.reduce((sum, n) => sum + (Number(n.total_amount) || 0), 0);
-        return {
-          sl_no: idx + 1,
+        const completedEvents = fNfas.filter((n) => n.nfa_type === 'event' && n.event_completion_status === 'completed').length;
+
+        rows.push({
+          sl_no: sl++,
           faculty_name: f.name,
           email: f.email,
-          department: f.department_id ? deptMap.get(f.department_id)?.code : '',
+          department: f.department_id ? (deptMap.get(f.department_id)?.code || '') : '',
           total_submitted: fNfas.length,
           total_approved: approved.length,
+          total_pending: pending.length,
+          total_rejected: rejected.length,
           total_requested: requestedAmt,
           total_approved_amount: approvedAmt,
-        };
+          events_completed: completedEvents,
+        });
       });
+      return rows;
     }
 
     case 'centres_offices': {
-      const coes = db.departments.filter((d) => d.category === 'coe' || d.code.startsWith('COE-'));
+      let coes = db.departments.filter((d) => d.category === 'coe' || d.code.startsWith('COE-'));
+      if (resolution.targetDeptIds.size > 0 && resolution.isSpecificFilter) {
+        coes = coes.filter((c) => resolution.targetDeptIds.has(c.id));
+      }
       return coes.map((c, idx) => {
-        const m = computeDepartmentMetrics([c.id]);
+        const m = computeDepartmentMetrics([c.id], targetFyId);
         return {
           sl_no: idx + 1,
           centre_code: c.code,
@@ -729,9 +1116,12 @@ export function getReportDataset(reportType: string, user: { id: string; role: R
     }
 
     case 'pending_approvals': {
-      const inFlight = db.nfas.filter(
-        (n) => !['draft', 'approved', 'rejected'].includes(n.status) && nfaInScope(n)
-      );
+      const inFlight = db.nfas.filter((n) => {
+        if (['draft', 'approved', 'rejected'].includes(n.status)) return false;
+        if (!targetDeptIds.has(n.department_id) && (!n.centre_id || !targetDeptIds.has(n.centre_id))) return false;
+        if (targetFyId && n.financial_year_id !== targetFyId) return false;
+        return nfaInScope(n);
+      });
       return inFlight.map((n, idx) => {
         const createdDate = new Date(n.created_at || n.date);
         const daysPending = Math.max(0, Math.floor((Date.now() - createdDate.getTime()) / (1000 * 60 * 60 * 24)));
@@ -756,7 +1146,7 @@ export function getReportDataset(reportType: string, user: { id: string; role: R
 
 /**
  * GET /api/reports/data/:reportType
- * Returns structured data for the table preview
+ * Returns structured data for the table preview, applying strict organization and FY filters
  */
 reportsRouter.get('/data/:reportType', (req: AuthedRequest, res) => {
   const { reportType } = req.params;
@@ -785,7 +1175,6 @@ function renderPdfTable(
   rightMargin: number
 ) {
   const tableWidth = pageWidth - leftMargin - rightMargin;
-  const colCount = keys.length;
 
   // Custom intelligent column weights
   const customWeights: Record<string, number> = {
@@ -806,16 +1195,20 @@ function renderPdfTable(
     verification: 55,
     payment_status: 58,
     completion: 55,
+    completion_status: 55,
     current_stage: 68,
     type: 48,
     nfa_type: 48,
     revenue_enabled: 48,
     revenue_generating: 48,
+    will_generate_revenue: 48,
     allocated: 68,
     approved: 68,
     pending: 68,
     available: 68,
     amount: 68,
+    requested_amount: 68,
+    approved_amount: 68,
     invoice_amount: 68,
     paid_amount: 68,
     gst_amount: 58,
@@ -824,6 +1217,11 @@ function renderPdfTable(
     revenue_generated: 68,
     total_requested: 68,
     total_approved_amount: 68,
+    total_submitted: 42,
+    total_approved: 42,
+    total_pending: 42,
+    total_rejected: 42,
+    events_completed: 45,
   };
 
   let allocatedFixed = 0;
@@ -850,7 +1248,7 @@ function renderPdfTable(
     let colX = leftMargin;
     keys.forEach((k, idx) => {
       const colW = finalColWidths[idx];
-      const isNum = k.includes('amount') || k.includes('allocated') || k.includes('approved') || k.includes('pending') || k.includes('available') || k.includes('revenue');
+      const isNum = k.includes('amount') || k.includes('allocated') || k.includes('approved') || k.includes('pending') || k.includes('available') || k.includes('revenue') || k.includes('requested');
       doc
         .font('Helvetica-Bold')
         .fontSize(8)
@@ -876,7 +1274,7 @@ function renderPdfTable(
       const colW = finalColWidths[idx];
       let val = row[k];
       if (typeof val === 'number') {
-        val = val.toLocaleString('en-IN');
+        val = `₹${val.toLocaleString('en-IN')}`;
       }
       doc.fontSize(7.5);
       const h = doc.heightOfString(String(val ?? '—'), { width: colW - 8 });
@@ -885,7 +1283,7 @@ function renderPdfTable(
 
     const rowHeight = Math.min(65, Math.max(18, maxCellHeight + 6));
 
-    // Page break handling
+    // Page break handling: only add page if this row will exceed bottom margin
     if (curY + rowHeight > pageHeight - 45) {
       doc.addPage();
       curY = 36;
@@ -900,9 +1298,9 @@ function renderPdfTable(
     keys.forEach((k, idx) => {
       const colW = finalColWidths[idx];
       let val = row[k];
-      const isNum = typeof val === 'number' || k.includes('amount') || k.includes('allocated') || k.includes('approved') || k.includes('pending') || k.includes('available') || k.includes('revenue');
+      const isNum = typeof val === 'number' || k.includes('amount') || k.includes('allocated') || k.includes('approved') || k.includes('pending') || k.includes('available') || k.includes('revenue') || k.includes('requested');
       if (typeof val === 'number') {
-        val = val.toLocaleString('en-IN');
+        val = `₹${val.toLocaleString('en-IN')}`;
       }
       doc
         .font('Helvetica')
@@ -924,37 +1322,16 @@ function renderPdfTable(
 }
 
 /**
- * POST or GET /api/reports/export/:reportType/pdf
- * Official CHRIST University Report PDF Generation
+ * Draws the official CHRIST University header with crest logo and institutional metadata
  */
-reportsRouter.all('/export/:reportType/pdf', (req: AuthedRequest, res: Response) => {
-  const { reportType } = req.params;
-  const user = req.user!;
-  const filters = { ...(req.query || {}), ...(req.body || {}) };
-  const data = getReportDataset(reportType, user, filters);
-
-  const isWide = ['nfa_activity', 'department_budget', 'school_budget', 'revenue_earnings', 'event_activity', 'purchase_invoice', 'payment_status', 'financial_ledger'].includes(reportType);
-  const layout = isWide ? 'landscape' : 'portrait';
-
-  const doc = new PDFDocument({
-    size: 'A4',
-    layout,
-    margins: { top: 36, bottom: 36, left: 36, right: 36 },
-    bufferPages: true,
-  });
-
-  const filename = `CU_Report_${reportType}_${Date.now()}.pdf`;
-  res.setHeader('Content-Type', 'application/pdf');
-  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-  doc.pipe(res);
-
-  const pageWidth = layout === 'landscape' ? 841.89 : 595.28;
-  const pageHeight = layout === 'landscape' ? 595.28 : 841.89;
-  const leftMargin = 36;
-  const rightMargin = 36;
-  const contentWidth = pageWidth - leftMargin - rightMargin;
-
-  // Header
+function drawOfficialHeader(
+  doc: PDFKit.PDFDocument,
+  title: string,
+  user: any,
+  leftMargin: number,
+  contentWidth: number,
+  fyLabel: string = '2026-27'
+) {
   const topY = 36;
   if (fs.existsSync(logoPath)) {
     try {
@@ -976,22 +1353,184 @@ reportsRouter.all('/export/:reportType/pdf', (req: AuthedRequest, res: Response)
     .font('Helvetica-Bold')
     .fontSize(11)
     .fillColor(CHRIST_BLUE)
-    .text(`OFFICIAL INSTITUTIONAL REPORT: ${reportType.replace(/_/g, ' ').toUpperCase()}`, leftMargin + 65, topY + 34);
+    .text(`OFFICIAL INSTITUTIONAL REPORT: ${title.toUpperCase()}`, leftMargin + 65, topY + 34);
 
   doc
     .font('Helvetica')
     .fontSize(8)
     .fillColor('#64748B')
-    .text(`Reporting Year: 2026-27 | Generated: ${new Date().toLocaleString('en-IN')} | Authorized User: ${user.name} (${user.role.toUpperCase()})`, leftMargin, topY + 64);
+    .text(`Academic Year: ${fyLabel} | Generated: ${new Date().toLocaleString('en-IN')} | Authorized User: ${user.name} (${user.role.toUpperCase()})`, leftMargin, topY + 64);
 
   doc.moveTo(leftMargin, topY + 76).lineTo(leftMargin + contentWidth, topY + 76).strokeColor(CHRIST_BLUE).lineWidth(1.5).stroke();
 
-  let curY = topY + 88;
+  return topY + 88;
+}
+
+/**
+ * Renders footers across all buffered pages with ZERO accidental page breaks
+ */
+function renderPdfFooters(doc: PDFKit.PDFDocument, leftMargin: number, contentWidth: number, pageHeight: number) {
+  const pageRange = doc.bufferedPageRange();
+  for (let i = 0; i < pageRange.count; i++) {
+    doc.switchToPage(i);
+    // CRITICAL: set margins.bottom to 0 so footer text never triggers an auto-page-break
+    doc.page.margins.bottom = 0;
+    doc
+      .font('Helvetica')
+      .fontSize(7.5)
+      .fillColor('#94A3B8')
+      .text(
+        `CHRIST (Deemed to be University) — Institutional Confidential Document | Page ${i + 1} of ${pageRange.count}`,
+        leftMargin,
+        pageHeight - 22,
+        { align: 'center', width: contentWidth, lineBreak: false }
+      );
+  }
+}
+
+/**
+ * POST or GET /api/reports/summary/export/pdf
+ * Generates official A4 Executive Summary PDF (Executive KPI Box + Faculty Table + Detailed NFA Table)
+ */
+reportsRouter.all('/summary/export/pdf', (req: AuthedRequest, res: Response) => {
+  const user = req.user!;
+  const filters = { ...(req.query || {}), ...(req.body || {}) };
+  const summary = getExecutiveSummaryData(user, filters);
+
+  const doc = new PDFDocument({
+    size: 'A4',
+    layout: 'landscape',
+    margins: { top: 36, bottom: 20, left: 36, right: 36 },
+    bufferPages: true,
+  });
+
+  const filename = `CU_Executive_Summary_${summary.org_code}_${Date.now()}.pdf`;
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  doc.pipe(res);
+
+  const pageWidth = 841.89;
+  const pageHeight = 595.28;
+  const leftMargin = 36;
+  const rightMargin = 36;
+  const contentWidth = pageWidth - leftMargin - rightMargin;
+
+  let curY = drawOfficialHeader(
+    doc,
+    `EXECUTIVE SUMMARY — ${summary.org_name.toUpperCase()} (${summary.org_code})`,
+    user,
+    leftMargin,
+    contentWidth,
+    summary.financial_year
+  );
+
+  // Section 1: Executive KPI Overview Box
+  doc.font('Helvetica-Bold').fontSize(11).fillColor(CHRIST_BLUE).text('SECTION 1: FINANCIAL CEILING & COMMITMENTS SUMMARY', leftMargin, curY);
+  curY += 16;
+
+  doc.rect(leftMargin, curY, contentWidth, 48).fillColor('#F1F5F9').strokeColor(BORDER_LIGHT).lineWidth(1).fillAndStroke();
+  const kpiCol = Math.floor(contentWidth / 4);
+  const m = summary.metrics;
+  const kpis = [
+    { l: 'Allocated Budget', v: `₹${m.allocated.toLocaleString('en-IN')}`, c: CHRIST_BLUE },
+    { l: 'Approved Expenditure', v: `₹${m.approved.toLocaleString('en-IN')}`, c: '#16A34A' },
+    { l: 'Active Reservations', v: `₹${m.pending.toLocaleString('en-IN')}`, c: '#CA8A04' },
+    { l: 'Available Balance', v: `₹${m.available.toLocaleString('en-IN')}`, c: '#0284C7' },
+  ];
+  kpis.forEach((k, idx) => {
+    doc.font('Helvetica-Bold').fontSize(7.5).fillColor('#64748B').text(k.l.toUpperCase(), leftMargin + idx * kpiCol + 8, curY + 8);
+    doc.font('Helvetica-Bold').fontSize(13).fillColor(k.c).text(k.v, leftMargin + idx * kpiCol + 8, curY + 24);
+  });
+  curY += 60;
+
+  // Secondary metrics line
+  doc.font('Helvetica').fontSize(8.5).fillColor(TEXT_DARK).text(
+    `Total NFAs: ${m.total_nfas} (Approved: ${m.approved_nfas} · In-Flight: ${m.pending_nfas} · Rejected: ${m.rejected_nfas}) | Events Completed: ${m.events_completed_count}/${m.event_nfas_count} | Revenue Generated: ₹${m.total_revenue.toLocaleString('en-IN')} (Verified: ₹${m.verified_revenue.toLocaleString('en-IN')}) | Invoices Paid: ₹${m.invoices_paid.toLocaleString('en-IN')} (Pending: ₹${m.invoices_pending.toLocaleString('en-IN')})`,
+    leftMargin,
+    curY
+  );
+  curY += 20;
+
+  // Section 2: Faculty-wise NFA Activity Table
+  doc.font('Helvetica-Bold').fontSize(11).fillColor(CHRIST_BLUE).text(`SECTION 2: FACULTY-WISE NFA ACTIVITY (${summary.faculty_activity.length} Faculty Members)`, leftMargin, curY);
+  curY += 16;
+
+  if (summary.faculty_activity.length > 0) {
+    const facKeys = ['sl_no', 'faculty_name', 'department', 'total_submitted', 'total_approved', 'total_pending', 'total_rejected', 'total_requested', 'total_approved_amount', 'events_completed'];
+    curY = renderPdfTable(doc, facKeys, summary.faculty_activity, curY, pageWidth, pageHeight, leftMargin, rightMargin);
+  } else {
+    doc.font('Helvetica').fontSize(9).fillColor('#64748B').text('No active faculty submissions found for this organization in the selected academic year.', leftMargin, curY);
+    curY += 24;
+  }
+
+  // Section 3: Detailed NFA Proposals Table
+  if (curY + 60 > pageHeight - 45) {
+    doc.addPage();
+    curY = 36;
+  } else {
+    curY += 20;
+  }
+
+  doc.font('Helvetica-Bold').fontSize(11).fillColor(CHRIST_BLUE).text(`SECTION 3: DETAILED NFA PROPOSALS (${summary.detailed_nfas.length} Records)`, leftMargin, curY);
+  curY += 16;
+
+  if (summary.detailed_nfas.length > 0) {
+    const nfaKeys = ['sl_no', 'ref_no', 'date', 'proposer', 'department', 'title', 'type', 'requested_amount', 'approved_amount', 'status', 'completion_status'];
+    curY = renderPdfTable(doc, nfaKeys, summary.detailed_nfas, curY, pageWidth, pageHeight, leftMargin, rightMargin);
+  } else {
+    doc.font('Helvetica').fontSize(9).fillColor('#64748B').text('No submitted NFA proposals found matching criteria.', leftMargin, curY);
+  }
+
+  // Render footers safely without blank pages
+  renderPdfFooters(doc, leftMargin, contentWidth, pageHeight);
+  doc.end();
+});
+
+/**
+ * POST or GET /api/reports/export/:reportType/pdf
+ * Official CHRIST University Report PDF Generation (14 Reports)
+ */
+reportsRouter.all('/export/:reportType/pdf', (req: AuthedRequest, res: Response) => {
+  const { reportType } = req.params;
+  const user = req.user!;
+  const filters = { ...(req.query || {}), ...(req.body || {}) };
+  const data = getReportDataset(reportType, user, filters);
+  const resolution = resolveAuthorizedScope(user, filters);
+
+  const isWide = ['nfa_activity', 'department_budget', 'school_budget', 'revenue_earnings', 'event_activity', 'purchase_invoice', 'payment_status', 'financial_ledger', 'faculty_nfa'].includes(reportType);
+  const layout = isWide ? 'landscape' : 'portrait';
+
+  const doc = new PDFDocument({
+    size: 'A4',
+    layout,
+    margins: { top: 36, bottom: 20, left: 36, right: 36 },
+    bufferPages: true,
+  });
+
+  const filename = `CU_Report_${reportType}_${Date.now()}.pdf`;
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  doc.pipe(res);
+
+  const pageWidth = layout === 'landscape' ? 841.89 : 595.28;
+  const pageHeight = layout === 'landscape' ? 595.28 : 841.89;
+  const leftMargin = 36;
+  const rightMargin = 36;
+  const contentWidth = pageWidth - leftMargin - rightMargin;
+
+  let curY = drawOfficialHeader(
+    doc,
+    reportType.replace(/_/g, ' '),
+    user,
+    leftMargin,
+    contentWidth,
+    resolution.financialYear.label
+  );
 
   if (reportType === 'school_budget') {
     // Multi-section school report
     const targetSchool = filters.school || filters.targetId || 'SOET';
-    const bundle = getSchoolReportBundle(targetSchool, user);
+    const bundle = getSchoolReportBundle(targetSchool, user, resolution.financialYear.id);
 
     doc.font('Helvetica-Bold').fontSize(11).fillColor(CHRIST_BLUE).text(`SECTION 1: ${bundle.overview.school_name.toUpperCase()} OVERVIEW & METRICS`, leftMargin, curY);
     curY += 16;
@@ -1026,22 +1565,8 @@ reportsRouter.all('/export/:reportType/pdf', (req: AuthedRequest, res: Response)
     }
   }
 
-  // Footer on all pages
-  const pageRange = doc.bufferedPageRange();
-  for (let i = 0; i < pageRange.count; i++) {
-    doc.switchToPage(i);
-    doc
-      .font('Helvetica')
-      .fontSize(7.5)
-      .fillColor('#94A3B8')
-      .text(
-        `CHRIST (Deemed to be University) — Institutional Confidential Document | Page ${i + 1} of ${pageRange.count}`,
-        leftMargin,
-        pageHeight - 24,
-        { align: 'center', width: contentWidth }
-      );
-  }
-
+  // Footer on all pages with zero blank pages
+  renderPdfFooters(doc, leftMargin, contentWidth, pageHeight);
   doc.end();
 });
 
@@ -1102,7 +1627,7 @@ function styleWorksheet(ws: ExcelJS.Worksheet, keys: string[], rows: any[]) {
       }
       keys.forEach((k, colIdx) => {
         const cell = r.getCell(colIdx + 1);
-        const isNum = typeof cell.value === 'number' || k.includes('amount') || k.includes('allocated') || k.includes('approved') || k.includes('pending') || k.includes('available') || k.includes('revenue');
+        const isNum = typeof cell.value === 'number' || k.includes('amount') || k.includes('allocated') || k.includes('approved') || k.includes('pending') || k.includes('available') || k.includes('revenue') || k.includes('requested');
         if (isNum && typeof cell.value === 'number') {
           cell.alignment = { vertical: 'middle', horizontal: 'right' };
           cell.numFmt = '₹#,##0.00';
@@ -1117,23 +1642,90 @@ function styleWorksheet(ws: ExcelJS.Worksheet, keys: string[], rows: any[]) {
 }
 
 /**
+ * POST or GET /api/reports/summary/export/excel
+ * Generates official multi-sheet Executive Summary Excel Workbook
+ */
+reportsRouter.all('/summary/export/excel', async (req: AuthedRequest, res: Response) => {
+  const user = req.user!;
+  const filters = { ...(req.query || {}), ...(req.body || {}) };
+  const summary = getExecutiveSummaryData(user, filters);
+
+  const wb = new ExcelJS.Workbook();
+  wb.creator = 'CHRIST (Deemed to be University) NFA System';
+  wb.created = new Date();
+
+  // Sheet 1: Executive Overview
+  const wsOverview = wb.addWorksheet('Executive Overview');
+  const overviewRows = [
+    { metric: 'Organization', value: `${summary.org_name} (${summary.org_code})` },
+    { metric: 'Scope', value: summary.scope.toUpperCase() },
+    { metric: 'Academic Year', value: summary.financial_year },
+    { metric: 'Allocated Budget', value: summary.metrics.allocated },
+    { metric: 'Approved Expenditure', value: summary.metrics.approved },
+    { metric: 'Active Reservations (Pending)', value: summary.metrics.pending },
+    { metric: 'Available Balance', value: summary.metrics.available },
+    { metric: 'Total Submitted NFAs', value: summary.metrics.total_nfas },
+    { metric: 'Approved NFAs', value: summary.metrics.approved_nfas },
+    { metric: 'Pending Review NFAs', value: summary.metrics.pending_nfas },
+    { metric: 'Rejected NFAs', value: summary.metrics.rejected_nfas },
+    { metric: 'Event NFAs Count', value: summary.metrics.event_nfas_count },
+    { metric: 'Events Completed', value: summary.metrics.events_completed_count },
+    { metric: 'Purchase NFAs Count', value: summary.metrics.purchase_nfas_count },
+    { metric: 'Total Recorded Revenue', value: summary.metrics.total_revenue },
+    { metric: 'Verified Revenue', value: summary.metrics.verified_revenue },
+    { metric: 'Invoices Paid', value: summary.metrics.invoices_paid },
+    { metric: 'Invoices Pending Payment', value: summary.metrics.invoices_pending },
+  ];
+  styleWorksheet(wsOverview, ['metric', 'value'], overviewRows);
+
+  // Sheet 2: Faculty-wise Activity
+  const wsFaculty = wb.addWorksheet('Faculty-wise Activity');
+  if (summary.faculty_activity.length > 0) {
+    styleWorksheet(wsFaculty, Object.keys(summary.faculty_activity[0]), summary.faculty_activity);
+  } else {
+    wsFaculty.addRow(['No active faculty submissions found for this organization']);
+  }
+
+  // Sheet 3: Detailed NFAs
+  const wsNfas = wb.addWorksheet('Detailed NFAs');
+  if (summary.detailed_nfas.length > 0) {
+    styleWorksheet(wsNfas, Object.keys(summary.detailed_nfas[0]), summary.detailed_nfas);
+  } else {
+    wsNfas.addRow(['No submitted NFA proposals found matching criteria']);
+  }
+
+  // Sheet 4: Categories Breakdown (if available)
+  if (summary.categories && summary.categories.length > 0) {
+    const wsCats = wb.addWorksheet('Category Budgets');
+    styleWorksheet(wsCats, Object.keys(summary.categories[0]), summary.categories);
+  }
+
+  const filename = `CU_Executive_Summary_${summary.org_code}_${Date.now()}.xlsx`;
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+
+  await wb.xlsx.write(res);
+  res.end();
+});
+
+/**
  * POST or GET /api/reports/export/:reportType/excel
- * Excel Workbook Generation using ExcelJS
+ * Excel Workbook Generation using ExcelJS (14 Reports)
  */
 reportsRouter.all('/export/:reportType/excel', async (req: AuthedRequest, res: Response) => {
   const { reportType } = req.params;
   const user = req.user!;
   const filters = { ...(req.query || {}), ...(req.body || {}) };
   const data = getReportDataset(reportType, user, filters);
+  const resolution = resolveAuthorizedScope(user, filters);
 
   const wb = new ExcelJS.Workbook();
   wb.creator = 'CHRIST (Deemed to be University) NFA System';
   wb.created = new Date();
 
   if (reportType === 'school_budget') {
-    // Multi-sheet workbook for comprehensive school report (Phase 7)
     const targetSchool = filters.school || filters.targetId || 'SOET';
-    const bundle = getSchoolReportBundle(targetSchool, user);
+    const bundle = getSchoolReportBundle(targetSchool, user, resolution.financialYear.id);
 
     // Sheet 1: School Summary
     const wsSummary = wb.addWorksheet('School Summary');

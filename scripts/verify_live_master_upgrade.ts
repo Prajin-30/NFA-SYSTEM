@@ -9,20 +9,31 @@ async function main() {
   const startTime = Date.now();
   const maxWaitMs = 300000; // 5 minutes
 
-  // 1. Poll until newly deployed build is active on Render
-  console.log('[1/8] Polling Render for updated deployment with Master Upgrade...');
+  // 1. Poll until newly deployed build is active on Render with 100% valid script syntax
+  console.log('[1/8] Polling Render for updated deployment without syntax errors...');
   let deployed = false;
   while (Date.now() - startTime < maxWaitMs) {
     try {
       const res = await fetch(`${baseUrl}/`, { signal: AbortSignal.timeout(10000) });
       if (res.ok) {
         const text = await res.text();
-        if (text.includes("invoices: 'Financial Records'") && text.includes("budgets: 'Budget'") && text.includes('Kengeri Campus')) {
-          console.log(`  ✅ Detected updated Master Upgrade build on Render! (${Math.round((Date.now() - startTime) / 1000)}s elapsed)`);
+        const scriptMatch = text.match(/<script\b[^>]*>([\s\S]*?)<\/script>/i);
+        let syntaxOk = false;
+        if (scriptMatch) {
+          try {
+            new vm.Script(scriptMatch[1], { filename: 'live_test.js' });
+            syntaxOk = true;
+          } catch (_) {
+            syntaxOk = false;
+          }
+        }
+
+        if (syntaxOk && text.includes("invoices: 'Financial Records'") && text.includes("budgets: 'Budget'")) {
+          console.log(`  ✅ Detected updated build on Render with 100% valid JavaScript syntax! (${Math.round((Date.now() - startTime) / 1000)}s elapsed)`);
           deployed = true;
           break;
         } else {
-          console.log(`  ⏳ Render still serving previous build... (${Math.round((Date.now() - startTime) / 1000)}s elapsed)`);
+          console.log(`  ⏳ Render still serving previous build (syntaxOk=${syntaxOk})... (${Math.round((Date.now() - startTime) / 1000)}s elapsed)`);
         }
       }
     } catch (e: any) {

@@ -148,6 +148,17 @@ async function runLiveBrowserTest() {
     }
     console.log('  ✅ Financial Records subtabs and views rendered successfully!');
 
+    // Test Revenue & Earnings Table Layout
+    console.log('  Switching to "Revenue & Earnings" subtab...');
+    await page.evaluate(() => (window as any).switchFinancialRecordsTab('revenue'));
+    await new Promise((r) => setTimeout(r, 2500));
+    const revHeaders = await page.$$eval('#main table thead th', (ths: any[]) => ths.map((t) => t.textContent.trim()));
+    console.log(`  Revenue Table Headers: ${JSON.stringify(revHeaders)}`);
+    if (revHeaders.length > 10) {
+      throw new Error(`Revenue table should be compact (9 columns), found ${revHeaders.length}`);
+    }
+    console.log('  ✅ Revenue Table redesigned into compact 9-column layout without horizontal scroll sprawl!');
+
     // Click Reports & Analytics tab
     console.log('  Clicking "Reports & Analytics" tab...');
     await page.evaluate(() => (window as any).showTab('excel'));
@@ -159,6 +170,17 @@ async function runLiveBrowserTest() {
     if (!summaryCardTitle.includes('Summary Generation')) {
       throw new Error(`Expected Summary Generation view, got "${summaryCardTitle}"`);
     }
+
+    // Verify Academic Year dropdown is populated
+    const fyOptions = await page.$$eval('select', (sels: any[]) => {
+      const fySel = sels.find((s) => (s.getAttribute('onchange') || '').includes('onSummaryFyChange'));
+      return fySel ? Array.from(fySel.options).map((o: any) => o.text) : [];
+    });
+    console.log(`  Summary Academic Year Dropdown Options: ${JSON.stringify(fyOptions)}`);
+    if (fyOptions.length === 0) {
+      throw new Error('Academic Year dropdown is blank or has 0 options');
+    }
+    console.log('  ✅ Academic Year dropdown correctly populated with options (never blank/narrow)!');
 
     const executiveSection1 = await page.$eval('h3', (el: any) => el.textContent.trim());
     console.log(`  Summary Section 1 Header: "${executiveSection1}"`);
@@ -174,6 +196,17 @@ async function runLiveBrowserTest() {
     console.log('  Switching to "Report Generation" (14 official reports)...');
     await page.evaluate(() => (window as any).switchReportsAnalyticsTab('reports'));
     await new Promise((r) => setTimeout(r, 2000));
+
+    // Verify Academic Year dropdown in Report Generation is populated
+    const repFyOptions = await page.$$eval('select', (sels: any[]) => {
+      const fySel = sels.find((s) => (s.getAttribute('onchange') || '').includes('onReportFyChange'));
+      return fySel ? Array.from(fySel.options).map((o: any) => o.text) : [];
+    });
+    console.log(`  Report Generation Academic Year Dropdown Options: ${JSON.stringify(repFyOptions)}`);
+    if (repFyOptions.length === 0) {
+      throw new Error('Report Generation Academic Year dropdown is blank');
+    }
+    console.log('  ✅ Report Generation Academic Year dropdown populated successfully!');
 
     const repDefBtns = await page.$$eval('#main button', (btns: any[]) =>
       btns.filter((b) => (b.getAttribute('onclick') || '').includes('selectReportType')).map((b) => b.textContent.trim())

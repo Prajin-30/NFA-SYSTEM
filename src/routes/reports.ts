@@ -93,9 +93,10 @@ export function resolveAuthorizedScope(
   const includeAllFaculty = filters.include_all_faculty === true || filters.include_all_faculty === 'true' || filters.include_all_faculty === '1';
 
   // 2. Identify requested parameters
-  const requestedDeptId = filters.department_id || filters.dept_id;
-  const requestedCentreId = filters.centre_id || filters.centre;
-  const requestedSchoolId = filters.school_id || filters.school;
+  const requestedTargetId = filters.id || filters.targetId;
+  const requestedDeptId = filters.department_id || filters.dept_id || (filters.scope === 'department' ? requestedTargetId : undefined);
+  const requestedCentreId = filters.centre_id || filters.centre || (filters.scope === 'centre' ? requestedTargetId : undefined);
+  const requestedSchoolId = filters.school_id || filters.school || (filters.scope === 'school' ? requestedTargetId : undefined);
   const requestedScope = filters.scope as ('campus' | 'school' | 'department' | 'centre' | undefined);
 
   // 3. Department-level filter
@@ -139,9 +140,55 @@ export function resolveAuthorizedScope(
 
   // 5. School-level filter
   if (requestedSchoolId || requestedScope === 'school') {
+    const legacySchoolCodeMap: Record<string, string> = {
+      '11111111-0000-0000-0000-000000000001': 'SOET',
+      '11111111-0000-0000-0000-000000000002': 'SOA',
+      '11111111-0000-0000-0000-000000000003': 'SBM',
+      '11111111-0000-0000-0000-000000000004': 'SPS',
+    };
     const targetSchoolId = requestedSchoolId || 'SOET';
-    const school = (db.schools || []).find((s) => s.id === targetSchoolId || s.code.toUpperCase() === String(targetSchoolId).toUpperCase())
-      || (db.schools && db.schools[0]);
+    const mappedCode = legacySchoolCodeMap[String(targetSchoolId)] || String(targetSchoolId).toUpperCase();
+    const school = (db.schools || []).find((s) => s.id === targetSchoolId || s.code.toUpperCase() === String(targetSchoolId).toUpperCase() || s.code.toUpperCase() === mappedCode)
+      || (requestedSchoolId ? { id: requestedSchoolId, code: mappedCode, name: `School (${mappedCode})`, campus: 'Bengaluru Central Campus' } : (db.schools && db.schools[0]));
+    if (school && (isSenior || isDean)) {
+      const schoolDepts = db.departments.filter((d) => d.school_id === school.id || (!d.school_id && school.code === 'SOET' && d.category === 'academic'));
+      return {
+        scope: 'school',
+        targetDeptIds: new Set(schoolDepts.map((d) => d.id)),
+        financialYear: activeFy,
+        isSpecificFilter: true,
+        selectedSchool: school,
+        includeAllFaculty,
+      };
+    }
+  }
+
+  // 5b. Fallback: Check if requestedTargetId matches a department, centre or school directly
+  if (requestedTargetId) {
+    const dept = db.departments.find((d) => d.id === requestedTargetId || d.code.toUpperCase() === String(requestedTargetId).toUpperCase());
+    if (dept) {
+      const isCoe = dept.category === 'coe' || dept.code.startsWith('COE-');
+      if (isSenior || isDean || (user.role === 'hod' && user.department_id === dept.id) || (user.role === 'faculty' && user.department_id === dept.id)) {
+        return {
+          scope: isCoe ? 'centre' : 'department',
+          targetDeptIds: new Set([dept.id]),
+          financialYear: activeFy,
+          isSpecificFilter: true,
+          selectedDept: !isCoe ? dept : undefined,
+          selectedCentre: isCoe ? dept : undefined,
+          includeAllFaculty,
+        };
+      }
+    }
+
+    const legacySchoolCodeMap: Record<string, string> = {
+      '11111111-0000-0000-0000-000000000001': 'SOET',
+      '11111111-0000-0000-0000-000000000002': 'SOA',
+      '11111111-0000-0000-0000-000000000003': 'SBM',
+      '11111111-0000-0000-0000-000000000004': 'SPS',
+    };
+    const mappedCode = legacySchoolCodeMap[String(requestedTargetId)] || String(requestedTargetId).toUpperCase();
+    const school = (db.schools || []).find((s) => s.id === requestedTargetId || s.code.toUpperCase() === String(requestedTargetId).toUpperCase() || s.code.toUpperCase() === mappedCode);
     if (school && (isSenior || isDean)) {
       const schoolDepts = db.departments.filter((d) => d.school_id === school.id || (!d.school_id && school.code === 'SOET' && d.category === 'academic'));
       return {
@@ -238,7 +285,8 @@ export function computeDepartmentMetrics(deptIds: string[], fyId?: string) {
   );
 
   const revenues = (db.event_revenues || []).filter((r) => {
-    if (!r.department_id || !deptSet.has(r.department_id)) return false;
+    const deptId = r.department_id || db.nfas.find((n) => n.id === r.nfa_id)?.department_id || db.nfas.find((n) => n.id === r.nfa_id)?.centre_id;
+    if (!deptId || !deptSet.has(deptId)) return false;
     if (fyId) {
       const nfa = db.nfas.find((n) => n.id === r.nfa_id);
       if (nfa && nfa.financial_year_id !== fyId) return false;
@@ -258,8 +306,10 @@ export function computeDepartmentMetrics(deptIds: string[], fyId?: string) {
   const pending = budgets.reduce((sum, b) => sum + (Number(b.pending_amount) || 0), 0);
   const available = allocated - approved - pending;
 
-  const totalRevenue = revenues.reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
+  const totalRevenue = revenues.filter((r) => r.status !== 'returned').reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
   const verifiedRevenue = revenues.filter((r) => r.status === 'verified').reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
+  const pendingRevenue = revenues.filter((r) => r.status === 'submitted').reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
+  const returnedRevenue = revenues.filter((r) => r.status === 'returned').reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
 
   const invoicesPaid = invoices.filter((i) => i.payment_status === 'paid').reduce((sum, i) => sum + (Number(i.invoice_amount) || 0), 0);
   const invoicesPending = invoices.filter((i) => i.payment_status !== 'paid').reduce((sum, i) => sum + (Number(i.invoice_amount) || 0), 0);
@@ -276,6 +326,8 @@ export function computeDepartmentMetrics(deptIds: string[], fyId?: string) {
     available,
     total_revenue: totalRevenue,
     verified_revenue: verifiedRevenue,
+    pending_revenue: pendingRevenue,
+    returned_revenue: returnedRevenue,
     invoices_paid: invoicesPaid,
     invoices_pending: invoicesPending,
     total_nfas: submittedNfas.length,
@@ -574,9 +626,12 @@ reportsRouter.get('/summary/centre/:id', (req: AuthedRequest, res) => {
 export function getSchoolReportBundle(schoolCodeOrId: string = 'SOET', _user: any, fyId?: string) {
   const db = store.data;
   const targetCode = String(schoolCodeOrId || 'SOET').toUpperCase();
-  const school = (db.schools || []).find((s) => s.id === schoolCodeOrId || s.code.toUpperCase() === targetCode)
-    || (db.schools && db.schools[0])
-    || { id: 'soet', code: 'SOET', name: 'School of Engineering & Technology', campus: 'Bengaluru – Kengeri Campus' };
+  let school = (db.schools || []).find((s) => s.id === schoolCodeOrId || s.code.toUpperCase() === targetCode);
+  if (!school && (!schoolCodeOrId || targetCode === 'SOET')) {
+    school = (db.schools && db.schools[0]) || { id: 'soet', code: 'SOET', name: 'School of Engineering & Technology', campus: 'Bengaluru – Kengeri Campus' };
+  } else if (!school) {
+    school = { id: schoolCodeOrId, code: targetCode, name: `School (${targetCode})`, campus: 'Bengaluru – Kengeri Campus' };
+  }
 
   const deptMap = new Map(db.departments.map((d) => [d.id, d]));
   const catMap = new Map(db.budget_categories.map((c) => [c.id, c.name]));
@@ -1164,6 +1219,55 @@ reportsRouter.get('/data/:reportType', (req: AuthedRequest, res) => {
 // 4. PROFESSIONAL A4 PDF REPORT GENERATOR
 // ==========================================
 
+export function isCurrencyKey(k: string): boolean {
+  const lower = k.toLowerCase();
+  if (
+    lower === 'sl_no' ||
+    lower === 's_no' ||
+    lower === 'sno' ||
+    lower.includes('count') ||
+    lower.includes('days') ||
+    lower.includes('percentage') ||
+    lower.includes('utilization') ||
+    lower.includes('faculty_count') ||
+    lower.includes('departments_count')
+  ) {
+    return false;
+  }
+  return (
+    lower.includes('amount') ||
+    lower.includes('allocated') ||
+    lower.includes('approved_amount') ||
+    lower.includes('approved_expenditure') ||
+    lower.includes('pending_reservations') ||
+    lower.includes('available') ||
+    lower.includes('revenue') ||
+    lower.includes('requested') ||
+    lower.includes('spend') ||
+    lower.includes('balance') ||
+    lower.includes('paid') ||
+    lower.includes('gst') ||
+    lower.includes('honorarium') ||
+    lower.includes('cost') ||
+    lower.includes('budget') ||
+    lower === 'allocated' ||
+    lower === 'approved' ||
+    lower === 'pending'
+  );
+}
+
+export function formatStatusLabel(val: any): string {
+  if (val === null || val === undefined) return '—';
+  const str = String(val);
+  if (str.includes('_') || (str === str.toUpperCase() && str.length > 3)) {
+    return str
+      .replace(/_/g, ' ')
+      .toLowerCase()
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+  return str;
+}
+
 function renderPdfTable(
   doc: PDFKit.PDFDocument,
   keys: string[],
@@ -1175,6 +1279,11 @@ function renderPdfTable(
   rightMargin: number
 ) {
   const tableWidth = pageWidth - leftMargin - rightMargin;
+
+  if (!rows || rows.length === 0) {
+    doc.font('Helvetica-Oblique').fontSize(8.5).fillColor('#64748B').text('No records available for the selected organization and academic year.', leftMargin, startY);
+    return startY + 20;
+  }
 
   // Custom intelligent column weights
   const customWeights: Record<string, number> = {
@@ -1188,15 +1297,16 @@ function renderPdfTable(
     invoice_no: 78,
     event_ref: 78,
     code: 45,
-    department: 45,
-    department_code: 45,
-    school_code: 45,
-    status: 55,
-    verification: 55,
-    payment_status: 58,
-    completion: 55,
-    completion_status: 55,
-    current_stage: 68,
+    department: 48,
+    department_code: 48,
+    school_code: 48,
+    status: 75,
+    verification: 75,
+    verification_status: 75,
+    payment_status: 75,
+    completion: 75,
+    completion_status: 75,
+    current_stage: 80,
     type: 48,
     nfa_type: 48,
     revenue_enabled: 48,
@@ -1248,14 +1358,15 @@ function renderPdfTable(
     let colX = leftMargin;
     keys.forEach((k, idx) => {
       const colW = finalColWidths[idx];
-      const isNum = k.includes('amount') || k.includes('allocated') || k.includes('approved') || k.includes('pending') || k.includes('available') || k.includes('revenue') || k.includes('requested');
+      const isCurr = isCurrencyKey(k);
+      const isCenter = k === 'sl_no' || k === 's_no' || k.includes('count') || k === 'type' || k === 'nfa_type';
       doc
         .font('Helvetica-Bold')
         .fontSize(8)
         .fillColor('#FFFFFF')
         .text(k.replace(/_/g, ' ').toUpperCase(), colX + 4, curY + 6, {
           width: colW - 8,
-          align: isNum ? 'right' : 'left',
+          align: isCurr ? 'right' : isCenter ? 'center' : 'left',
           ellipsis: true,
         });
       colX += colW;
@@ -1272,12 +1383,17 @@ function renderPdfTable(
     let maxCellHeight = 16;
     keys.forEach((k, idx) => {
       const colW = finalColWidths[idx];
-      let val = row[k];
+      const val = row[k];
+      let cellText: string;
       if (typeof val === 'number') {
-        val = `₹${val.toLocaleString('en-IN')}`;
+        cellText = isCurrencyKey(k) ? `₹${val.toLocaleString('en-IN')}` : val.toLocaleString('en-IN');
+      } else if (k === 'status' || k.includes('status') || k === 'current_stage') {
+        cellText = formatStatusLabel(val);
+      } else {
+        cellText = String(val ?? '—');
       }
       doc.fontSize(7.5);
-      const h = doc.heightOfString(String(val ?? '—'), { width: colW - 8 });
+      const h = doc.heightOfString(cellText, { width: colW - 8 });
       if (h > maxCellHeight) maxCellHeight = h;
     });
 
@@ -1297,18 +1413,25 @@ function renderPdfTable(
     let colX = leftMargin;
     keys.forEach((k, idx) => {
       const colW = finalColWidths[idx];
-      let val = row[k];
-      const isNum = typeof val === 'number' || k.includes('amount') || k.includes('allocated') || k.includes('approved') || k.includes('pending') || k.includes('available') || k.includes('revenue') || k.includes('requested');
+      const val = row[k];
+      const isCurr = isCurrencyKey(k);
+      const isCenter = k === 'sl_no' || k === 's_no' || k.includes('count') || k === 'type' || k === 'nfa_type';
+      let cellText: string;
       if (typeof val === 'number') {
-        val = `₹${val.toLocaleString('en-IN')}`;
+        cellText = isCurr ? `₹${val.toLocaleString('en-IN')}` : val.toLocaleString('en-IN');
+      } else if (k === 'status' || k.includes('status') || k === 'current_stage') {
+        cellText = formatStatusLabel(val);
+      } else {
+        cellText = String(val ?? '—');
       }
+
       doc
         .font('Helvetica')
         .fontSize(7.5)
         .fillColor(TEXT_DARK)
-        .text(String(val ?? '—'), colX + 4, curY + 4, {
+        .text(cellText, colX + 4, curY + 4, {
           width: colW - 8,
-          align: isNum ? 'right' : 'left',
+          align: isCurr ? 'right' : isCenter ? 'center' : 'left',
           ellipsis: true,
         });
       colX += colW;
@@ -1529,7 +1652,7 @@ reportsRouter.all('/export/:reportType/pdf', (req: AuthedRequest, res: Response)
 
   if (reportType === 'school_budget') {
     // Multi-section school report
-    const targetSchool = filters.school || filters.targetId || 'SOET';
+    const targetSchool = filters.school || filters.targetId || filters.id || resolution.selectedSchool?.id || 'SOET';
     const bundle = getSchoolReportBundle(targetSchool, user, resolution.financialYear.id);
 
     doc.font('Helvetica-Bold').fontSize(11).fillColor(CHRIST_BLUE).text(`SECTION 1: ${bundle.overview.school_name.toUpperCase()} OVERVIEW & METRICS`, leftMargin, curY);
@@ -1627,10 +1750,12 @@ function styleWorksheet(ws: ExcelJS.Worksheet, keys: string[], rows: any[]) {
       }
       keys.forEach((k, colIdx) => {
         const cell = r.getCell(colIdx + 1);
-        const isNum = typeof cell.value === 'number' || k.includes('amount') || k.includes('allocated') || k.includes('approved') || k.includes('pending') || k.includes('available') || k.includes('revenue') || k.includes('requested');
-        if (isNum && typeof cell.value === 'number') {
+        if (isCurrencyKey(k) && typeof cell.value === 'number') {
           cell.alignment = { vertical: 'middle', horizontal: 'right' };
           cell.numFmt = '₹#,##0.00';
+        } else if (typeof cell.value === 'number') {
+          cell.alignment = { vertical: 'middle', horizontal: k === 'sl_no' || k === 's_no' ? 'center' : 'right' };
+          cell.numFmt = '#,##0';
         } else if (k === 'sl_no' || k.includes('date') || k === 'status') {
           cell.alignment = { vertical: 'middle', horizontal: 'center' };
         } else {
@@ -1724,7 +1849,7 @@ reportsRouter.all('/export/:reportType/excel', async (req: AuthedRequest, res: R
   wb.created = new Date();
 
   if (reportType === 'school_budget') {
-    const targetSchool = filters.school || filters.targetId || 'SOET';
+    const targetSchool = filters.school || filters.targetId || filters.id || resolution.selectedSchool?.id || 'SOET';
     const bundle = getSchoolReportBundle(targetSchool, user, resolution.financialYear.id);
 
     // Sheet 1: School Summary

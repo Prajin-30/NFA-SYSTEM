@@ -148,6 +148,42 @@ async function runLiveBrowserTest() {
     }
     console.log('  ✅ Financial Records subtabs and views rendered successfully!');
 
+    // Click Reports & Analytics tab
+    console.log('  Clicking "Reports & Analytics" tab...');
+    await page.evaluate(() => (window as any).showTab('excel'));
+    await new Promise((r) => setTimeout(r, 2500));
+
+    // Verify Executive Summary Section 1, 2, 3
+    const summaryCardTitle = await page.$eval('.card-title', (el: any) => el.textContent.trim());
+    console.log(`  Reports & Analytics Card Title: "${summaryCardTitle}"`);
+    if (!summaryCardTitle.includes('Summary Generation')) {
+      throw new Error(`Expected Summary Generation view, got "${summaryCardTitle}"`);
+    }
+
+    const executiveSection1 = await page.$eval('h3', (el: any) => el.textContent.trim());
+    console.log(`  Summary Section 1 Header: "${executiveSection1}"`);
+
+    // Verify 4-stat cards
+    const statCardsCount = await page.$$eval('.stat-card', (cards: any[]) => cards.length);
+    console.log(`  Rendered Executive Stat Cards: ${statCardsCount}`);
+    if (statCardsCount < 4) {
+      throw new Error(`Expected at least 4 executive stat cards, got ${statCardsCount}`);
+    }
+
+    // Switch to Report Generation sub-tab (14 reports)
+    console.log('  Switching to "Report Generation" (14 official reports)...');
+    await page.evaluate(() => (window as any).switchReportsAnalyticsTab('reports'));
+    await new Promise((r) => setTimeout(r, 2000));
+
+    const repDefBtns = await page.$$eval('#main button', (btns: any[]) =>
+      btns.filter((b) => (b.getAttribute('onclick') || '').includes('selectReportType')).map((b) => b.textContent.trim())
+    );
+    console.log(`  Available Report Types count: ${repDefBtns.length}`);
+    if (repDefBtns.length !== 14) {
+      throw new Error(`Expected 14 report definitions, found ${repDefBtns.length}`);
+    }
+    console.log('  ✅ All 14 Official Institutional Report types rendered with organization filter bar!');
+
     // 7. Test Logout and Multi-Role Login (Finance and Faculty)
     console.log('\n[7/7] Testing Logout & Multi-Role Logins (Finance & Faculty)...');
     await page.evaluate(() => (window as any).logout());

@@ -256,6 +256,14 @@ export function renderNfaPdf(
     if (rpSentence.trim()) {
       renderBullet(rpSentence);
     }
+    if (nfa.will_generate_revenue) {
+      renderBullet('Revenue Generation: This event is scheduled to generate institutional revenue (Registration / Sponsorships / Collections).');
+    } else {
+      renderBullet('Revenue Generation: No revenue generation planned for this event.');
+    }
+    if (nfa.event_completion_status === 'completed') {
+      renderBullet(`Event Completion: Successfully concluded on ${formatDate(nfa.event_completion_date || '')}.${nfa.event_completion_remarks ? ` Remarks: ${nfa.event_completion_remarks}` : ''}`);
+    }
   }
 
   // Change 1: Display "Sampling — Required" when selected; omit when not selected

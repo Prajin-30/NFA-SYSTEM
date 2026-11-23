@@ -982,61 +982,118 @@ nfasRouter.post('/', requireRole('faculty', 'hod', 'dean', 'super_admin'), async
   const creatorUser = store.data.users.find((u) => u.id === req.user!.id);
   const proposerSig = creatorUser?.signature_image || (fs.existsSync(path.join(signaturesDir, `${req.user!.id}.png`)) ? `${req.user!.id}.png` : undefined);
 
-  const nfa = {
-    id: uuid(),
-    ref_no: refNo,
-    project_id: b.project_id || null, // Project is optional!
-    department_id: targetDepartmentId,
-    centre_id: targetCentreId,
-    organization_type: orgType,
-    workflow_type: orgType,
-    financial_year_id: b.financial_year_id,
-    budget_type_id: b.budget_type_id || undefined,
-    budget_category_id: b.budget_category_id,
-    budget_subcategory_id: b.budget_subcategory_id || null,
-    budget_subcategory_name: b.budget_subcategory_name || '',
-    title: b.title,
-    purpose: b.point1 || b.purpose || '',
-    description: b.point2 || b.description || '',
-    justification: b.point3 || b.justification || '',
-    sdgs: b.sdgs || '',
-    requirements: b.requirements || '',
-    total_amount: total,
-    status: 'draft' as NfaStatus,
-    created_by: req.user!.id,
-    submitted_by_name: b.submitted_by_name || req.user!.name,
-    submitted_by_designation: b.submitted_by_designation || 'Faculty',
-    hod_name: '',
-    date: new Date().toISOString().slice(0, 10),
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    // Specific requirements
-    nfa_type: targetNfaType,
-    point1: b.point1 || b.purpose || '',
-    point2: b.point2 || b.description || '',
-    point3: b.point3 || b.justification || '',
-    point4: b.point4 || '',
-    event_details: isPurchase ? undefined : (b.event_details || {
+  // Check if updating an existing unsubmitted draft created by this user
+  const existingDraftId = b.draft_id || b.id;
+  const existingDraft = existingDraftId
+    ? store.data.nfas.find((n) => n.id === existingDraftId && n.status === 'draft' && n.created_by === req.user!.id)
+    : null;
+
+  let nfa: any;
+  let isNewNfa = false;
+
+  if (existingDraft) {
+    nfa = existingDraft;
+    nfa.title = b.title;
+    nfa.department_id = targetDepartmentId;
+    nfa.centre_id = targetCentreId;
+    nfa.organization_type = orgType;
+    nfa.workflow_type = orgType;
+    nfa.financial_year_id = b.financial_year_id;
+    nfa.budget_type_id = b.budget_type_id || undefined;
+    nfa.budget_category_id = b.budget_category_id;
+    nfa.budget_subcategory_id = b.budget_subcategory_id || null;
+    nfa.budget_subcategory_name = b.budget_subcategory_name || '';
+    nfa.purpose = b.point1 || b.purpose || '';
+    nfa.description = b.point2 || b.description || '';
+    nfa.justification = b.point3 || b.justification || '';
+    nfa.sdgs = b.sdgs || '';
+    nfa.requirements = b.requirements || '';
+    nfa.total_amount = total;
+    nfa.submitted_by_name = b.submitted_by_name || req.user!.name;
+    nfa.submitted_by_designation = b.submitted_by_designation || 'Faculty';
+    nfa.updated_at = new Date().toISOString();
+    nfa.nfa_type = targetNfaType;
+    nfa.point1 = b.point1 || b.purpose || '';
+    nfa.point2 = b.point2 || b.description || '';
+    nfa.point3 = b.point3 || b.justification || '';
+    nfa.point4 = b.point4 || '';
+    nfa.event_details = isPurchase ? undefined : (b.event_details || {
       resource_person_name: b.event_resource_person_name || '',
       designation: b.event_designation || '',
       organization: b.event_organization || '',
       event_date: b.event_date || '',
       venue: b.event_venue || '',
       additional_info: b.event_additional_info || '',
-    }),
-    purchase_details: isPurchase ? (b.purchase_details || {
+    });
+    nfa.purchase_details = isPurchase ? (b.purchase_details || {
       item_name: b.purchase_item_name || '',
       description: b.purchase_description || '',
       quantity: b.purchase_quantity || '',
       purpose: b.purchase_purpose || '',
       additional_info: b.purchase_additional_info || '',
-    }) : undefined,
-    quotations: isPurchase && Array.isArray(b.quotations) ? b.quotations : [],
-    comparative_statement: isPurchase ? (b.comparative_statement || undefined) : undefined,
-    proposer_signature: proposerSig,
-    will_generate_revenue: !isPurchase && Boolean(b.will_generate_revenue),
-    event_completion_status: 'not_started' as const,
-  };
+    }) : undefined;
+    nfa.quotations = isPurchase && Array.isArray(b.quotations) ? b.quotations : [];
+    nfa.comparative_statement = isPurchase ? (b.comparative_statement || undefined) : undefined;
+    nfa.proposer_signature = proposerSig || nfa.proposer_signature;
+    nfa.will_generate_revenue = !isPurchase && Boolean(b.will_generate_revenue);
+  } else {
+    isNewNfa = true;
+    nfa = {
+      id: uuid(),
+      ref_no: refNo,
+      project_id: b.project_id || null, // Project is optional!
+      department_id: targetDepartmentId,
+      centre_id: targetCentreId,
+      organization_type: orgType,
+      workflow_type: orgType,
+      financial_year_id: b.financial_year_id,
+      budget_type_id: b.budget_type_id || undefined,
+      budget_category_id: b.budget_category_id,
+      budget_subcategory_id: b.budget_subcategory_id || null,
+      budget_subcategory_name: b.budget_subcategory_name || '',
+      title: b.title,
+      purpose: b.point1 || b.purpose || '',
+      description: b.point2 || b.description || '',
+      justification: b.point3 || b.justification || '',
+      sdgs: b.sdgs || '',
+      requirements: b.requirements || '',
+      total_amount: total,
+      status: 'draft' as NfaStatus,
+      created_by: req.user!.id,
+      submitted_by_name: b.submitted_by_name || req.user!.name,
+      submitted_by_designation: b.submitted_by_designation || 'Faculty',
+      hod_name: '',
+      date: new Date().toISOString().slice(0, 10),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      // Specific requirements
+      nfa_type: targetNfaType,
+      point1: b.point1 || b.purpose || '',
+      point2: b.point2 || b.description || '',
+      point3: b.point3 || b.justification || '',
+      point4: b.point4 || '',
+      event_details: isPurchase ? undefined : (b.event_details || {
+        resource_person_name: b.event_resource_person_name || '',
+        designation: b.event_designation || '',
+        organization: b.event_organization || '',
+        event_date: b.event_date || '',
+        venue: b.event_venue || '',
+        additional_info: b.event_additional_info || '',
+      }),
+      purchase_details: isPurchase ? (b.purchase_details || {
+        item_name: b.purchase_item_name || '',
+        description: b.purchase_description || '',
+        quantity: b.purchase_quantity || '',
+        purpose: b.purchase_purpose || '',
+        additional_info: b.purchase_additional_info || '',
+      }) : undefined,
+      quotations: isPurchase && Array.isArray(b.quotations) ? b.quotations : [],
+      comparative_statement: isPurchase ? (b.comparative_statement || undefined) : undefined,
+      proposer_signature: proposerSig,
+      will_generate_revenue: !isPurchase && Boolean(b.will_generate_revenue),
+      event_completion_status: 'not_started' as const,
+    };
+  }
 
   const bankDetailEntries: ResourcePersonBankDetail[] = [];
   if (!isPurchase && Array.isArray(b.resource_person_bank_details)) {
@@ -1091,7 +1148,14 @@ nfasRouter.post('/', requireRole('faculty', 'hod', 'dean', 'super_admin'), async
   }
 
   await store.transact((db) => {
-    db.nfas.push(nfa);
+    if (isNewNfa) {
+      db.nfas.push(nfa);
+    } else {
+      db.nfa_items = db.nfa_items.filter((it) => it.nfa_id !== nfa.id);
+      if (db.resource_person_bank_details && bankDetailEntries.length > 0) {
+        db.resource_person_bank_details = db.resource_person_bank_details.filter((bd) => bd.nfa_id !== nfa.id);
+      }
+    }
     processedItems.forEach((it: any) => {
       db.nfa_items.push({
         ...it,

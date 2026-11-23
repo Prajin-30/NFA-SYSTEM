@@ -272,16 +272,24 @@ async function runMasterUpgradeTestSuite() {
   const indexPath = path.join(__dirname, '..', 'public', 'index.html');
   const indexHtml = fs.readFileSync(indexPath, 'utf-8');
 
-  // Verify exact 8 navigation tabs
-  const tabLabelMatch = indexHtml.includes("dashboard: '01. Home'") &&
-    indexHtml.includes("nfas: '02. NFA'") &&
-    indexHtml.includes("inbox: '03. Approvals'") &&
-    indexHtml.includes("budgets: '04. Department Budgets'") &&
-    indexHtml.includes("invoices: '05. Financial Records'") &&
-    indexHtml.includes("excel: '06. Reports & Analytics'") &&
-    indexHtml.includes("audit: '07. Financial Ledger'") &&
-    indexHtml.includes("admin: '08. Settings'");
-  assert(tabLabelMatch, 'Frontend TAB_LABEL contains exact required labels without decorative emojis');
+  // Verify exact 8 unnumbered navigation tabs
+  const tabLabelMatch = indexHtml.includes("dashboard: 'Home'") &&
+    indexHtml.includes("nfas: 'NFA'") &&
+    indexHtml.includes("inbox: 'Approvals'") &&
+    indexHtml.includes("budgets: 'Budget'") &&
+    indexHtml.includes("invoices: 'Financial Records'") &&
+    indexHtml.includes("excel: 'Reports & Analytics'") &&
+    indexHtml.includes("audit: 'Financial Ledger'") &&
+    indexHtml.includes("admin: 'Settings'");
+  assert(tabLabelMatch, 'Frontend TAB_LABEL contains exact required unnumbered labels (Home | NFA | Approvals | Budget | Financial Records | Reports & Analytics | Financial Ledger | Settings)');
+
+  // Verify zero numerical prefixes in TAB_LABEL
+  const hasNumericalPrefixes = indexHtml.includes("dashboard: '01.") || indexHtml.includes("budgets: '04.");
+  assert(!hasNumericalPrefixes, 'Zero numerical prefixes (01., 02., etc.) in top navigation bar');
+
+  // Verify campus header
+  const headerMatch = (indexHtml.includes('Bengaluru – Kengeri Campus · Institutional NFA &amp; Budget System') || indexHtml.includes('Bengaluru – Kengeri Campus · Institutional NFA & Budget System')) && indexHtml.includes('ESTD. 1969');
+  assert(headerMatch, 'Campus header correctly displays "Bengaluru – Kengeri Campus · Institutional NFA & Budget System" and "ESTD. 1969"');
 
   // Verify tab order in TABS_BY_ROLE
   const orderMatch = indexHtml.includes("super_admin: ['dashboard', 'nfas', 'inbox', 'budgets', 'invoices', 'excel', 'audit', 'admin']");
@@ -290,6 +298,30 @@ async function runMasterUpgradeTestSuite() {
   // Verify zero occurrences of "Centres or Offices"
   const oldCentresMatch = indexHtml.includes('Centres or Offices');
   assert(!oldCentresMatch, 'Zero occurrences of legacy "Centres or Offices" (globally renamed to "Centres / Offices")');
+
+  // Verify Event details badge & completion status
+  const eventDetailsDisplayMatch = indexHtml.includes('Revenue-Generating Event:') && indexHtml.includes('Event Operations Status:');
+  assert(eventDetailsDisplayMatch, 'NFA View Details displays Revenue-Generating Event badge and Event Operations Status');
+
+  console.log('\n--- PHASE 8: MULTI-SCOPE BUDGET OVERVIEW & MULTI-SHEET EXCEL ---');
+  // Test multi-scope budget overviews
+  const scopesToTest = ['campus', 'soet', 'soa', 'sbm', 'sps', 'coe'];
+  for (const sc of scopesToTest) {
+    const scRes = await request('GET', `/api/budgets/school/overview?scope=${sc}`, adminToken);
+    assert(scRes.status === 200, `GET /api/budgets/school/overview?scope=${sc} returns 200 OK`);
+    assert(scRes.body.totals !== undefined, `Scope ${sc} returns 4 summary totals cards data`);
+  }
+
+  // Test multi-sheet school_budget Excel export
+  const schoolExcelRes = await request('POST', '/api/reports/export/school_budget/excel', adminToken);
+  assert(schoolExcelRes.status === 200, 'POST /api/reports/export/school_budget/excel returns 200 OK');
+  assert(schoolExcelRes.headers['content-type'].includes('spreadsheetml'), 'School budget export is xlsx workbook');
+  assert(schoolExcelRes.buffer && schoolExcelRes.buffer.subarray(0, 2).toString() === 'PK', 'School budget Excel export is valid multi-sheet workbook');
+
+  // Test A4 PDF export for school_budget
+  const schoolPdfRes = await request('POST', '/api/reports/export/school_budget/pdf', adminToken);
+  assert(schoolPdfRes.status === 200, 'POST /api/reports/export/school_budget/pdf returns 200 OK');
+  assert(schoolPdfRes.buffer && schoolPdfRes.buffer.subarray(0, 4).toString() === '%PDF', 'School budget PDF export generates valid %PDF stream');
 
   // Clean up test revenue entry
   await request('DELETE', `/api/revenue/entries/${createdRevenueId}`, adminToken);

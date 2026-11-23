@@ -496,17 +496,40 @@ budgetsRouter.get('/school/overview', (req: AuthedRequest, res) => {
   const fyObj = store.data.financial_years.find((f) => f.id === fyId || f.label === fyId);
   if (fyObj) fyId = fyObj.id;
 
+  const scope = String(req.query.scope || 'soet').toLowerCase();
   const allLines = store.data.department_budgets.filter((b) => b.financial_year_id === fyId);
+  const catMap = new Map(store.data.budget_categories.map((c) => [c.id, c.name]));
 
-  // Filter to verified active academic departments and Centres of Excellence of School of Engineering and Technology (SoET)
-  // Excludes inactive/legacy units (e.g. DRAS) and strictly excludes non-SoET departments (e.g. School of Architecture)
-  const validDepartments = store.data.departments.filter(
-    (dept) =>
-      dept.is_active &&
-      (dept.category === 'academic' || dept.category === 'coe') &&
-      (!dept.school || dept.school === 'SoET' || dept.school.includes('SoET')) &&
-      dept.school !== 'SoA'
+  // Find school object if scope matches a school
+  const matchedSchool = (store.data.schools || []).find(
+    (s) => s.code.toLowerCase() === scope || s.id.toLowerCase() === scope
   );
+
+  let validDepartments = store.data.departments.filter((d) => d.is_active);
+  let scopeTitle = 'School of Engineering and Technology';
+  let scopeCode = 'SoET';
+
+  if (scope === 'campus') {
+    scopeTitle = 'Campus Overview — Consolidated Budget';
+    scopeCode = 'CAMPUS';
+    // All active departments and centres
+  } else if (scope === 'coe') {
+    scopeTitle = 'Centres / Offices of Excellence';
+    scopeCode = 'COE';
+    validDepartments = validDepartments.filter((d) => d.category === 'coe' || d.code.startsWith('COE-'));
+  } else if (matchedSchool) {
+    scopeTitle = matchedSchool.name;
+    scopeCode = matchedSchool.code;
+    validDepartments = validDepartments.filter(
+      (d) => d.school_id === matchedSchool.id || (!d.school_id && matchedSchool.code === 'SOET' && d.category === 'academic')
+    );
+  } else {
+    // Default to SoET
+    const soet = (store.data.schools || []).find((s) => s.code === 'SOET');
+    validDepartments = validDepartments.filter(
+      (d) => (soet && d.school_id === soet.id) || (!d.school_id && d.category === 'academic')
+    );
+  }
 
   const deptSummaries = validDepartments.map((dept) => {
     const deptLines = allLines.filter((b) => b.department_id === dept.id);
@@ -515,6 +538,30 @@ budgetsRouter.get('/school/overview', (req: AuthedRequest, res) => {
     const pending = deptLines.reduce((sum, l) => sum + (Number(l.pending_amount) || 0), 0);
     const remaining = allocated - approved - pending;
     const utilizationPct = allocated > 0 ? Math.round((approved / allocated) * 10000) / 100 : (approved > 0 ? 100 : 0);
+
+    const categories = deptLines.map((l) => {
+      const subcats = (store.data.budget_subcategories || []).filter(
+        (s) => s.budget_category_id === l.budget_category_id && s.department_id === dept.id
+      ).map((s) => ({
+        id: s.id,
+        sl_no: s.sl_no,
+        name: s.name,
+        allocated_amount: Number(s.allocated_amount) || 0,
+        approved_amount: Number(s.approved_amount) || 0,
+        pending_amount: Number(s.pending_amount) || 0,
+        remaining_amount: (Number(s.allocated_amount) || 0) - (Number(s.approved_amount) || 0) - (Number(s.pending_amount) || 0),
+      }));
+      return {
+        category_id: l.budget_category_id,
+        category_name: catMap.get(l.budget_category_id) || 'Category',
+        allocated_amount: Number(l.allocated_amount) || 0,
+        approved_amount: Number(l.approved_amount) || 0,
+        pending_amount: Number(l.pending_amount) || 0,
+        remaining_amount: (Number(l.allocated_amount) || 0) - (Number(l.approved_amount) || 0) - (Number(l.pending_amount) || 0),
+        subcategories: subcats,
+      };
+    });
+
     return {
       department_id: dept.id,
       department_name: dept.name,
@@ -529,6 +576,7 @@ budgetsRouter.get('/school/overview', (req: AuthedRequest, res) => {
       is_deficit: remaining < 0,
       deficit_amount: remaining < 0 ? Math.abs(remaining) : 0,
       has_budget: deptLines.length > 0,
+      categories,
     };
   });
 
@@ -540,8 +588,11 @@ budgetsRouter.get('/school/overview', (req: AuthedRequest, res) => {
 
   res.json({
     financial_year: fyObj || { id: fyId, label: 'Current' },
-    school: 'School of Engineering and Technology',
-    school_code: 'SoET',
+    school: scopeTitle,
+    school_code: scopeCode,
+    scope,
+    empty: deptSummaries.length === 0 || totalAllocated === 0,
+    message: deptSummaries.length === 0 || totalAllocated === 0 ? 'No budget data configured for the selected school and year.' : null,
     totals: {
       allocated_amount: totalAllocated,
       approved_amount: totalApproved,

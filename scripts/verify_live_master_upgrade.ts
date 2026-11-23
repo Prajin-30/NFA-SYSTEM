@@ -15,7 +15,7 @@ async function main() {
       const res = await fetch(`${baseUrl}/`, { signal: AbortSignal.timeout(10000) });
       if (res.ok) {
         const text = await res.text();
-        if (text.includes('05. Financial Records') && text.includes('renderRevenueEarnings') && text.includes('renderSummaryGeneration')) {
+        if (text.includes("invoices: 'Financial Records'") && text.includes("budgets: 'Budget'") && text.includes('Kengeri Campus')) {
           console.log(`  ✅ Detected updated Master Upgrade build on Render! (${Math.round((Date.now() - startTime) / 1000)}s elapsed)`);
           deployed = true;
           break;
@@ -214,21 +214,31 @@ async function main() {
   const htmlRes = await fetch(`${baseUrl}/`, { signal: AbortSignal.timeout(15000) });
   const html = await htmlRes.text();
   const requiredTabs = [
-    '01. Home',
-    '02. NFA',
-    '03. Approvals',
-    '04. Department Budgets',
-    '05. Financial Records',
-    '06. Reports & Analytics',
-    '07. Financial Ledger',
-    '08. Settings',
+    "dashboard: 'Home'",
+    "nfas: 'NFA'",
+    "inbox: 'Approvals'",
+    "budgets: 'Budget'",
+    "invoices: 'Financial Records'",
+    "excel: 'Reports & Analytics'",
+    "audit: 'Financial Ledger'",
+    "admin: 'Settings'",
   ];
   for (const tab of requiredTabs) {
     if (!html.includes(tab)) {
       throw new Error(`Live frontend HTML missing required navigation tab: "${tab}"`);
     }
   }
-  console.log('  ✅ Live HTML contains all 8 required navigation tabs without decorative emojis');
+  console.log('  ✅ Live HTML contains all 8 required unnumbered navigation tabs without decorative emojis');
+
+  if (html.includes("dashboard: '01.") || html.includes("budgets: '04.")) {
+    throw new Error('Live frontend HTML still contains legacy numerical prefixes');
+  }
+  console.log('  ✅ Zero numerical prefixes confirmed on live service');
+
+  if (!html.includes('Kengeri Campus') || !html.includes('ESTD. 1969')) {
+    throw new Error('Live campus header missing Kengeri Campus or ESTD. 1969');
+  }
+  console.log('  ✅ Campus header verified on live service');
 
   if (html.includes('Centres or Offices')) {
     throw new Error('Live frontend HTML contains legacy "Centres or Offices" string');

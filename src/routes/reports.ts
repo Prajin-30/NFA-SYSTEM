@@ -276,6 +276,11 @@ export function computeDepartmentMetrics(deptIds: string[], fyId?: string) {
   const db = store.data;
   const deptSet = new Set(deptIds);
 
+  const nfaMap = new Map<string, (typeof db.nfas)[0]>();
+  for (const n of db.nfas) {
+    nfaMap.set(n.id, n);
+  }
+
   const budgets = db.department_budgets.filter(
     (b) => deptSet.has(b.department_id) && (!fyId || b.financial_year_id === fyId)
   );
@@ -285,17 +290,15 @@ export function computeDepartmentMetrics(deptIds: string[], fyId?: string) {
   );
 
   const revenues = (db.event_revenues || []).filter((r) => {
-    const deptId = r.department_id || db.nfas.find((n) => n.id === r.nfa_id)?.department_id || db.nfas.find((n) => n.id === r.nfa_id)?.centre_id;
+    const parentNfa = r.nfa_id ? nfaMap.get(r.nfa_id) : undefined;
+    const deptId = r.department_id || parentNfa?.department_id || parentNfa?.centre_id;
     if (!deptId || !deptSet.has(deptId)) return false;
-    if (fyId) {
-      const nfa = db.nfas.find((n) => n.id === r.nfa_id);
-      if (nfa && nfa.financial_year_id !== fyId) return false;
-    }
+    if (fyId && parentNfa && parentNfa.financial_year_id !== fyId) return false;
     return true;
   });
 
   const invoices = (db.purchase_invoices || []).filter((i) => {
-    const nfa = db.nfas.find((n) => n.id === i.nfa_id);
+    const nfa = nfaMap.get(i.nfa_id);
     if (!nfa) return false;
     if (fyId && nfa.financial_year_id !== fyId) return false;
     return deptSet.has(nfa.department_id) || (nfa.centre_id && deptSet.has(nfa.centre_id));

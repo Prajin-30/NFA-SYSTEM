@@ -531,8 +531,31 @@ budgetsRouter.get('/school/overview', (req: AuthedRequest, res) => {
     );
   }
 
+  // Pre-index budget lines by department_id for O(1) retrieval
+  const linesByDept = new Map<string, typeof allLines>();
+  for (const l of allLines) {
+    let arr = linesByDept.get(l.department_id);
+    if (!arr) {
+      arr = [];
+      linesByDept.set(l.department_id, arr);
+    }
+    arr.push(l);
+  }
+
+  // Pre-index budget subcategories by department_id and budget_category_id for O(1) retrieval
+  const subcatsByDeptCat = new Map<string, any[]>();
+  for (const s of (store.data.budget_subcategories || [])) {
+    const key = `${s.department_id || ''}:${s.budget_category_id}`;
+    let arr = subcatsByDeptCat.get(key);
+    if (!arr) {
+      arr = [];
+      subcatsByDeptCat.set(key, arr);
+    }
+    arr.push(s);
+  }
+
   const deptSummaries = validDepartments.map((dept) => {
-    const deptLines = allLines.filter((b) => b.department_id === dept.id);
+    const deptLines = linesByDept.get(dept.id) || [];
     const allocated = deptLines.reduce((sum, l) => sum + (Number(l.allocated_amount) || 0), 0);
     const approved = deptLines.reduce((sum, l) => sum + (Number(l.approved_amount) || 0), 0);
     const pending = deptLines.reduce((sum, l) => sum + (Number(l.pending_amount) || 0), 0);
@@ -540,9 +563,8 @@ budgetsRouter.get('/school/overview', (req: AuthedRequest, res) => {
     const utilizationPct = allocated > 0 ? Math.round((approved / allocated) * 10000) / 100 : (approved > 0 ? 100 : 0);
 
     const categories = deptLines.map((l) => {
-      const subcats = (store.data.budget_subcategories || []).filter(
-        (s) => s.budget_category_id === l.budget_category_id && s.department_id === dept.id
-      ).map((s) => ({
+      const key = `${dept.id}:${l.budget_category_id}`;
+      const subcats = (subcatsByDeptCat.get(key) || []).map((s) => ({
         id: s.id,
         sl_no: s.sl_no,
         name: s.name,

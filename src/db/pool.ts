@@ -110,9 +110,9 @@ export function getDbPool(): pg.Pool {
   poolInstance = new Pool({
     connectionString: dbUrl || undefined,
     ssl: ssl ? (ssl as any) : undefined,
-    max: 10,
+    max: 15,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 15000,
+    connectionTimeoutMillis: 10000,
     statement_timeout: 30000,
     query_timeout: 30000,
   });
@@ -122,6 +122,21 @@ export function getDbPool(): pg.Pool {
   });
 
   return poolInstance;
+}
+
+/**
+ * Safely drains and closes the PostgreSQL connection pool on application shutdown.
+ */
+export async function closeDbPool(): Promise<void> {
+  if (poolInstance) {
+    try {
+      await poolInstance.end();
+      poolInstance = null;
+      console.log('[DB POOL] PostgreSQL connection pool safely terminated.');
+    } catch (err: any) {
+      console.error('[DB POOL CLOSE ERROR]:', err.message);
+    }
+  }
 }
 
 /**

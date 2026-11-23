@@ -2567,6 +2567,17 @@
         .replace(/'/g, '&#39;');
     }
 
+    function debounce(fn, delay = 250) {
+      let timer = null;
+      return function (...args) {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(() => {
+          timer = null;
+          fn.apply(this, args);
+        }, delay);
+      };
+    }
+
     function countWords(str) {
       if (!str) return 0;
       return str.trim().split(/\s+/).filter(Boolean).length;
@@ -3856,6 +3867,7 @@
       showTab(currentTab);
     }
 
+    let activeTabRequestId = 0;
     async function showTab(tab) {
       closeModal();
       document.body.classList.remove('modal-open');
@@ -3863,6 +3875,7 @@
       [...document.querySelectorAll('nav button')].forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
       const main = document.getElementById('main');
       main.innerHTML = '<div class="card muted" style="text-align:center;padding:40px 20px;">Loading data…</div>';
+      const requestId = ++activeTabRequestId;
       try {
         if (tab === 'dashboard') await renderHome(main);
         else if (tab === 'inbox') await renderInbox(main);
@@ -3874,7 +3887,9 @@
         else if (tab === 'audit') await renderAudit(main);
         else if (tab === 'admin') await renderAdmin(main);
       } catch (e) {
-        main.innerHTML = `<div class="card" style="color:var(--danger)">${e.message}</div>`;
+        if (requestId === activeTabRequestId) {
+          main.innerHTML = `<div class="card" style="color:var(--danger)">${e.message}</div>`;
+        }
       }
     }
 
@@ -4839,65 +4854,162 @@
     }
 
     // ---------------- NFAs LIST ----------------
-    async function renderNfas(main) {
-      const list = await api('/nfas');
-      let html = `
-    <div class="card">
-      <div class="card-header">
-        <div>
-          <h2 class="card-title">Note for Approval (NFA)</h2>
-          <div class="card-sub">Institutional master ledger of requested, reviewed, and debited expenditures</div>
-        </div>
-        <button onclick="newNfaModal()">+ Request New NFA</button>
-      </div>
-      <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Ref No.</th>
-            <th>Title</th>
-            <th>Organization</th>
-            <th>Category &amp; Subcategory</th>
-            <th class="nfa-amount-cell">Amount</th>
-            <th>Status</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-  `;
+    let allNfasCache = [];
+    let nfaListPage = 1;
+    const nfaPageSize = 15;
+    let nfaSearchQuery = '';
+    let nfaStatusFilter = '';
 
-      if (list.length === 0) {
-        html += `<tr><td colspan="7" class="muted" style="text-align:center;padding:30px;">No NFAs submitted yet. Click "+ Request New NFA" to propose one.</td></tr>`;
+    const debouncedNfaFilter = debounce(() => {
+      nfaListPage = 1;
+      updateNfaTableDom();
+    }, 200);
+
+    function onNfaSearchInput(val) {
+      nfaSearchQuery = (val || '').trim().toLowerCase();
+      debouncedNfaFilter();
+    }
+
+    function onNfaStatusChange(val) {
+      nfaStatusFilter = val || '';
+      nfaListPage = 1;
+      updateNfaTableDom();
+    }
+
+    function changeNfaPage(delta) {
+      nfaListPage += delta;
+      updateNfaTableDom();
+    }
+
+    function getFilteredNfas() {
+      return allNfasCache.filter(n => {
+        if (nfaStatusFilter && n.status !== nfaStatusFilter) return false;
+        if (nfaSearchQuery) {
+          const q = nfaSearchQuery;
+          const ref = (n.ref_no || '').toLowerCase();
+          const title = (n.title || '').toLowerCase();
+          const proposer = (n.submitted_by_name || '').toLowerCase();
+          const dept = (deptName(n.department_id) || '').toLowerCase();
+          if (!ref.includes(q) && !title.includes(q) && !proposer.includes(q) && !dept.includes(q)) {
+            return false;
+          }
+        }
+        return true;
+      });
+    }
+
+    function updateNfaTableDom() {
+      const tbody = document.getElementById('nfaTableBody');
+      const paginationInfo = document.getElementById('nfaPaginationInfo');
+      const prevBtn = document.getElementById('nfaPrevBtn');
+      const nextBtn = document.getElementById('nfaNextBtn');
+      if (!tbody) return;
+
+      const filtered = getFilteredNfas();
+      const total = filtered.length;
+      const totalPages = Math.max(1, Math.ceil(total / nfaPageSize));
+      if (nfaListPage > totalPages) nfaListPage = totalPages;
+      if (nfaListPage < 1) nfaListPage = 1;
+
+      const start = (nfaListPage - 1) * nfaPageSize;
+      const end = Math.min(start + nfaPageSize, total);
+      const pageSlice = filtered.slice(start, end);
+
+      if (total === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="muted" style="text-align:center;padding:30px;">No matching NFAs found.</td></tr>`;
       } else {
-        list.forEach(n => {
+        let rowsHtml = '';
+        pageSlice.forEach(n => {
           const isCentreUnit = n.organization_type === 'centre_or_office' || (REF.departments.find(d => d.id === n.department_id)?.category === 'coe');
-          html += `
-        <tr>
-          <td><strong>${escapeHtml(n.ref_no)}</strong><div class="muted">${escapeHtml(n.date)}</div></td>
-          <td><strong>${escapeHtml(n.title)}</strong><div class="muted">${escapeHtml(n.submitted_by_name || 'Faculty')}</div></td>
-          <td>
-            <span class="badge" style="${isCentreUnit ? 'background:#e0e7ff;color:#3730a3;border:1px solid #c7d2fe;' : 'background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;'}font-size:10px;padding:2px 6px;margin-bottom:3px;display:inline-block;">
-              ${isCentreUnit ? 'Centres / Offices' : 'Department'}
-            </span>
-            <div style="font-weight:600;font-size:12.5px;line-height:1.3;">${escapeHtml(deptName(n.department_id))}</div>
-          </td>
-          <td>
-            <strong>${escapeHtml(catName(n.budget_category_id))}</strong>
-            ${n.budget_subcategory_name ? `<div class="muted">↳ ${escapeHtml(n.budget_subcategory_name)}</div>` : ''}
-          </td>
-          <td class="nfa-amount-cell"><strong>${inr(n.total_amount)}</strong></td>
-          <td><span class="badge b-${n.status}">${fmtStatus(n.status)}</span></td>
-          <td>
-            <button class="secondary" onclick="openNfa('${n.id}')">View Details →</button>
-            ${n.status === 'draft' && n.created_by === USER.id ? `<button class="danger" style="margin-left:6px;padding:5px 10px;font-size:12px;" onclick="confirmDeleteDraft('${n.id}')">Delete Draft</button>` : ''}
-          </td>
-        </tr>
-      `;
+          rowsHtml += `
+            <tr>
+              <td><strong>${escapeHtml(n.ref_no)}</strong><div class="muted">${escapeHtml(n.date)}</div></td>
+              <td><strong>${escapeHtml(n.title)}</strong><div class="muted">${escapeHtml(n.submitted_by_name || 'Faculty')}</div></td>
+              <td>
+                <span class="badge" style="${isCentreUnit ? 'background:#e0e7ff;color:#3730a3;border:1px solid #c7d2fe;' : 'background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;'}font-size:10px;padding:2px 6px;margin-bottom:3px;display:inline-block;">
+                  ${isCentreUnit ? 'Centres / Offices' : 'Department'}
+                </span>
+                <div style="font-weight:600;font-size:12.5px;line-height:1.3;">${escapeHtml(deptName(n.department_id))}</div>
+              </td>
+              <td>
+                <strong>${escapeHtml(catName(n.budget_category_id))}</strong>
+                ${n.budget_subcategory_name ? `<div class="muted">↳ ${escapeHtml(n.budget_subcategory_name)}</div>` : ''}
+              </td>
+              <td class="nfa-amount-cell"><strong>${inr(n.total_amount)}</strong></td>
+              <td><span class="badge b-${n.status}">${fmtStatus(n.status)}</span></td>
+              <td>
+                <button class="secondary" onclick="openNfa('${n.id}')">View Details →</button>
+                ${n.status === 'draft' && n.created_by === USER.id ? `<button class="danger" style="margin-left:6px;padding:5px 10px;font-size:12px;" onclick="confirmDeleteDraft('${n.id}')">Delete Draft</button>` : ''}
+              </td>
+            </tr>
+          `;
         });
+        tbody.innerHTML = rowsHtml;
       }
 
-      html += `</tbody></table></div>`;
+      if (paginationInfo) {
+        paginationInfo.textContent = total > 0 ? `Showing ${start + 1}–${end} of ${total} NFAs (Page ${nfaListPage} of ${totalPages})` : `0 NFAs`;
+      }
+      if (prevBtn) prevBtn.disabled = nfaListPage <= 1;
+      if (nextBtn) nextBtn.disabled = nfaListPage >= totalPages;
+    }
+
+    async function renderNfas(main) {
+      const res = await api('/nfas');
+      allNfasCache = Array.isArray(res) ? res : (res.nfas || []);
+      nfaListPage = 1;
+
+      let html = `
+        <div class="card">
+          <div class="card-header" style="flex-wrap:wrap;gap:12px;align-items:center;">
+            <div>
+              <h2 class="card-title">Note for Approval (NFA)</h2>
+              <div class="card-sub">Institutional master ledger of requested, reviewed, and debited expenditures</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <input type="text" id="nfaSearchInput" placeholder="Search Ref, Title, Proposer..." value="${escapeHtml(nfaSearchQuery)}" oninput="onNfaSearchInput(this.value)" style="padding:6px 12px;font-size:13px;border:1px solid #cbd5e1;border-radius:6px;min-width:220px;" />
+              <select id="nfaStatusFilterSelect" onchange="onNfaStatusChange(this.value)" style="padding:6px 10px;font-size:13px;border:1px solid #cbd5e1;border-radius:6px;">
+                <option value="">All Statuses</option>
+                <option value="draft" ${nfaStatusFilter === 'draft' ? 'selected' : ''}>Draft</option>
+                <option value="submitted_to_hod" ${nfaStatusFilter === 'submitted_to_hod' ? 'selected' : ''}>Submitted to HOD</option>
+                <option value="pending_dean" ${nfaStatusFilter === 'pending_dean' ? 'selected' : ''}>Pending Dean</option>
+                <option value="pending_finance" ${nfaStatusFilter === 'pending_finance' ? 'selected' : ''}>Pending Finance</option>
+                <option value="pending_director" ${nfaStatusFilter === 'pending_director' ? 'selected' : ''}>Pending Director</option>
+                <option value="approved" ${nfaStatusFilter === 'approved' ? 'selected' : ''}>Approved</option>
+                <option value="rejected" ${nfaStatusFilter === 'rejected' ? 'selected' : ''}>Rejected</option>
+                <option value="revision_required" ${nfaStatusFilter === 'revision_required' ? 'selected' : ''}>Revision Required</option>
+              </select>
+              <button onclick="newNfaModal()">+ Request New NFA</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Ref No.</th>
+                  <th>Title</th>
+                  <th>Organization</th>
+                  <th>Category &amp; Subcategory</th>
+                  <th class="nfa-amount-cell">Amount</th>
+                  <th>Status</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="nfaTableBody">
+              </tbody>
+            </table>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid #e2e8f0;flex-wrap:wrap;gap:10px;">
+            <div id="nfaPaginationInfo" class="muted" style="font-size:13px;"></div>
+            <div style="display:flex;gap:8px;">
+              <button id="nfaPrevBtn" class="secondary" style="padding:5px 14px;font-size:12.5px;" onclick="changeNfaPage(-1)">← Previous</button>
+              <button id="nfaNextBtn" class="secondary" style="padding:5px 14px;font-size:12.5px;" onclick="changeNfaPage(1)">Next →</button>
+            </div>
+          </div>
+        </div>
+      `;
       main.innerHTML = html;
+      updateNfaTableDom();
     }
 
     // ---------------- FINANCIAL RECORDS VIEW (INVOICES & REVENUE) ----------------

@@ -40,6 +40,34 @@ class Store {
   public initPromise: Promise<void> | null = null;
   public readonly isPostgres: boolean;
 
+  // Safe reference indices for static metadata (departments, schools, categories, financial years)
+  // Strictly NEVER used for dynamic financial balances or approval states
+  private departmentMap: Map<string, any> = new Map();
+  private schoolMap: Map<string, any> = new Map();
+  private categoryMap: Map<string, any> = new Map();
+  private fyMap: Map<string, any> = new Map();
+
+  private rebuildReferenceIndices(): void {
+    this.departmentMap.clear();
+    for (const d of this.db.departments || []) {
+      this.departmentMap.set(d.id, d);
+    }
+    this.schoolMap.clear();
+    for (const s of this.db.schools || []) {
+      this.schoolMap.set(s.id, s);
+      if (s.code) this.schoolMap.set(s.code.toUpperCase(), s);
+    }
+    this.categoryMap.clear();
+    for (const c of this.db.budget_categories || []) {
+      this.categoryMap.set(c.id, c);
+    }
+    this.fyMap.clear();
+    for (const f of this.db.financial_years || []) {
+      this.fyMap.set(f.id, f);
+      if (f.label) this.fyMap.set(f.label, f);
+    }
+  }
+
   constructor() {
     this.isPostgres = Boolean(process.env.DATABASE_URL || process.env.DATA_SOURCE === 'postgres');
 
@@ -79,6 +107,8 @@ class Store {
       this.db = emptyDb();
     }
 
+    this.rebuildReferenceIndices();
+
     if (this.isPostgres) {
       this.initPromise = this.loadFromPostgres();
     }
@@ -99,6 +129,7 @@ class Store {
       const client = await getDbPool().connect();
       try {
         this.db = await loadAllFromPostgres(client);
+        this.rebuildReferenceIndices();
         console.log(`[STORE] Authoritative dataset loaded from Supabase PostgreSQL (${this.db.nfas.length} NFAs, ${this.db.department_budgets.length} budgets).`);
       } finally {
         client.release();
@@ -109,6 +140,26 @@ class Store {
         throw new Error(`DATABASE_UNAVAILABLE: Authoritative Supabase PostgreSQL connection failed: ${err.message}`);
       }
     }
+  }
+
+  /** Fast O(1) department lookup */
+  getDepartment(id: string): any | undefined {
+    return this.departmentMap.get(id);
+  }
+
+  /** Fast O(1) school lookup by ID or uppercase code */
+  getSchool(idOrCode: string): any | undefined {
+    return this.schoolMap.get(idOrCode) || this.schoolMap.get(idOrCode.toUpperCase());
+  }
+
+  /** Fast O(1) budget category lookup */
+  getBudgetCategory(id: string): any | undefined {
+    return this.categoryMap.get(id);
+  }
+
+  /** Fast O(1) financial year lookup by ID or label */
+  getFinancialYear(idOrLabel: string): any | undefined {
+    return this.fyMap.get(idOrLabel);
   }
 
   /** Read-only snapshot access */
@@ -143,8 +194,10 @@ class Store {
         } else {
           this.persist();
         }
+        this.rebuildReferenceIndices();
       } catch (err) {
         this.db = JSON.parse(snapshot);
+        this.rebuildReferenceIndices();
         throw err;
       }
     });

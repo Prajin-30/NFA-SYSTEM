@@ -7,6 +7,7 @@ if (typeof (globalThis as any).WebSocket === 'undefined') {
 }
 
 import express from 'express';
+import compression from 'compression';
 import cors from 'cors';
 import path from 'path';
 import fs from 'fs';
@@ -24,7 +25,7 @@ import { revenueRouter } from './routes/revenue.js';
 import { reportsRouter } from './routes/reports.js';
 import { requireAuth, AuthedRequest } from './middleware/auth.js';
 import { store } from './store.js';
-import { query } from './db/pool.js';
+import { query, closeDbPool } from './db/pool.js';
 import { isLiveSupabaseAuthConfigured, getSupabaseAdmin } from './services/supabaseAuth.js';
 import { isEmailTestingEnabled } from './services/resendService.js';
 
@@ -33,6 +34,32 @@ const signaturesDir = path.join(__dirname, '..', 'data', 'signatures');
 export const app = express();
 
 app.use(cors());
+app.use(compression({
+  threshold: 1024,
+  filter: (req, res) => {
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    return compression.filter(req, res);
+  },
+}));
+
+// Request timeout protection: 45s for export and import endpoints, 15s for general API queries
+app.use((req, res, next) => {
+  const isExportOrImport = req.path.includes('/export/') || req.path.includes('/import/');
+  const timeoutMs = isExportOrImport ? 45000 : 15000;
+
+  const timer = setTimeout(() => {
+    if (!res.headersSent) {
+      res.status(504).json({ error: 'GATEWAY_TIMEOUT', message: 'Request execution exceeded timeout threshold.' });
+    }
+  }, timeoutMs);
+
+  res.on('finish', () => clearTimeout(timer));
+  res.on('close', () => clearTimeout(timer));
+  next();
+});
+
 app.use(async (_req, res, next) => {
   if (store.initPromise) {
     try {
@@ -53,6 +80,8 @@ app.use(express.static(path.join(__dirname, '..', 'public'), {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
+    } else {
+      res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=3600');
     }
   },
 }));
@@ -178,4 +207,19 @@ if (isMain && process.env.NODE_ENV !== 'test') {
       console.error(err);
     }
   });
+
+  const shutdown = async (signal: string) => {
+    console.log(`\n[SERVER] Received ${signal}. Draining connections and shutting down gracefully...`);
+    server.close(async () => {
+      await closeDbPool();
+      process.exit(0);
+    });
+    setTimeout(() => {
+      console.error('[SERVER] Forced shutdown after timeout.');
+      process.exit(1);
+    }, 10000);
+  };
+
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 }

@@ -472,7 +472,7 @@ nfasRouter.get('/inbox', (req: AuthedRequest, res) => {
   res.json(list.map((n) => ({ ...n, items: withItems(n.id), approvals: withApprovals(n.id) })));
 });
 
-/** GET /api/nfas — role-scoped list with strict draft privacy */
+/** GET /api/nfas — role-scoped list with strict draft privacy & optional server-side pagination */
 nfasRouter.get('/', (req: AuthedRequest, res) => {
   let list = store.data.nfas.filter((n) => !n.is_deleted);
   const { role, id, department_id } = req.user!;
@@ -501,7 +501,61 @@ nfasRouter.get('/', (req: AuthedRequest, res) => {
     seen.add(n.id);
     return true;
   });
-  res.json(uniqueList.map((n) => ({ ...n, items: withItems(n.id), approvals: withApprovals(n.id) })));
+
+  // Pre-index items and approvals for O(1) correlation
+  const itemsByNfa = new Map<string, typeof store.data.nfa_items>();
+  for (const item of store.data.nfa_items) {
+    let arr = itemsByNfa.get(item.nfa_id);
+    if (!arr) {
+      arr = [];
+      itemsByNfa.set(item.nfa_id, arr);
+    }
+    arr.push(item);
+  }
+
+  const userMap = new Map(store.data.users.map((u) => [u.id, u.name]));
+  const approvalsByNfa = new Map<string, any[]>();
+  for (const a of store.data.approvals) {
+    let arr = approvalsByNfa.get(a.nfa_id);
+    if (!arr) {
+      arr = [];
+      approvalsByNfa.set(a.nfa_id, arr);
+    }
+    arr.push({
+      ...a,
+      approver_name: a.approver_name || userMap.get(a.approver_id) || a.approver_role,
+    });
+  }
+
+  const mapNfa = (n: (typeof uniqueList)[0]) => {
+    const items = (itemsByNfa.get(n.id) || []).slice().sort((a, b) => a.sl_no - b.sl_no);
+    const approvals = (approvalsByNfa.get(n.id) || []).slice().sort(
+      (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    );
+    return { ...n, items, approvals };
+  };
+
+  // Optional server-side pagination
+  if (req.query.page !== undefined || req.query.limit !== undefined) {
+    const page = Math.max(1, parseInt(String(req.query.page || '1'), 10) || 1);
+    const limit = Math.max(1, Math.min(100, parseInt(String(req.query.limit || '20'), 10) || 20));
+    const total = uniqueList.length;
+    const totalPages = Math.ceil(total / limit) || 1;
+    const startIndex = (page - 1) * limit;
+    const slice = uniqueList.slice(startIndex, startIndex + limit);
+    return res.json({
+      nfas: slice.map(mapNfa),
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages,
+      },
+    });
+  }
+
+  // Full dataset for unpaginated requests & exports
+  res.json(uniqueList.map(mapNfa));
 });
 
 function generateUniqueNfaRefNo(db: any, departmentId: string, financialYearId: string): string {

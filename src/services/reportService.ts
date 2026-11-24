@@ -1056,23 +1056,37 @@ export function getReportDataset(
 }
 
 /**
- * Determines whether a column key represents currency
+ * Determines whether a column key represents an integer count or sequence
  */
-export function isCurrencyKey(k: string): boolean {
+export function isCountKey(k: string): boolean {
   const lower = k.toLowerCase();
-  if (
+  return (
     lower === 'sl_no' ||
     lower === 's_no' ||
     lower === 'sno' ||
+    lower === 'id' ||
     lower.includes('count') ||
+    lower.includes('submitted') ||
+    lower.includes('total_approved') ||
+    lower.includes('total_pending') ||
+    lower.includes('total_rejected') ||
+    lower.includes('events_completed') ||
     lower.includes('days') ||
     lower.includes('percentage') ||
     lower.includes('utilization') ||
     lower.includes('faculty_count') ||
     lower.includes('departments_count')
-  ) {
+  );
+}
+
+/**
+ * Determines whether a column key represents currency
+ */
+export function isCurrencyKey(k: string): boolean {
+  if (isCountKey(k)) {
     return false;
   }
+  const lower = k.toLowerCase();
   return (
     lower.includes('amount') ||
     lower.includes('allocated') ||

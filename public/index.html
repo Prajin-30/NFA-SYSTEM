@@ -388,11 +388,12 @@
       box-shadow: 0 0 0 3px var(--primary-glow);
     }
 
-    button {
+    button,
+    .btn {
       cursor: pointer;
-      border: none;
-      border-radius: var(--radius-sm);
-      padding: 9px 16px;
+      border: 1px solid var(--primary-blue);
+      border-radius: var(--radius-sm, 6px);
+      padding: 8px 16px;
       background: var(--primary-blue);
       color: #fff;
       font-weight: 600;
@@ -401,72 +402,99 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
-      transition: all 0.15s ease;
+      transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
       min-height: 38px;
       white-space: nowrap;
+      box-sizing: border-box;
     }
 
-    button:hover {
+    button:hover,
+    .btn:hover {
       background: var(--hover-blue);
-      transform: translateY(-1px);
-      box-shadow: var(--shadow-sm);
-    }
-
-    button.secondary {
-      background: #fff;
-      border: 1px solid var(--border);
-      color: var(--text-primary);
-    }
-
-    button.secondary:hover {
-      background: var(--light-blue);
-      border-color: var(--primary-blue);
-      color: var(--primary-blue);
-    }
-
-    button.gold {
-      background: var(--gold-accent);
-      color: var(--dark-blue);
-      font-weight: 700;
-    }
-
-    button.gold:hover {
-      background: #bfa02e;
-      color: var(--dark-blue);
-    }
-
-    button.danger {
-      background: var(--danger);
+      border-color: var(--hover-blue);
       color: #fff;
     }
 
-    button.danger:hover {
-      background: #7f1d1d;
+    button:focus-visible,
+    .btn:focus-visible {
+      outline: 2px solid var(--primary-blue);
+      outline-offset: 2px;
     }
 
-    button.green {
-      background: var(--success);
-      color: #fff;
+    button.secondary,
+    .btn.secondary {
+      background: #ffffff !important;
+      border: 1px solid #cbd5e1 !important;
+      color: var(--text-primary, #1e293b) !important;
     }
 
-    button.green:hover {
-      background: #176541;
+    button.secondary:hover,
+    .btn.secondary:hover {
+      background: #f8fafc !important;
+      border-color: #94a3b8 !important;
+      color: var(--text-primary, #1e293b) !important;
     }
 
-    button.amber {
-      background: var(--warning);
-      color: #fff;
+    button.gold,
+    .btn.gold {
+      background: var(--primary-blue) !important;
+      border: 1px solid var(--primary-blue) !important;
+      color: #ffffff !important;
     }
 
-    button.amber:hover {
-      background: #92400e;
+    button.gold:hover,
+    .btn.gold:hover {
+      background: var(--hover-blue) !important;
+      border-color: var(--hover-blue) !important;
+      color: #ffffff !important;
     }
 
-    button:disabled {
+    button.danger,
+    .btn.danger {
+      background: #dc2626 !important;
+      border: 1px solid #dc2626 !important;
+      color: #ffffff !important;
+    }
+
+    button.danger:hover,
+    .btn.danger:hover {
+      background: #b91c1c !important;
+      border-color: #b91c1c !important;
+    }
+
+    button.green,
+    .btn.green {
+      background: #16a34a !important;
+      border: 1px solid #16a34a !important;
+      color: #ffffff !important;
+    }
+
+    button.green:hover,
+    .btn.green:hover {
+      background: #15803d !important;
+      border-color: #15803d !important;
+    }
+
+    button.amber,
+    .btn.amber {
+      background: #d97706 !important;
+      border: 1px solid #d97706 !important;
+      color: #ffffff !important;
+    }
+
+    button.amber:hover,
+    .btn.amber:hover {
+      background: #b45309 !important;
+      border-color: #b45309 !important;
+    }
+
+    button:disabled,
+    .btn:disabled {
       opacity: .5;
       cursor: not-allowed;
       transform: none !important;
       box-shadow: none !important;
+      pointer-events: none;
     }
 
     /* HEADER & NAVIGATION */
@@ -475,7 +503,7 @@
     }
 
     #app-header-wrap {
-      position: sticky;
+      position: fixed;
       top: 0;
       left: 0;
       right: 0;
@@ -655,11 +683,14 @@
     }
 
     /* MAIN CONTENT — FULL-WIDTH FLUID ENTERPRISE LAYOUT */
-    main {
+    main,
+    #main {
       width: 100%;
       max-width: 100%;
       margin: 0;
-      padding: 22px var(--page-padding-x) 75px;
+      margin-top: var(--header-nav-offset, 112px);
+      padding: 24px var(--page-padding-x) calc(var(--footer-height, 38px) + 32px);
+      min-height: calc(100vh - var(--header-nav-offset, 112px));
       box-sizing: border-box;
       min-width: 0;
     }
@@ -679,6 +710,7 @@
       font-weight: 500;
       padding: 8px 20px;
       letter-spacing: 0.01em;
+      box-sizing: border-box;
     }
 
     .card {
@@ -748,7 +780,7 @@
     .report-catalogue-sidebar {
       position: sticky;
       top: calc(var(--header-nav-offset, 112px) + 12px);
-      max-height: calc(100vh - var(--header-nav-offset, 112px) - 30px);
+      max-height: calc(100vh - var(--header-nav-offset, 112px) - var(--footer-height, 38px) - 24px);
       overflow-y: auto;
       overflow-x: hidden;
       background: #f8fafc;
@@ -1893,9 +1925,11 @@
     }
 
     @media (max-width: 768px) {
-      main {
-        padding: 16px var(--page-padding-x) 65px;
+      main,
+      #main {
+        padding: 16px var(--page-padding-x) calc(var(--footer-height, 38px) + 24px);
         margin: 0;
+        margin-top: var(--header-nav-offset, 112px);
       }
 
       .card {
@@ -2512,8 +2546,8 @@
         </div>
         <div id="excelUploadErr" style="color:var(--danger);font-size:12px;margin-top:8px;display:none;"></div>
         <div style="margin-top:14px;display:flex;justify-content:flex-end;">
-          <button class="btn btn-primary" id="btnInspectExcel" onclick="inspectFacultyExcel()" style="padding:9px 18px;"
-            disabled>Inspect &amp; Preview Rows →</button>
+          <button class="primary" id="btnInspectExcel" onclick="inspectFacultyExcel()" style="padding:9px 18px;"
+            disabled>Inspect &amp; Preview Rows</button>
         </div>
       </div>
 
@@ -2541,13 +2575,13 @@
         </div>
         <div
           style="background:#FEF3C7;border:1px solid #FDE68A;border-radius:6px;padding:8px 12px;font-size:11.5px;color:#92400E;margin-bottom:12px;">
-          ⚠️ <strong>Preview Mode:</strong> No accounts have been created yet. Review row validation above and click
+          <strong>Preview Mode:</strong> No accounts have been created yet. Review row validation above and click
           below to confirm account provisioning.
         </div>
         <div style="display:flex;gap:10px;justify-content:flex-end;">
-          <button class="btn btn-secondary" onclick="resetExcelOnboardingStep()" style="padding:8px 14px;">Choose
+          <button class="secondary" onclick="resetExcelOnboardingStep()" style="padding:8px 14px;">Choose
             Different File</button>
-          <button class="btn btn-primary" id="btnConfirmExcelUpload" onclick="confirmFacultyExcelUpload()"
+          <button class="primary" id="btnConfirmExcelUpload" onclick="confirmFacultyExcelUpload()"
             style="padding:8px 20px;">Confirm &amp; Create Accounts</button>
         </div>
       </div>
@@ -2555,13 +2589,9 @@
       <!-- Step 3: Creation Results -->
       <div id="excelStepResults" style="display:none;">
         <div style="text-align:center;padding:20px 10px;">
-          <div
-            style="width:48px;height:48px;border-radius:50%;background:#EDF7EE;display:inline-flex;align-items:center;justify-content:center;font-size:26px;color:var(--success);margin-bottom:10px;">
-            🎉</div>
-          <h3 style="font-size:17px;font-weight:700;color:var(--primary-blue);margin:0 0 6px;">Bulk Onboarding Completed
-          </h3>
+          <h3 style="font-size:17px;font-weight:700;color:var(--primary-blue);margin:0 0 6px;">Bulk Onboarding Completed</h3>
           <p id="excelResultsSummary" style="font-size:13px;color:var(--text);margin:0 0 16px;"></p>
-          <button class="btn btn-primary" onclick="closeExcelOnboardingModal(); showTab('admin');"
+          <button class="primary" onclick="closeExcelOnboardingModal(); showTab('admin');"
             style="padding:10px 24px;">Return to User Management</button>
         </div>
       </div>
@@ -2690,7 +2720,7 @@
           card.style.display = 'flex';
           card.innerHTML = `
             <div class="file-selected-info">
-              <span class="file-selected-icon">${options.icon || '📄'}</span>
+              <span class="file-selected-icon">${options.icon || ''}</span>
               <div style="overflow:hidden;min-width:0;">
                 <div class="file-selected-name" title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</div>
                 <div class="file-selected-size">${sizeStr} &bull; Ready</div>
@@ -3494,7 +3524,6 @@
           <div class="field-help" style="margin-bottom:8px;">Min size: 200 × 70 px. Recommended: 600 × 200 px (transparent background PNG). Max file size: 2 MB.</div>
           <div id="sigDropzone" class="file-dropzone" style="padding:14px;margin-bottom:10px;" onclick="document.getElementById('sigFileInput').click()">
             <input name="sigFileInput" type="file" id="sigFileInput" accept="image/png" style="display:none;" />
-            <div class="file-dropzone-icon" style="font-size:22px;margin-bottom:2px;">✍️</div>
             <div class="file-dropzone-prompt" style="font-size:12.5px;">Click to select official PNG signature image</div>
             <div class="file-dropzone-sub">Transparent PNG recommended (Max 2 MB)</div>
           </div>
@@ -3510,7 +3539,7 @@
       </div>
     `);
 
-        setupFileDropzone('sigDropzone', 'sigFileInput', 'sigDropzoneCard', { icon: '✍️' });
+        setupFileDropzone('sigDropzone', 'sigFileInput', 'sigDropzoneCard', { icon: '' });
       } catch (e) {
         toast(e.message);
       }
@@ -3608,7 +3637,6 @@
       <label for="sigFileInput" class="field-label" style="font-weight:700;">Select Signature File (.png)</label>
       <div id="adminSigDropzone" class="file-dropzone" style="padding:14px;margin-bottom:10px;" onclick="document.getElementById('sigFileInput').click()">
         <input name="sigFileInput" type="file" id="sigFileInput" accept="image/png" style="display:none;" />
-        <div class="file-dropzone-icon" style="font-size:22px;margin-bottom:2px;">✍️</div>
         <div class="file-dropzone-prompt" style="font-size:12.5px;">Click to select official PNG signature image</div>
         <div class="file-dropzone-sub">Transparent PNG recommended (Max 2 MB)</div>
       </div>
@@ -3620,7 +3648,7 @@
     </div>
   `);
 
-      setupFileDropzone('adminSigDropzone', 'sigFileInput', 'adminSigDropzoneCard', { icon: '✍️' });
+      setupFileDropzone('adminSigDropzone', 'sigFileInput', 'adminSigDropzoneCard', { icon: '' });
     }
 
     async function api(path, opts = {}) {
@@ -4073,6 +4101,8 @@
       document.body.classList.remove('modal-open');
       currentTab = tab;
       window.currentTab = tab;
+      updateHeaderNavOffset();
+      window.scrollTo({ top: 0, behavior: 'instant' });
       [...document.querySelectorAll('nav button')].forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
       const main = document.getElementById('main');
       main.innerHTML = '<div class="card muted" style="text-align:center;padding:40px 20px;">Loading data…</div>';
@@ -4140,7 +4170,7 @@
             <strong style="color:var(--warning);font-size:15px;">Pending Action: ${inboxItems.length} Note(s) For Approval awaiting your authorization</strong>
             <div class="card-sub">Please review and decide on proposals promptly to maintain departmental operations.</div>
           </div>
-          <button class="amber" onclick="showTab('inbox')">Open Inbox (${inboxItems.length}) →</button>
+          <button class="secondary" onclick="showTab('inbox')">Open Inbox (${inboxItems.length})</button>
         </div>
       </div>
     `;
@@ -4308,7 +4338,7 @@
           <h2 class="card-title" style="color:var(--primary-blue);margin:0;">Purchase Invoice Monitor</h2>
           <div class="card-sub">Invoices and vendor disbursements for your approved purchase approvals · ${escapeHtml(fy.label)}</div>
         </div>
-        <button class="primary" onclick="showTab('invoices')" style="padding:7px 14px;font-size:13px;">View Invoices →</button>
+        <button class="primary" onclick="showTab('invoices')" style="padding:7px 14px;font-size:13px;">View Invoices</button>
       </div>
       <div class="grid-4" style="margin-top:10px;">
         <div class="stat-card">
@@ -4620,7 +4650,6 @@
 
       <div id="masterDropzone" class="file-dropzone" onclick="document.getElementById('masterExcelFileInput').click()">
         <input name="masterExcelFileInput" type="file" id="masterExcelFileInput" accept=".xlsx" style="display:none;" onchange="onMasterExcelFileSelected(this)" />
-        <div class="file-dropzone-icon">📑</div>
         <div class="file-dropzone-prompt">Select Multi-Sheet Excel Workbook (.xlsx) or drag &amp; drop here</div>
         <div class="file-dropzone-sub">Ingests and validates multi-sheet departmental financial allocations</div>
       </div>
@@ -4638,7 +4667,7 @@
     </div>
   `);
 
-      setupFileDropzone('masterDropzone', 'masterExcelFileInput', 'masterDropzoneCard', { icon: '📑' });
+      setupFileDropzone('masterDropzone', 'masterExcelFileInput', 'masterDropzoneCard', { icon: '' });
     }
 
     function onMasterExcelFileSelected(input) {
@@ -5046,7 +5075,7 @@
         </td>
         <td class="nfa-amount-cell"><strong style="color:var(--primary);font-size:14px">${inr(n.total_amount)}</strong></td>
         <td><span class="badge b-${n.status}">${fmtStatus(n.status)}</span></td>
-        <td><button onclick="openNfa('${n.id}')">Review &amp; Decide →</button></td>
+        <td><button onclick="openNfa('${n.id}')">Review &amp; Decide</button></td>
       </tr>
     `;
       });
@@ -5207,8 +5236,8 @@
           <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid #e2e8f0;flex-wrap:wrap;gap:10px;">
             <div id="nfaPaginationInfo" class="muted" style="font-size:13px;"></div>
             <div style="display:flex;gap:8px;">
-              <button id="nfaPrevBtn" class="secondary" style="padding:5px 14px;font-size:12.5px;" onclick="changeNfaPage(-1)">← Previous</button>
-              <button id="nfaNextBtn" class="secondary" style="padding:5px 14px;font-size:12.5px;" onclick="changeNfaPage(1)">Next →</button>
+              <button id="nfaPrevBtn" class="secondary" style="padding:5px 14px;font-size:12.5px;" onclick="changeNfaPage(-1)">Previous</button>
+              <button id="nfaNextBtn" class="secondary" style="padding:5px 14px;font-size:12.5px;" onclick="changeNfaPage(1)">Next</button>
             </div>
           </div>
         </div>
@@ -5296,8 +5325,7 @@
 
       if (nfas.length === 0) {
         html += `
-          <div class="card" style="text-align:center;padding:40px 20px;background:#f8fafc;border:1px dashed #cbd5e1;border-radius:8px;">
-            <div style="font-size:28px;margin-bottom:8px;">📦</div>
+          <div class="card" style="text-align:center;padding:40px 20px;background:#f8fafc;border:1px solid #cbd5e1;border-radius:8px;">
             <strong style="font-size:15px;color:#1e293b;">No Eligible Approved Purchase NFAs Found</strong>
             <p style="color:#64748b;font-size:13px;margin:6px 0 0;">
               Invoice monitoring is activated automatically once a Purchase NFA receives final institutional approval.
@@ -5430,7 +5458,7 @@
                             <td>
                               ${inv.file_path ? `
                                 <a href="/api/nfas/attachment-preview/${encodeURIComponent(inv.file_path)}" target="_blank" class="button secondary" style="padding:2px 8px;font-size:11px;text-decoration:none;">
-                                  📄 View Doc
+                                  View Document
                                 </a>
                               ` : '—'}
                             </td>
@@ -5446,7 +5474,7 @@
                             <td>
                               <div style="display:flex;gap:4px;flex-wrap:wrap;">
                                 ${canCorrect ? `
-                                  <button class="amber" style="padding:3px 6px;font-size:11px;" onclick="openEditInvoiceModal('${inv.id}')">Correct ✎</button>
+                                  <button class="amber" style="padding:3px 6px;font-size:11px;" onclick="openEditInvoiceModal('${inv.id}')">Correct</button>
                                 ` : ''}
                                 ${isFinanceOrAdmin ? `
                                   <button class="secondary" style="padding:3px 6px;font-size:11px;" onclick="openVerifyInvoiceModal('${inv.id}', '${escapeHtml(inv.invoice_number)}', ${inv.invoice_amount}, '${encodeURIComponent(inv.vendor_name)}')">Verify</button>
@@ -5574,9 +5602,9 @@
         }
         const data = await res.json();
         currentUploadInvoiceFile = data;
-        statusEl.innerHTML = `<span style="color:var(--success);">✓ Attached: ${escapeHtml(data.original_filename)} (${Math.round(data.file_size / 1024)} KB)</span>`;
+        statusEl.innerHTML = `<span style="color:var(--success);">Attached: ${escapeHtml(data.original_filename)} (${Math.round(data.file_size / 1024)} KB)</span>`;
       } catch (e) {
-        statusEl.innerHTML = `<span style="color:var(--danger);">✕ Upload failed: ${escapeHtml(e.message)}</span>`;
+        statusEl.innerHTML = `<span style="color:var(--danger);">Upload failed: ${escapeHtml(e.message)}</span>`;
         currentUploadInvoiceFile = null;
       }
     }
@@ -5933,7 +5961,7 @@
                 + Add Revenue
               </button>
               <button class="secondary" style="font-size:13px;font-weight:600;padding:8px 16px;" onclick="openCompleteEventModal()">
-                ✓ Mark Event as Completed
+                Mark Event as Completed
               </button>
             </div>
           </div>
@@ -6127,7 +6155,7 @@
             </div>
             <div class="row" style="gap:10px;">
               <button class="primary" style="font-size:13px;font-weight:700;padding:8px 18px;" onclick="openCompleteEventModal()">
-                ✓ Mark Event as Completed
+                Mark Event as Completed
               </button>
             </div>
           </div>
@@ -6394,7 +6422,7 @@
 
       openModal(`
         <button class="close-btn" type="button" onclick="closeModal()">✕</button>
-        <h2 style="color:var(--primary-blue);margin:0 0 4px;font-size:18px;">✓ Mark Event as Completed</h2>
+        <h2 style="color:var(--primary-blue);margin:0 0 4px;font-size:18px;">Mark Event as Completed</h2>
         <div style="font-size:12.5px;color:var(--text-muted);margin-bottom:14px;">
           Marking an approved event as completed records its operational conclusion and automatically triggers revenue submission notifications for revenue-generating events.
         </div>
@@ -6587,7 +6615,6 @@
         if (userDept) {
           deptSelectorHtml = `
             <div style="padding:10px 14px;background:#F8FAFC;border:1px solid #CBD5E1;border-radius:6px;display:flex;align-items:center;gap:10px;">
-              <span style="font-size:16px;">🏛️</span>
               <div style="flex:1;">
                 <div style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;">Assigned Department</div>
                 <div style="font-weight:700;color:#0F172A;font-size:13.5px;">${escapeHtml(userDept.name)} (${escapeHtml(userDept.code)})</div>
@@ -6599,7 +6626,7 @@
         } else {
           deptSelectorHtml = `
             <div style="padding:10px 14px;background:#FEF2F2;border:1px solid #FECACA;border-radius:6px;color:#991B1B;font-weight:600;font-size:13px;">
-              ⚠️ No valid department assignment exists on your profile. Please contact Super Admin before submitting an NFA.
+              No valid department assignment exists on your profile. Please contact Super Admin before submitting an NFA.
             </div>
             <input name="nfaDept" type="hidden" id="nfaDept" value="" />
           `;
@@ -6841,7 +6868,7 @@
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
         <div>
           <h3 style="margin:0;font-size:14px;color:var(--primary-blue);display:flex;align-items:center;gap:6px;">
-            <span>🔒</span> Resource Person — Bank Details (Confidential)
+            Resource Person — Bank Details (Confidential)
           </h3>
           <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">
             Required for honorarium / travel disbursement. Encrypted with AES-256-GCM. Strictly restricted to Finance Office and Super Admin.
@@ -7311,7 +7338,7 @@
 
       row.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f1f5f9;">
-          <span style="font-weight:700;font-size:12.5px;color:var(--primary-blue);">👤 Resource Person &amp; Payment Details</span>
+          <span style="font-weight:700;font-size:12.5px;color:var(--primary-blue);">Resource Person &amp; Payment Details</span>
           <button type="button" class="danger" style="font-size:11px;padding:2px 8px;" onclick="this.closest('.bank-detail-card-row').remove(); calcRpHonorariumTotal(${isEdit});">✕ Remove</button>
         </div>
         
@@ -8001,7 +8028,7 @@
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
           <div>
             <h4 style="margin:0;color:${isFinanceOrAdmin ? '#0f766e' : '#1e40af'};font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px;">
-              <span>🔒</span> Resource Persons &amp; Payment Credentials ${isFinanceOrAdmin ? '(Authorized Finance Access)' : ''}
+              Resource Persons &amp; Payment Credentials ${isFinanceOrAdmin ? '(Authorized Finance Access)' : ''}
             </h4>
             <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">
               ${isFinanceOrAdmin ? 'Encrypted with AES-256-GCM. Decrypted on-demand. Every access is logged to the security audit trail.' : 'Account numbers are encrypted with AES-256-GCM and securely stored for Finance disbursement.'}
@@ -8583,11 +8610,11 @@
                   <div style="font-weight:600;color:#1e293b;" title="${escapeHtml(m.body)}">${escapeHtml(m.subject)}</div>
                 </td>
                 <td style="padding:10px 12px;vertical-align:top;text-align:center;">
-                  ${m.has_pdf_attachment ? `<span style="display:inline-block;padding:2px 6px;border-radius:4px;font-size:10.5px;font-weight:700;background:#dcfce7;color:#166534;border:1px solid #86efac;white-space:nowrap;">📄 ${escapeHtml(m.attachment_name || 'PDF Attached')}</span>` : `<span style="font-size:11.5px;color:#94a3b8;">None</span>`}
+                  ${m.has_pdf_attachment ? `<span style="display:inline-block;padding:2px 6px;border-radius:4px;font-size:10.5px;font-weight:700;background:#dcfce7;color:#166534;border:1px solid #86efac;white-space:nowrap;">${escapeHtml(m.attachment_name || 'PDF Attached')}</span>` : `<span style="font-size:11.5px;color:#94a3b8;">None</span>`}
                 </td>
                 <td style="padding:10px 12px;vertical-align:top;text-align:center;">
                   <span style="display:inline-block;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:700;white-space:nowrap;background:${m.status === 'mock_delivered' ? '#ecfdf5' : '#fef2f2'};color:${m.status === 'mock_delivered' ? '#047857' : '#b91c1c'};border:1px solid ${m.status === 'mock_delivered' ? '#a7f3d0' : '#fecaca'};">
-                    ${m.status === 'mock_delivered' ? '✓ Mock Delivered' : '✕ Failed'}
+                    ${m.status === 'mock_delivered' ? 'Mock Delivered' : 'Failed'}
                   </span>
                 </td>
               </tr>
@@ -8797,7 +8824,7 @@
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
         <div>
           <h3 style="margin:0;font-size:14px;color:var(--primary-blue);display:flex;align-items:center;gap:6px;">
-            <span>🔒</span> Resource Person — Bank Details (Confidential)
+            Resource Person — Bank Details (Confidential)
           </h3>
           <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">
             Encrypted with AES-256-GCM. Restricted strictly to Finance Office and Super Admin.
@@ -9802,7 +9829,6 @@
       <p class="card-sub">All workbook changes are previewed against the master ledger before any allocations are committed.</p>
       <div id="syncDropzone" class="file-dropzone" style="max-width:440px;margin-bottom:12px;" onclick="document.getElementById('excelFile').click()">
         <input name="excelFile" type="file" id="excelFile" accept=".xlsx" style="display:none;" />
-        <div class="file-dropzone-icon" style="font-size:24px;margin-bottom:2px;">📊</div>
         <div class="file-dropzone-prompt" style="font-size:13px;">Choose modified Excel workbook (.xlsx) or drag &amp; drop here</div>
         <div class="file-dropzone-sub">Preview differences against the master ledger</div>
       </div>
@@ -9837,7 +9863,7 @@
     </div>
   `;
       main.innerHTML = html;
-      setupFileDropzone('syncDropzone', 'excelFile', 'syncDropzoneCard', { icon: '📊' });
+      setupFileDropzone('syncDropzone', 'excelFile', 'syncDropzoneCard', { icon: '' });
     }
 
     async function renderSummaryGeneration(container) {
@@ -10257,6 +10283,51 @@
       await downloadReportFile(`/api/reports/summary/export/${format}?${qParts.join('&')}`, filename);
     }
 
+    function isCountKey(k) {
+      const lower = String(k || '').toLowerCase();
+      return (
+        lower === 'sl_no' ||
+        lower === 's_no' ||
+        lower === 'sno' ||
+        lower === 'id' ||
+        lower.includes('count') ||
+        lower.includes('submitted') ||
+        lower.includes('total_approved') ||
+        lower.includes('total_pending') ||
+        lower.includes('total_rejected') ||
+        lower.includes('events_completed') ||
+        lower.includes('days') ||
+        lower.includes('percentage') ||
+        lower.includes('utilization') ||
+        lower.includes('faculty_count') ||
+        lower.includes('departments_count')
+      );
+    }
+
+    function isCurrencyField(k) {
+      if (isCountKey(k)) return false;
+      const lower = String(k || '').toLowerCase();
+      return (
+        lower.includes('amount') ||
+        lower.includes('allocated') ||
+        lower.includes('expenditure') ||
+        lower.includes('reservations') ||
+        lower.includes('available') ||
+        lower.includes('revenue') ||
+        lower.includes('requested') ||
+        lower.includes('spend') ||
+        lower.includes('balance') ||
+        lower.includes('paid') ||
+        lower.includes('gst') ||
+        lower.includes('honorarium') ||
+        lower.includes('cost') ||
+        lower.includes('budget') ||
+        lower === 'allocated' ||
+        lower === 'approved' ||
+        lower === 'pending'
+      );
+    }
+
     const REPORT_DEFINITIONS = [
       // Category: NFA Proposals & Approvals
       { id: 'nfa_activity', category: 'NFA Proposals & Approvals', name: 'NFA Activity Report', desc: 'Comprehensive log of all submitted, approved, and active Notes for Approval.' },
@@ -10357,7 +10428,7 @@
                         type="button"
                         data-rep="${r.id}"
                         class="${currentSelectedReport === r.id ? 'primary' : 'secondary'}"
-                        style="text-align:left;padding:8px 10px;font-size:11.5px;font-weight:${currentSelectedReport === r.id ? '600' : '500'};border-radius:6px;line-height:1.35;white-space:normal;cursor:pointer;border:1px solid ${currentSelectedReport === r.id ? 'var(--primary-blue)' : '#e2e8f0'};${currentSelectedReport === r.id ? 'background:var(--primary-blue);color:#ffffff;' : 'background:#ffffff;color:#334155;'}"
+                        style="text-align:left;padding:8px 10px;font-size:11.5px;font-weight:${currentSelectedReport === r.id ? '600' : '500'};border-radius:6px;line-height:1.35;white-space:normal;cursor:pointer;${currentSelectedReport === r.id ? '' : 'background:#ffffff;color:#334155;border:1px solid #cbd5e1;'}"
                         onclick="selectReportType('${r.id}')"
                       >
                         ${escapeHtml(r.name)}
@@ -10369,7 +10440,7 @@
             </div>
 
             <!-- Right Column: Active Report Workspace -->
-            <div style="display:flex;flex-direction:column;gap:14px;min-width:0;">
+            <div style="display:flex;flex-direction:column;gap:16px;min-width:0;">
               <!-- Mobile Categorized Dropdown Selector -->
               <div class="mobile-report-selector-wrap">
                 <label for="mobileReportSelector" style="font-size:12px;font-weight:600;color:#334155;margin-bottom:6px;display:block;">Select Report Type</label>
@@ -10396,31 +10467,87 @@
               <!-- 3. Scope & Organization Filters + 4. Academic Year + 5. Actions -->
               <div style="background:#f8fafc;padding:16px 18px;border-radius:8px;border:1px solid #e2e8f0;">
                 <!-- Scope Options -->
-                <div style="margin-bottom:12px;">
+                <div style="margin-bottom:14px;">
                   <div style="font-size:11.5px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Scope</div>
                   <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
                     ${isSenior ? `
-                      <button type="button" class="${currentReportScope === 'campus' ? 'primary' : 'secondary'}" style="font-size:12px;font-weight:${currentReportScope === 'campus' ? '600' : '500'};padding:6px 14px;border-radius:6px;${currentReportScope === 'campus' ? 'background:var(--primary-blue);color:#ffffff;border:1px solid var(--primary-blue);' : 'background:#ffffff;color:#334155;border:1px solid #cbd5e1;'}" onclick="onReportScopeChange('campus')">
+                      <button type="button" class="${currentReportScope === 'campus' ? 'primary' : 'secondary'}" style="font-size:12px;padding:6px 14px;" onclick="onReportScopeChange('campus')">
                         Campus
                       </button>
                     ` : ''}
                     ${(isSenior || isDean) ? `
-                      <button type="button" class="${currentReportScope === 'school' ? 'primary' : 'secondary'}" style="font-size:12px;font-weight:${currentReportScope === 'school' ? '600' : '500'};padding:6px 14px;border-radius:6px;${currentReportScope === 'school' ? 'background:var(--primary-blue);color:#ffffff;border:1px solid var(--primary-blue);' : 'background:#ffffff;color:#334155;border:1px solid #cbd5e1;'}" onclick="onReportScopeChange('school')">
+                      <button type="button" class="${currentReportScope === 'school' ? 'primary' : 'secondary'}" style="font-size:12px;padding:6px 14px;" onclick="onReportScopeChange('school')">
                         School-Wise
                       </button>
                     ` : ''}
-                    <button type="button" class="${currentReportScope === 'department' ? 'primary' : 'secondary'}" style="font-size:12px;font-weight:${currentReportScope === 'department' ? '600' : '500'};padding:6px 14px;border-radius:6px;${currentReportScope === 'department' ? 'background:var(--primary-blue);color:#ffffff;border:1px solid var(--primary-blue);' : 'background:#ffffff;color:#334155;border:1px solid #cbd5e1;'}" onclick="onReportScopeChange('department')">
+                    <button type="button" class="${currentReportScope === 'department' ? 'primary' : 'secondary'}" style="font-size:12px;padding:6px 14px;" onclick="onReportScopeChange('department')">
                       Department
                     </button>
-                    <button type="button" class="${currentReportScope === 'centre' ? 'primary' : 'secondary'}" style="font-size:12px;font-weight:${currentReportScope === 'centre' ? '600' : '500'};padding:6px 14px;border-radius:6px;${currentReportScope === 'centre' ? 'background:var(--primary-blue);color:#ffffff;border:1px solid var(--primary-blue);' : 'background:#ffffff;color:#334155;border:1px solid #cbd5e1;'}" onclick="onReportScopeChange('centre')">
+                    <button type="button" class="${currentReportScope === 'centre' ? 'primary' : 'secondary'}" style="font-size:12px;padding:6px 14px;" onclick="onReportScopeChange('centre')">
                       Centres / Offices
                     </button>
                   </div>
                 </div>
 
-                <!-- Entity Dropdown & Academic Year Row -->
+                <!-- Entity Dropdown & Academic Year & Action Buttons Row -->
+                <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;">
+                  ${currentReportScope === 'school' ? `
+                    <div style="flex:1;min-width:200px;">
+                      <label for="reportSchoolSelect" style="font-size:11.5px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px;">Select School</label>
+                      <select id="reportSchoolSelect" style="width:100%;height:38px;border:1px solid #cbd5e1;border-radius:6px;font-size:12.5px;padding:0 10px;background:#ffffff;" onchange="onReportTargetChange(this.value)">
+                        ${(REF.schools || [
+                          { id: '310308c6-0ad2-4012-9bf5-892a04752bfb', code: 'SOET', name: 'School of Engineering and Technology' },
+                          { id: '792cf03f-2355-408c-ad4d-637740ec583f', code: 'SOA', name: 'School of Arts' },
+                          { id: '85035bc1-2baf-4207-97f0-f5b47e55a1f4', code: 'SBM', name: 'School of Business and Management' },
+                          { id: '3f3c4efc-7d0a-42c5-b5b2-715da171eefb', code: 'SPS', name: 'School of Psychological Sciences' },
+                        ]).map(s => `<option value="${s.id}" ${currentReportTargetId === s.id ? 'selected' : ''}>${escapeHtml(s.code)} — ${escapeHtml(s.name)}</option>`).join('')}
+                      </select>
+                    </div>
+                  ` : ''}
+
+                  ${currentReportScope === 'department' ? `
+                    <div style="flex:1;min-width:220px;">
+                      <label for="reportDeptSelect" style="font-size:11.5px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px;">Select Department</label>
+                      <select id="reportDeptSelect" style="width:100%;height:38px;border:1px solid #cbd5e1;border-radius:6px;font-size:12.5px;padding:0 10px;background:#ffffff;" onchange="onReportTargetChange(this.value)">
+                        ${academicDepts.map(d => `<option value="${d.id}" ${currentReportTargetId === d.id ? 'selected' : ''}>${escapeHtml(d.name)} (${escapeHtml(d.code)})</option>`).join('')}
+                      </select>
+                    </div>
+                  ` : ''}
+
+                  ${currentReportScope === 'centre' ? `
+                    <div style="flex:1;min-width:220px;">
+                      <label for="reportCentreSelect" style="font-size:11.5px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px;">Select Centre / Office</label>
+                      <select id="reportCentreSelect" style="width:100%;height:38px;border:1px solid #cbd5e1;border-radius:6px;font-size:12.5px;padding:0 10px;background:#ffffff;" onchange="onReportTargetChange(this.value)">
+                        ${centreDepts.map(c => `<option value="${c.id}" ${currentReportTargetId === c.id ? 'selected' : ''}>${escapeHtml(c.name)} (${escapeHtml(c.code)})</option>`).join('')}
+                      </select>
+                    </div>
+                  ` : ''}
+
+                  <div style="min-width:140px;">
+                    <label for="reportFySelect" style="font-size:11.5px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px;">Academic Year</label>
+                    <select id="reportFySelect" style="width:100%;height:38px;border:1px solid #cbd5e1;border-radius:6px;font-size:12.5px;padding:0 10px;background:#ffffff;" onchange="onReportFyChange(this.value)">
+                      ${(REF.financialYears || REF.financial_years || []).map(f => `<option value="${f.id}" ${currentReportFyId === f.id ? 'selected' : ''}>${escapeHtml(f.label)}${f.is_active ? ' (Active)' : ''}</option>`).join('')}
+                    </select>
+                  </div>
+
+                  ${currentSelectedReport === 'faculty_nfa' ? `
+                    <div style="display:flex;align-items:center;height:38px;padding-bottom:2px;">
+                      <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#334155;cursor:pointer;margin:0;">
+                        <input type="checkbox" id="chkAllFaculty" ${currentReportIncludeAllFaculty ? 'checked' : ''} onchange="onReportFacultyToggle(this.checked)" />
+                        Include 0-proposal faculty
+                      </label>
+                    </div>
+                  ` : ''}
+
+                  <!-- Action Buttons: Refresh, PDF, Excel -->
+                  <div style="display:flex;gap:8px;align-items:center;margin-left:auto;flex-wrap:wrap;">
+                    <button type="button" class="secondary" style="height:38px;padding:0 16px;font-size:12.5px;" onclick="refreshActiveReport()">
+                      Refresh Preview
                     </button>
-                    <button class="secondary" style="height:38px;padding:0 16px;font-size:12.5px;font-weight:600;border-radius:6px;border:1px solid #cbd5e1;background:#ffffff;color:#334155;" onclick="downloadActiveReport('excel')">
+                    <button type="button" class="primary" style="height:38px;padding:0 16px;font-size:12.5px;" onclick="downloadActiveReport('pdf')">
+                      Download PDF
+                    </button>
+                    <button type="button" class="secondary" style="height:38px;padding:0 16px;font-size:12.5px;" onclick="downloadActiveReport('excel')">
                       Download Excel
                     </button>
                   </div>
@@ -10429,71 +10556,85 @@
 
               <!-- 6. Record Count Banner & 7. Table Preview -->
               ${errorMsg ? `<div class="card" style="color:var(--danger);padding:14px;">${escapeHtml(errorMsg)}</div>` : `
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-                  <span style="font-size:13px;font-weight:700;color:#1e293b;">Previewing Records (${records.length} total)</span>
-                  <span style="font-size:11.5px;color:#64748b;">Showing first 25 records. Full records exported in PDF &amp; Excel.</span>
-                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
+                    <span style="font-size:13px;font-weight:700;color:var(--text-primary);">Previewing Records (${records.length} total)</span>
+                    <span style="font-size:11.5px;color:var(--text-muted);">${records.length <= 25 ? `Showing ${records.length} of ${records.length} records.` : `Showing first 25 of ${records.length} records. Full records exported in PDF &amp; Excel.`}</span>
+                  </div>
 
-                <div class="table-wrap">
-                  <table style="width:100%;border-collapse:collapse;">
-                    <thead>
-                      <tr>
-                        ${records.length > 0 ? Object.keys(records[0]).map(k => {
-                          const isCurr = k.includes('amount') || k.includes('allocated') || k.includes('approved') || k.includes('pending') || k.includes('available') || k.includes('revenue') || k.includes('requested');
-                          const isDate = k.includes('date');
-                          const isSl = k === 'sl_no' || k === 'id';
-                          const isStatus = k.includes('status');
-                          let thStyle = '';
-                          if (isCurr) thStyle = 'text-align:right;white-space:nowrap;';
-                          else if (isDate) thStyle = 'width:105px;white-space:nowrap;';
-                          else if (isSl) thStyle = 'width:50px;text-align:center;white-space:nowrap;';
-                          else if (isStatus) thStyle = 'text-align:center;white-space:nowrap;';
-                          return `<th style="${thStyle}">${escapeHtml(k.replace(/_/g, ' ').toUpperCase())}</th>`;
-                        }).join('') : '<th>Records</th>'}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      ${records.length === 0 ? '<tr><td colspan="10" class="muted" style="text-align:center;padding:24px;">No records available for this report type.</td></tr>' : ''}
-                      ${records.slice(0, 25).map(row => `
+                  <div class="table-wrap">
+                    <table style="width:100%;border-collapse:collapse;">
+                      <thead>
                         <tr>
-                          ${Object.keys(row).map(k => {
-                            let val = row[k];
-                            const isCurr = typeof val === 'number' && (k.includes('amount') || k.includes('allocated') || k.includes('approved') || k.includes('pending') || k.includes('available') || k.includes('revenue') || k.includes('requested'));
+                          ${records.length > 0 ? Object.keys(records[0]).map(k => {
+                            const isCount = isCountKey(k);
+                            const isCurr = !isCount && isCurrencyField(k);
                             const isDate = k.includes('date');
-                            const isSl = k === 'sl_no' || k === 'id';
+                            const isSl = k === 'sl_no' || k === 's_no' || k === 'id';
                             const isStatus = k.includes('status');
-                            const isTitleDesc = k.includes('title') || k.includes('particulars') || k.includes('desc') || k.includes('remarks') || k.includes('reason');
-
-                            let formattedVal = val ?? '—';
-                            if (isCurr) {
-                              formattedVal = inr(val);
-                            } else if (isStatus && typeof val === 'string') {
-                              formattedVal = `<span class="badge ${val.includes('approved') || val === 'completed' || val === 'verified' ? 'b-approved' : val.includes('reject') || val === 'returned' ? 'b-rejected' : 'b-submitted'}">${escapeHtml(val.replace(/_/g, ' ').toUpperCase())}</span>`;
-                            } else {
-                              formattedVal = escapeHtml(String(formattedVal));
-                            }
-
-                            let tdStyle = '';
-                            if (isCurr) tdStyle = 'text-align:right;font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums;';
-                            else if (isDate) tdStyle = 'white-space:nowrap;width:105px;';
-                            else if (isSl) tdStyle = 'text-align:center;white-space:nowrap;width:50px;';
-                            else if (isStatus) tdStyle = 'text-align:center;white-space:nowrap;';
-                            else if (isTitleDesc) tdStyle = 'min-width:180px;line-height:1.4;word-break:normal;overflow-wrap:break-word;';
-
-                            return `<td style="${tdStyle}">${formattedVal}</td>`;
-                          }).join('')}
+                            let thStyle = '';
+                            if (isCurr) thStyle = 'text-align:right;white-space:nowrap;';
+                            else if (isCount || isSl) thStyle = 'text-align:center;white-space:nowrap;';
+                            else if (isDate) thStyle = 'width:105px;white-space:nowrap;';
+                            else if (isStatus) thStyle = 'text-align:center;white-space:nowrap;';
+                            return `<th style="${thStyle}">${escapeHtml(k.replace(/_/g, ' ').toUpperCase())}</th>`;
+                          }).join('') : '<th>Records</th>'}
                         </tr>
-                      `).join('')}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        ${records.length === 0 ? '<tr><td colspan="12" class="muted" style="text-align:center;padding:24px;">No records available for this report type.</td></tr>' : ''}
+                        ${records.slice(0, 25).map(row => `
+                          <tr>
+                            ${Object.keys(row).map(k => {
+                              let val = row[k];
+                              const isCount = isCountKey(k);
+                              const isCurr = typeof val === 'number' && !isCount && isCurrencyField(k);
+                              const isDate = k.includes('date');
+                              const isSl = k === 'sl_no' || k === 's_no' || k === 'id';
+                              const isStatus = k.includes('status');
+                              const isTitleDesc = k.includes('title') || k.includes('particulars') || k.includes('desc') || k.includes('remarks') || k.includes('reason');
+
+                              let formattedVal = val ?? '—';
+                              if (isCurr) {
+                                formattedVal = inr(val);
+                              } else if (isCount && typeof val === 'number') {
+                                formattedVal = val.toLocaleString('en-IN');
+                              } else if (isStatus && typeof val === 'string') {
+                                formattedVal = `<span class="badge ${val.includes('approved') || val === 'completed' || val === 'verified' ? 'b-approved' : val.includes('reject') || val === 'returned' ? 'b-rejected' : 'b-submitted'}">${escapeHtml(val.replace(/_/g, ' ').toUpperCase())}</span>`;
+                              } else {
+                                formattedVal = escapeHtml(String(formattedVal));
+                              }
+
+                              let tdStyle = '';
+                              if (isCurr) tdStyle = 'text-align:right;font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums;';
+                              else if (isCount) tdStyle = 'text-align:center;white-space:nowrap;font-variant-numeric:tabular-nums;';
+                              else if (isDate) tdStyle = 'white-space:nowrap;width:105px;';
+                              else if (isSl) tdStyle = 'text-align:center;white-space:nowrap;width:50px;';
+                              else if (isStatus) tdStyle = 'text-align:center;white-space:nowrap;';
+                              else if (isTitleDesc) tdStyle = 'min-width:180px;line-height:1.4;word-break:normal;overflow-wrap:break-word;';
+
+                              return `<td style="${tdStyle}">${formattedVal}</td>`;
+                            }).join('')}
+                          </tr>
+                        `).join('')}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               `}
-            </div>
-          </div>
-        </div>
+            </div> <!-- Close Right Column -->
+          </div> <!-- Close report-workspace-grid -->
+        </div> <!-- Close card -->
       `;
 
       container.innerHTML = html;
+    }
+
+    async function refreshActiveReport() {
+      const scrollY = window.scrollY;
+      const main = document.getElementById('main');
+      await renderExcel(main);
+      window.scrollTo({ top: scrollY, behavior: 'instant' });
     }
 
     async function selectReportType(typeId) {
@@ -10662,35 +10803,32 @@
       adminUsersListCache = users;
 
       let html = `
-    <div class="card" style="border: 2px solid var(--accent); background: linear-gradient(to bottom right, #ffffff, var(--accent-light));">
+    <div class="card" style="border: 1px solid var(--border); background: #ffffff;">
       <div class="card-header">
         <div>
-          <h2 class="card-title" style="margin-bottom:4px">Master Budget Management &amp; Fiscal Year Transition</h2>
+          <h2 class="card-title" style="margin-bottom:4px;color:var(--primary-blue);">Master Budget Management &amp; Fiscal Year Transition</h2>
           <div class="card-sub">Super Admin tools: upload new academic year budget workbook (.xlsx), clear previous year allocations, or download official budget templates.</div>
         </div>
       </div>
-      <div class="row" style="gap:12px;flex-wrap:wrap;margin-top:14px;">
-        <button class="gold" onclick="openPrivateBudgetUploadModal()">Upload New Academic Year Budget (.xlsx)</button>
+      <div class="row" style="gap:10px;flex-wrap:wrap;margin-top:14px;">
+        <button class="primary" onclick="openPrivateBudgetUploadModal()">Upload New Academic Year Budget (.xlsx)</button>
         <button class="danger" onclick="openClearBudgetModal()">Clear Previous Year / Budget Data</button>
         <button class="secondary" onclick="downloadBudgetTemplate()">Download Blank Template (.xlsx)</button>
         <button class="secondary" onclick="exportBudgetReport('')">Export Entire Master Workbook</button>
-        <button class="primary" style="background:#4338ca;" onclick="openMockEmailLogsModal()">View Mock Email Logs (Audit)</button>
+        <button class="secondary" onclick="openMockEmailLogsModal()">View Mock Email Logs</button>
       </div>
     </div>
 
     <!-- Email Notification & Delivery Testing (Mock & Resend Gateway) -->
-    <div class="card" id="emailTestingCard" style="border: 1px solid #c7d2fe; background: #ffffff;">
+    <div class="card" id="emailTestingCard" style="border: 1px solid var(--border); background: #ffffff;">
       <div class="card-header" style="margin-bottom: 12px; display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:36px;height:36px;border-radius:8px;background:#e0e7ff;color:#4338ca;display:flex;align-items:center;justify-content:center;font-size:18px;">✉️</div>
-          <div>
-            <h2 class="card-title" style="margin:0;font-size:16px;">Email Notification &amp; Delivery Testing (Mock &amp; Resend)</h2>
-            <div class="card-sub" style="font-size:12.5px;color:#64748b;">Super Admin email verification. Workflow notifications remain strictly mock-only (zero real emails to faculty/staff).</div>
-          </div>
+        <div>
+          <h2 class="card-title" style="margin:0;font-size:16px;color:var(--primary-blue);">Email Notification &amp; Delivery Testing (Mock &amp; Resend)</h2>
+          <div class="card-sub" style="font-size:12.5px;color:#64748b;">Super Admin email verification. Workflow notifications remain strictly mock-only (zero real emails to faculty/staff).</div>
         </div>
         <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
           <span id="emailTestingModeBadge" class="badge" style="background:#dcfce7;color:#166534;font-weight:700;font-size:11px;">EMAIL_TEST_MODE: Checking...</span>
-          <span class="badge" style="background:#e0e7ff;color:#3730a3;font-weight:600;font-size:11px;">Admin Testing Gateway</span>
+          <span class="badge" style="background:#f1f5f9;color:#334155;border:1px solid #cbd5e1;font-weight:600;font-size:11px;">Admin Testing Gateway</span>
         </div>
       </div>
       <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:14px;margin-bottom:14px;font-size:13px;">
@@ -10702,9 +10840,9 @@
         </div>
       </div>
       <div class="row" style="gap:10px;align-items:center;flex-wrap:wrap;">
-        <button id="btnSendMockTestEmail" class="btn btn-primary" style="background:#2563eb;padding:8px 16px;font-weight:600;font-size:12.5px;" onclick="triggerEmailTest('mock')">📨 Send Mock Test Email (Simulated)</button>
-        <button id="btnSendResendTestEmail" class="btn secondary" style="background:#f5f3ff;border:1px solid #ddd6fe;color:#5b21b6;padding:8px 16px;font-weight:600;font-size:12.5px;" onclick="triggerEmailTest('resend')">🚀 Send Live Resend Test Email</button>
-        <button type="button" class="secondary" style="padding:8px 14px;font-size:12.5px;" onclick="openMockEmailLogsModal()">📜 Full Audit Log Modal</button>
+        <button id="btnSendMockTestEmail" class="primary" style="padding:8px 16px;font-weight:600;font-size:12.5px;" onclick="triggerEmailTest('mock')">Send Mock Test Email</button>
+        <button id="btnSendResendTestEmail" class="secondary" style="padding:8px 16px;font-weight:600;font-size:12.5px;" onclick="triggerEmailTest('resend')">Send Live Resend Test Email</button>
+        <button type="button" class="secondary" style="padding:8px 14px;font-size:12.5px;font-weight:600;" onclick="openMockEmailLogsModal()">View Audit Log</button>
         <span id="emailTestingStatus" style="font-size:13px;color:#64748b;"></span>
       </div>
       <div id="emailTestingResultBox" style="display:none;margin-top:14px;padding:12px 14px;border-radius:6px;font-size:13px;"></div>
@@ -10713,7 +10851,7 @@
       <div style="margin-top:16px;border-top:1px solid #e2e8f0;padding-top:12px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
           <strong style="font-size:12.5px;color:#1e293b;">Recent Mock Email Outbox (Live Feed)</strong>
-          <a href="javascript:void(0)" onclick="loadRecentEmailTestingLogs()" style="font-size:12px;color:#2563eb;text-decoration:none;">🔄 Refresh Outbox</a>
+          <button type="button" class="secondary" onclick="loadRecentEmailTestingLogs()" style="font-size:11.5px;padding:3px 10px;min-height:26px;">Refresh Outbox</button>
         </div>
         <div class="table-wrap" style="margin:0;max-height:180px;overflow-y:auto;border:1px solid #e2e8f0;border-radius:4px;background:#ffffff;">
           <table style="width:100%;font-size:11.5px;border-collapse:collapse;">
@@ -10775,16 +10913,16 @@
           <div class="card-sub">Provision individual faculty/administrative accounts, manage user active statuses, reset temporary passwords, or bulk onboard faculty via Excel.</div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="gold" onclick="openExcelOnboardingModal()" style="padding:8px 14px;font-size:12.5px;">📊 Bulk Excel Onboarding</button>
-          <a href="/api/admin/users/template" download="CU_Faculty_Onboarding_Template.xlsx" class="secondary" style="padding:8px 14px;font-size:12.5px;text-decoration:none;border-radius:4px;display:inline-flex;align-items:center;border:1px solid var(--border);background:#fff;color:var(--text);">📥 Download Template</a>
-          <button class="btn btn-primary" onclick="openAddUserModal()" style="padding:8px 16px;font-size:12.5px;">+ Add User</button>
+          <button class="primary" onclick="openExcelOnboardingModal()" style="padding:8px 14px;font-size:12.5px;">Bulk Excel Onboarding</button>
+          <a href="/api/admin/users/template" download="CU_Faculty_Onboarding_Template.xlsx" class="secondary" style="padding:8px 14px;font-size:12.5px;text-decoration:none;border-radius:4px;display:inline-flex;align-items:center;border:1px solid var(--border);background:#fff;color:var(--text);">Download Template</a>
+          <button class="primary" onclick="openAddUserModal()" style="padding:8px 16px;font-size:12.5px;">+ Add User</button>
         </div>
       </div>
 
       <!-- Search & Filters Toolbar -->
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:#F8F9FA;padding:12px;border-radius:var(--radius);border:1px solid var(--border);margin-bottom:16px;">
         <div style="flex:2;min-width:200px;">
-          <input name="userSearchInput" id="userSearchInput" placeholder="🔍 Search by name or email..." style="margin-bottom:0;padding:8px 12px;font-size:13px;" oninput="filterAdminUserTable()" />
+          <input name="userSearchInput" id="userSearchInput" placeholder="Search by name or email..." style="margin-bottom:0;padding:8px 12px;font-size:13px;" oninput="filterAdminUserTable()" />
         </div>
         <div style="flex:1;min-width:140px;">
           <select name="userRoleFilter" id="userRoleFilter" style="margin-bottom:0;height:38px;min-height:38px;padding:6px 10px;font-size:13px;" onchange="filterAdminUserTable()">
@@ -10926,7 +11064,7 @@
             <td style="padding:6px 10px;white-space:nowrap;">${escapeHtml(m.recipient_name || m.recipient_email)}</td>
             <td style="padding:6px 10px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(m.subject)}">${escapeHtml(m.subject)}</td>
             <td style="padding:6px 10px;text-align:center;">
-              <span class="badge" style="background:#ecfdf5;color:#047857;padding:1px 6px;font-size:10.5px;">✓ Mock Delivered</span>
+              <span class="badge" style="background:#ecfdf5;color:#047857;padding:1px 6px;font-size:10.5px;">Mock Delivered</span>
             </td>
           </tr>
         `).join('');
@@ -10972,7 +11110,7 @@
           resultBox.style.color = '#166534';
           resultBox.innerHTML = `
             <div style="font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
-              <span>✓</span> <span>${res.mode === 'mock' ? 'Mock Email Successfully Generated &amp; Delivered' : 'Request Accepted by Resend API'}</span>
+              <span>${res.mode === 'mock' ? 'Mock Email Successfully Generated &amp; Delivered' : 'Request Accepted by Resend API'}</span>
             </div>
             <div style="font-size:12.5px;color:#14532d;line-height:1.6;">
               <div>• <strong>Mode:</strong> <span class="badge" style="background:#dcfce7;color:#166534;font-weight:700;">${escapeHtml((res.mode || mode).toUpperCase())}</span></div>
@@ -10995,7 +11133,7 @@
           resultBox.style.border = '1px solid #fecaca';
           resultBox.style.color = '#991b1b';
           resultBox.innerHTML = `
-            <div style="font-weight:700;margin-bottom:4px;">✕ Test Execution Blocked / Failed</div>
+            <div style="font-weight:700;margin-bottom:4px;">Test Execution Blocked / Failed</div>
             <div style="font-size:12.5px;line-height:1.4;">${escapeHtml(err.message || 'Error executing email test')}</div>
           `;
         }
@@ -11295,7 +11433,7 @@
       const modal = document.getElementById('modalExcelOnboarding');
       if (!modal) return;
       resetExcelOnboardingStep();
-      setupFileDropzone('facultyDropzone', 'facultyExcelInput', 'facultyDropzoneCard', { icon: '📊' });
+      setupFileDropzone('facultyDropzone', 'facultyExcelInput', 'facultyDropzoneCard', { icon: '' });
       modal.style.display = 'flex';
     }
 
@@ -11364,7 +11502,7 @@
         if (errEl) { errEl.textContent = e.message || 'Validation failed'; errEl.style.display = 'block'; }
       } finally {
         btn.disabled = false;
-        btn.textContent = 'Inspect & Preview Rows →';
+        btn.textContent = 'Inspect & Preview Rows';
       }
     }
 
@@ -11426,7 +11564,7 @@
           // For Faculty & HOD: Department/CoE dropdown selector
           let deptOrScopeDisplay;
           if (isSchoolWideRole) {
-            deptOrScopeDisplay = `<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 8px;font-size:11.5px;font-weight:600;color:var(--primary-blue);background:#EFF6FF;border:1px solid #BFDBFE;border-radius:4px;white-space:nowrap;" title="School-wide institutional scope for SoET"><span style="font-size:12px;">🏫</span> School-wide (SoET)</span>`;
+            deptOrScopeDisplay = `<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 8px;font-size:11.5px;font-weight:600;color:var(--primary-blue);background:#EFF6FF;border:1px solid #BFDBFE;border-radius:4px;white-space:nowrap;" title="School-wide institutional scope for SoET">School-wide (SoET)</span>`;
           } else {
             const deptOptions = [
               `<option value="">-- Select Department / CoE --</option>`,
@@ -11767,12 +11905,13 @@
     });
 
     function updateHeaderNavOffset() {
-      const header = document.querySelector('header');
-      const nav = document.querySelector('nav');
-      if (header && nav) {
-        const hHeight = header.offsetHeight || 60;
-        const nHeight = nav.offsetHeight || 46;
-        document.documentElement.style.setProperty('--header-nav-offset', `${hHeight + nHeight}px`);
+      const wrap = document.getElementById('app-header-wrap');
+      const footer = document.getElementById('app-footer');
+      if (wrap && wrap.offsetHeight > 0) {
+        document.documentElement.style.setProperty('--header-nav-offset', `${wrap.offsetHeight}px`);
+      }
+      if (footer && footer.offsetHeight > 0) {
+        document.documentElement.style.setProperty('--footer-height', `${footer.offsetHeight}px`);
       }
     }
     window.addEventListener('resize', updateHeaderNavOffset);

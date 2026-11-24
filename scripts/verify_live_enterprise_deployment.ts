@@ -22,17 +22,17 @@ async function verifyLiveEnterpriseDeployment() {
       });
       if (res.ok) {
         const text = await res.text();
-        const hasBtnDelete = text.includes('.btn-delete');
-        const hasRevGrid = text.includes('revenue-modal-grid');
-        const hasOffsetListener = text.includes('updateHeaderNavOffset');
-        const hasRevConfirm = text.includes('confirmDeleteRevenueEntry');
+        const hasReportGrid = text.includes('report-workspace-grid');
+        const hasIsCountKey = text.includes('isCountKey');
+        const hasChkAllFaculty = text.includes('chkAllFaculty');
+        const hasDownloadReport = text.includes('downloadActiveReport');
 
-        if (hasBtnDelete && hasRevGrid && hasOffsetListener && hasRevConfirm) {
-          console.log(`  ✅ Live site has successfully deployed commit 0a6c16b! (attempt ${attempts})`);
-          console.log(`     - .btn-delete styling present: true`);
-          console.log(`     - revenue-modal-grid present: true`);
-          console.log(`     - updateHeaderNavOffset present: true`);
-          console.log(`     - confirmDeleteRevenueEntry present: true`);
+        if (hasReportGrid && hasIsCountKey && hasChkAllFaculty && hasDownloadReport) {
+          console.log(`  ✅ Live site has successfully deployed latest UI standardization commit! (attempt ${attempts})`);
+          console.log(`     - report-workspace-grid present: true`);
+          console.log(`     - isCountKey present: true`);
+          console.log(`     - chkAllFaculty present: true`);
+          console.log(`     - downloadActiveReport present: true`);
           deployed = true;
           break;
         } else {

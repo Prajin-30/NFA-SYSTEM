@@ -116,6 +116,7 @@ async function run() {
     console.log(`  ✓ ADSE Summary Excel generated successfully (${adseExcelRes.buffer.length} bytes)`);
 
     console.log('--- ALL SUMMARY EXPORT TESTS PASSED ---');
+    process.exit(0);
   } finally {
     server.close();
   }

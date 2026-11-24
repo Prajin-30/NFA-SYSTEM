@@ -15,6 +15,7 @@ import {
   getSchoolReportBundle,
   getReportDataset,
   isCurrencyKey,
+  isCountKey,
   formatStatusLabel,
   getHeaderLabel,
   type ScopeResolution,
@@ -29,6 +30,7 @@ export {
   getSchoolReportBundle,
   getReportDataset,
   isCurrencyKey,
+  isCountKey,
   formatStatusLabel,
   getHeaderLabel,
   type ScopeResolution,
@@ -349,7 +351,7 @@ function renderPdfTable(
     keys.forEach((k, idx) => {
       const colW = finalColWidths[idx];
       const isCurr = isCurrencyKey(k);
-      const isCenter = k === 'sl_no' || k === 's_no' || k.includes('count') || k === 'type' || k === 'nfa_type' || k.includes('date');
+      const isCenter = isCountKey(k) || k === 'sl_no' || k === 's_no' || k.includes('count') || k === 'type' || k === 'nfa_type' || k.includes('date');
       const label = getHeaderLabel(k);
       doc.font(boldFont).fontSize(7.5);
       const textH = doc.heightOfString(label, { width: colW - 6, align: isCurr ? 'right' : isCenter ? 'center' : 'left' });
@@ -407,7 +409,7 @@ function renderPdfTable(
       const colW = finalColWidths[idx];
       const val = row[k];
       const isCurr = isCurrencyKey(k);
-      const isCenter = k === 'sl_no' || k === 's_no' || k.includes('count') || k === 'type' || k === 'nfa_type' || k.includes('date');
+      const isCenter = isCountKey(k) || k === 'sl_no' || k === 's_no' || k.includes('count') || k === 'type' || k === 'nfa_type' || k.includes('date');
       let cellText: string;
 
       if (typeof val === 'number') {
@@ -885,7 +887,8 @@ function styleWorksheet(ws: ExcelJS.Worksheet, keys: string[], rows: any[]) {
           cell.alignment = { vertical: 'middle', horizontal: 'right' };
           cell.numFmt = '₹#,##0.00';
         } else if (typeof cell.value === 'number') {
-          cell.alignment = { vertical: 'middle', horizontal: k === 'sl_no' || k === 's_no' ? 'center' : 'right' };
+          const isCount = isCountKey(k);
+          cell.alignment = { vertical: 'middle', horizontal: isCount || k === 'sl_no' || k === 's_no' ? 'center' : 'right' };
           cell.numFmt = '#,##0';
         } else if (k === 'sl_no' || k.includes('date') || k === 'status') {
           cell.alignment = { vertical: 'middle', horizontal: 'center' };

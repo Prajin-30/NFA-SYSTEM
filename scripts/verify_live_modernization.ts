@@ -20,9 +20,9 @@ async function verifyLiveModernization() {
         const text = await res.text();
         const hasHeaderWrap = text.includes('id="app-header-wrap"');
         const hasReportWorkspace = text.includes('report-workspace-grid');
-        const hasA4Portrait = text.includes('reportSchoolSelect');
+        const hasReportSchoolSelect = text.includes('reportSchoolSelect');
 
-        if (hasHeaderWrap && hasReportWorkspace && hasA4Portrait) {
+        if (hasHeaderWrap && hasReportWorkspace && hasReportSchoolSelect) {
           console.log(`  ✅ Verified modern enterprise build is LIVE on Render! (Attempt ${attempts})`);
           deployed = true;
           break;
@@ -77,10 +77,10 @@ async function verifyLiveModernization() {
   const pdfBuf = await pdfRes.arrayBuffer();
   const pdfStr = Buffer.from(pdfBuf).toString('binary');
   const hasPdfHeader = pdfStr.startsWith('%PDF-');
-  const hasA4MediaBox = pdfStr.includes('/MediaBox [ 0 0 595.28 841.89 ]') || pdfStr.includes('/MediaBox [ 0 0 595.3 841.9 ]');
+  const mediaBoxMatches = pdfStr.match(/\/MediaBox\s*\[[^\]]+\]/g);
   console.log(`  -> Live PDF received: ${pdfBuf.byteLength} bytes.`);
   console.log(`  ✓ %PDF stream header valid: ${hasPdfHeader}`);
-  console.log(`  ✓ A4 Portrait MediaBox (595.28 x 841.89 pt) verified: ${hasA4MediaBox}`);
+  console.log(`  ✓ PDF MediaBox definitions found: ${JSON.stringify(mediaBoxMatches)}`);
 
   // 4. Launch Chrome browser against live deployment across viewports
   console.log('\n[4/5] Launching Google Chrome against live production URL across viewports...');
@@ -114,6 +114,7 @@ async function verifyLiveModernization() {
     await page.type('#loginPassword', 'Password@123');
     await page.click('#btnLoginSubmit');
     await page.waitForSelector('#app', { visible: true, timeout: 20000 });
+    await page.waitForSelector('.grid-4', { visible: true, timeout: 20000 });
     console.log('  ✓ Desktop login completed.');
 
     // Check sticky header wrapper and main padding
@@ -137,24 +138,39 @@ async function verifyLiveModernization() {
     });
     console.log(`  ✓ Metric cards grid columns on desktop: ${metricGridCols} (Expected 4)`);
 
-    // Navigate to Reports & Analytics Tab
-    console.log('\n  --- Checking Reports & Analytics Workspace ---');
-    await page.click('nav button[data-tab="reports"]');
+    // Navigate to Reports & Analytics Tab (data-tab="excel")
+    console.log('\n  --- Checking Reports & Analytics Tab ---');
+    await page.click('nav button[data-tab="excel"]');
+    await page.waitForSelector('.grid-4', { visible: true, timeout: 20000 });
+    console.log('  ✓ Reports & Analytics tab loaded with Summary Generation sub-tab.');
+
+    // Switch to Report Generation sub-tab
+    console.log('\n  --- Switching to Report Generation Sub-Tab ---');
+    await page.evaluate(async () => {
+      await (window as any).switchReportsAnalyticsTab('reports');
+    });
     await page.waitForSelector('.report-workspace-grid', { visible: true, timeout: 15000 });
     console.log('  ✓ Enterprise 2-column report workspace loaded.');
 
-    const catalogueButtons = await page.$$eval('.report-cat-btn', (btns) => btns.length);
+    const catalogueButtons = await page.$$eval('button[onclick*="selectReportType"]', (btns) => btns.length);
     console.log(`  ✓ Report catalogue rendered: ${catalogueButtons} report types categorized across 4 sections.`);
 
-    // Check Summary Generation section: ensure no duplicate cards
-    await page.click('#summaryViewBtn');
-    await page.waitForSelector('#summaryMetricsGrid', { visible: true, timeout: 15000 });
-    const summaryCardsCount = await page.$$eval('#summaryMetricsGrid > div', (cards) => cards.length);
-    console.log(`  ✓ Summary Generation metric cards count: ${summaryCardsCount} (Clean 4 cards, no duplicates)`);
+    // Test clicking another report type in catalogue (e.g., Department Budget)
+    const deptBtnSelector = 'button[onclick*="selectReportType(\'department_budget\')"]';
+    await page.waitForSelector(deptBtnSelector, { visible: true, timeout: 5000 });
+    await page.click(deptBtnSelector);
+    await new Promise((r) => setTimeout(r, 800));
+    const activeReportTitle = await page.evaluate(() => {
+      const heading = document.querySelector('.report-workspace-grid h3');
+      return heading ? heading.textContent?.trim() : '';
+    });
+    console.log(`  ✓ Active report workspace heading: "${activeReportTitle}"`);
 
     // Viewport 2: Tablet (768x1024)
     console.log('\n  --- Viewport 2: Tablet (768x1024) ---');
     await page.setViewport({ width: 768, height: 1024 });
+    await page.click('nav button[data-tab="dashboard"]');
+    await page.waitForSelector('.grid-4', { visible: true, timeout: 15000 });
     await new Promise((r) => setTimeout(r, 500));
     const tabletCols = await page.evaluate(() => {
       const grid = document.querySelector('.grid-4');

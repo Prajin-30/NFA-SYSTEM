@@ -74,6 +74,16 @@ app.use(async (_req, res, next) => {
   next();
 });
 app.use(express.json({ limit: '5mb' }));
+// Serve favicon.ico directly with fallback
+app.get('/favicon.ico', (_req, res) => {
+  const icoPath = path.join(__dirname, '..', 'public', 'favicon.ico');
+  const logoFallback = path.join(__dirname, '..', 'public', 'christ-logo.png');
+  if (fs.existsSync(icoPath)) {
+    return res.sendFile(icoPath);
+  }
+  return res.sendFile(logoFallback);
+});
+
 app.use(express.static(path.join(__dirname, '..', 'public'), {
   setHeaders: (res, filePath) => {
     if (filePath.endsWith('.html')) {

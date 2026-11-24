@@ -5,6 +5,8 @@
   <meta charset="utf-8" />
   <title>CU-NFA</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/png" href="/christ-logo.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -698,9 +700,35 @@
       align-items: start;
     }
 
+    .report-catalogue-sidebar {
+      position: sticky;
+      top: 100px;
+      max-height: calc(100vh - 130px);
+      overflow-y: auto;
+      overflow-x: hidden;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      scrollbar-width: thin;
+    }
+
+    .mobile-report-selector-wrap {
+      display: none;
+    }
+
     @media (max-width: 900px) {
       .report-workspace-grid {
         grid-template-columns: 1fr !important;
+      }
+      .report-catalogue-sidebar {
+        display: none !important;
+      }
+      .mobile-report-selector-wrap {
+        display: block !important;
       }
     }
 
@@ -1964,8 +1992,8 @@
 
     <div id="loginModeBadge" style="display:none;"></div>
 
-    <div style="margin-top:16px;text-align:left;">
-      <label for="loginEmail" style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:6px;">Official Email ID</label>
+    <form id="loginForm" onsubmit="event.preventDefault(); doLogin();" style="margin-top:16px;text-align:left;">
+      <label for="loginEmail" style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:6px;">Email ID</label>
       <input id="loginEmail" name="email" type="email" placeholder="e.g. name@christuniversity.in" autocomplete="username"
         style="margin-bottom:14px;" />
 
@@ -1989,9 +2017,9 @@
         </button>
       </div>
 
-      <button id="btnLoginSubmit" style="width:100%;padding:12px;font-size:14px;font-weight:600;" onclick="doLogin()">Sign In</button>
+      <button id="btnLoginSubmit" type="submit" style="width:100%;padding:12px;font-size:14px;font-weight:600;">Sign In</button>
       <div id="loginErr" class="login-alert-banner" style="display:none;"></div>
-    </div>
+    </form>
   </div>
 
   <!-- MANDATORY FIRST-LOGIN PASSWORD CHANGE MODAL -->
@@ -2094,7 +2122,7 @@
       </p>
 
       <div style="margin-bottom:14px;text-align:left;">
-        <label for="forgotEmailInput" style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Official Email ID</label>
+        <label for="forgotEmailInput" style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Email ID</label>
         <input id="forgotEmailInput" name="forgotEmail" type="email" placeholder="e.g. name@christuniversity.in" autocomplete="email"
           style="width:100%;padding:10px;border:1px solid var(--border);border-radius:6px;font-size:13px;"
           onkeydown="if(event.key==='Enter')submitForgotPassword()" />
@@ -2293,8 +2321,8 @@
       </div>
 
       <div style="margin-bottom:14px;text-align:left;">
-        <label style="font-size:12px;font-weight:600;display:block;margin-bottom:6px;">Authorized Centres / Offices (Multi-Select)</label>
-        <div id="editUserCentresWrap" style="max-height:130px;overflow-y:auto;border:1px solid var(--border);border-radius:6px;padding:8px 10px;background:#FAFAFA;display:flex;flex-direction:column;gap:6px;">
+        <span class="field-label" id="editUserCentresLabel" style="font-size:12px;font-weight:600;display:block;margin-bottom:6px;">Authorized Centres / Offices (Multi-Select)</span>
+        <div id="editUserCentresWrap" role="group" aria-labelledby="editUserCentresLabel" style="max-height:130px;overflow-y:auto;border:1px solid var(--border);border-radius:6px;padding:8px 10px;background:#FAFAFA;display:flex;flex-direction:column;gap:6px;">
           <!-- Dynamically populated checkboxes -->
         </div>
         <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Check each Centre or Office this faculty member is authorized to propose NFAs for.</div>
@@ -3538,7 +3566,7 @@
 
       if (!email || !password) {
         if (errEl) {
-          errEl.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><span>Please enter both Official Email ID and Password</span>`;
+          errEl.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><span>Please enter both Email ID and Password</span>`;
           errEl.style.display = 'flex';
         }
         return;
@@ -3751,7 +3779,7 @@
 
       if (!email) {
         if (errEl) {
-          errEl.textContent = 'Please enter your Official Email ID';
+          errEl.textContent = 'Please enter your Email ID';
           errEl.style.display = 'block';
         }
         return;
@@ -9669,85 +9697,87 @@
             </div>
           </div>
 
-          <!-- Scope Selection & Filter Bar: 2 Clean Rows -->
-          <div style="background:#f8fafc;padding:14px 16px;border-radius:6px;border:1px solid #e2e8f0;margin-bottom:18px;">
-            <!-- Row 1: Scope, Organization Dropdown, Academic Year -->
-            <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">
-              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-                <span style="font-size:12px;font-weight:600;color:#475569;">Scope:</span>
+          <!-- Scope Selection & Filter Workspace -->
+          <div style="background:#f8fafc;padding:18px 20px;border-radius:8px;border:1px solid #e2e8f0;margin-bottom:20px;">
+            <!-- Scope Section -->
+            <div style="margin-bottom:14px;">
+              <div style="font-size:11.5px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">
+                Scope
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                 ${isSenior ? `
-                  <button class="${currentSummaryScope === 'campus' ? 'primary' : 'secondary'}" style="font-size:11.5px;padding:4px 10px;" onclick="onSummaryScopeChange('campus')">
+                  <button type="button" class="${currentSummaryScope === 'campus' ? 'primary' : 'secondary'}" style="font-size:12.5px;font-weight:${currentSummaryScope === 'campus' ? '600' : '500'};padding:7px 16px;border-radius:6px;${currentSummaryScope === 'campus' ? 'background:var(--primary-blue);color:#ffffff;border:1px solid var(--primary-blue);' : 'background:#ffffff;color:#334155;border:1px solid #cbd5e1;'}" onclick="onSummaryScopeChange('campus')">
                     Campus
                   </button>
                 ` : ''}
                 ${(isSenior || isDean) ? `
-                  <button class="${currentSummaryScope === 'school' ? 'primary' : 'secondary'}" style="font-size:11.5px;padding:4px 10px;" onclick="onSummaryScopeChange('school')">
+                  <button type="button" class="${currentSummaryScope === 'school' ? 'primary' : 'secondary'}" style="font-size:12.5px;font-weight:${currentSummaryScope === 'school' ? '600' : '500'};padding:7px 16px;border-radius:6px;${currentSummaryScope === 'school' ? 'background:var(--primary-blue);color:#ffffff;border:1px solid var(--primary-blue);' : 'background:#ffffff;color:#334155;border:1px solid #cbd5e1;'}" onclick="onSummaryScopeChange('school')">
                     School-Wise
                   </button>
                 ` : ''}
-                <button class="${currentSummaryScope === 'department' ? 'primary' : 'secondary'}" style="font-size:11.5px;padding:4px 10px;" onclick="onSummaryScopeChange('department')">
+                <button type="button" class="${currentSummaryScope === 'department' ? 'primary' : 'secondary'}" style="font-size:12.5px;font-weight:${currentSummaryScope === 'department' ? '600' : '500'};padding:7px 16px;border-radius:6px;${currentSummaryScope === 'department' ? 'background:var(--primary-blue);color:#ffffff;border:1px solid var(--primary-blue);' : 'background:#ffffff;color:#334155;border:1px solid #cbd5e1;'}" onclick="onSummaryScopeChange('department')">
                   Department
                 </button>
-                <button class="${currentSummaryScope === 'centre' ? 'primary' : 'secondary'}" style="font-size:11.5px;padding:4px 10px;" onclick="onSummaryScopeChange('centre')">
+                <button type="button" class="${currentSummaryScope === 'centre' ? 'primary' : 'secondary'}" style="font-size:12.5px;font-weight:${currentSummaryScope === 'centre' ? '600' : '500'};padding:7px 16px;border-radius:6px;${currentSummaryScope === 'centre' ? 'background:var(--primary-blue);color:#ffffff;border:1px solid var(--primary-blue);' : 'background:#ffffff;color:#334155;border:1px solid #cbd5e1;'}" onclick="onSummaryScopeChange('centre')">
                   Centres / Offices
                 </button>
               </div>
+            </div>
 
-              <!-- Dynamic Entity Dropdown with min-width 240px -->
+            <!-- Organization & Academic Year Selectors (Side-by-Side Grid) -->
+            <div style="display:grid;grid-template-columns:${currentSummaryScope === 'campus' ? '1fr' : 'repeat(auto-fit, minmax(280px, 1fr))'};gap:14px;align-items:end;margin-bottom:14px;">
               ${currentSummaryScope === 'school' ? `
-                <div style="display:inline-flex;align-items:center;gap:6px;">
-                  <span style="font-size:11.5px;font-weight:600;color:#334155;">School:</span>
-                  <select id="summarySchoolSelect" name="summarySchool" aria-label="Select School for Summary" style="font-size:12px;padding:4px 8px;min-width:240px;" onchange="onSummaryTargetChange(this.value)">
+                <div>
+                  <label for="summarySchoolSelect" style="font-size:12px;font-weight:600;color:#334155;margin-bottom:6px;display:block;">School</label>
+                  <select id="summarySchoolSelect" name="summarySchool" aria-label="Select School for Summary" style="height:42px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;width:100%;padding:0 12px;margin:0;background:#ffffff;" onchange="onSummaryTargetChange(this.value)">
                     ${(REF.schools || []).map(s => `<option value="${s.id || s.code}" ${(currentSummaryTargetId === s.id || currentSummaryTargetId === s.code) ? 'selected' : ''}>${escapeHtml(s.name)} (${s.code})</option>`).join('')}
                   </select>
                 </div>
               ` : ''}
 
               ${currentSummaryScope === 'department' ? `
-                <div style="display:inline-flex;align-items:center;gap:6px;">
-                  <span style="font-size:11.5px;font-weight:600;color:#334155;">Department:</span>
-                  <select id="summaryDeptSelect" name="summaryDept" aria-label="Select Department for Summary" style="font-size:12px;padding:4px 8px;min-width:240px;" onchange="onSummaryTargetChange(this.value)" ${(!isSenior && !isDean) ? 'disabled' : ''}>
+                <div>
+                  <label for="summaryDeptSelect" style="font-size:12px;font-weight:600;color:#334155;margin-bottom:6px;display:block;">Department</label>
+                  <select id="summaryDeptSelect" name="summaryDept" aria-label="Select Department for Summary" style="height:42px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;width:100%;padding:0 12px;margin:0;background:#ffffff;" onchange="onSummaryTargetChange(this.value)" ${(!isSenior && !isDean) ? 'disabled' : ''}>
                     ${academicDepts.map(d => `<option value="${d.id}" ${currentSummaryTargetId === d.id ? 'selected' : ''}>${escapeHtml(d.name)} (${d.code})</option>`).join('')}
                   </select>
                 </div>
               ` : ''}
 
               ${currentSummaryScope === 'centre' ? `
-                <div style="display:inline-flex;align-items:center;gap:6px;">
-                  <span style="font-size:11.5px;font-weight:600;color:#334155;">Centre:</span>
-                  <select id="summaryCentreSelect" name="summaryCentre" aria-label="Select Centre or Office for Summary" style="font-size:12px;padding:4px 8px;min-width:240px;" onchange="onSummaryTargetChange(this.value)">
+                <div>
+                  <label for="summaryCentreSelect" style="font-size:12px;font-weight:600;color:#334155;margin-bottom:6px;display:block;">Centres / Offices</label>
+                  <select id="summaryCentreSelect" name="summaryCentre" aria-label="Select Centre or Office for Summary" style="height:42px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;width:100%;padding:0 12px;margin:0;background:#ffffff;" onchange="onSummaryTargetChange(this.value)">
                     ${centreDepts.map(c => `<option value="${c.id}" ${currentSummaryTargetId === c.id ? 'selected' : ''}>${escapeHtml(c.name)} (${c.code})</option>`).join('')}
                   </select>
                 </div>
               ` : ''}
 
-              <!-- Academic Year Dropdown with min-width 140px -->
-              <div style="display:inline-flex;align-items:center;gap:6px;margin-left:auto;">
-                <span style="font-size:11.5px;font-weight:600;color:#334155;">Academic Year:</span>
-                <select id="summaryFySelect" name="summaryFy" aria-label="Select Academic Year for Summary" style="font-size:12px;padding:4px 8px;min-width:140px;" onchange="onSummaryFyChange(this.value)">
+              <div>
+                <label for="summaryFySelect" style="font-size:12px;font-weight:600;color:#334155;margin-bottom:6px;display:block;">Academic Year</label>
+                <select id="summaryFySelect" name="summaryFy" aria-label="Select Academic Year for Summary" style="height:42px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;width:100%;padding:0 12px;margin:0;background:#ffffff;" onchange="onSummaryFyChange(this.value)">
                   ${(REF.financialYears || REF.financial_years || []).map(f => `<option value="${f.id}" ${currentSummaryFyId === f.id ? 'selected' : ''}>${escapeHtml(f.label)}${f.is_active ? ' (Active)' : ''}</option>`).join('')}
                 </select>
               </div>
             </div>
 
-            <!-- Row 2: 0-Activity Toggle + Action Buttons -->
-            <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding-top:10px;border-top:1px solid #e2e8f0;">
-              <label for="summaryIncludeFaculty" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#475569;cursor:pointer;">
-                <input type="checkbox" id="summaryIncludeFaculty" name="summaryIncludeFaculty" ${currentSummaryIncludeAllFaculty ? 'checked' : ''} onchange="onSummaryFacultyToggle(this.checked)" />
-                <span>Include faculty with no NFA activity</span>
-              </label>
+            <!-- Checkbox: Include faculty with no NFA activity -->
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+              <input type="checkbox" id="summaryIncludeFaculty" name="summaryIncludeFaculty" style="width:17px;height:17px;margin:0;cursor:pointer;accent-color:var(--primary-blue);" ${currentSummaryIncludeAllFaculty ? 'checked' : ''} onchange="onSummaryFacultyToggle(this.checked)" />
+              <label for="summaryIncludeFaculty" style="font-size:13px;color:#334155;cursor:pointer;font-weight:500;margin:0;user-select:none;white-space:nowrap;">Include faculty with no NFA activity</label>
+            </div>
 
-              <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                <button class="secondary" style="font-size:12px;padding:5px 12px;" onclick="renderSummaryGeneration(document.querySelector('#mainContent > div:last-child'))">
-                  Refresh Preview
-                </button>
-                <button class="secondary" style="font-size:12px;padding:5px 12px;" onclick="exportSummary('pdf')">
-                  Download Summary (PDF)
-                </button>
-                <button class="secondary" style="font-size:12px;padding:5px 12px;" onclick="exportSummary('excel')">
-                  Download Summary (Excel)
-                </button>
-              </div>
+            <!-- Action Buttons: Refresh Preview | Download PDF | Download Excel -->
+            <div style="display:flex;gap:10px;justify-content:flex-end;align-items:center;flex-wrap:wrap;padding-top:12px;border-top:1px solid #e2e8f0;">
+              <button class="secondary" style="height:40px;padding:0 18px;font-size:13px;font-weight:600;border-radius:6px;border:1px solid #cbd5e1;background:#ffffff;color:#334155;" onclick="renderSummaryGeneration(document.querySelector('#mainContent > div:last-child'))">
+                Refresh Preview
+              </button>
+              <button class="primary" style="height:40px;padding:0 18px;font-size:13px;font-weight:600;border-radius:6px;background:var(--primary-blue);color:#ffffff;border:1px solid var(--primary-blue);" onclick="exportSummary('pdf')">
+                Download PDF
+              </button>
+              <button class="secondary" style="height:40px;padding:0 18px;font-size:13px;font-weight:600;border-radius:6px;border:1px solid #cbd5e1;background:#ffffff;color:#334155;" onclick="exportSummary('excel')">
+                Download Excel
+              </button>
             </div>
           </div>
 
@@ -10093,27 +10123,27 @@
           </div>
 
           <!-- 2-Column Institutional Report Workspace -->
-          <div style="display:grid;grid-template-columns:280px 1fr;gap:20px;align-items:start;" class="report-workspace-grid">
-            <!-- Left Column: Categorized Navigation List -->
-            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:12px;">
-              <div style="font-size:12.5px;font-weight:700;color:var(--primary-blue);padding-bottom:6px;border-bottom:1px solid #e2e8f0;">
+          <div class="report-workspace-grid">
+            <!-- Left Column: Categorized Sticky Navigation List -->
+            <div class="report-catalogue-sidebar">
+              <div style="font-size:11.5px;font-weight:700;color:var(--primary-blue);padding-bottom:6px;border-bottom:1px solid #e2e8f0;text-transform:uppercase;letter-spacing:0.5px;">
                 Report Catalogue
               </div>
               ${REPORT_CATEGORIES.map(cat => `
                 <div>
-                  <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;padding:4px 6px 4px;">
+                  <div style="font-size:10.5px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;padding:4px 6px;">
                     ${escapeHtml(cat)}
                   </div>
                   <div style="display:flex;flex-direction:column;gap:3px;">
                     ${REPORT_DEFINITIONS.filter(r => r.category === cat).map(r => `
                       <button
                         type="button"
+                        data-rep="${r.id}"
                         class="${currentSelectedReport === r.id ? 'primary' : 'secondary'}"
-                        style="text-align:left;padding:7px 10px;font-size:11.5px;font-weight:${currentSelectedReport === r.id ? '700' : '500'};display:flex;align-items:center;gap:6px;border-radius:6px;line-height:1.3;white-space:normal;${currentSelectedReport === r.id ? 'background:var(--primary-blue);color:#ffffff;box-shadow:0 1px 3px rgba(0,0,0,0.1);border-color:var(--primary-blue);' : 'background:#ffffff;border:1px solid #e2e8f0;color:#334155;'}"
+                        style="text-align:left;padding:8px 10px;font-size:11.5px;font-weight:${currentSelectedReport === r.id ? '600' : '500'};border-radius:6px;line-height:1.35;white-space:normal;cursor:pointer;border:1px solid ${currentSelectedReport === r.id ? 'var(--primary-blue)' : '#e2e8f0'};${currentSelectedReport === r.id ? 'background:var(--primary-blue);color:#ffffff;' : 'background:#ffffff;color:#334155;'}"
                         onclick="selectReportType('${r.id}')"
                       >
-                        <span style="font-size:9px;opacity:${currentSelectedReport === r.id ? '1' : '0.5'};">${currentSelectedReport === r.id ? '▶' : '•'}</span>
-                        <span>${escapeHtml(r.name)}</span>
+                        ${escapeHtml(r.name)}
                       </button>
                     `).join('')}
                   </div>
@@ -10123,35 +10153,60 @@
 
             <!-- Right Column: Active Report Workspace -->
             <div style="display:flex;flex-direction:column;gap:14px;min-width:0;">
-              <!-- Scope & Organization Filter Bar -->
-              <div style="background:#f8fafc;padding:14px 16px;border-radius:6px;border:1px solid #e2e8f0;">
-                <!-- Row 1: Scope, Organization Dropdown, Academic Year -->
-                <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">
+              <!-- Mobile Categorized Dropdown Selector -->
+              <div class="mobile-report-selector-wrap">
+                <label for="mobileReportSelector" style="font-size:12px;font-weight:600;color:#334155;margin-bottom:6px;display:block;">Select Report Type</label>
+                <select id="mobileReportSelector" aria-label="Select Report Type" style="width:100%;height:42px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;padding:0 12px;background:#ffffff;margin:0;" onchange="selectReportType(this.value)">
+                  ${REPORT_CATEGORIES.map(cat => `
+                    <optgroup label="${escapeHtml(cat)}">
+                      ${REPORT_DEFINITIONS.filter(r => r.category === cat).map(r => `
+                        <option value="${r.id}" ${currentSelectedReport === r.id ? 'selected' : ''}>${escapeHtml(r.name)}</option>
+                      `).join('')}
+                    </optgroup>
+                  `).join('')}
+                </select>
+              </div>
+
+              <!-- 1. Active Report Title & Category Badge + 2. Short Description -->
+              <div style="background:#f8fafc;border-left:4px solid var(--primary-blue);padding:14px 16px;border-radius:0 8px 8px 0;border-top:1px solid #e2e8f0;border-right:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:8px;">
+                  <h3 style="margin:0;font-size:16px;font-weight:700;color:var(--primary-blue);">${escapeHtml(activeDef.name)}</h3>
+                  <span class="badge" style="background:var(--light-blue);color:var(--primary-blue);font-size:11px;font-weight:700;">${escapeHtml(activeDef.category)}</span>
+                </div>
+                <div style="font-size:13px;color:#475569;line-height:1.4;">${escapeHtml(activeDef.desc)}</div>
+              </div>
+
+              <!-- 3. Scope & Organization Filters + 4. Academic Year + 5. Actions -->
+              <div style="background:#f8fafc;padding:16px 18px;border-radius:8px;border:1px solid #e2e8f0;">
+                <!-- Scope Options -->
+                <div style="margin-bottom:12px;">
+                  <div style="font-size:11.5px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Scope</div>
                   <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-                    <span style="font-size:12px;font-weight:600;color:#475569;">Scope:</span>
                     ${isSenior ? `
-                      <button class="${currentReportScope === 'campus' ? 'primary' : 'secondary'}" style="font-size:11.5px;padding:4px 10px;" onclick="onReportScopeChange('campus')">
+                      <button type="button" class="${currentReportScope === 'campus' ? 'primary' : 'secondary'}" style="font-size:12px;font-weight:${currentReportScope === 'campus' ? '600' : '500'};padding:6px 14px;border-radius:6px;${currentReportScope === 'campus' ? 'background:var(--primary-blue);color:#ffffff;border:1px solid var(--primary-blue);' : 'background:#ffffff;color:#334155;border:1px solid #cbd5e1;'}" onclick="onReportScopeChange('campus')">
                         Campus
                       </button>
                     ` : ''}
                     ${(isSenior || isDean) ? `
-                      <button class="${currentReportScope === 'school' ? 'primary' : 'secondary'}" style="font-size:11.5px;padding:4px 10px;" onclick="onReportScopeChange('school')">
+                      <button type="button" class="${currentReportScope === 'school' ? 'primary' : 'secondary'}" style="font-size:12px;font-weight:${currentReportScope === 'school' ? '600' : '500'};padding:6px 14px;border-radius:6px;${currentReportScope === 'school' ? 'background:var(--primary-blue);color:#ffffff;border:1px solid var(--primary-blue);' : 'background:#ffffff;color:#334155;border:1px solid #cbd5e1;'}" onclick="onReportScopeChange('school')">
                         School-Wise
                       </button>
                     ` : ''}
-                    <button class="${currentReportScope === 'department' ? 'primary' : 'secondary'}" style="font-size:11.5px;padding:4px 10px;" onclick="onReportScopeChange('department')">
+                    <button type="button" class="${currentReportScope === 'department' ? 'primary' : 'secondary'}" style="font-size:12px;font-weight:${currentReportScope === 'department' ? '600' : '500'};padding:6px 14px;border-radius:6px;${currentReportScope === 'department' ? 'background:var(--primary-blue);color:#ffffff;border:1px solid var(--primary-blue);' : 'background:#ffffff;color:#334155;border:1px solid #cbd5e1;'}" onclick="onReportScopeChange('department')">
                       Department
                     </button>
-                    <button class="${currentReportScope === 'centre' ? 'primary' : 'secondary'}" style="font-size:11.5px;padding:4px 10px;" onclick="onReportScopeChange('centre')">
+                    <button type="button" class="${currentReportScope === 'centre' ? 'primary' : 'secondary'}" style="font-size:12px;font-weight:${currentReportScope === 'centre' ? '600' : '500'};padding:6px 14px;border-radius:6px;${currentReportScope === 'centre' ? 'background:var(--primary-blue);color:#ffffff;border:1px solid var(--primary-blue);' : 'background:#ffffff;color:#334155;border:1px solid #cbd5e1;'}" onclick="onReportScopeChange('centre')">
                       Centres / Offices
                     </button>
                   </div>
+                </div>
 
-                  <!-- Dynamic Entity Dropdown with min-width 240px -->
+                <!-- Entity Dropdown & Academic Year Row -->
+                <div style="display:grid;grid-template-columns:${currentReportScope === 'campus' ? '1fr' : 'repeat(auto-fit, minmax(280px, 1fr))'};gap:14px;align-items:end;margin-bottom:12px;">
                   ${currentReportScope === 'school' ? `
-                    <div style="display:inline-flex;align-items:center;gap:6px;">
-                      <span style="font-size:11.5px;font-weight:600;color:#334155;">School:</span>
-                      <select id="reportSchoolSelect" name="reportSchool" aria-label="Select School for Report" style="font-size:12px;padding:4px 8px;min-width:240px;" onchange="onReportTargetChange(this.value)">
+                    <div>
+                      <label for="reportSchoolSelect" style="font-size:12px;font-weight:600;color:#334155;margin-bottom:6px;display:block;">School</label>
+                      <select id="reportSchoolSelect" name="reportSchool" aria-label="Select School for Report" style="height:42px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;width:100%;padding:0 12px;margin:0;background:#ffffff;" onchange="onReportTargetChange(this.value)">
                         <option value="">All Schools</option>
                         ${(REF.schools || []).map(s => `<option value="${s.id || s.code}" ${(currentReportTargetId === s.id || currentReportTargetId === s.code) ? 'selected' : ''}>${escapeHtml(s.name)} (${s.code})</option>`).join('')}
                       </select>
@@ -10159,9 +10214,9 @@
                   ` : ''}
 
                   ${currentReportScope === 'department' ? `
-                    <div style="display:inline-flex;align-items:center;gap:6px;">
-                      <span style="font-size:11.5px;font-weight:600;color:#334155;">Department:</span>
-                      <select id="reportDeptSelect" name="reportDept" aria-label="Select Department for Report" style="font-size:12px;padding:4px 8px;min-width:240px;" onchange="onReportTargetChange(this.value)" ${(!isSenior && !isDean) ? 'disabled' : ''}>
+                    <div>
+                      <label for="reportDeptSelect" style="font-size:12px;font-weight:600;color:#334155;margin-bottom:6px;display:block;">Department</label>
+                      <select id="reportDeptSelect" name="reportDept" aria-label="Select Department for Report" style="height:42px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;width:100%;padding:0 12px;margin:0;background:#ffffff;" onchange="onReportTargetChange(this.value)" ${(!isSenior && !isDean) ? 'disabled' : ''}>
                         ${isSenior || isDean ? '<option value="">All Departments</option>' : ''}
                         ${academicDepts.map(d => `<option value="${d.id}" ${currentReportTargetId === d.id ? 'selected' : ''}>${escapeHtml(d.name)} (${d.code})</option>`).join('')}
                       </select>
@@ -10169,69 +10224,63 @@
                   ` : ''}
 
                   ${currentReportScope === 'centre' ? `
-                    <div style="display:inline-flex;align-items:center;gap:6px;">
-                      <span style="font-size:11.5px;font-weight:600;color:#334155;">Centre:</span>
-                      <select id="reportCentreSelect" name="reportCentre" aria-label="Select Centre or Office for Report" style="font-size:12px;padding:4px 8px;min-width:240px;" onchange="onReportTargetChange(this.value)">
+                    <div>
+                      <label for="reportCentreSelect" style="font-size:12px;font-weight:600;color:#334155;margin-bottom:6px;display:block;">Centres / Offices</label>
+                      <select id="reportCentreSelect" name="reportCentre" aria-label="Select Centre or Office for Report" style="height:42px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;width:100%;padding:0 12px;margin:0;background:#ffffff;" onchange="onReportTargetChange(this.value)">
                         <option value="">All Centres / Offices</option>
                         ${centreDepts.map(c => `<option value="${c.id}" ${currentReportTargetId === c.id ? 'selected' : ''}>${escapeHtml(c.name)} (${c.code})</option>`).join('')}
                       </select>
                     </div>
                   ` : ''}
 
-                  <!-- Academic Year Dropdown with min-width 140px -->
-                  <div style="display:inline-flex;align-items:center;gap:6px;margin-left:auto;">
-                    <span style="font-size:11.5px;font-weight:600;color:#334155;">Academic Year:</span>
-                    <select id="reportFySelect" name="reportFy" aria-label="Select Academic Year for Report" style="font-size:12px;padding:4px 8px;min-width:140px;" onchange="onReportFyChange(this.value)">
+                  <div>
+                    <label for="reportFySelect" style="font-size:12px;font-weight:600;color:#334155;margin-bottom:6px;display:block;">Academic Year</label>
+                    <select id="reportFySelect" name="reportFy" aria-label="Select Academic Year for Report" style="height:42px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;width:100%;padding:0 12px;margin:0;background:#ffffff;" onchange="onReportFyChange(this.value)">
                       ${(REF.financialYears || REF.financial_years || []).map(f => `<option value="${f.id}" ${currentReportFyId === f.id ? 'selected' : ''}>${escapeHtml(f.label)}${f.is_active ? ' (Active)' : ''}</option>`).join('')}
                     </select>
                   </div>
                 </div>
 
-                <!-- Row 2: 0-Activity Toggle + Action Buttons -->
-                <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding-top:10px;border-top:1px solid #e2e8f0;">
+                <!-- Toggle & Action Buttons: Refresh Preview | Download PDF | Download Excel -->
+                <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding-top:12px;border-top:1px solid #e2e8f0;">
                   <div>
                     ${currentSelectedReport === 'faculty_nfa' ? `
-                      <label for="reportIncludeFaculty" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#475569;cursor:pointer;">
-                        <input type="checkbox" id="reportIncludeFaculty" name="reportIncludeFaculty" ${currentReportIncludeAllFaculty ? 'checked' : ''} onchange="onReportFacultyToggle(this.checked)" />
+                      <label for="reportIncludeFaculty" style="display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:#334155;cursor:pointer;">
+                        <input type="checkbox" id="reportIncludeFaculty" name="reportIncludeFaculty" style="width:16px;height:16px;margin:0;accent-color:var(--primary-blue);" ${currentReportIncludeAllFaculty ? 'checked' : ''} onchange="onReportFacultyToggle(this.checked)" />
                         <span>Include faculty with no NFA activity</span>
                       </label>
-                    ` : '<span style="font-size:12px;color:#64748b;">Filtering: Strict organization boundary</span>'}
+                    ` : '<span style="font-size:11.5px;color:#64748b;">Filtering: Institutional Organization Scope</span>'}
                   </div>
 
-                  <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                    <button class="secondary" style="font-size:12px;padding:5px 12px;" onclick="renderReportGeneration(document.querySelector('#mainContent > div:last-child'))">
+                  <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <button class="secondary" style="height:38px;padding:0 16px;font-size:12.5px;font-weight:600;border-radius:6px;border:1px solid #cbd5e1;background:#ffffff;color:#334155;" onclick="renderReportGeneration(document.querySelector('#mainContent > div:last-child'))">
                       Refresh Preview
                     </button>
-                    <button class="primary" style="font-size:12px;padding:5px 14px;" onclick="downloadActiveReport('pdf')">
-                      Download Official PDF Report
+                    <button class="primary" style="height:38px;padding:0 18px;font-size:12.5px;font-weight:600;border-radius:6px;background:var(--primary-blue);color:#ffffff;border:1px solid var(--primary-blue);" onclick="downloadActiveReport('pdf')">
+                      Download PDF
                     </button>
-                    <button class="secondary" style="font-size:12px;padding:5px 12px;" onclick="downloadActiveReport('excel')">
-                      Download Formatted Excel
+                    <button class="secondary" style="height:38px;padding:0 16px;font-size:12.5px;font-weight:600;border-radius:6px;border:1px solid #cbd5e1;background:#ffffff;color:#334155;" onclick="downloadActiveReport('excel')">
+                      Download Excel
                     </button>
                   </div>
                 </div>
               </div>
 
-              <!-- Active Report Header & Description -->
-              <div style="background:#f8fafc;border-left:4px solid var(--primary-blue);padding:12px 16px;border-radius:0 6px 6px 0;">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-                  <h3 style="margin:0;font-size:15px;color:var(--primary-blue);">${escapeHtml(activeDef.name)}</h3>
-                  <span class="badge" style="background:var(--light-blue);color:var(--primary-blue);font-size:10.5px;font-weight:700;">${escapeHtml(activeDef.category)}</span>
-                </div>
-                <div style="font-size:12.5px;color:#475569;">${escapeHtml(activeDef.desc)}</div>
-              </div>
-
+              <!-- 6. Record Count Banner & 7. Table Preview -->
               ${errorMsg ? `<div class="card" style="color:var(--danger);padding:14px;">${escapeHtml(errorMsg)}</div>` : `
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-                  <span style="font-size:12.5px;font-weight:600;color:#334155;">Previewing Records (${records.length} total)</span>
-                  <span style="font-size:11px;color:#64748b;">Showing first 25 records below. Full records exported in PDF &amp; Excel.</span>
+                  <span style="font-size:13px;font-weight:700;color:#1e293b;">Previewing Records (${records.length} total)</span>
+                  <span style="font-size:11.5px;color:#64748b;">Showing first 25 records. Full records exported in PDF &amp; Excel.</span>
                 </div>
 
                 <div class="table-wrap">
                   <table>
                     <thead>
                       <tr>
-                        ${records.length > 0 ? Object.keys(records[0]).map(k => `<th>${escapeHtml(k.replace(/_/g, ' ').toUpperCase())}</th>`).join('') : '<th>Records</th>'}
+                        ${records.length > 0 ? Object.keys(records[0]).map(k => {
+                          const isCurr = k.includes('amount') || k.includes('allocated') || k.includes('approved') || k.includes('pending') || k.includes('available') || k.includes('revenue') || k.includes('requested');
+                          return `<th style="${isCurr ? 'text-align:right;' : ''}">${escapeHtml(k.replace(/_/g, ' ').toUpperCase())}</th>`;
+                        }).join('') : '<th>Records</th>'}
                       </tr>
                     </thead>
                     <tbody>
@@ -10240,10 +10289,11 @@
                         <tr>
                           ${Object.keys(row).map(k => {
                             let val = row[k];
-                            if (typeof val === 'number' && (k.includes('amount') || k.includes('allocated') || k.includes('approved') || k.includes('pending') || k.includes('available') || k.includes('revenue') || k.includes('requested'))) {
+                            const isCurr = typeof val === 'number' && (k.includes('amount') || k.includes('allocated') || k.includes('approved') || k.includes('pending') || k.includes('available') || k.includes('revenue') || k.includes('requested'));
+                            if (isCurr) {
                               val = inr(val);
                             }
-                            return `<td>${escapeHtml(String(val ?? '—'))}</td>`;
+                            return `<td style="${isCurr ? 'text-align:right;font-weight:600;' : ''}">${escapeHtml(String(val ?? '—'))}</td>`;
                           }).join('')}
                         </tr>
                       `).join('')}
@@ -10261,8 +10311,10 @@
 
     async function selectReportType(typeId) {
       currentSelectedReport = typeId;
+      const scrollY = window.scrollY;
       const main = document.getElementById('main');
       await renderExcel(main);
+      window.scrollTo({ top: scrollY, behavior: 'instant' });
     }
 
     async function onReportScopeChange(scope) {

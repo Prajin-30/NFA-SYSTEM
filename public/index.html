@@ -439,6 +439,17 @@
       display: none;
     }
 
+    #app-header-wrap {
+      position: sticky;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      width: 100%;
+      background: var(--dark-blue);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
     header {
       background: var(--dark-blue);
       color: #fff;
@@ -447,13 +458,8 @@
       align-items: center;
       gap: 20px;
       border-bottom: 2px solid var(--gold-accent);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-      /* Change 5 — Fixed header */
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
+      position: relative;
+      width: 100%;
     }
 
     header .brand {
@@ -571,12 +577,8 @@
       -webkit-overflow-scrolling: touch;
       border-bottom: 1px solid rgba(255, 255, 255, 0.12);
       scrollbar-width: thin;
-      /* Change 5 — Fixed nav directly below header */
-      position: fixed;
-      top: 70px;
-      left: 0;
-      right: 0;
-      z-index: 999;
+      position: relative;
+      width: 100%;
     }
 
     nav button {
@@ -617,9 +619,8 @@
     /* MAIN CONTENT */
     main {
       max-width: 1240px;
-      margin: 24px auto;
-      /* Change 5 — Offset for fixed header + nav + room for footer */
-      padding: 120px 20px 70px;
+      margin: 0 auto;
+      padding: 24px 20px 70px;
       width: 100%;
       min-width: 0;
     }
@@ -674,8 +675,33 @@
 
     .grid-4 {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(4, 1fr);
       gap: 16px;
+    }
+
+    @media (max-width: 1024px) {
+      .grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 560px) {
+      .grid-4 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .report-workspace-grid {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .report-workspace-grid {
+        grid-template-columns: 1fr !important;
+      }
     }
 
     .stat-card {
@@ -1939,17 +1965,17 @@
     <div id="loginModeBadge" style="display:none;"></div>
 
     <div style="margin-top:16px;text-align:left;">
-      <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:6px;">Official Email ID</label>
-      <input id="loginEmail" type="email" placeholder="e.g. name@christuniversity.in" autocomplete="username"
+      <label for="loginEmail" style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:6px;">Official Email ID</label>
+      <input id="loginEmail" name="email" type="email" placeholder="e.g. name@christuniversity.in" autocomplete="username"
         style="margin-bottom:14px;" />
 
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-        <label style="font-size:12px;font-weight:600;color:var(--text);margin:0;">Password</label>
+        <label for="loginPassword" style="font-size:12px;font-weight:600;color:var(--text);margin:0;">Password</label>
         <a href="javascript:void(0)" onclick="openForgotPasswordModal()"
           style="font-size:12px;color:var(--primary-blue);font-weight:600;text-decoration:none;">Forgot Password?</a>
       </div>
       <div class="pwd-input-wrap" style="margin-bottom:18px;">
-        <input id="loginPassword" type="password" placeholder="Enter your password" autocomplete="current-password"
+        <input id="loginPassword" name="password" type="password" placeholder="Enter your password" autocomplete="current-password"
           style="margin-bottom:0;" onkeydown="if(event.key==='Enter')doLogin()" />
         <button type="button" class="pwd-toggle-btn" aria-label="Show password" title="Show password"
           onclick="togglePasswordVisibility('loginPassword', this)">
@@ -1975,8 +2001,9 @@
       style="background:#fff;border-radius:var(--radius-lg);max-width:480px;width:100%;padding:32px 28px;box-shadow:var(--shadow-lg);border:1px solid var(--border);position:relative;">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
         <div
-          style="width:40px;height:40px;border-radius:50%;background:#FFF3CD;display:flex;align-items:center;justify-content:center;font-size:20px;color:#856404;">
-          🔒</div>
+          style="width:40px;height:40px;border-radius:50%;background:#FFF3CD;display:flex;align-items:center;justify-content:center;color:#856404;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        </div>
         <div>
           <h2 style="font-size:18px;font-weight:700;color:var(--primary-blue);margin:0;">Mandatory Password Change</h2>
           <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">Institutional Security Enforcement</div>
@@ -1989,9 +2016,9 @@
       </div>
 
       <div style="margin-bottom:14px;text-align:left;">
-        <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">New Password</label>
+        <label for="mustChangeNewPwd" style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">New Password</label>
         <div class="pwd-input-wrap">
-          <input id="mustChangeNewPwd" type="password" placeholder="At least 8 chars (upper, lower, digit, symbol)"
+          <input id="mustChangeNewPwd" name="newPassword" type="password" placeholder="At least 8 chars (upper, lower, digit, symbol)" autocomplete="new-password"
             style="width:100%;padding:10px 42px 10px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;margin-bottom:0;" />
           <button type="button" class="pwd-toggle-btn" aria-label="Show password" title="Show password"
             onclick="togglePasswordVisibility('mustChangeNewPwd', this)">
@@ -2007,9 +2034,9 @@
       </div>
 
       <div style="margin-bottom:16px;text-align:left;">
-        <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Confirm New Password</label>
+        <label for="mustChangeConfirmPwd" style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Confirm New Password</label>
         <div class="pwd-input-wrap">
-          <input id="mustChangeConfirmPwd" type="password" placeholder="Re-enter new password"
+          <input id="mustChangeConfirmPwd" name="confirmPassword" type="password" placeholder="Re-enter new password" autocomplete="new-password"
             style="width:100%;padding:10px 42px 10px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;margin-bottom:0;"
             onkeydown="if(event.key==='Enter')submitMustChangePassword()" />
           <button type="button" class="pwd-toggle-btn" aria-label="Show password" title="Show password"
@@ -2053,8 +2080,9 @@
         style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-muted);">&times;</button>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
         <div
-          style="width:36px;height:36px;border-radius:50%;background:rgba(0,61,143,0.1);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--primary-blue);">
-          ✉️</div>
+          style="width:36px;height:36px;border-radius:50%;background:rgba(0,61,143,0.1);display:flex;align-items:center;justify-content:center;color:var(--primary-blue);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+        </div>
         <div>
           <h2 style="font-size:17px;font-weight:700;color:var(--primary-blue);margin:0;">Forgot Password?</h2>
           <div style="font-size:12px;color:var(--text-muted);">Institutional Account Password Recovery</div>
@@ -2066,8 +2094,8 @@
       </p>
 
       <div style="margin-bottom:14px;text-align:left;">
-        <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Official Email ID</label>
-        <input id="forgotEmailInput" type="email" placeholder="e.g. name@christuniversity.in"
+        <label for="forgotEmailInput" style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Official Email ID</label>
+        <input id="forgotEmailInput" name="forgotEmail" type="email" placeholder="e.g. name@christuniversity.in" autocomplete="email"
           style="width:100%;padding:10px;border:1px solid var(--border);border-radius:6px;font-size:13px;"
           onkeydown="if(event.key==='Enter')submitForgotPassword()" />
       </div>
@@ -2094,8 +2122,9 @@
         style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-muted);">&times;</button>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
         <div
-          style="width:36px;height:36px;border-radius:50%;background:rgba(0,61,143,0.1);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--primary-blue);">
-          👤</div>
+          style="width:36px;height:36px;border-radius:50%;background:rgba(0,61,143,0.1);display:flex;align-items:center;justify-content:center;color:var(--primary-blue);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7.5" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+        </div>
         <div>
           <h2 style="font-size:17px;font-weight:700;color:var(--primary-blue);margin:0;">Add System User</h2>
           <div style="font-size:12px;color:var(--text-muted);">Provision individual faculty or administrative account
@@ -2104,14 +2133,14 @@
       </div>
 
       <div style="margin-bottom:12px;text-align:left;">
-        <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Full Name *</label>
-        <input id="addUserName" type="text" placeholder="e.g. Dr. Ramesh Kumar"
+        <label for="addUserName" style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Full Name *</label>
+        <input id="addUserName" name="addUserName" type="text" placeholder="e.g. Dr. Ramesh Kumar" autocomplete="name"
           style="width:100%;padding:9px;border:1px solid var(--border);border-radius:6px;font-size:13px;" />
       </div>
 
       <div style="margin-bottom:12px;text-align:left;">
-        <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Official Email ID *</label>
-        <input id="addUserEmail" type="email" placeholder="e.g. ramesh.kumar@christuniversity.in"
+        <label for="addUserEmail" style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Official Email ID *</label>
+        <input id="addUserEmail" name="addUserEmail" type="email" placeholder="e.g. ramesh.kumar@christuniversity.in" autocomplete="email"
           style="width:100%;padding:9px;border:1px solid var(--border);border-radius:6px;font-size:13px;" />
         <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Must be an official university domain
           (@christuniversity.in or @christ.edu)</div>
@@ -2119,8 +2148,8 @@
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
         <div style="text-align:left;">
-          <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Role *</label>
-          <select id="addUserRole" onchange="onAddUserRoleChange()"
+          <label for="addUserRole" style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Role *</label>
+          <select id="addUserRole" name="addUserRole" onchange="onAddUserRoleChange()"
             style="width:100%;padding:9px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
             <option value="faculty">Faculty</option>
             <option value="hod">Head of Department (HOD)</option>
@@ -2132,9 +2161,9 @@
           </select>
         </div>
         <div style="text-align:left;">
-          <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;"
+          <label for="addUserDept" style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;"
             id="addUserDeptLabel">Department *</label>
-          <select id="addUserDept"
+          <select id="addUserDept" name="addUserDept"
             style="width:100%;padding:9px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
             <!-- Dynamically populated -->
           </select>
@@ -2143,7 +2172,7 @@
 
       <div
         style="background:#FFF9E6;border:1px solid #FFEBAA;border-radius:6px;padding:8px 10px;font-size:11.5px;color:#856404;line-height:1.4;margin-bottom:14px;">
-        💡 A unique 14-character temporary password will be cryptographically generated upon creation. The user will be
+        A unique 14-character temporary password will be cryptographically generated upon creation. The user will be
         required to change it on their first login.
       </div>
 
@@ -2164,8 +2193,9 @@
       style="background:#fff;border-radius:var(--radius-lg);max-width:480px;width:100%;padding:28px 26px;box-shadow:var(--shadow-lg);border:1px solid var(--border);position:relative;">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
         <div
-          style="width:38px;height:38px;border-radius:50%;background:#EDF7EE;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--success);">
-          ✅</div>
+          style="width:38px;height:38px;border-radius:50%;background:#EDF7EE;display:flex;align-items:center;justify-content:center;color:var(--success);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </div>
         <div>
           <h2 style="font-size:17px;font-weight:700;color:var(--primary-blue);margin:0;" id="credDeliveryTitle">Account
             Credentials Generated</h2>
@@ -2195,7 +2225,7 @@
             <code id="credTempPassword"
               style="background:#FFF3CD;padding:4px 8px;border-radius:4px;font-size:14px;font-weight:700;color:#856404;letter-spacing:1px;"></code>
             <button class="secondary" onclick="copyCredentialsToClipboard()" style="padding:4px 8px;font-size:11px;"
-              title="Copy to clipboard">📋 Copy</button>
+              title="Copy to clipboard">Copy</button>
           </div>
         </div>
       </div>
@@ -2216,31 +2246,32 @@
         style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-muted);">&times;</button>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
         <div
-          style="width:36px;height:36px;border-radius:50%;background:rgba(0,61,143,0.1);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--primary-blue);">
-          ✏️</div>
+          style="width:36px;height:36px;border-radius:50%;background:rgba(0,61,143,0.1);display:flex;align-items:center;justify-content:center;color:var(--primary-blue);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+        </div>
         <div>
           <h2 style="font-size:17px;font-weight:700;color:var(--primary-blue);margin:0;">Edit User Account</h2>
           <div style="font-size:12px;color:var(--text-muted);">Update role and department assignments</div>
         </div>
       </div>
-      <input type="hidden" id="editUserId" />
+      <input type="hidden" id="editUserId" name="editUserId" />
 
       <div style="margin-bottom:12px;text-align:left;">
-        <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Full Name *</label>
-        <input id="editUserName" type="text"
+        <label for="editUserName" style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Full Name *</label>
+        <input id="editUserName" name="editUserName" type="text" autocomplete="name"
           style="width:100%;padding:9px;border:1px solid var(--border);border-radius:6px;font-size:13px;" />
       </div>
 
       <div style="margin-bottom:12px;text-align:left;">
-        <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Official Email ID *</label>
-        <input id="editUserEmail" type="email"
+        <label for="editUserEmail" style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Official Email ID *</label>
+        <input id="editUserEmail" name="editUserEmail" type="email" autocomplete="email"
           style="width:100%;padding:9px;border:1px solid var(--border);border-radius:6px;font-size:13px;" />
       </div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
         <div style="text-align:left;">
-          <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Role *</label>
-          <select id="editUserRole" onchange="onEditUserRoleChange()"
+          <label for="editUserRole" style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Role *</label>
+          <select id="editUserRole" name="editUserRole" onchange="onEditUserRoleChange()"
             style="width:100%;padding:9px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
             <option value="faculty">Faculty</option>
             <option value="hod">Head of Department (HOD)</option>
@@ -2252,9 +2283,9 @@
           </select>
         </div>
         <div style="text-align:left;">
-          <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;"
+          <label for="editUserDept" style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;"
             id="editUserDeptLabel">Department</label>
-          <select id="editUserDept"
+          <select id="editUserDept" name="editUserDept"
             style="width:100%;padding:9px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
             <!-- Dynamically populated -->
           </select>
@@ -2288,8 +2319,9 @@
         style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-muted);">&times;</button>
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
         <div
-          style="width:38px;height:38px;border-radius:50%;background:#FEF3C7;display:flex;align-items:center;justify-content:center;font-size:20px;color:#B45309;">
-          📊</div>
+          style="width:38px;height:38px;border-radius:50%;background:#FEF3C7;display:flex;align-items:center;justify-content:center;color:#B45309;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        </div>
         <div>
           <h2 style="font-size:18px;font-weight:700;color:var(--primary-blue);margin:0;">Faculty Excel Bulk Onboarding
           </h2>
@@ -2301,9 +2333,11 @@
       <!-- Step 1: Upload & Inspect -->
       <div id="excelStepUpload">
         <div id="facultyDropzone" class="file-dropzone" onclick="document.getElementById('facultyExcelInput').click()">
-          <input type="file" id="facultyExcelInput" accept=".xlsx" style="display:none;"
+          <input type="file" id="facultyExcelInput" name="facultyExcelInput" accept=".xlsx" style="display:none;"
             onchange="onFacultyExcelSelected()" />
-          <div class="file-dropzone-icon">📊</div>
+          <div class="file-dropzone-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--primary-blue);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+          </div>
           <div class="file-dropzone-prompt">Choose an Excel Workbook (.xlsx) or drag &amp; drop here</div>
           <div class="file-dropzone-sub">
             Required columns: <strong>Faculty Name</strong>, <strong>Official Email ID</strong>, <strong>Department Code</strong>, <strong>Role</strong>
@@ -2313,7 +2347,7 @@
         <div style="margin-top:12px;text-align:center;">
           <a href="/api/admin/users/template" download="CU_Faculty_Onboarding_Template.xlsx" class="secondary"
             style="font-size:12px;text-decoration:none;display:inline-block;padding:6px 12px;border-radius:4px;border:1px solid var(--border);background:#fff;">
-            📥 Download Blank Excel Template (.xlsx)
+            Download Blank Excel Template (.xlsx)
           </a>
         </div>
         <div id="excelUploadErr" style="color:var(--danger);font-size:12px;margin-top:8px;display:none;"></div>
@@ -2377,35 +2411,36 @@
 
   <!-- APPLICATION VIEW -->
   <div id="app">
-    <header>
-      <div class="brand">
-        <!-- Official CHRIST University Logo -->
-        <img src="/christ-logo.png" alt="CHRIST University" />
-        <div class="brand-texts">
-          <div class="brand-title">
-            CHRIST <span style="font-weight:400;opacity:0.9">UNIVERSITY</span>
-            <span class="brand-pill">ESTD. 1969</span>
+    <div id="app-header-wrap">
+      <header>
+        <div class="brand">
+          <!-- Official CHRIST University Logo -->
+          <img src="/christ-logo.png" alt="CHRIST University" />
+          <div class="brand-texts">
+            <div class="brand-title">
+              CHRIST <span style="font-weight:400;opacity:0.9">UNIVERSITY</span>
+              <span class="brand-pill">ESTD. 1969</span>
+            </div>
+            <span class="brand-sub">Bengaluru – Kengeri Campus · Institutional NFA &amp; Budget System</span>
           </div>
-          <span class="brand-sub">Bengaluru – Kengeri Campus · Institutional NFA &amp; Budget System</span>
         </div>
-      </div>
-      <div class="user-info">
-        <!-- Global FY Selector -->
-        <div class="row" style="gap:6px">
-          <span style="font-size:11px;font-weight:700;color:#fce7ba;text-transform:uppercase;">Academic Year:</span>
-          <select id="headerFySelect" class="fy-pill-select" onchange="onHeaderFyChange(this.value)"></select>
+        <div class="user-info">
+          <!-- Global FY Selector -->
+          <div class="row" style="gap:6px">
+            <label for="headerFySelect" style="font-size:11px;font-weight:700;color:#fce7ba;text-transform:uppercase;margin:0;">Academic Year:</label>
+            <select id="headerFySelect" name="headerFySelect" class="fy-pill-select" onchange="onHeaderFyChange(this.value)"></select>
+          </div>
+          <button class="secondary"
+            style="padding:5px 11px;font-size:12px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.12);color:#fff;cursor:pointer;border-radius:4px;"
+            onclick="openProfileModal()">Digital Signature</button>
+          <span id="whoamiName" style="font-weight:700"></span>
+          <span id="whoamiRole" class="role-pill"></span>
+          <button class="secondary" style="padding:6px 12px;font-size:12px;border:none;" onclick="logout()">Log Out</button>
         </div>
-        <button class="secondary"
-          style="padding:5px 11px;font-size:12px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.12);color:#fff;cursor:pointer;border-radius:4px;"
-          onclick="openProfileModal()">Digital Signature</button>
-        <span id="whoamiName" style="font-weight:700"></span>
-        <span id="whoamiRole" class="role-pill"></span>
-        <button class="secondary" style="padding:6px 12px;font-size:12px;border:none;" onclick="logout()">Log
-          Out</button>
-      </div>
-    </header>
+      </header>
 
-    <nav id="nav"></nav>
+      <nav id="nav"></nav>
+    </div>
 
     <main id="main"></main>
   </div>
@@ -2896,10 +2931,10 @@
       if (isSampling) row.dataset.sampling = 'true';
 
       row.innerHTML = `
-    <input placeholder="Particulars / Item Description" class="it-p" value="${escapeHtml(particulars)}" />
-    <input placeholder="Qty" class="it-q" type="number" min="1" step="1" value="${escapeHtml(q)}" oninput="calcRow(this)" />
-    <input placeholder="Rate (₹)" class="it-r" type="number" min="0" step="any" value="${escapeHtml(r)}" oninput="calcRow(this)" />
-    <input placeholder="Amount (₹)" class="it-a" type="number" min="0" step="any" value="${escapeHtml(a)}" oninput="calcTotal()" style="font-weight:700" />
+    <input name="particulars" aria-label="Particulars / Item Description" placeholder="Particulars / Item Description" class="it-p" value="${escapeHtml(particulars)}" />
+    <input name="quantity" aria-label="Quantity" placeholder="Qty" class="it-q" type="number" min="1" step="1" value="${escapeHtml(q)}" oninput="calcRow(this)" />
+    <input name="rate" aria-label="Rate in Rupees" placeholder="Rate (₹)" class="it-r" type="number" min="0" step="any" value="${escapeHtml(r)}" oninput="calcRow(this)" />
+    <input name="amount" aria-label="Amount in Rupees" placeholder="Amount (₹)" class="it-a" type="number" min="0" step="any" value="${escapeHtml(a)}" oninput="calcTotal()" style="font-weight:700" />
     <button class="del-item" type="button" title="Remove row" onclick="removeItemRow(this, ${isEdit})">✕</button>
   `;
       wrap.appendChild(row);
@@ -2965,7 +3000,7 @@
         return `
             <div id="${prefix}card_particular_${p.key}" class="event-particular-item ${isChecked ? 'checked' : ''}">
               <label class="event-particular-header" for="${prefix}cb_particular_${p.key}">
-                <input type="checkbox" id="${prefix}cb_particular_${p.key}" ${isChecked ? 'checked' : ''} onchange="onToggleEventParticular('${p.key}', this, ${isEdit})" />
+                <input type="checkbox" id="${prefix}cb_particular_${p.key}" name="${prefix}cb_particular_${p.key}" ${isChecked ? 'checked' : ''} onchange="onToggleEventParticular('${p.key}', this, ${isEdit})" />
                 <span>${escapeHtml(p.name)}</span>
               </label>
               ${p.key === 'sampling' ? `
@@ -2975,12 +3010,12 @@
               ` : ''}
               ${p.key === 'travel_expenses' ? `
                 <div class="event-subfield" style="padding-left:25px;">
-                  <input id="${prefix}subfield_${p.key}" value="${escapeHtml(distVal)}" placeholder="${p.notePlaceholder}" oninput="onPredefinedSubfieldChange('${p.key}', this, ${isEdit})" />
+                  <input id="${prefix}subfield_${p.key}" name="${prefix}subfield_${p.key}" value="${escapeHtml(distVal)}" placeholder="${p.notePlaceholder}" oninput="onPredefinedSubfieldChange('${p.key}', this, ${isEdit})" />
                 </div>
               ` : ''}
               ${p.key === 'memento' ? `
                 <div class="event-subfield" style="padding-left:25px;">
-                  <input id="${prefix}subfield_${p.key}" value="${escapeHtml(carryBackVal)}" placeholder="${p.notePlaceholder}" oninput="onPredefinedSubfieldChange('${p.key}', this, ${isEdit})" />
+                  <input id="${prefix}subfield_${p.key}" name="${prefix}subfield_${p.key}" value="${escapeHtml(carryBackVal)}" placeholder="${p.notePlaceholder}" oninput="onPredefinedSubfieldChange('${p.key}', this, ${isEdit})" />
                 </div>
               ` : ''}
             </div>
@@ -3017,22 +3052,22 @@
                 <span class="badge" style="background:#e0f2fe;color:#0369a1;font-size:10px;">${v.tag}</span>
               </div>
               <div>
-                <label class="field-label" style="margin:0 0 2px;font-size:11.5px;">Vendor Name <span style="color:var(--danger)">*</span></label>
-                <input id="${prefix}quoteVendor${idx}" value="${escapeHtml(q.vendor_name || '')}" placeholder="Company / Vendor Name" style="margin-bottom:6px;font-size:12.5px;" />
+                <label class="field-label" for="${prefix}quoteVendor${idx}" style="margin:0 0 2px;font-size:11.5px;">Vendor Name <span style="color:var(--danger)">*</span></label>
+    <input name="__prefix_quoteVendor__idx_" id="${prefix}quoteVendor${idx}" value="${escapeHtml(q.vendor_name || '')}" placeholder="Company / Vendor Name" style="margin-bottom:6px;font-size:12.5px;" />
               </div>
               <div class="row" style="gap:6px;">
                 <div style="flex:1">
-                  <label class="field-label" style="margin:0 0 2px;font-size:11px;">Quote Ref (Optional)</label>
-                  <input id="${prefix}quoteRef${idx}" value="${escapeHtml(q.quotation_ref || '')}" placeholder="e.g. QT-2026-09" style="margin-bottom:6px;font-size:12px;" />
+                  <label class="field-label" for="${prefix}quoteRef${idx}" style="margin:0 0 2px;font-size:11px;">Quote Ref (Optional)</label>
+    <input name="__prefix_quoteRef__idx_" id="${prefix}quoteRef${idx}" value="${escapeHtml(q.quotation_ref || '')}" placeholder="e.g. QT-2026-09" style="margin-bottom:6px;font-size:12px;" />
                 </div>
                 <div style="flex:1">
-                  <label class="field-label" style="margin:0 0 2px;font-size:11px;">Quote Date (Optional)</label>
-                  <input id="${prefix}quoteDate${idx}" type="date" value="${escapeHtml(q.quotation_date || '')}" style="margin-bottom:6px;font-size:12px;" />
+                  <label class="field-label" for="${prefix}quoteDate${idx}" style="margin:0 0 2px;font-size:11px;">Quote Date (Optional)</label>
+    <input name="__prefix_quoteDate__idx_" id="${prefix}quoteDate${idx}" type="date" value="${escapeHtml(q.quotation_date || '')}" style="margin-bottom:6px;font-size:12px;" />
                 </div>
               </div>
               <div style="margin-top:4px;">
-                <label class="field-label" style="margin:0 0 4px;font-size:11.5px;">Quotation Document (PDF, JPG, PNG)</label>
-                <input type="file" id="${prefix}quoteFileInput${idx}" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="handleQuotationFileUpload(${idx}, this, ${isEdit})" />
+                <label class="field-label" for="editCatName" style="margin:0 0 4px;font-size:11.5px;">Quotation Document (PDF, JPG, PNG)</label>
+                <input name="__prefix_quoteFileInput__idx_" type="file" id="${prefix}quoteFileInput${idx}" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="handleQuotationFileUpload(${idx}, this, ${isEdit})" />
                 <button type="button" id="${prefix}quoteTriggerBtn${idx}" class="secondary" style="width:100%;font-size:12px;padding:8px;" onclick="document.getElementById('${prefix}quoteFileInput${idx}').click()">
                   Upload Quotation Document
                 </button>
@@ -3052,7 +3087,7 @@
       <div class="field-help" style="margin-bottom:10px;">Upload the institutional Comparative Statement (CS) evaluating the 3 vendor quotations (PDF, JPG, PNG, or XLSX).</div>
 
       <div style="background:#ffffff;border:1px solid #cbd5e1;border-radius:var(--radius-sm);padding:14px;">
-        <input type="file" id="${prefix}csFileInput" accept=".pdf,.jpg,.jpeg,.png,.xlsx" style="display:none" onchange="handleCsFileUpload(this, ${isEdit})" />
+        <input name="__prefix_csFileInput" type="file" id="${prefix}csFileInput" accept=".pdf,.jpg,.jpeg,.png,.xlsx" style="display:none" onchange="handleCsFileUpload(this, ${isEdit})" />
         <button type="button" id="${prefix}csTriggerBtn" class="secondary" style="font-size:12.5px;padding:8px 16px;" onclick="document.getElementById('${prefix}csFileInput').click()">
           Upload Comparative Statement
         </button>
@@ -3295,10 +3330,10 @@
         ${sigHtml}
 
         <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">
-          <label class="field-label" style="font-weight:700;">Upload New Signature (PNG format only)</label>
+          <label for="sigFileInput" class="field-label" style="font-weight:700;">Upload New Signature (PNG format only)</label>
           <div class="field-help" style="margin-bottom:8px;">Min size: 200 × 70 px. Recommended: 600 × 200 px (transparent background PNG). Max file size: 2 MB.</div>
           <div id="sigDropzone" class="file-dropzone" style="padding:14px;margin-bottom:10px;" onclick="document.getElementById('sigFileInput').click()">
-            <input type="file" id="sigFileInput" accept="image/png" style="display:none;" />
+            <input name="sigFileInput" type="file" id="sigFileInput" accept="image/png" style="display:none;" />
             <div class="file-dropzone-icon" style="font-size:22px;margin-bottom:2px;">✍️</div>
             <div class="file-dropzone-prompt" style="font-size:12.5px;">Click to select official PNG signature image</div>
             <div class="file-dropzone-sub">Transparent PNG recommended (Max 2 MB)</div>
@@ -3410,9 +3445,9 @@
     <div class="field-help">Upload or update official digital signature for this user (PNG format only, transparent recommended).</div>
 
     <div style="margin:16px 0;">
-      <label class="field-label" style="font-weight:700;">Select Signature File (.png)</label>
+      <label for="sigFileInput" class="field-label" style="font-weight:700;">Select Signature File (.png)</label>
       <div id="adminSigDropzone" class="file-dropzone" style="padding:14px;margin-bottom:10px;" onclick="document.getElementById('sigFileInput').click()">
-        <input type="file" id="sigFileInput" accept="image/png" style="display:none;" />
+        <input name="sigFileInput" type="file" id="sigFileInput" accept="image/png" style="display:none;" />
         <div class="file-dropzone-icon" style="font-size:22px;margin-bottom:2px;">✍️</div>
         <div class="file-dropzone-prompt" style="font-size:12.5px;">Click to select official PNG signature image</div>
         <div class="file-dropzone-sub">Transparent PNG recommended (Max 2 MB)</div>
@@ -4057,7 +4092,7 @@
           ${isInstitutionalRole ? `
             <div style="display:flex;align-items:center;gap:6px;">
               <span class="muted" style="font-size:12px;font-weight:600;">Department:</span>
-              <select style="max-width:280px;margin-bottom:0;padding:5px 10px;font-size:12px;" onchange="onDashboardDeptChange(this.value)">
+              <select id="dashboardDeptSelect" name="dashboardDept" aria-label="Select Department" style="max-width:280px;margin-bottom:0;padding:5px 10px;font-size:12px;" onchange="onDashboardDeptChange(this.value)">
                 ${renderDeptSelectOptions(deptId, false)}
               </select>
             </div>
@@ -4315,11 +4350,11 @@
     <h2>Edit Category Budget Allocation</h2>
     <div class="field-help">Admin direct update for department budget ceiling. Changes reflect immediately across all views.</div>
 
-    <label class="field-label">Category Name</label>
-    <input id="editCatName" value="${escapeHtml(catName)}" />
+    <label for="editCatName" class="field-label">Category Name</label>
+    <input name="editCatName" id="editCatName" value="${escapeHtml(catName)}" />
 
-    <label class="field-label">Allocated Annual Ceiling (₹)</label>
-    <input id="editCatAlloc" type="number" value="${currentAlloc}" min="0" />
+    <label class="field-label" for="editCatAlloc">Allocated Annual Ceiling (₹)</label>
+    <input name="editCatAlloc" id="editCatAlloc" type="number" value="${currentAlloc}" min="0" />
 
     <div class="row" style="justify-content:flex-end;margin-top:20px;gap:10px;">
       <button class="secondary" onclick="closeModal()">Cancel</button>
@@ -4350,11 +4385,11 @@
     <h2>Edit Subcategory Budget</h2>
     <div class="field-help">Admin direct update for subcategory particulars and allocation.</div>
 
-    <label class="field-label">Subcategory Name</label>
-    <input id="editSubName" value="${escapeHtml(subName)}" />
+    <label class="field-label" for="editSubName">Subcategory Name</label>
+    <input name="editSubName" id="editSubName" value="${escapeHtml(subName)}" />
 
-    <label class="field-label">Allocated Budget (₹)</label>
-    <input id="editSubAlloc" type="number" value="${currentAlloc}" min="0" />
+    <label class="field-label" for="editSubAlloc">Allocated Budget (₹)</label>
+    <input name="editSubAlloc" id="editSubAlloc" type="number" value="${currentAlloc}" min="0" />
 
     <div class="row" style="justify-content:flex-end;margin-top:20px;gap:10px;">
       <button class="secondary" onclick="closeModal()">Cancel</button>
@@ -4401,15 +4436,15 @@
     <div id="masterUploadFormSection">
       <div class="row" style="gap:12px;margin-bottom:12px;">
         <div style="flex:1">
-          <label class="field-label">Target Department / Unit</label>
-          <select id="masterUploadDept">
+          <label class="field-label" for="masterUploadDept">Target Department / Unit</label>
+    <select name="masterUploadDept" id="masterUploadDept">
             ${REF.departments.map(d => `<option value="${d.id}">${escapeHtml(d.name)} (${escapeHtml(d.code)})</option>`).join('')}
           </select>
         </div>
         <div style="flex:1">
-          <label class="field-label">Target Academic / Financial Year</label>
+          <label class="field-label" for="clearBudgetFy">Target Academic / Financial Year</label>
           <div class="row" style="gap:6px">
-            <select id="masterUploadFy" style="flex:1;margin-bottom:0;">
+            <select name="masterUploadFy" id="masterUploadFy" style="flex:1;margin-bottom:0;">
               ${REF.financialYears.map(f => `<option value="${f.id}" ${f.id === fy.id ? 'selected' : ''}>${f.label}${f.is_active ? ' (Active)' : ''}</option>`).join('')}
             </select>
             <button class="secondary" type="button" onclick="promptAddNewFyInModal()" style="white-space:nowrap;">+ Add Year</button>
@@ -4418,7 +4453,7 @@
       </div>
 
       <div id="masterDropzone" class="file-dropzone" onclick="document.getElementById('masterExcelFileInput').click()">
-        <input type="file" id="masterExcelFileInput" accept=".xlsx" style="display:none;" onchange="onMasterExcelFileSelected(this)" />
+        <input name="masterExcelFileInput" type="file" id="masterExcelFileInput" accept=".xlsx" style="display:none;" onchange="onMasterExcelFileSelected(this)" />
         <div class="file-dropzone-icon">📑</div>
         <div class="file-dropzone-prompt">Select Multi-Sheet Excel Workbook (.xlsx) or drag &amp; drop here</div>
         <div class="file-dropzone-sub">Ingests and validates multi-sheet departmental financial allocations</div>
@@ -4602,11 +4637,11 @@
       <label class="field-label" style="margin-top:0;font-weight:700;">Select Import Commitment Mode:</label>
       <div class="row" style="gap:16px;">
         <label style="cursor:pointer;display:flex;align-items:center;gap:6px;">
-          <input type="radio" name="masterImportModeRadio" value="replace" checked style="width:auto;margin:0;" />
+          <input type="radio" id="modeReplace" name="masterImportModeRadio" value="replace" checked style="width:auto;margin:0;" />
           <span><strong>Replace Mode (Recommended)</strong>: Cleanly initialize budget lines from workbook. <em>All existing NFAs and approvals are preserved.</em></span>
         </label>
         <label style="cursor:pointer;display:flex;align-items:center;gap:6px;">
-          <input type="radio" name="masterImportModeRadio" value="merge" style="width:auto;margin:0;" />
+          <input type="radio" id="modeMerge" name="masterImportModeRadio" value="merge" style="width:auto;margin:0;" />
           <span><strong>Merge Mode</strong>: Update matching items and add new lines without replacing.</span>
         </label>
       </div>
@@ -4695,21 +4730,21 @@
     <h2 style="color:var(--danger)">Clear Previous Year / Historical Budget Data</h2>
     <div class="field-help">Super Admin tool: Reset or wipe previous year budget allocations and test NFAs before uploading a new financial year's master budget sheet.</div>
 
-    <label class="field-label">Select Academic / Financial Year to Clear</label>
-    <select id="clearBudgetFy">
+    <label for="clearYearSelect" class="field-label">Select Academic / Financial Year to Clear</label>
+    <select name="clearBudgetFy" id="clearBudgetFy">
       ${REF.financialYears.map(f => `<option value="${f.id}" ${f.id === fy.id ? 'selected' : ''}>${f.label}${f.is_active ? ' (Active)' : ''}</option>`).join('')}
       <option value="all">All Financial Years (Complete System Budget Wipe)</option>
     </select>
 
-    <label class="field-label">Budget Reset Mode</label>
-    <select id="clearResetMode">
+    <label class="field-label" for="clearResetMode">Budget Reset Mode</label>
+    <select name="clearResetMode" id="clearResetMode">
       <option value="delete">Remove Budget Allocations Completely (Recommended before fresh upload)</option>
       <option value="zero">Zero Out Allocations (Keep category rows, set all amounts to ₹0)</option>
     </select>
 
     <div style="margin:16px 0;padding:12px;background:var(--danger-bg);border:1px solid #fca5a5;border-radius:var(--radius-sm)">
       <label style="cursor:pointer;display:flex;align-items:flex-start;gap:10px;font-weight:600;color:var(--danger);font-size:13px;">
-        <input type="checkbox" id="clearNfasCheck" checked style="width:auto;margin-top:2px;" />
+        <input name="clearNfasCheck" type="checkbox" id="clearNfasCheck" checked style="width:auto;margin-top:2px;" />
         <span>Also clear associated Notes for Approval (NFAs) for this academic year to prevent orphaned proposals</span>
       </label>
     </div>
@@ -4969,8 +5004,8 @@
               <div class="card-sub">Institutional master ledger of requested, reviewed, and debited expenditures</div>
             </div>
             <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-              <input type="text" id="nfaSearchInput" placeholder="Search Ref, Title, Proposer..." value="${escapeHtml(nfaSearchQuery)}" oninput="onNfaSearchInput(this.value)" style="padding:6px 12px;font-size:13px;border:1px solid #cbd5e1;border-radius:6px;min-width:220px;" />
-              <select id="nfaStatusFilterSelect" onchange="onNfaStatusChange(this.value)" style="padding:6px 10px;font-size:13px;border:1px solid #cbd5e1;border-radius:6px;">
+              <input name="nfaSearchInput" type="text" id="nfaSearchInput" placeholder="Search Ref, Title, Proposer..." value="${escapeHtml(nfaSearchQuery)}" oninput="onNfaSearchInput(this.value)" style="padding:6px 12px;font-size:13px;border:1px solid #cbd5e1;border-radius:6px;min-width:220px;" />
+              <select name="nfaStatusFilterSelect" id="nfaStatusFilterSelect" onchange="onNfaStatusChange(this.value)" style="padding:6px 10px;font-size:13px;border:1px solid #cbd5e1;border-radius:6px;">
                 <option value="">All Statuses</option>
                 <option value="draft" ${nfaStatusFilter === 'draft' ? 'selected' : ''}>Draft</option>
                 <option value="submitted_to_hod" ${nfaStatusFilter === 'submitted_to_hod' ? 'selected' : ''}>Submitted to HOD</option>
@@ -5294,38 +5329,38 @@
             <form id="uploadInvoiceForm" onsubmit="event.preventDefault(); submitUploadInvoice('${nfaId}', ${remaining});">
               <div class="grid2" style="gap:10px;margin-bottom:10px;">
                 <div>
-                  <label class="field-label" style="font-size:11.5px;">Invoice Number *</label>
-                  <input id="invModalNumber" placeholder="e.g. INV-2026-001" required />
+                  <label class="field-label" for="invModalNumber" style="font-size:11.5px;">Invoice Number *</label>
+    <input name="invModalNumber" id="invModalNumber" placeholder="e.g. INV-2026-001" required />
                 </div>
                 <div>
-                  <label class="field-label" style="font-size:11.5px;">Invoice Date *</label>
-                  <input id="invModalDate" type="date" value="${new Date().toISOString().split('T')[0]}" required />
-                </div>
-              </div>
-              <div class="grid2" style="gap:10px;margin-bottom:10px;">
-                <div>
-                  <label class="field-label" style="font-size:11.5px;">Vendor Name *</label>
-                  <input id="invModalVendor" value="${escapeHtml(vendor)}" placeholder="e.g. ABC Lab Equipment Ltd" required />
-                </div>
-                <div>
-                  <label class="field-label" style="font-size:11.5px;">Invoice Amount (₹) *</label>
-                  <input id="invModalAmount" type="number" min="0.01" step="any" placeholder="e.g. 20000" required />
+                  <label class="field-label" for="invModalDate" style="font-size:11.5px;">Invoice Date *</label>
+    <input name="invModalDate" id="invModalDate" type="date" value="${new Date().toISOString().split('T')[0]}" required />
                 </div>
               </div>
               <div class="grid2" style="gap:10px;margin-bottom:10px;">
                 <div>
-                  <label class="field-label" style="font-size:11.5px;">GST / Tax Amount (₹)</label>
-                  <input id="invModalGst" type="number" min="0" step="any" placeholder="e.g. 3600 (Optional)" />
+                  <label class="field-label" for="invModalVendor" style="font-size:11.5px;">Vendor Name *</label>
+    <input name="invModalVendor" id="invModalVendor" value="${escapeHtml(vendor)}" placeholder="e.g. ABC Lab Equipment Ltd" required />
                 </div>
                 <div>
-                  <label class="field-label" style="font-size:11.5px;">Invoice Document (PDF/Image) *</label>
-                  <input id="invModalFileInput" type="file" accept=".pdf,.png,.jpg,.jpeg" required onchange="handleInvoiceFileSelected(this)" />
+                  <label class="field-label" for="invModalAmount" style="font-size:11.5px;">Invoice Amount (₹) *</label>
+    <input name="invModalAmount" id="invModalAmount" type="number" min="0.01" step="any" placeholder="e.g. 20000" required />
+                </div>
+              </div>
+              <div class="grid2" style="gap:10px;margin-bottom:10px;">
+                <div>
+                  <label class="field-label" for="invModalGst" style="font-size:11.5px;">GST / Tax Amount (₹)</label>
+    <input name="invModalGst" id="invModalGst" type="number" min="0" step="any" placeholder="e.g. 3600 (Optional)" />
+                </div>
+                <div>
+                  <label class="field-label" for="invModalFileInput" style="font-size:11.5px;">Invoice Document (PDF/Image) *</label>
+    <input name="invModalFileInput" id="invModalFileInput" type="file" accept=".pdf,.png,.jpg,.jpeg" required onchange="handleInvoiceFileSelected(this)" />
                   <div id="invModalFileStatus" style="font-size:11px;color:#64748b;margin-top:2px;"></div>
                 </div>
               </div>
               <div style="margin-bottom:14px;">
-                <label class="field-label" style="font-size:11.5px;">Remarks / Notes (Optional)</label>
-                <textarea id="invModalRemarks" rows="2" placeholder="e.g. Part 1 delivery received and verified"></textarea>
+                <label class="field-label" for="invModalRemarks" style="font-size:11.5px;">Remarks / Notes (Optional)</label>
+    <textarea name="invModalRemarks" id="invModalRemarks" rows="2" placeholder="e.g. Part 1 delivery received and verified"></textarea>
               </div>
               <div class="row" style="justify-content:flex-end;gap:10px;">
                 <button type="button" class="secondary" onclick="closeUploadInvoiceModal()">Cancel</button>
@@ -5447,21 +5482,21 @@
             </div>
             <form id="verifyInvoiceForm" onsubmit="event.preventDefault(); submitVerifyInvoice('${invoiceId}');">
               <div style="margin-bottom:12px;">
-                <label class="field-label" style="font-size:12px;">Verification Decision *</label>
+                <label class="field-label" for="verifyReturnRemarks" style="font-size:12px;">Verification Decision *</label>
                 <div style="display:flex;gap:16px;margin-top:6px;">
                   <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:600;color:var(--success);">
-                    <input type="radio" name="verifyDecision" value="verified" checked onchange="document.getElementById('returnReasonWrap').style.display='none'" />
+                    <input type="radio" id="verifyDecisionVerified" name="verifyDecision" value="verified" checked onchange="document.getElementById('returnReasonWrap').style.display='none'" />
                     Verify &amp; Forward to Payment
                   </label>
                   <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:600;color:var(--danger);">
-                    <input type="radio" name="verifyDecision" value="returned" onchange="document.getElementById('returnReasonWrap').style.display='block'" />
+                    <input type="radio" id="verifyDecisionReturned" name="verifyDecision" value="returned" onchange="document.getElementById('returnReasonWrap').style.display='block'" />
                     Return for Correction
                   </label>
                 </div>
               </div>
               <div id="returnReasonWrap" style="display:none;margin-bottom:14px;">
                 <label class="field-label" style="font-size:12px;color:var(--danger);">Return Reason / Required Correction *</label>
-                <textarea id="verifyReturnRemarks" rows="2" placeholder="Specify why the invoice is returned (e.g. GST discrepancy, missing vendor stamp)"></textarea>
+    <textarea name="verifyReturnRemarks" id="verifyReturnRemarks" rows="2" placeholder="Specify why the invoice is returned (e.g. GST discrepancy, missing vendor stamp)"></textarea>
               </div>
               <div class="row" style="justify-content:flex-end;gap:10px;">
                 <button type="button" class="secondary" onclick="closeVerifyInvoiceModal()">Cancel</button>
@@ -5525,31 +5560,31 @@
             <form id="paymentInvoiceForm" onsubmit="event.preventDefault(); submitPaymentInvoice('${invoiceId}');">
               <div class="grid2" style="gap:10px;margin-bottom:10px;">
                 <div>
-                  <label class="field-label" style="font-size:11.5px;">Payment Status *</label>
-                  <select id="payModalStatus" style="font-size:12.5px;">
+                  <label class="field-label" for="payModalStatus" style="font-size:11.5px;">Payment Status *</label>
+    <select name="payModalStatus" id="payModalStatus" style="font-size:12.5px;">
                     <option value="unpaid" ${currentStatus === 'unpaid' ? 'selected' : ''}>Unpaid</option>
                     <option value="in_process" ${currentStatus === 'in_process' ? 'selected' : ''}>In Process (Disbursement Queue)</option>
                     <option value="paid" ${currentStatus === 'paid' ? 'selected' : ''}>Paid (Settled)</option>
                   </select>
                 </div>
                 <div>
-                  <label class="field-label" style="font-size:11.5px;">Disbursed Amount (₹) *</label>
-                  <input id="payModalAmount" type="number" step="any" value="${currentPaid || amount}" required />
+                  <label class="field-label" for="payModalAmount" style="font-size:11.5px;">Disbursed Amount (₹) *</label>
+    <input name="payModalAmount" id="payModalAmount" type="number" step="any" value="${currentPaid || amount}" required />
                 </div>
               </div>
               <div class="grid2" style="gap:10px;margin-bottom:10px;">
                 <div>
-                  <label class="field-label" style="font-size:11.5px;">Payment Date</label>
-                  <input id="payModalDate" type="date" value="${new Date().toISOString().split('T')[0]}" />
+                  <label class="field-label" for="payModalDate" style="font-size:11.5px;">Payment Date</label>
+    <input name="payModalDate" id="payModalDate" type="date" value="${new Date().toISOString().split('T')[0]}" />
                 </div>
                 <div>
-                  <label class="field-label" style="font-size:11.5px;">Payment Reference / UTR Number</label>
-                  <input id="payModalUtr" placeholder="e.g. UTR123456789" value="${escapeHtml(utr)}" />
+                  <label class="field-label" for="payModalUtr" style="font-size:11.5px;">Payment Reference / UTR Number</label>
+    <input name="payModalUtr" id="payModalUtr" placeholder="e.g. UTR123456789" value="${escapeHtml(utr)}" />
                 </div>
               </div>
               <div style="margin-bottom:14px;">
-                <label class="field-label" style="font-size:11.5px;">Finance Payment Remarks (Optional)</label>
-                <textarea id="payModalRemarks" rows="2" placeholder="e.g. Bank transfer processed through NEFT/RTGS">${escapeHtml(remarks)}</textarea>
+                <label class="field-label" for="payModalRemarks" style="font-size:11.5px;">Finance Payment Remarks (Optional)</label>
+    <textarea name="payModalRemarks" id="payModalRemarks" rows="2" placeholder="e.g. Bank transfer processed through NEFT/RTGS">${escapeHtml(remarks)}</textarea>
               </div>
               <div class="row" style="justify-content:flex-end;gap:10px;">
                 <button type="button" class="secondary" onclick="closePaymentInvoiceModal()">Cancel</button>
@@ -5627,27 +5662,27 @@
               <form id="editInvoiceForm" onsubmit="event.preventDefault(); submitEditInvoice('${invoiceId}');">
                 <div class="grid2" style="gap:10px;margin-bottom:10px;">
                   <div>
-                    <label class="field-label" style="font-size:11.5px;">Invoice Number *</label>
-                    <input id="editInvNumber" value="${escapeHtml(targetInvoice.invoice_number)}" required />
+                    <label class="field-label" for="editInvNumber" style="font-size:11.5px;">Invoice Number *</label>
+    <input name="editInvNumber" id="editInvNumber" value="${escapeHtml(targetInvoice.invoice_number)}" required />
                   </div>
                   <div>
-                    <label class="field-label" style="font-size:11.5px;">Invoice Date *</label>
-                    <input id="editInvDate" type="date" value="${targetInvoice.invoice_date}" required />
+                    <label class="field-label" for="editInvDate" style="font-size:11.5px;">Invoice Date *</label>
+    <input name="editInvDate" id="editInvDate" type="date" value="${targetInvoice.invoice_date}" required />
                   </div>
                 </div>
                 <div class="grid2" style="gap:10px;margin-bottom:10px;">
                   <div>
-                    <label class="field-label" style="font-size:11.5px;">Vendor Name *</label>
-                    <input id="editInvVendor" value="${escapeHtml(targetInvoice.vendor_name)}" required />
+                    <label class="field-label" for="editInvVendor" style="font-size:11.5px;">Vendor Name *</label>
+    <input name="editInvVendor" id="editInvVendor" value="${escapeHtml(targetInvoice.vendor_name)}" required />
                   </div>
                   <div>
-                    <label class="field-label" style="font-size:11.5px;">Invoice Amount (₹) *</label>
-                    <input id="editInvAmount" type="number" step="any" value="${targetInvoice.invoice_amount}" required />
+                    <label class="field-label" for="editInvAmount" style="font-size:11.5px;">Invoice Amount (₹) *</label>
+    <input name="editInvAmount" id="editInvAmount" type="number" step="any" value="${targetInvoice.invoice_amount}" required />
                   </div>
                 </div>
                 <div style="margin-bottom:14px;">
-                  <label class="field-label" style="font-size:11.5px;">Correction Remarks</label>
-                  <textarea id="editInvRemarks" rows="2" placeholder="Explain the corrections made for Finance review"></textarea>
+                  <label class="field-label" for="editInvRemarks" style="font-size:11.5px;">Correction Remarks</label>
+    <textarea name="editInvRemarks" id="editInvRemarks" rows="2" placeholder="Explain the corrections made for Finance review"></textarea>
                 </div>
                 <div class="row" style="justify-content:flex-end;gap:10px;">
                   <button type="button" class="secondary" onclick="closeEditInvoiceModal()">Cancel</button>
@@ -6039,16 +6074,16 @@
         </div>
         <form id="recordRevenueForm" onsubmit="event.preventDefault(); submitRecordRevenue();">
           <div style="margin-bottom:12px;">
-            <label class="field-label" style="font-size:11.5px;">Select Approved Event Note for Approval *</label>
-            <select id="revModalNfa" required style="font-size:12.5px;">
+            <label class="field-label" for="revModalNfa" style="font-size:11.5px;">Select Approved Event Note for Approval *</label>
+    <select name="revModalNfa" id="revModalNfa" required style="font-size:12.5px;">
               <option value="">— Select Event NFA —</option>
               ${eligible.map(n => `<option value="${n.id}">${escapeHtml(n.ref_no)} — ${escapeHtml(n.title)} (${escapeHtml(n.department_code || 'DEPT')})</option>`).join('')}
             </select>
           </div>
           <div class="grid2" style="gap:10px;margin-bottom:12px;">
             <div>
-              <label class="field-label" style="font-size:11.5px;">Revenue Source *</label>
-              <select id="revModalSource" required style="font-size:12.5px;">
+              <label class="field-label" for="revModalSource" style="font-size:11.5px;">Revenue Source *</label>
+    <select name="revModalSource" id="revModalSource" required style="font-size:12.5px;">
                 <option value="registration_fee">Registration Fees</option>
                 <option value="sponsorship">Sponsorships</option>
                 <option value="participation_fee">Participation Fees</option>
@@ -6057,18 +6092,18 @@
               </select>
             </div>
             <div>
-              <label class="field-label" style="font-size:11.5px;">Amount Collected (₹) *</label>
-              <input id="revModalAmount" type="number" min="1" step="any" placeholder="e.g. 25000" required />
+              <label class="field-label" for="revModalAmount" style="font-size:11.5px;">Amount Collected (₹) *</label>
+    <input name="revModalAmount" id="revModalAmount" type="number" min="1" step="any" placeholder="e.g. 25000" required />
             </div>
           </div>
           <div class="grid2" style="gap:10px;margin-bottom:12px;">
             <div>
-              <label class="field-label" style="font-size:11.5px;">Collection Date *</label>
-              <input id="revModalDate" type="date" value="${new Date().toISOString().split('T')[0]}" required />
+              <label class="field-label" for="revModalDate" style="font-size:11.5px;">Collection Date *</label>
+    <input name="revModalDate" id="revModalDate" type="date" value="${new Date().toISOString().split('T')[0]}" required />
             </div>
             <div>
-              <label class="field-label" style="font-size:11.5px;">Payment / Settlement Method</label>
-              <select id="revModalMethod" style="font-size:12.5px;">
+              <label class="field-label" for="revModalMethod" style="font-size:11.5px;">Payment / Settlement Method</label>
+    <select name="revModalMethod" id="revModalMethod" style="font-size:12.5px;">
                 <option value="online">Online Payment Gateway</option>
                 <option value="bank_transfer">Bank Transfer / NEFT / RTGS</option>
                 <option value="upi">UPI / QR Code</option>
@@ -6079,17 +6114,17 @@
             </div>
           </div>
           <div style="margin-bottom:12px;">
-            <label class="field-label" style="font-size:11.5px;">Collection Description *</label>
-            <input id="revModalDescription" placeholder="e.g. 50 Delegate registrations for National AI Workshop" required />
+            <label class="field-label" for="revModalDescription" style="font-size:11.5px;">Collection Description *</label>
+    <input name="revModalDescription" id="revModalDescription" placeholder="e.g. 50 Delegate registrations for National AI Workshop" required />
           </div>
           <div style="margin-bottom:12px;">
-            <label class="field-label" style="font-size:11.5px;">Supporting Receipt / Credit Advice (PDF/Image)</label>
-            <input id="revModalReceiptFile" type="file" accept=".pdf,.png,.jpg,.jpeg" />
+            <label class="field-label" for="revModalReceiptFile" style="font-size:11.5px;">Supporting Receipt / Credit Advice (PDF/Image)</label>
+    <input name="revModalReceiptFile" id="revModalReceiptFile" type="file" accept=".pdf,.png,.jpg,.jpeg" />
             <div style="font-size:10.5px;color:#64748b;margin-top:2px;">PDF, PNG, JPG (Max 10MB)</div>
           </div>
           <div style="margin-bottom:16px;">
-            <label class="field-label" style="font-size:11.5px;">Remarks (Optional)</label>
-            <textarea id="revModalRemarks" rows="2" placeholder="Additional notes or reconciliation references"></textarea>
+            <label class="field-label" for="revModalRemarks" style="font-size:11.5px;">Remarks (Optional)</label>
+    <textarea name="revModalRemarks" id="revModalRemarks" rows="2" placeholder="Additional notes or reconciliation references"></textarea>
           </div>
           <div class="row" style="justify-content:flex-end;gap:10px;">
             <button type="button" class="secondary" onclick="closeModal()">Cancel</button>
@@ -6180,19 +6215,19 @@
         </div>
         <form id="completeEventForm" onsubmit="event.preventDefault(); submitCompleteEvent();">
           <div style="margin-bottom:12px;">
-            <label class="field-label" style="font-size:11.5px;">Select Event Note for Approval *</label>
-            <select id="completeModalNfa" required style="font-size:12.5px;">
+            <label class="field-label" for="completeModalNfa" style="font-size:11.5px;">Select Event Note for Approval *</label>
+    <select name="completeModalNfa" id="completeModalNfa" required style="font-size:12.5px;">
               <option value="">— Select Event NFA —</option>
               ${pendingCompletion.map(n => `<option value="${n.id}" ${n.id === preSelectedNfaId ? 'selected' : ''}>${escapeHtml(n.ref_no)} — ${escapeHtml(n.title)} ${n.will_generate_revenue ? '(Revenue Enabled)' : ''}</option>`).join('')}
             </select>
           </div>
           <div style="margin-bottom:12px;">
-            <label class="field-label" style="font-size:11.5px;">Event Conclusion Date *</label>
-            <input id="completeModalDate" type="date" value="${new Date().toISOString().split('T')[0]}" required />
+            <label class="field-label" for="completeModalDate" style="font-size:11.5px;">Event Conclusion Date *</label>
+    <input name="completeModalDate" id="completeModalDate" type="date" value="${new Date().toISOString().split('T')[0]}" required />
           </div>
           <div style="margin-bottom:16px;">
-            <label class="field-label" style="font-size:11.5px;">Completion Summary / Remarks</label>
-            <textarea id="completeModalRemarks" rows="2" placeholder="e.g. Conducted successfully with 120 attendees across 2 sessions."></textarea>
+            <label class="field-label" for="completeModalRemarks" style="font-size:11.5px;">Completion Summary / Remarks</label>
+    <textarea name="completeModalRemarks" id="completeModalRemarks" rows="2" placeholder="e.g. Conducted successfully with 120 attendees across 2 sessions."></textarea>
           </div>
           <div class="row" style="justify-content:flex-end;gap:10px;">
             <button type="button" class="secondary" onclick="closeModal()">Cancel</button>
@@ -6314,26 +6349,26 @@
               </div>
               <span class="badge" style="background:#EBF5FF;color:#003D8F;border:1px solid #BFDBFE;font-size:11px;">Primary Department</span>
             </div>
-            <input type="hidden" id="nfaDept" value="${userDept.id}" />
+            <input name="nfaDept" type="hidden" id="nfaDept" value="${userDept.id}" />
           `;
         } else {
           deptSelectorHtml = `
             <div style="padding:10px 14px;background:#FEF2F2;border:1px solid #FECACA;border-radius:6px;color:#991B1B;font-weight:600;font-size:13px;">
               ⚠️ No valid department assignment exists on your profile. Please contact Super Admin before submitting an NFA.
             </div>
-            <input type="hidden" id="nfaDept" value="" />
+            <input name="nfaDept" type="hidden" id="nfaDept" value="" />
           `;
         }
       } else {
         const activeAcademic = (REF.departments || []).filter(d => d.is_active && d.category === 'academic');
         deptSelectorHtml = `
-          <select id="nfaDept" onchange="onNfaDeptSelect(this.value)">
+          <select name="nfaDept" id="nfaDept" onchange="onNfaDeptSelect(this.value)">
             ${activeAcademic.map(d => `<option value="${d.id}" ${d.id === deptId ? 'selected' : ''}>${escapeHtml(d.name)} (${d.code})</option>`).join('')}
             <option value="__custom__">Other / Enter Custom Department Name...</option>
           </select>
           <div id="customDeptWrap" style="display:none;margin-top:8px;">
-            <input id="customDeptName" placeholder="Enter Full Department Name (e.g. Dept. of Data Science)" style="margin-bottom:6px;" />
-            <input id="customDeptCode" placeholder="Department Code (optional, e.g. DS)" style="max-width:200px;" />
+            <input name="customDeptName" id="customDeptName" placeholder="Enter Full Department Name (e.g. Dept. of Data Science)" style="margin-bottom:6px;" />
+            <input name="customDeptCode" id="customDeptCode" placeholder="Department Code (optional, e.g. DS)" style="max-width:200px;" />
           </div>
         `;
       }
@@ -6341,7 +6376,7 @@
       let centreSelectorHtml = '';
       if (authorizedCentres.length > 0) {
         centreSelectorHtml = `
-          <select id="nfaCentreSelect" onchange="onNfaCentreSelect(this.value)" style="margin-bottom:0;">
+          <select name="nfaCentreSelect" id="nfaCentreSelect" onchange="onNfaCentreSelect(this.value)" style="margin-bottom:0;">
             <option value="">— Select an Authorized Centre or Office —</option>
             ${authorizedCentres.map(c => `<option value="${c.id}">${escapeHtml(c.name)} (${c.code})</option>`).join('')}
           </select>
@@ -6351,7 +6386,7 @@
           <div style="padding:10px 14px;background:#FFFBEB;border:1px solid #FEF3C7;border-radius:6px;color:#92400E;font-size:13px;line-height:1.4;">
             ℹ️ You are not authorized for any Centres / Offices. Please select <strong>Department</strong> above, or contact Super Admin to assign you to a Centre or Office.
           </div>
-          <input type="hidden" id="nfaCentreSelect" value="" />
+          <input name="nfaCentreSelect" type="hidden" id="nfaCentreSelect" value="" />
         `;
       }
 
@@ -6362,15 +6397,15 @@
 
     <div class="row">
       <div style="flex:1">
-        <label class="field-label">Reference Number (Auto-Generated)</label>
+        <label class="field-label" for="nfaFy">Reference Number (Auto-Generated)</label>
         <div class="row" style="gap:6px">
-          <input id="nfaRefNo" value="${escapeHtml(autoRef)}" style="margin-bottom:0;flex:1;font-weight:700;color:var(--primary)" />
+          <input name="nfaRefNo" id="nfaRefNo" value="${escapeHtml(autoRef)}" style="margin-bottom:0;flex:1;font-weight:700;color:var(--primary)" />
           <span class="badge" style="background:var(--accent-light);color:#8c6827;border:1px solid var(--accent-border);">Auto</span>
         </div>
       </div>
       <div style="flex:1">
-        <label class="field-label">Academic / Financial Year</label>
-        <select id="nfaFy" onchange="onNfaFyOrDeptChange()" style="color:#172033;background:#FFFFFF;">
+        <label for="nfaFy" class="field-label">Academic / Financial Year</label>
+    <select name="nfaFy" id="nfaFy" onchange="onNfaFyOrDeptChange()" style="color:#172033;background:#FFFFFF;">
           ${REF.financialYears.map(f => {
         const fStart = parseInt((f.label.match(/\d{4}/) || ['0'])[0], 10);
         const activeStart = parseInt((fy.label.match(/\d{4}/) || ['0'])[0], 10);
@@ -6383,7 +6418,7 @@
 
     <!-- Mandatory Select Organization Type -->
     <div style="margin-top:12px;margin-bottom:12px;padding:12px 14px;background:var(--section-bg);border:1px solid var(--border);border-radius:var(--radius-sm);">
-      <label class="field-label" style="font-weight:700;color:var(--primary);margin-bottom:8px;">Select Organization Type <span style="color:var(--danger)">*</span></label>
+      <label class="field-label" for="nfaFacultyName" style="font-weight:700;color:var(--primary);margin-bottom:8px;">Select Organization Type <span style="color:var(--danger)">*</span></label>
       <div style="display:flex;gap:24px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
         <label class="radio-label">
           <input type="radio" name="nfaOrgType" id="nfaOrgTypeDept" value="department" checked onchange="onNfaOrgTypeChange('department')" />
@@ -6397,7 +6432,7 @@
 
       <!-- Dynamic Container for Option A: Department -->
       <div id="wrapOrgDept" style="display:block;">
-        <label class="field-label" style="font-weight:600;margin-bottom:4px;">Department</label>
+        <label for="nfaDept" class="field-label" style="font-weight:600;margin-bottom:4px;">Department</label>
         ${deptSelectorHtml}
       </div>
 
@@ -6410,15 +6445,15 @@
 
     <div class="row" style="margin-top:10px;">
       <div style="flex:1">
-        <label class="field-label">Faculty Proposer Name</label>
-        <input id="nfaFacultyName" value="${escapeHtml(USER.name)}" />
+        <label for="nfaFacultyName" class="field-label">Faculty Proposer Name</label>
+    <input name="nfaFacultyName" id="nfaFacultyName" value="${escapeHtml(USER.name)}" />
       </div>
     </div>
 
     <div style="margin-top:12px;padding:14px;background:var(--section-bg);border:1px solid var(--border);border-radius:var(--radius-sm);">
       <div>
-        <label class="field-label" style="font-weight:700;color:var(--primary)">1. Budget Nature / Classification</label>
-        <select id="nfaBudgetType" onchange="filterModalCategories(this.value)" style="margin-bottom:10px;">
+        <label class="field-label" for="nfaBudgetType" style="font-weight:700;color:var(--primary)">1. Budget Nature / Classification</label>
+    <select name="nfaBudgetType" id="nfaBudgetType" onchange="filterModalCategories(this.value)" style="margin-bottom:10px;">
           <option value="">— Select Budget Nature / Classification —</option>
           <option value="revenue">Revenue Expenditure (Operating / Departmental)</option>
           <option value="capex">Capital Expenditure (CAPEX - Computing, Lab, Software, Equipment)</option>
@@ -6428,16 +6463,16 @@
       </div>
 
       <div>
-        <label class="field-label" style="font-weight:700;color:var(--primary)">2. Budget Main Category</label>
-        <select id="nfaCat" onchange="onCategorySelect(this.value)" style="margin-bottom:10px;">
+        <label class="field-label" for="nfaCat" style="font-weight:700;color:var(--primary)">2. Budget Main Category</label>
+    <select name="nfaCat" id="nfaCat" onchange="onCategorySelect(this.value)" style="margin-bottom:10px;">
           <option value="">— Select Budget Nature above first —</option>
         </select>
       </div>
 
       <div>
-        <label class="field-label" style="font-weight:700;color:var(--primary)">3. Available Budget Items</label>
+        <label class="field-label" for="nfaTitle" style="font-weight:700;color:var(--primary)">3. Available Budget Items</label>
         <div class="field-help" id="budgetItemsHelp" style="margin-bottom:6px;">Select a Budget Main Category above to view and select individual budget items.</div>
-        <select id="nfaSubcat" onchange="onBudgetItemSelect(this.value)" style="margin-bottom:6px;">
+        <select name="nfaSubcat" id="nfaSubcat" onchange="onBudgetItemSelect(this.value)" style="margin-bottom:6px;">
           <option value="">— Select a Budget Main Category above first —</option>
         </select>
         <div id="budgetItemsGrid" class="budget-items-chip-grid" style="display:none;"></div>
@@ -6461,13 +6496,13 @@
       </div>
     </div>
 
-    <label class="field-label" style="margin-top:14px;font-weight:700">Title of Proposal</label>
-    <input id="nfaTitle" class="field-focus-pulse" placeholder="e.g. Procurement of Research GPU Servers / National Conference on AI" />
+    <label for="nfaTitle" class="field-label" style="margin-top:14px;font-weight:700">Title of Proposal</label>
+    <input name="nfaTitle" id="nfaTitle" class="field-focus-pulse" placeholder="e.g. Procurement of Research GPU Servers / National Conference on AI" />
 
     <!-- FOUR DESCRIPTION POINTS (MAX 50 WORDS EACH) -->
     <div style="margin-top:14px;padding:14px;background:#FAFBFC;border:1px solid var(--border);border-radius:var(--radius-sm);">
       <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px;">
-        <label class="field-label" style="font-weight:700;color:var(--primary);margin:0;">Four NFA Description Points (Max 50 Words Each)</label>
+        <label class="field-label" for="eventResourcePerson" style="font-weight:700;color:var(--primary);margin:0;">Four NFA Description Points (Max 50 Words Each)</label>
         <span class="field-help" style="margin:0;">Strict limit: 50 words per point</span>
       </div>
 
@@ -6476,7 +6511,7 @@
           <span style="font-size:12px;font-weight:600;">1. Proposal Purpose &amp; Objective</span>
           <span id="p1CountBadge" class="word-badge">0 / 50 words</span>
         </div>
-        <textarea id="nfaPoint1" rows="2" placeholder="Explain the specific purpose, target audience, and outcome of this proposal (max 50 words)" oninput="updateWordCount('nfaPoint1', 'p1CountBadge', 50)"></textarea>
+        <textarea name="nfaPoint1" id="nfaPoint1" rows="2" placeholder="Explain the specific purpose, target audience, and outcome of this proposal (max 50 words)" oninput="updateWordCount('nfaPoint1', 'p1CountBadge', 50)"></textarea>
       </div>
 
       <div style="margin-bottom:10px;">
@@ -6484,7 +6519,7 @@
           <span style="font-size:12px;font-weight:600;">2. Operational Logistics &amp; Arrangements</span>
           <span id="p2CountBadge" class="word-badge">0 / 50 words</span>
         </div>
-        <textarea id="nfaPoint2" rows="2" placeholder="Outline operational execution, infrastructure, venue, or technical arrangements (max 50 words)" oninput="updateWordCount('nfaPoint2', 'p2CountBadge', 50)"></textarea>
+        <textarea name="nfaPoint2" id="nfaPoint2" rows="2" placeholder="Outline operational execution, infrastructure, venue, or technical arrangements (max 50 words)" oninput="updateWordCount('nfaPoint2', 'p2CountBadge', 50)"></textarea>
       </div>
 
       <div style="margin-bottom:10px;">
@@ -6492,7 +6527,7 @@
           <span style="font-size:12px;font-weight:600;">3. Justification of Need &amp; Institutional Value</span>
           <span id="p3CountBadge" class="word-badge">0 / 50 words</span>
         </div>
-        <textarea id="nfaPoint3" rows="2" placeholder="Institutional impact, academic relevance, and rationale for sanctioning (max 50 words)" oninput="updateWordCount('nfaPoint3', 'p3CountBadge', 50)"></textarea>
+        <textarea name="nfaPoint3" id="nfaPoint3" rows="2" placeholder="Institutional impact, academic relevance, and rationale for sanctioning (max 50 words)" oninput="updateWordCount('nfaPoint3', 'p3CountBadge', 50)"></textarea>
       </div>
 
       <div>
@@ -6500,7 +6535,7 @@
           <span style="font-size:12px;font-weight:600;">4. Financial Implication &amp; Annexure Statement</span>
           <span id="p4CountBadge" class="word-badge">8 / 50 words</span>
         </div>
-        <textarea id="nfaPoint4" rows="2" placeholder="The estimated expenditure details are attached as Annexure-I. (max 50 words)" oninput="updateWordCount('nfaPoint4', 'p4CountBadge', 50)">The estimated expenditure details are attached as Annexure-I.</textarea>
+        <textarea name="nfaPoint4" id="nfaPoint4" rows="2" placeholder="The estimated expenditure details are attached as Annexure-I. (max 50 words)" oninput="updateWordCount('nfaPoint4', 'p4CountBadge', 50)">The estimated expenditure details are attached as Annexure-I.</textarea>
       </div>
     </div>
 
@@ -6509,38 +6544,38 @@
       <h3 style="margin:0 0 10px;font-size:14px;color:var(--primary-blue);">Event / Resource Person Details</h3>
       <div class="row" style="gap:10px;margin-bottom:8px;">
         <div style="flex:1">
-          <label class="field-label">Resource Person Name</label>
-          <input id="eventResourcePerson" placeholder="Full name of speaker / trainer" />
+          <label for="eventResourcePerson" class="field-label">Resource Person Name</label>
+    <input name="eventResourcePerson" id="eventResourcePerson" placeholder="Full name of speaker / trainer" />
         </div>
         <div style="flex:1">
-          <label class="field-label">Designation</label>
-          <input id="eventDesignation" placeholder="e.g. Professor / Lead AI Engineer" />
-        </div>
-      </div>
-      <div class="row" style="gap:10px;margin-bottom:8px;">
-        <div style="flex:1">
-          <label class="field-label">Organization / Institution</label>
-          <input id="eventOrganization" placeholder="Affiliated University or Corporate Entity" />
-        </div>
-        <div style="flex:1">
-          <label class="field-label">Event Date</label>
-          <input id="eventDate" type="date" />
+          <label class="field-label" for="eventDesignation">Designation</label>
+    <input name="eventDesignation" id="eventDesignation" placeholder="e.g. Professor / Lead AI Engineer" />
         </div>
       </div>
       <div class="row" style="gap:10px;margin-bottom:8px;">
         <div style="flex:1">
-          <label class="field-label">Venue</label>
-          <input id="eventVenue" placeholder="e.g. Kengeri Auditorium / Lab 304" />
+          <label class="field-label" for="eventOrganization">Organization / Institution</label>
+    <input name="eventOrganization" id="eventOrganization" placeholder="Affiliated University or Corporate Entity" />
+        </div>
+        <div style="flex:1">
+          <label class="field-label" for="eventDate">Event Date</label>
+    <input name="eventDate" id="eventDate" type="date" />
+        </div>
+      </div>
+      <div class="row" style="gap:10px;margin-bottom:8px;">
+        <div style="flex:1">
+          <label class="field-label" for="eventVenue">Venue</label>
+    <input name="eventVenue" id="eventVenue" placeholder="e.g. Kengeri Auditorium / Lab 304" />
         </div>
       </div>
       <div>
-        <label class="field-label">Additional Relevant Information</label>
-        <textarea id="eventAdditionalInfo" rows="2" placeholder="Any further details regarding schedule, session tracks, travel, or accommodations"></textarea>
+        <label class="field-label" for="eventAdditionalInfo">Additional Relevant Information</label>
+    <textarea name="eventAdditionalInfo" id="eventAdditionalInfo" rows="2" placeholder="Any further details regarding schedule, session tracks, travel, or accommodations"></textarea>
       </div>
 
       <!-- Event Revenue Generation -->
       <div style="margin-top:12px;padding:12px 14px;background:#ffffff;border:2px solid #93c5fd;border-radius:6px;">
-        <label class="field-label" style="font-weight:700;color:var(--primary-blue);margin-bottom:6px;font-size:13.5px;">
+        <label class="field-label" for="purchaseItemName" style="font-weight:700;color:var(--primary-blue);margin-bottom:6px;font-size:13.5px;">
           Will this event generate revenue? <span style="color:var(--danger)">*</span> <span style="font-size:11.5px;font-weight:normal;color:#64748b;">(Registration fees, sponsorships, participation fees, or other income)</span>
         </label>
         <div style="display:flex;gap:24px;align-items:center;">
@@ -6577,30 +6612,30 @@
       <h3 style="margin:0 0 10px;font-size:14px;color:var(--primary-blue);">Purchase / Item Details</h3>
       <div class="row" style="gap:10px;margin-bottom:8px;">
         <div style="flex:2">
-          <label class="field-label">Item / Product Name</label>
-          <input id="purchaseItemName" placeholder="Full product or equipment name" />
+          <label for="purItemName" class="field-label">Item / Product Name</label>
+    <input name="purchaseItemName" id="purchaseItemName" placeholder="Full product or equipment name" />
         </div>
         <div style="flex:1">
-          <label class="field-label">Quantity</label>
-          <input id="purchaseQuantity" placeholder="e.g. 2 Units / 1 License" />
+          <label class="field-label" for="purchaseQuantity">Quantity</label>
+    <input name="purchaseQuantity" id="purchaseQuantity" placeholder="e.g. 2 Units / 1 License" />
         </div>
       </div>
       <div style="margin-bottom:8px;">
-        <label class="field-label">Description / Specifications</label>
-        <textarea id="purchaseDescription" rows="2" placeholder="Detailed technical specifications, model, make, or configurations"></textarea>
+        <label class="field-label" for="purchaseDescription">Description / Specifications</label>
+    <textarea name="purchaseDescription" id="purchaseDescription" rows="2" placeholder="Detailed technical specifications, model, make, or configurations"></textarea>
       </div>
       <div style="margin-bottom:8px;">
-        <label class="field-label">Purpose / Justification</label>
-        <textarea id="purchasePurpose" rows="2" placeholder="Why this item is needed and how it will be utilized"></textarea>
+        <label class="field-label" for="purchasePurpose">Purpose / Justification</label>
+    <textarea name="purchasePurpose" id="purchasePurpose" rows="2" placeholder="Why this item is needed and how it will be utilized"></textarea>
       </div>
       <div>
-        <label class="field-label">Additional Relevant Information</label>
-        <textarea id="purchaseAdditionalInfo" rows="2" placeholder="Warranty, installation, delivery timeline, or vendor details"></textarea>
+        <label class="field-label" for="purchaseAdditionalInfo">Additional Relevant Information</label>
+    <textarea name="purchaseAdditionalInfo" id="purchaseAdditionalInfo" rows="2" placeholder="Warranty, installation, delivery timeline, or vendor details"></textarea>
       </div>
     </div>
 
     <!-- 3. SUSTAINABLE DEVELOPMENT GOALS (SDGs) -->
-    <label class="field-label" style="margin-top:16px;font-weight:700">Select Relevant UN Sustainable Development Goals (SDGs)</label>
+    <label class="field-label" for="correctionReasonInput" style="margin-top:16px;font-weight:700">Select Relevant UN Sustainable Development Goals (SDGs)</label>
     <div class="field-help">Click to highlight all sustainable development goals addressed:</div>
     <div class="sdg-grid" id="sdgGrid">
       ${SDG_LIST.map(sdg => `
@@ -7039,31 +7074,31 @@
         <div class="grid2" style="gap:10px;margin-bottom:8px;">
           <div>
             <label class="field-label" style="font-size:11.5px;margin-top:0;">Full Name *</label>
-            <input class="bd-rp-name" placeholder="e.g. Dr. Jane Smith" value="${escapeHtml(data.resource_person_name || '')}" />
+            <input name="resource_person_name" aria-label="Resource Person Full Name" class="bd-rp-name" placeholder="e.g. Dr. Jane Smith" value="${escapeHtml(data.resource_person_name || '')}" />
           </div>
           <div>
             <label class="field-label" style="font-size:11.5px;margin-top:0;">Designation *</label>
-            <input class="bd-designation" placeholder="e.g. Professor / Senior Scientist" value="${escapeHtml(data.designation || '')}" />
+            <input name="resource_person_designation" aria-label="Resource Person Designation" class="bd-designation" placeholder="e.g. Professor / Senior Scientist" value="${escapeHtml(data.designation || '')}" />
           </div>
         </div>
         <div class="grid2" style="gap:10px;margin-bottom:8px;">
           <div>
             <label class="field-label" style="font-size:11.5px;margin-top:0;">Organization / Institution *</label>
-            <input class="bd-org" placeholder="e.g. IISc Bangalore / IIT Madras" value="${escapeHtml(data.organization || '')}" />
+            <input name="resource_person_org" aria-label="Resource Person Organization" class="bd-org" placeholder="e.g. IISc Bangalore / IIT Madras" value="${escapeHtml(data.organization || '')}" />
           </div>
           <div>
             <label class="field-label" style="font-size:11.5px;margin-top:0;">Honorarium Amount (₹) *</label>
-            <input class="bd-honorarium" type="number" min="0" step="any" placeholder="e.g. 5000" value="${escapeHtml(data.honorarium_amount !== undefined ? data.honorarium_amount : '')}" oninput="calcRpHonorariumTotal(${isEdit})" style="font-weight:700;color:var(--primary-blue);" />
+            <input name="honorarium_amount" aria-label="Honorarium Amount in Rupees" class="bd-honorarium" type="number" min="0" step="any" placeholder="e.g. 5000" value="${escapeHtml(data.honorarium_amount !== undefined ? data.honorarium_amount : '')}" oninput="calcRpHonorariumTotal(${isEdit})" style="font-weight:700;color:var(--primary-blue);" />
           </div>
         </div>
         <div class="grid2" style="gap:10px;margin-bottom:12px;">
           <div>
             <label class="field-label" style="font-size:11.5px;margin-top:0;">Email Address *</label>
-            <input class="bd-email" type="email" placeholder="e.g. speaker@institution.ac.in" value="${escapeHtml(data.email || '')}" />
+            <input name="resource_person_email" aria-label="Resource Person Email Address" class="bd-email" type="email" placeholder="e.g. speaker@institution.ac.in" value="${escapeHtml(data.email || '')}" />
           </div>
           <div>
             <label class="field-label" style="font-size:11.5px;margin-top:0;">Mobile Number *</label>
-            <input class="bd-mobile" placeholder="e.g. +91 9876543210" value="${escapeHtml(data.mobile || '')}" />
+            <input name="resource_person_mobile" aria-label="Resource Person Mobile Number" class="bd-mobile" placeholder="e.g. +91 9876543210" value="${escapeHtml(data.mobile || '')}" />
           </div>
         </div>
 
@@ -7071,36 +7106,36 @@
         <div class="grid2" style="gap:10px;margin-bottom:8px;">
           <div>
             <label class="field-label" style="font-size:11.5px;margin-top:0;">Beneficiary / Account Holder Name *</label>
-            <input class="bd-holder-name" placeholder="Exact name as in passbook / bank" value="${escapeHtml(data.account_holder_name || '')}" />
+            <input name="account_holder_name" aria-label="Beneficiary or Account Holder Name" class="bd-holder-name" placeholder="Exact name as in passbook / bank" value="${escapeHtml(data.account_holder_name || '')}" />
           </div>
           <div>
             <label class="field-label" style="font-size:11.5px;margin-top:0;">Bank Name *</label>
-            <input class="bd-bank-name" placeholder="e.g. State Bank of India / HDFC Bank" value="${escapeHtml(data.bank_name || '')}" />
+            <input name="bank_name" aria-label="Bank Name" class="bd-bank-name" placeholder="e.g. State Bank of India / HDFC Bank" value="${escapeHtml(data.bank_name || '')}" />
           </div>
         </div>
         <div class="grid2" style="gap:10px;margin-bottom:8px;">
           <div>
             <label class="field-label" style="font-size:11.5px;margin-top:0;">Bank Branch Name *</label>
-            <input class="bd-branch" placeholder="e.g. Koramangala Branch, Bangalore" value="${escapeHtml(data.branch_name || '')}" />
+            <input name="bank_branch" aria-label="Bank Branch Name" class="bd-branch" placeholder="e.g. Koramangala Branch, Bangalore" value="${escapeHtml(data.branch_name || '')}" />
           </div>
           <div>
             <label class="field-label" style="font-size:11.5px;margin-top:0;">IFSC Code (11 Chars) *</label>
-            <input class="bd-ifsc" style="text-transform:uppercase;font-family:monospace;" placeholder="e.g. SBIN0001234" value="${escapeHtml(data.ifsc_code || '')}" maxlength="11" />
+            <input name="ifsc_code" aria-label="Bank IFSC Code" class="bd-ifsc" style="text-transform:uppercase;font-family:monospace;" placeholder="e.g. SBIN0001234" value="${escapeHtml(data.ifsc_code || '')}" maxlength="11" />
           </div>
         </div>
         <div class="grid2" style="gap:10px;margin-bottom:8px;">
           <div>
             <label class="field-label" style="font-size:11.5px;margin-top:0;">${isExisting ? 'Update Account Number (Leave blank to keep existing ' + escapeHtml(maskedAcct) + ')' : 'Bank Account Number *'}</label>
-            <input class="bd-acct-no" type="password" placeholder="${isExisting ? 'Enter new account number only if changing' : 'Enter bank account number'}" />
+            <input name="bank_account_number" aria-label="Bank Account Number" class="bd-acct-no" type="password" placeholder="${isExisting ? 'Enter new account number only if changing' : 'Enter bank account number'}" />
           </div>
           <div>
             <label class="field-label" style="font-size:11.5px;margin-top:0;">Confirm Bank Account Number *</label>
-            <input class="bd-confirm-acct-no" type="password" placeholder="${isExisting ? 'Confirm new account number' : 'Re-enter bank account number'}" />
+            <input name="confirm_bank_account_number" aria-label="Confirm Bank Account Number" class="bd-confirm-acct-no" type="password" placeholder="${isExisting ? 'Confirm new account number' : 'Re-enter bank account number'}" />
           </div>
         </div>
         <div>
           <label class="field-label" style="font-size:11.5px;margin-top:0;">Payment Reference / Remarks (Optional)</label>
-          <input class="bd-remarks" placeholder="e.g. Keynote speaker honorarium + local travel" value="${escapeHtml(data.remarks || '')}" />
+          <input name="payment_remarks" aria-label="Payment Reference Remarks" class="bd-remarks" placeholder="e.g. Keynote speaker honorarium + local travel" value="${escapeHtml(data.remarks || '')}" />
         </div>
       `;
       container.appendChild(row);
@@ -7200,10 +7235,10 @@
       const row = document.createElement('div');
       row.className = 'item-row';
       row.innerHTML = `
-    <input placeholder="${placeholder}" class="it-p" value="${escapeHtml(p)}" />
-    <input placeholder="Qty" class="it-q" type="number" min="1" step="1" value="${escapeHtml(q)}" oninput="calcRow(this)" />
-    <input placeholder="Rate (₹)" class="it-r" type="number" min="0" step="any" value="${escapeHtml(r)}" oninput="calcRow(this)" />
-    <input placeholder="Amount (₹)" class="it-a" type="number" min="0" step="any" value="${escapeHtml(a)}" oninput="calcTotal()" style="font-weight:700" />
+    <input name="particulars" aria-label="Item Description" placeholder="${placeholder}" class="it-p" value="${escapeHtml(p)}" />
+    <input name="quantity" aria-label="Quantity" placeholder="Qty" class="it-q" type="number" min="1" step="1" value="${escapeHtml(q)}" oninput="calcRow(this)" />
+    <input name="rate" aria-label="Rate in Rupees" placeholder="Rate (₹)" class="it-r" type="number" min="0" step="any" value="${escapeHtml(r)}" oninput="calcRow(this)" />
+    <input name="amount" aria-label="Amount in Rupees" placeholder="Amount (₹)" class="it-a" type="number" min="0" step="any" value="${escapeHtml(a)}" oninput="calcTotal()" style="font-weight:700" />
     <button class="del-item" type="button" title="Remove row" onclick="removeItemRow(this, ${isEdit})">✕</button>
   `;
       wrap.appendChild(row);
@@ -7943,7 +7978,7 @@
           </div>
           <div style="margin-bottom:18px;">
             <label style="display:block;font-size:13px;font-weight:600;color:#334155;margin-bottom:6px;">Mandatory Correction Reason <span style="color:#dc2626;">*</span></label>
-            <textarea id="correctionReasonInput" rows="4" placeholder="Detail the specific corrections, missing documents, or revisions required by the faculty..." style="width:100%;box-sizing:border-box;border:1px solid #cbd5e1;border-radius:6px;padding:10px;font-family:inherit;font-size:13.5px;"></textarea>
+    <textarea name="correctionReasonInput" id="correctionReasonInput" rows="4" placeholder="Detail the specific corrections, missing documents, or revisions required by the faculty..." style="width:100%;box-sizing:border-box;border:1px solid #cbd5e1;border-radius:6px;padding:10px;font-family:inherit;font-size:13.5px;"></textarea>
           </div>
           <div style="display:flex;justify-content:flex-end;gap:12px;">
             <button type="button" class="secondary" style="padding:9px 18px;font-size:13.5px;font-weight:600;" onclick="dismissReturnForCorrectionModal()">Cancel</button>
@@ -8119,8 +8154,8 @@
             <form onsubmit="event.preventDefault(); submitRpPaymentTracking('${nfaId}', '${bankDetailId}');">
               <div class="grid2" style="gap:10px;margin-bottom:10px;">
                 <div>
-                  <label class="field-label" style="font-size:11.5px;">Tracking Status *</label>
-                  <select id="rpPayStatus" style="font-size:12.5px;">
+                  <label class="field-label" for="rpPayStatus" style="font-size:11.5px;">Tracking Status *</label>
+    <select name="rpPayStatus" id="rpPayStatus" style="font-size:12.5px;">
                     <option value="details_submitted" ${currentStatus === 'details_submitted' ? 'selected' : ''}>Details Submitted</option>
                     <option value="finance_verification" ${currentStatus === 'finance_verification' ? 'selected' : ''}>Finance Verification</option>
                     <option value="ready_for_payment" ${currentStatus === 'ready_for_payment' ? 'selected' : ''}>Ready for Payment</option>
@@ -8131,33 +8166,33 @@
                   </select>
                 </div>
                 <div>
-                  <label class="field-label" style="font-size:11.5px;">Approved Honorarium (₹)</label>
-                  <input id="rpPayApproved" type="number" step="any" value="${honorarium}" oninput="calcRpNet()" />
+                  <label class="field-label" for="rpPayApproved" style="font-size:11.5px;">Approved Honorarium (₹)</label>
+    <input name="rpPayApproved" id="rpPayApproved" type="number" step="any" value="${honorarium}" oninput="calcRpNet()" />
                 </div>
               </div>
               <div class="grid2" style="gap:10px;margin-bottom:10px;">
                 <div>
-                  <label class="field-label" style="font-size:11.5px;">Applicable Deductions / TDS (₹)</label>
-                  <input id="rpPayDeductions" type="number" step="any" value="${deductions || 0}" oninput="calcRpNet()" />
+                  <label class="field-label" for="rpPayDeductions" style="font-size:11.5px;">Applicable Deductions / TDS (₹)</label>
+    <input name="rpPayDeductions" id="rpPayDeductions" type="number" step="any" value="${deductions || 0}" oninput="calcRpNet()" />
                 </div>
                 <div>
-                  <label class="field-label" style="font-size:11.5px;">Net Payable Amount (₹)</label>
-                  <input id="rpPayNet" type="number" step="any" value="${Math.max(0, honorarium - (deductions || 0))}" readonly style="background:#f1f5f9;font-weight:700;color:var(--primary-blue);" />
+                  <label class="field-label" for="rpPayNet" style="font-size:11.5px;">Net Payable Amount (₹)</label>
+    <input name="rpPayNet" id="rpPayNet" type="number" step="any" value="${Math.max(0, honorarium - (deductions || 0))}" readonly style="background:#f1f5f9;font-weight:700;color:var(--primary-blue);" />
                 </div>
               </div>
               <div class="grid2" style="gap:10px;margin-bottom:10px;">
                 <div>
-                  <label class="field-label" style="font-size:11.5px;">Disbursement Date</label>
-                  <input id="rpPayDate" type="date" value="${paymentDate || new Date().toISOString().split('T')[0]}" />
+                  <label class="field-label" for="rpPayDate" style="font-size:11.5px;">Disbursement Date</label>
+    <input name="rpPayDate" id="rpPayDate" type="date" value="${paymentDate || new Date().toISOString().split('T')[0]}" />
                 </div>
                 <div>
-                  <label class="field-label" style="font-size:11.5px;">Payment Reference / UTR</label>
-                  <input id="rpPayUtr" placeholder="e.g. UTR-NEFT-99238" value="${escapeHtml(utr || '')}" />
+                  <label class="field-label" for="rpPayUtr" style="font-size:11.5px;">Payment Reference / UTR</label>
+    <input name="rpPayUtr" id="rpPayUtr" placeholder="e.g. UTR-NEFT-99238" value="${escapeHtml(utr || '')}" />
                 </div>
               </div>
               <div style="margin-bottom:14px;">
-                <label class="field-label" style="font-size:11.5px;">Payment Remarks (Optional)</label>
-                <textarea id="rpPayRemarks" rows="2" placeholder="e.g. Processed via institutional net banking">${escapeHtml(remarks || '')}</textarea>
+                <label class="field-label" for="rpPayRemarks" style="font-size:11.5px;">Payment Remarks (Optional)</label>
+    <textarea name="rpPayRemarks" id="rpPayRemarks" rows="2" placeholder="e.g. Processed via institutional net banking">${escapeHtml(remarks || '')}</textarea>
               </div>
               <div class="row" style="justify-content:flex-end;gap:10px;">
                 <button type="button" class="secondary" onclick="closeRpPaymentModal()">Cancel</button>
@@ -8372,12 +8407,12 @@
     <h2>Edit NFA: ${escapeHtml(n.ref_no)}</h2>
     <div class="field-help">Update proposal details, 4 description points (max 50 words each), and budget items.</div>
 
-    <label class="field-label">Proposal Title</label>
-    <input id="editTitle" value="${escapeHtml(n.title)}" />
+    <label class="field-label" for="editTitle">Proposal Title</label>
+    <input name="editTitle" id="editTitle" value="${escapeHtml(n.title)}" />
 
     <div class="row" style="margin-top:10px;">
       <div style="flex:1">
-        <label class="field-label">NFA Type</label>
+        <label class="field-label" for="editNfaFy">NFA Type</label>
         <div style="padding:9px 12px;background:#F8FAFC;border:1px solid #CBD5E1;border-radius:6px;font-weight:600;font-size:13px;color:#1E293B;">
           ${(n.organization_type === 'centre_or_office' || (REF.departments.find(d => d.id === n.department_id)?.category === 'coe')) ? 'Centres / Offices' : 'Department'}
         </div>
@@ -8387,11 +8422,11 @@
         <div style="padding:9px 12px;background:#F8FAFC;border:1px solid #CBD5E1;border-radius:6px;font-weight:600;font-size:13px;color:#1E293B;">
           ${escapeHtml(deptName(n.department_id))}
         </div>
-        <input type="hidden" id="editNfaDept" value="${n.department_id}" />
+        <input name="editNfaDept" type="hidden" id="editNfaDept" value="${n.department_id}" />
       </div>
       <div style="flex:1">
-        <label class="field-label">Academic / Financial Year</label>
-        <select id="editNfaFy">
+        <label for="nfaFy" class="field-label">Academic / Financial Year</label>
+    <select name="editNfaFy" id="editNfaFy">
           ${REF.financialYears.map(f => `<option value="${f.id}" ${f.id === n.financial_year_id ? 'selected' : ''}>${escapeHtml(f.label)}</option>`).join('')}
         </select>
       </div>
@@ -8400,14 +8435,14 @@
     <div style="margin-top:12px;padding:14px;background:var(--section-bg);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:14px;">
       <div class="row">
         <div style="flex:1">
-          <label class="field-label" style="font-weight:700;color:var(--primary)">Budget Main Category</label>
-          <select id="editNfaCat" onchange="onEditCategorySelect(this.value)">
+          <label class="field-label" for="editNfaCat" style="font-weight:700;color:var(--primary)">Budget Main Category</label>
+    <select name="editNfaCat" id="editNfaCat" onchange="onEditCategorySelect(this.value)">
             ${REF.categories.map(c => `<option value="${c.id}" ${c.id === n.budget_category_id ? 'selected' : ''}>${escapeHtml(c.name)}</option>`).join('')}
           </select>
         </div>
         <div style="flex:1">
-          <label class="field-label" style="font-weight:700;color:var(--primary)">Budget Subcategory</label>
-          <select id="editNfaSubcat">
+          <label class="field-label" for="editNfaSubcat" style="font-weight:700;color:var(--primary)">Budget Subcategory</label>
+    <select name="editNfaSubcat" id="editNfaSubcat">
             <option value="">— General Category Allocation —</option>
             ${(REF.subcategories || []).filter(s => s.budget_category_id === n.budget_category_id).map(s => `<option value="${s.id}" ${s.id === n.budget_subcategory_id ? 'selected' : ''}>${escapeHtml(s.name)}</option>`).join('')}
           </select>
@@ -8416,7 +8451,7 @@
     </div>
 
     <div class="card" style="padding:14px;background:var(--section-bg);border:1px solid var(--accent-border);margin-top:12px;margin-bottom:14px;">
-      <label class="field-label" style="font-weight:700;color:var(--primary);margin:0 0 8px;">Select NFA Category Type</label>
+      <label class="field-label" for="editEventResourcePerson" style="font-weight:700;color:var(--primary);margin:0 0 8px;">Select NFA Category Type</label>
       <div class="row" style="gap:14px;">
         <label id="editNfaTypeCardEvent" class="nfa-type-card ${!isPurchase ? 'active' : ''}">
           <input type="radio" name="editNfaType" id="editNfaTypeEvent" value="event" ${!isPurchase ? 'checked' : ''} onchange="switchNfaCategory('event', true)" />
@@ -8438,7 +8473,7 @@
           <label class="field-label" style="margin:0;font-weight:600;">1. Purpose of the Proposal</label>
           <span class="word-badge" id="editPoint1Badge">${countWords(p1)}/50 words</span>
         </div>
-        <textarea id="editPoint1" rows="2" oninput="updateWordCount('editPoint1', 'editPoint1Badge')">${escapeHtml(p1)}</textarea>
+        <textarea name="editPoint1" id="editPoint1" rows="2" oninput="updateWordCount('editPoint1', 'editPoint1Badge')">${escapeHtml(p1)}</textarea>
       </div>
 
       <div style="margin-bottom:12px;">
@@ -8446,7 +8481,7 @@
           <label class="field-label" style="margin:0;font-weight:600;">2. Logistics &amp; Scheduling Details</label>
           <span class="word-badge" id="editPoint2Badge">${countWords(p2)}/50 words</span>
         </div>
-        <textarea id="editPoint2" rows="2" oninput="updateWordCount('editPoint2', 'editPoint2Badge')">${escapeHtml(p2)}</textarea>
+        <textarea name="editPoint2" id="editPoint2" rows="2" oninput="updateWordCount('editPoint2', 'editPoint2Badge')">${escapeHtml(p2)}</textarea>
       </div>
 
       <div style="margin-bottom:12px;">
@@ -8454,7 +8489,7 @@
           <label class="field-label" style="margin:0;font-weight:600;">3. Justification &amp; Expected Outcomes</label>
           <span class="word-badge" id="editPoint3Badge">${countWords(p3)}/50 words</span>
         </div>
-        <textarea id="editPoint3" rows="2" oninput="updateWordCount('editPoint3', 'editPoint3Badge')">${escapeHtml(p3)}</textarea>
+        <textarea name="editPoint3" id="editPoint3" rows="2" oninput="updateWordCount('editPoint3', 'editPoint3Badge')">${escapeHtml(p3)}</textarea>
       </div>
 
       <div style="margin-bottom:6px;">
@@ -8462,7 +8497,7 @@
           <label class="field-label" style="margin:0;font-weight:600;">4. Statement of Total Expenditure</label>
           <span class="word-badge" id="editPoint4Badge">${countWords(p4)}/50 words</span>
         </div>
-        <textarea id="editPoint4" rows="2" oninput="updateWordCount('editPoint4', 'editPoint4Badge')">${escapeHtml(p4)}</textarea>
+        <textarea name="editPoint4" id="editPoint4" rows="2" oninput="updateWordCount('editPoint4', 'editPoint4Badge')">${escapeHtml(p4)}</textarea>
       </div>
     </div>
 
@@ -8471,31 +8506,31 @@
       <h3 style="margin-top:0;font-size:15px;color:#1e3a8a;font-weight:700;">Event &amp; Resource Person Details</h3>
       <div class="grid2" style="gap:12px;">
         <div>
-          <label class="field-label" style="margin-top:0">Resource Person Name</label>
-          <input id="editEventResourcePerson" value="${escapeHtml(ed.resource_person_name || '')}" placeholder="e.g. Dr. Jane Smith" />
+          <label for="eventResourcePerson" class="field-label" style="margin-top:0">Resource Person Name</label>
+    <input name="editEventResourcePerson" id="editEventResourcePerson" value="${escapeHtml(ed.resource_person_name || '')}" placeholder="e.g. Dr. Jane Smith" />
         </div>
         <div>
-          <label class="field-label" style="margin-top:0">Designation</label>
-          <input id="editEventDesignation" value="${escapeHtml(ed.designation || '')}" placeholder="e.g. Senior Research Scientist" />
+          <label class="field-label" for="editEventDesignation" style="margin-top:0">Designation</label>
+    <input name="editEventDesignation" id="editEventDesignation" value="${escapeHtml(ed.designation || '')}" placeholder="e.g. Senior Research Scientist" />
         </div>
         <div>
-          <label class="field-label" style="margin-top:0">Organization / Affiliation</label>
-          <input id="editEventOrganization" value="${escapeHtml(ed.organization || '')}" placeholder="e.g. IISc Bangalore / Tech Corp" />
+          <label class="field-label" for="editEventOrganization" style="margin-top:0">Organization / Affiliation</label>
+    <input name="editEventOrganization" id="editEventOrganization" value="${escapeHtml(ed.organization || '')}" placeholder="e.g. IISc Bangalore / Tech Corp" />
         </div>
         <div>
-          <label class="field-label" style="margin-top:0">Event Date(s)</label>
-          <input id="editEventDate" value="${escapeHtml(ed.event_date || '')}" placeholder="e.g. 15-16 Nov 2026" />
+          <label class="field-label" for="editEventDate" style="margin-top:0">Event Date(s)</label>
+    <input name="editEventDate" id="editEventDate" value="${escapeHtml(ed.event_date || '')}" placeholder="e.g. 15-16 Nov 2026" />
         </div>
         <div style="grid-column: 1 / -1;">
-          <label class="field-label" style="margin-top:0">Event Venue</label>
-          <input id="editEventVenue" value="${escapeHtml(ed.venue || '')}" placeholder="e.g. Central Auditorium / Room 402, Block II" />
+          <label class="field-label" for="editEventVenue" style="margin-top:0">Event Venue</label>
+    <input name="editEventVenue" id="editEventVenue" value="${escapeHtml(ed.venue || '')}" placeholder="e.g. Central Auditorium / Room 402, Block II" />
         </div>
         <div style="grid-column: 1 / -1;">
-          <label class="field-label" style="margin-top:0">Additional Info</label>
-          <textarea id="editEventAdditionalInfo" rows="2" placeholder="Target audience, expected attendees, etc.">${escapeHtml(ed.additional_info || '')}</textarea>
+          <label class="field-label" for="editEventAdditionalInfo" style="margin-top:0">Additional Info</label>
+    <textarea name="editEventAdditionalInfo" id="editEventAdditionalInfo" rows="2" placeholder="Target audience, expected attendees, etc.">${escapeHtml(ed.additional_info || '')}</textarea>
         </div>
         <div style="grid-column: 1 / -1;margin-top:4px;padding:8px 12px;background:#ffffff;border:1px solid #bfdbfe;border-radius:6px;">
-          <label class="field-label" style="font-weight:700;color:var(--primary-blue);margin-bottom:4px;">
+          <label class="field-label" for="editPurchaseItemName" style="font-weight:700;color:var(--primary-blue);margin-bottom:4px;">
             Will this event generate revenue?
           </label>
           <div style="display:flex;gap:20px;align-items:center;">
@@ -8535,29 +8570,29 @@
       <div class="grid2" style="gap:12px;">
         <div>
           <label class="field-label" style="margin-top:0">Item Name / Equipment</label>
-          <input id="editPurchaseItemName" value="${escapeHtml(pd.item_name || '')}" placeholder="e.g. 4K Ultra-HD Projector" />
+    <input name="editPurchaseItemName" id="editPurchaseItemName" value="${escapeHtml(pd.item_name || '')}" placeholder="e.g. 4K Ultra-HD Projector" />
         </div>
         <div>
-          <label class="field-label" style="margin-top:0">Quantity</label>
-          <input id="editPurchaseQuantity" value="${escapeHtml(pd.quantity || '')}" placeholder="e.g. 2 Units" />
+          <label class="field-label" for="editPurchaseQuantity" style="margin-top:0">Quantity</label>
+    <input name="editPurchaseQuantity" id="editPurchaseQuantity" value="${escapeHtml(pd.quantity || '')}" placeholder="e.g. 2 Units" />
         </div>
         <div style="grid-column: 1 / -1;">
-          <label class="field-label" style="margin-top:0">Description &amp; Specifications</label>
-          <textarea id="editPurchaseDescription" rows="2" placeholder="Technical specifications, brand, model, warranty requirements...">${escapeHtml(pd.description || '')}</textarea>
+          <label class="field-label" for="editPurchaseDescription" style="margin-top:0">Description &amp; Specifications</label>
+    <textarea name="editPurchaseDescription" id="editPurchaseDescription" rows="2" placeholder="Technical specifications, brand, model, warranty requirements...">${escapeHtml(pd.description || '')}</textarea>
         </div>
         <div style="grid-column: 1 / -1;">
-          <label class="field-label" style="margin-top:0">Purpose / Justification of Purchase</label>
-          <textarea id="editPurchasePurpose" rows="2" placeholder="Why this equipment is required and how it supports departmental academic activities...">${escapeHtml(pd.purpose || '')}</textarea>
+          <label class="field-label" for="editPurchasePurpose" style="margin-top:0">Purpose / Justification of Purchase</label>
+    <textarea name="editPurchasePurpose" id="editPurchasePurpose" rows="2" placeholder="Why this equipment is required and how it supports departmental academic activities...">${escapeHtml(pd.purpose || '')}</textarea>
         </div>
         <div style="grid-column: 1 / -1;">
-          <label class="field-label" style="margin-top:0">Additional Info</label>
-          <textarea id="editPurchaseAdditionalInfo" rows="2" placeholder="Vendor quotes received, maintenance requirements, etc.">${escapeHtml(pd.additional_info || '')}</textarea>
+          <label class="field-label" for="editPurchaseAdditionalInfo" style="margin-top:0">Additional Info</label>
+    <textarea name="editPurchaseAdditionalInfo" id="editPurchaseAdditionalInfo" rows="2" placeholder="Vendor quotes received, maintenance requirements, etc.">${escapeHtml(pd.additional_info || '')}</textarea>
         </div>
       </div>
     </div>
 
     <!-- 3. SDGs -->
-    <label class="field-label" style="margin-top:16px;font-weight:700">Select Relevant UN Sustainable Development Goals (SDGs)</label>
+    <label class="field-label" for="pjName" style="margin-top:16px;font-weight:700">Select Relevant UN Sustainable Development Goals (SDGs)</label>
     <div class="sdg-grid" id="sdgGrid">
       ${SDG_LIST.map(sdg => `
         <div class="sdg-chip ${selectedSdgs.includes(sdg) ? 'active' : ''}" onclick="toggleSdg('${sdg}', this)">
@@ -8850,16 +8885,16 @@
       openModal(`
     <button class="close-btn" onclick="closeModal()">✕</button>
     <h2>Add New Project</h2>
-    <label class="field-label">Project Name</label>
-    <input id="pjName" placeholder="e.g. Cyber Security Lab Upgrade / Cloud VM Cluster" />
-    <label class="field-label">Description</label>
-    <textarea id="pjDesc" rows="2"></textarea>
-    <label class="field-label">Department / Centre</label>
-    <select id="pjDept">${renderDeptSelectOptions(USER.department_id || REF.departments[0]?.id, false)}</select>
-    <label class="field-label">Budget Main Category</label>
-    <select id="pjCat">${REF.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}</select>
-    <label class="field-label">Planned Budget (₹)</label>
-    <input id="pjAmt" type="number" placeholder="Total planned allocation" />
+    <label for="pjName" class="field-label">Project Name</label>
+    <input name="pjName" id="pjName" placeholder="e.g. Cyber Security Lab Upgrade / Cloud VM Cluster" />
+    <label class="field-label" for="pjDesc">Description</label>
+    <textarea name="pjDesc" id="pjDesc" rows="2"></textarea>
+    <label class="field-label" for="pjDept">Department / Centre</label>
+    <select name="pjDept" id="pjDept">${renderDeptSelectOptions(USER.department_id || REF.departments[0]?.id, false)}</select>
+    <label class="field-label" for="pjCat">Budget Main Category</label>
+    <select name="pjCat" id="pjCat">${REF.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}</select>
+    <label class="field-label" for="pjAmt">Planned Budget (₹)</label>
+    <input name="pjAmt" id="pjAmt" type="number" placeholder="Total planned allocation" />
     <div class="row" style="justify-content:flex-end;margin-top:16px">
       <button class="secondary" onclick="closeModal()">Cancel</button>
       <button onclick="createProject()">Create Project</button>
@@ -9102,7 +9137,7 @@
           ${isInstitutionalRole ? `
             <div style="display:flex;align-items:center;gap:6px;">
               <span class="muted" style="font-size:12px;font-weight:600;">Department:</span>
-              <select style="max-width:280px;margin-bottom:0;" onchange="changeBudgetDept(this.value)">
+              <select id="budgetAdminDeptSelect" name="budgetDept" aria-label="Select Budget Department" style="max-width:280px;margin-bottom:0;" onchange="changeBudgetDept(this.value)">
                 ${renderDeptSelectOptions(deptId, false)}
               </select>
             </div>
@@ -9290,23 +9325,23 @@
 
     <div class="row" style="margin-bottom:14px;">
       <div style="flex:1">
-        <label class="field-label">Current Academic Year</label>
-        <input value="${fy.label}" disabled style="background:#f1f5f9;font-weight:700" />
+        <label class="field-label" for="rolloverCurrentFy">Current Academic Year</label>
+        <input id="rolloverCurrentFy" name="rolloverCurrentFy" aria-label="Current Academic Year" value="${fy.label}" disabled style="background:#f1f5f9;font-weight:700" />
       </div>
       <div style="flex:1">
-        <label class="field-label">Next Academic Year</label>
-        <input id="rollTargetLabel" placeholder="Auto-calculated (e.g. 2027-28)" />
+        <label for="rollTargetLabel" class="field-label">Next Academic Year</label>
+    <input name="rollTargetLabel" id="rollTargetLabel" placeholder="Auto-calculated (e.g. 2027-28)" />
       </div>
     </div>
 
     <div class="row" style="margin-bottom:14px;">
       <div style="flex:1">
-        <label class="field-label">Annual Growth Increment (%)</label>
-        <input id="rollPct" type="number" value="8" min="0" max="100" oninput="loadRolloverPreview()" />
+        <label class="field-label" for="rollPct">Annual Growth Increment (%)</label>
+    <input name="rollPct" id="rollPct" type="number" value="8" min="0" max="100" oninput="loadRolloverPreview()" />
       </div>
       <div style="flex:1;display:flex;align-items:center;padding-top:20px;">
         <label style="cursor:pointer;display:flex;align-items:center;gap:8px;font-weight:600;font-size:13px;">
-          <input type="checkbox" id="rollCarry" style="width:auto;margin-bottom:0;" onchange="loadRolloverPreview()" />
+          <input name="rollCarry" type="checkbox" id="rollCarry" style="width:auto;margin-bottom:0;" onchange="loadRolloverPreview()" />
           Carry Forward Unspent Balance
         </label>
       </div>
@@ -9318,7 +9353,7 @@
 
     <div class="row" style="justify-content:space-between;align-items:center;margin-top:20px;">
       <label style="cursor:pointer;display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-muted)">
-        <input type="checkbox" id="rollSetActive" checked style="width:auto;margin-bottom:0;" />
+        <input name="rollSetActive" type="checkbox" id="rollSetActive" checked style="width:auto;margin-bottom:0;" />
         Set new academic year as active upon rollover
       </label>
       <div class="row" style="gap:10px;">
@@ -9521,7 +9556,7 @@
       </div>
       <p class="card-sub">All workbook changes are previewed against the master ledger before any allocations are committed.</p>
       <div id="syncDropzone" class="file-dropzone" style="max-width:440px;margin-bottom:12px;" onclick="document.getElementById('excelFile').click()">
-        <input type="file" id="excelFile" accept=".xlsx" style="display:none;" />
+        <input name="excelFile" type="file" id="excelFile" accept=".xlsx" style="display:none;" />
         <div class="file-dropzone-icon" style="font-size:24px;margin-bottom:2px;">📊</div>
         <div class="file-dropzone-prompt" style="font-size:13px;">Choose modified Excel workbook (.xlsx) or drag &amp; drop here</div>
         <div class="file-dropzone-sub">Preview differences against the master ledger</div>
@@ -9662,7 +9697,7 @@
               ${currentSummaryScope === 'school' ? `
                 <div style="display:inline-flex;align-items:center;gap:6px;">
                   <span style="font-size:11.5px;font-weight:600;color:#334155;">School:</span>
-                  <select style="font-size:12px;padding:4px 8px;min-width:240px;" onchange="onSummaryTargetChange(this.value)">
+                  <select id="summarySchoolSelect" name="summarySchool" aria-label="Select School for Summary" style="font-size:12px;padding:4px 8px;min-width:240px;" onchange="onSummaryTargetChange(this.value)">
                     ${(REF.schools || []).map(s => `<option value="${s.id || s.code}" ${(currentSummaryTargetId === s.id || currentSummaryTargetId === s.code) ? 'selected' : ''}>${escapeHtml(s.name)} (${s.code})</option>`).join('')}
                   </select>
                 </div>
@@ -9671,7 +9706,7 @@
               ${currentSummaryScope === 'department' ? `
                 <div style="display:inline-flex;align-items:center;gap:6px;">
                   <span style="font-size:11.5px;font-weight:600;color:#334155;">Department:</span>
-                  <select style="font-size:12px;padding:4px 8px;min-width:240px;" onchange="onSummaryTargetChange(this.value)" ${(!isSenior && !isDean) ? 'disabled' : ''}>
+                  <select id="summaryDeptSelect" name="summaryDept" aria-label="Select Department for Summary" style="font-size:12px;padding:4px 8px;min-width:240px;" onchange="onSummaryTargetChange(this.value)" ${(!isSenior && !isDean) ? 'disabled' : ''}>
                     ${academicDepts.map(d => `<option value="${d.id}" ${currentSummaryTargetId === d.id ? 'selected' : ''}>${escapeHtml(d.name)} (${d.code})</option>`).join('')}
                   </select>
                 </div>
@@ -9680,7 +9715,7 @@
               ${currentSummaryScope === 'centre' ? `
                 <div style="display:inline-flex;align-items:center;gap:6px;">
                   <span style="font-size:11.5px;font-weight:600;color:#334155;">Centre:</span>
-                  <select style="font-size:12px;padding:4px 8px;min-width:240px;" onchange="onSummaryTargetChange(this.value)">
+                  <select id="summaryCentreSelect" name="summaryCentre" aria-label="Select Centre or Office for Summary" style="font-size:12px;padding:4px 8px;min-width:240px;" onchange="onSummaryTargetChange(this.value)">
                     ${centreDepts.map(c => `<option value="${c.id}" ${currentSummaryTargetId === c.id ? 'selected' : ''}>${escapeHtml(c.name)} (${c.code})</option>`).join('')}
                   </select>
                 </div>
@@ -9689,7 +9724,7 @@
               <!-- Academic Year Dropdown with min-width 140px -->
               <div style="display:inline-flex;align-items:center;gap:6px;margin-left:auto;">
                 <span style="font-size:11.5px;font-weight:600;color:#334155;">Academic Year:</span>
-                <select style="font-size:12px;padding:4px 8px;min-width:140px;" onchange="onSummaryFyChange(this.value)">
+                <select id="summaryFySelect" name="summaryFy" aria-label="Select Academic Year for Summary" style="font-size:12px;padding:4px 8px;min-width:140px;" onchange="onSummaryFyChange(this.value)">
                   ${(REF.financialYears || REF.financial_years || []).map(f => `<option value="${f.id}" ${currentSummaryFyId === f.id ? 'selected' : ''}>${escapeHtml(f.label)}${f.is_active ? ' (Active)' : ''}</option>`).join('')}
                 </select>
               </div>
@@ -9697,20 +9732,20 @@
 
             <!-- Row 2: 0-Activity Toggle + Action Buttons -->
             <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding-top:10px;border-top:1px solid #e2e8f0;">
-              <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#475569;cursor:pointer;">
-                <input type="checkbox" ${currentSummaryIncludeAllFaculty ? 'checked' : ''} onchange="onSummaryFacultyToggle(this.checked)" />
-                Include 0-activity faculty
+              <label for="summaryIncludeFaculty" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#475569;cursor:pointer;">
+                <input type="checkbox" id="summaryIncludeFaculty" name="summaryIncludeFaculty" ${currentSummaryIncludeAllFaculty ? 'checked' : ''} onchange="onSummaryFacultyToggle(this.checked)" />
+                <span>Include faculty with no NFA activity</span>
               </label>
 
               <div style="display:flex;gap:8px;flex-wrap:wrap;">
                 <button class="secondary" style="font-size:12px;padding:5px 12px;" onclick="renderSummaryGeneration(document.querySelector('#mainContent > div:last-child'))">
-                  🔄 Refresh Preview
+                  Refresh Preview
                 </button>
                 <button class="secondary" style="font-size:12px;padding:5px 12px;" onclick="exportSummary('pdf')">
-                  📥 Download Summary (PDF)
+                  Download Summary (PDF)
                 </button>
                 <button class="secondary" style="font-size:12px;padding:5px 12px;" onclick="exportSummary('excel')">
-                  📊 Download Summary (Excel)
+                  Download Summary (Excel)
                 </button>
               </div>
             </div>
@@ -9753,10 +9788,10 @@
               </div>
             </div>
 
-            <!-- Secondary Metrics: Revenue, Invoices, NFAs -->
+            <!-- Secondary Metrics: Revenue, Invoices, NFAs (Rendered strictly once) -->
             <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));gap:14px;margin-bottom:24px;">
               <div style="background:#ffffff;border:1px solid #e2e8f0;padding:14px;border-radius:8px;">
-                <div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:6px;">💰 Revenue &amp; Earnings</div>
+                <div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:6px;">Revenue &amp; Earnings</div>
                 <div style="font-size:18px;font-weight:700;color:#059669;">Submitted: ${inr(m.total_revenue || 0)}</div>
                 <div style="font-size:11px;color:#64748b;margin-top:3px;">
                   Verified by Finance: <strong style="color:#16a34a;">${inr(m.verified_revenue || 0)}</strong> · Pending Verification: <strong style="color:#ca8a04;">${inr(m.pending_revenue !== undefined ? m.pending_revenue : ((m.total_revenue || 0) - (m.verified_revenue || 0)))}</strong>
@@ -9764,23 +9799,12 @@
                 <div style="font-size:10.5px;color:#94a3b8;margin-top:2px;">Strictly independent ledger (does not inflate spend ceiling)</div>
               </div>
               <div style="background:#ffffff;border:1px solid #e2e8f0;padding:14px;border-radius:8px;">
-                <div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:6px;">🧾 Purchase Invoices &amp; Settlements</div>
+                <div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:6px;">Purchase Invoices &amp; Settlements</div>
                 <div style="font-size:18px;font-weight:700;color:#2563eb;">Paid: ${inr(m.invoices_paid)}</div>
                 <div style="font-size:11px;color:#64748b;margin-top:2px;">Pending Payment: ${inr(m.invoices_pending)}</div>
               </div>
               <div style="background:#ffffff;border:1px solid #e2e8f0;padding:14px;border-radius:8px;">
-                <div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:6px;">📑 Total Notes for Approval (NFAs)</div>
-                <div style="font-size:18px;font-weight:700;color:var(--primary);">${m.total_nfas} Submitted</div>
-                <div style="font-size:11px;color:#64748b;margin-top:2px;">Approved: ${m.approved_nfas} · In-Flight: ${m.pending_nfas} · Rejected: ${m.rejected_nfas} · Events Completed: ${m.events_completed_count}/${m.event_nfas_count}</div>
-              </div>
-            </div>
-              <div style="background:#ffffff;border:1px solid #e2e8f0;padding:14px;border-radius:8px;">
-                <div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:6px;">🧾 Purchase Invoices &amp; Settlements</div>
-                <div style="font-size:18px;font-weight:700;color:#2563eb;">Paid: ${inr(m.invoices_paid)}</div>
-                <div style="font-size:11px;color:#64748b;margin-top:2px;">Pending Payment: ${inr(m.invoices_pending)}</div>
-              </div>
-              <div style="background:#ffffff;border:1px solid #e2e8f0;padding:14px;border-radius:8px;">
-                <div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:6px;">📑 Total Notes for Approval (NFAs)</div>
+                <div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:6px;">Total Notes for Approval (NFAs)</div>
                 <div style="font-size:18px;font-weight:700;color:var(--primary);">${m.total_nfas} Submitted</div>
                 <div style="font-size:11px;color:#64748b;margin-top:2px;">Approved: ${m.approved_nfas} · In-Flight: ${m.pending_nfas} · Rejected: ${m.rejected_nfas} · Events Completed: ${m.events_completed_count}/${m.event_nfas_count}</div>
               </div>
@@ -9987,20 +10011,34 @@
     }
 
     const REPORT_DEFINITIONS = [
-      { id: 'nfa_activity', name: 'NFA Activity Report', desc: 'Comprehensive log of all submitted, approved, and active Notes for Approval.' },
-      { id: 'department_budget', name: 'Department Budget Report', desc: 'Allocated vs spent budgets across all department categories and line items.' },
-      { id: 'school_budget', name: 'School Budget Report', desc: 'Roll-up comparison of budgets and expenditures across schools (SOET, SOA, SBM, SPS).' },
-      { id: 'campus_budget', name: 'Campus Budget Report', desc: 'Executive institutional financial overview covering academic and research centres.' },
-      { id: 'capex', name: 'Capital Expenditure (CAPEX) Report', desc: 'Equipment, software licenses, laboratory investments, and computing assets.' },
-      { id: 'revenue_earnings', name: 'Revenue & Earnings Report', desc: 'Earnings ledger: registrations, sponsorships, participation fees, verified collections.' },
-      { id: 'event_activity', name: 'Event Activity Report', desc: 'Workshops, conferences, resource persons, venue, dates, and completion status.' },
-      { id: 'purchase_activity', name: 'Purchase Activity Report', desc: 'Procurement NFAs, 3 vendor quotations, comparative statements, and item specs.' },
-      { id: 'purchase_invoice', name: 'Purchase Invoice & Settlement Report', desc: 'Vendor invoice submissions, GST amounts, Finance verification, and paid amounts.' },
-      { id: 'payment_status', name: 'Payment Status Report', desc: 'Real-time disbursement tracker for vendor invoices and resource person honorariums.' },
-      { id: 'financial_ledger', name: 'Financial Ledger & Audit Trail Report', desc: 'Immutable chronology of financial transactions, revisions, and status transitions.' },
-      { id: 'faculty_nfa', name: 'Faculty-wise NFA Activity Report', desc: 'Faculty proposal metrics: submissions, approval rates, and total sanctioned amounts.' },
-      { id: 'centres_offices', name: 'Centres / Offices Activity Report', desc: 'Centres of Excellence (COEs) and specialized research laboratory operations.' },
-      { id: 'pending_approvals', name: 'Pending Approvals & Bottleneck Report', desc: 'In-flight proposals, current review stages, and approval duration tracking.' },
+      // Category: NFA Proposals & Approvals
+      { id: 'nfa_activity', category: 'NFA Proposals & Approvals', name: 'NFA Activity Report', desc: 'Comprehensive log of all submitted, approved, and active Notes for Approval.' },
+      { id: 'faculty_nfa', category: 'NFA Proposals & Approvals', name: 'Faculty-wise NFA Activity Report', desc: 'Faculty proposal metrics: submissions, approval rates, and total sanctioned amounts.' },
+      { id: 'pending_approvals', category: 'NFA Proposals & Approvals', name: 'Pending Approvals & Bottleneck Report', desc: 'In-flight proposals, current review stages, and approval duration tracking.' },
+
+      // Category: Institutional Budgets & Allocations
+      { id: 'department_budget', category: 'Institutional Budgets & Allocations', name: 'Department Budget Report', desc: 'Allocated vs spent budgets across all department categories and line items.' },
+      { id: 'school_budget', category: 'Institutional Budgets & Allocations', name: 'School Budget Report', desc: 'Roll-up comparison of budgets and expenditures across schools (SOET, SOA, SBM, SPS).' },
+      { id: 'campus_budget', category: 'Institutional Budgets & Allocations', name: 'Campus Budget Report', desc: 'Executive institutional financial overview covering academic and research centres.' },
+      { id: 'capex', category: 'Institutional Budgets & Allocations', name: 'Capital Expenditure (CAPEX) Report', desc: 'Equipment, software licenses, laboratory investments, and computing assets.' },
+
+      // Category: Financial Settlements & Revenue
+      { id: 'revenue_earnings', category: 'Financial Settlements & Revenue', name: 'Revenue & Earnings Report', desc: 'Earnings ledger: registrations, sponsorships, participation fees, verified collections.' },
+      { id: 'purchase_invoice', category: 'Financial Settlements & Revenue', name: 'Purchase Invoice & Settlement Report', desc: 'Vendor invoice submissions, GST amounts, Finance verification, and paid amounts.' },
+      { id: 'payment_status', category: 'Financial Settlements & Revenue', name: 'Payment Status Report', desc: 'Real-time disbursement tracker for vendor invoices and resource person honorariums.' },
+      { id: 'financial_ledger', category: 'Financial Settlements & Revenue', name: 'Financial Ledger & Audit Trail Report', desc: 'Immutable chronology of financial transactions, revisions, and status transitions.' },
+
+      // Category: Activity, Procurement & Governance
+      { id: 'event_activity', category: 'Activity, Procurement & Governance', name: 'Event Activity Report', desc: 'Workshops, conferences, resource persons, venue, dates, and completion status.' },
+      { id: 'purchase_activity', category: 'Activity, Procurement & Governance', name: 'Purchase Activity Report', desc: 'Procurement NFAs, 3 vendor quotations, comparative statements, and item specs.' },
+      { id: 'centres_offices', category: 'Activity, Procurement & Governance', name: 'Centres / Offices Activity Report', desc: 'Centres of Excellence (COEs) and specialized research laboratory operations.' },
+    ];
+
+    const REPORT_CATEGORIES = [
+      'NFA Proposals & Approvals',
+      'Institutional Budgets & Allocations',
+      'Financial Settlements & Revenue',
+      'Activity, Procurement & Governance',
     ];
 
     async function renderReportGeneration(container) {
@@ -10047,153 +10085,174 @@
 
       let html = `
         <div class="card" style="margin-bottom:20px;">
-          <div class="card-header" style="flex-wrap:wrap;gap:12px;">
+          <div class="card-header" style="flex-wrap:wrap;gap:12px;margin-bottom:16px;">
             <div>
               <h2 class="card-title" style="color:var(--primary-blue);">Official Institutional Reports (14 Report Types)</h2>
               <div class="card-sub">Generate and export official CHRIST University audit and governance reports in PDF and Excel formats</div>
             </div>
           </div>
 
-          <!-- Report Selector Grid (14 items) -->
-          <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(210px, 1fr));gap:8px;margin-bottom:16px;">
-            ${REPORT_DEFINITIONS.map(r => `
-              <button
-                type="button"
-                class="${currentSelectedReport === r.id ? 'primary' : 'secondary'}"
-                style="text-align:left;padding:8px 10px;font-size:11.5px;font-weight:600;display:flex;align-items:center;gap:6px;border-radius:6px;"
-                onclick="selectReportType('${r.id}')"
-              >
-                <span>${currentSelectedReport === r.id ? '▶' : '•'}</span>
-                <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(r.name)}</span>
-              </button>
-            `).join('')}
-          </div>
-
-          <!-- Scope & Organization Filter Bar: 2 Clean Rows -->
-          <div style="background:#f8fafc;padding:14px 16px;border-radius:6px;border:1px solid #e2e8f0;margin-bottom:16px;">
-            <!-- Row 1: Scope, Organization Dropdown, Academic Year -->
-            <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">
-              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-                <span style="font-size:12px;font-weight:600;color:#475569;">Scope:</span>
-                ${isSenior ? `
-                  <button class="${currentReportScope === 'campus' ? 'primary' : 'secondary'}" style="font-size:11.5px;padding:4px 10px;" onclick="onReportScopeChange('campus')">
-                    Campus
-                  </button>
-                ` : ''}
-                ${(isSenior || isDean) ? `
-                  <button class="${currentReportScope === 'school' ? 'primary' : 'secondary'}" style="font-size:11.5px;padding:4px 10px;" onclick="onReportScopeChange('school')">
-                    School-Wise
-                  </button>
-                ` : ''}
-                <button class="${currentReportScope === 'department' ? 'primary' : 'secondary'}" style="font-size:11.5px;padding:4px 10px;" onclick="onReportScopeChange('department')">
-                  Department
-                </button>
-                <button class="${currentReportScope === 'centre' ? 'primary' : 'secondary'}" style="font-size:11.5px;padding:4px 10px;" onclick="onReportScopeChange('centre')">
-                  Centres / Offices
-                </button>
+          <!-- 2-Column Institutional Report Workspace -->
+          <div style="display:grid;grid-template-columns:280px 1fr;gap:20px;align-items:start;" class="report-workspace-grid">
+            <!-- Left Column: Categorized Navigation List -->
+            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:12px;">
+              <div style="font-size:12.5px;font-weight:700;color:var(--primary-blue);padding-bottom:6px;border-bottom:1px solid #e2e8f0;">
+                Report Catalogue
               </div>
-
-              <!-- Dynamic Entity Dropdown with min-width 240px -->
-              ${currentReportScope === 'school' ? `
-                <div style="display:inline-flex;align-items:center;gap:6px;">
-                  <span style="font-size:11.5px;font-weight:600;color:#334155;">School:</span>
-                  <select style="font-size:12px;padding:4px 8px;min-width:240px;" onchange="onReportTargetChange(this.value)">
-                    <option value="">All Schools</option>
-                    ${(REF.schools || []).map(s => `<option value="${s.id || s.code}" ${(currentReportTargetId === s.id || currentReportTargetId === s.code) ? 'selected' : ''}>${escapeHtml(s.name)} (${s.code})</option>`).join('')}
-                  </select>
+              ${REPORT_CATEGORIES.map(cat => `
+                <div>
+                  <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;padding:4px 6px 4px;">
+                    ${escapeHtml(cat)}
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:3px;">
+                    ${REPORT_DEFINITIONS.filter(r => r.category === cat).map(r => `
+                      <button
+                        type="button"
+                        class="${currentSelectedReport === r.id ? 'primary' : 'secondary'}"
+                        style="text-align:left;padding:7px 10px;font-size:11.5px;font-weight:${currentSelectedReport === r.id ? '700' : '500'};display:flex;align-items:center;gap:6px;border-radius:6px;line-height:1.3;white-space:normal;${currentSelectedReport === r.id ? 'background:var(--primary-blue);color:#ffffff;box-shadow:0 1px 3px rgba(0,0,0,0.1);border-color:var(--primary-blue);' : 'background:#ffffff;border:1px solid #e2e8f0;color:#334155;'}"
+                        onclick="selectReportType('${r.id}')"
+                      >
+                        <span style="font-size:9px;opacity:${currentSelectedReport === r.id ? '1' : '0.5'};">${currentSelectedReport === r.id ? '▶' : '•'}</span>
+                        <span>${escapeHtml(r.name)}</span>
+                      </button>
+                    `).join('')}
+                  </div>
                 </div>
-              ` : ''}
-
-              ${currentReportScope === 'department' ? `
-                <div style="display:inline-flex;align-items:center;gap:6px;">
-                  <span style="font-size:11.5px;font-weight:600;color:#334155;">Department:</span>
-                  <select style="font-size:12px;padding:4px 8px;min-width:240px;" onchange="onReportTargetChange(this.value)" ${(!isSenior && !isDean) ? 'disabled' : ''}>
-                    ${isSenior || isDean ? '<option value="">All Departments</option>' : ''}
-                    ${academicDepts.map(d => `<option value="${d.id}" ${currentReportTargetId === d.id ? 'selected' : ''}>${escapeHtml(d.name)} (${d.code})</option>`).join('')}
-                  </select>
-                </div>
-              ` : ''}
-
-              ${currentReportScope === 'centre' ? `
-                <div style="display:inline-flex;align-items:center;gap:6px;">
-                  <span style="font-size:11.5px;font-weight:600;color:#334155;">Centre:</span>
-                  <select style="font-size:12px;padding:4px 8px;min-width:240px;" onchange="onReportTargetChange(this.value)">
-                    <option value="">All Centres / Offices</option>
-                    ${centreDepts.map(c => `<option value="${c.id}" ${currentReportTargetId === c.id ? 'selected' : ''}>${escapeHtml(c.name)} (${c.code})</option>`).join('')}
-                  </select>
-                </div>
-              ` : ''}
-
-              <!-- Academic Year Dropdown with min-width 140px -->
-              <div style="display:inline-flex;align-items:center;gap:6px;margin-left:auto;">
-                <span style="font-size:11.5px;font-weight:600;color:#334155;">Academic Year:</span>
-                <select style="font-size:12px;padding:4px 8px;min-width:140px;" onchange="onReportFyChange(this.value)">
-                  ${(REF.financialYears || REF.financial_years || []).map(f => `<option value="${f.id}" ${currentReportFyId === f.id ? 'selected' : ''}>${escapeHtml(f.label)}${f.is_active ? ' (Active)' : ''}</option>`).join('')}
-                </select>
-              </div>
+              `).join('')}
             </div>
 
-            <!-- Row 2: 0-Activity Toggle + Action Buttons -->
-            <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding-top:10px;border-top:1px solid #e2e8f0;">
-              <div>
-                ${currentSelectedReport === 'faculty_nfa' ? `
-                  <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#475569;cursor:pointer;">
-                    <input type="checkbox" ${currentReportIncludeAllFaculty ? 'checked' : ''} onchange="onReportFacultyToggle(this.checked)" />
-                    Include 0-activity faculty
-                  </label>
-                ` : '<span style="font-size:12px;color:#64748b;">Filtering: Strict organization boundary</span>'}
+            <!-- Right Column: Active Report Workspace -->
+            <div style="display:flex;flex-direction:column;gap:14px;min-width:0;">
+              <!-- Scope & Organization Filter Bar -->
+              <div style="background:#f8fafc;padding:14px 16px;border-radius:6px;border:1px solid #e2e8f0;">
+                <!-- Row 1: Scope, Organization Dropdown, Academic Year -->
+                <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">
+                  <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                    <span style="font-size:12px;font-weight:600;color:#475569;">Scope:</span>
+                    ${isSenior ? `
+                      <button class="${currentReportScope === 'campus' ? 'primary' : 'secondary'}" style="font-size:11.5px;padding:4px 10px;" onclick="onReportScopeChange('campus')">
+                        Campus
+                      </button>
+                    ` : ''}
+                    ${(isSenior || isDean) ? `
+                      <button class="${currentReportScope === 'school' ? 'primary' : 'secondary'}" style="font-size:11.5px;padding:4px 10px;" onclick="onReportScopeChange('school')">
+                        School-Wise
+                      </button>
+                    ` : ''}
+                    <button class="${currentReportScope === 'department' ? 'primary' : 'secondary'}" style="font-size:11.5px;padding:4px 10px;" onclick="onReportScopeChange('department')">
+                      Department
+                    </button>
+                    <button class="${currentReportScope === 'centre' ? 'primary' : 'secondary'}" style="font-size:11.5px;padding:4px 10px;" onclick="onReportScopeChange('centre')">
+                      Centres / Offices
+                    </button>
+                  </div>
+
+                  <!-- Dynamic Entity Dropdown with min-width 240px -->
+                  ${currentReportScope === 'school' ? `
+                    <div style="display:inline-flex;align-items:center;gap:6px;">
+                      <span style="font-size:11.5px;font-weight:600;color:#334155;">School:</span>
+                      <select id="reportSchoolSelect" name="reportSchool" aria-label="Select School for Report" style="font-size:12px;padding:4px 8px;min-width:240px;" onchange="onReportTargetChange(this.value)">
+                        <option value="">All Schools</option>
+                        ${(REF.schools || []).map(s => `<option value="${s.id || s.code}" ${(currentReportTargetId === s.id || currentReportTargetId === s.code) ? 'selected' : ''}>${escapeHtml(s.name)} (${s.code})</option>`).join('')}
+                      </select>
+                    </div>
+                  ` : ''}
+
+                  ${currentReportScope === 'department' ? `
+                    <div style="display:inline-flex;align-items:center;gap:6px;">
+                      <span style="font-size:11.5px;font-weight:600;color:#334155;">Department:</span>
+                      <select id="reportDeptSelect" name="reportDept" aria-label="Select Department for Report" style="font-size:12px;padding:4px 8px;min-width:240px;" onchange="onReportTargetChange(this.value)" ${(!isSenior && !isDean) ? 'disabled' : ''}>
+                        ${isSenior || isDean ? '<option value="">All Departments</option>' : ''}
+                        ${academicDepts.map(d => `<option value="${d.id}" ${currentReportTargetId === d.id ? 'selected' : ''}>${escapeHtml(d.name)} (${d.code})</option>`).join('')}
+                      </select>
+                    </div>
+                  ` : ''}
+
+                  ${currentReportScope === 'centre' ? `
+                    <div style="display:inline-flex;align-items:center;gap:6px;">
+                      <span style="font-size:11.5px;font-weight:600;color:#334155;">Centre:</span>
+                      <select id="reportCentreSelect" name="reportCentre" aria-label="Select Centre or Office for Report" style="font-size:12px;padding:4px 8px;min-width:240px;" onchange="onReportTargetChange(this.value)">
+                        <option value="">All Centres / Offices</option>
+                        ${centreDepts.map(c => `<option value="${c.id}" ${currentReportTargetId === c.id ? 'selected' : ''}>${escapeHtml(c.name)} (${c.code})</option>`).join('')}
+                      </select>
+                    </div>
+                  ` : ''}
+
+                  <!-- Academic Year Dropdown with min-width 140px -->
+                  <div style="display:inline-flex;align-items:center;gap:6px;margin-left:auto;">
+                    <span style="font-size:11.5px;font-weight:600;color:#334155;">Academic Year:</span>
+                    <select id="reportFySelect" name="reportFy" aria-label="Select Academic Year for Report" style="font-size:12px;padding:4px 8px;min-width:140px;" onchange="onReportFyChange(this.value)">
+                      ${(REF.financialYears || REF.financial_years || []).map(f => `<option value="${f.id}" ${currentReportFyId === f.id ? 'selected' : ''}>${escapeHtml(f.label)}${f.is_active ? ' (Active)' : ''}</option>`).join('')}
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Row 2: 0-Activity Toggle + Action Buttons -->
+                <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding-top:10px;border-top:1px solid #e2e8f0;">
+                  <div>
+                    ${currentSelectedReport === 'faculty_nfa' ? `
+                      <label for="reportIncludeFaculty" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#475569;cursor:pointer;">
+                        <input type="checkbox" id="reportIncludeFaculty" name="reportIncludeFaculty" ${currentReportIncludeAllFaculty ? 'checked' : ''} onchange="onReportFacultyToggle(this.checked)" />
+                        <span>Include faculty with no NFA activity</span>
+                      </label>
+                    ` : '<span style="font-size:12px;color:#64748b;">Filtering: Strict organization boundary</span>'}
+                  </div>
+
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <button class="secondary" style="font-size:12px;padding:5px 12px;" onclick="renderReportGeneration(document.querySelector('#mainContent > div:last-child'))">
+                      Refresh Preview
+                    </button>
+                    <button class="primary" style="font-size:12px;padding:5px 14px;" onclick="downloadActiveReport('pdf')">
+                      Download Official PDF Report
+                    </button>
+                    <button class="secondary" style="font-size:12px;padding:5px 12px;" onclick="downloadActiveReport('excel')">
+                      Download Formatted Excel
+                    </button>
+                  </div>
+                </div>
               </div>
 
-              <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                <button class="secondary" style="font-size:12px;padding:5px 12px;" onclick="renderReportGeneration(document.querySelector('#mainContent > div:last-child'))">
-                  🔄 Refresh Preview
-                </button>
-                <button class="primary" style="font-size:12px;padding:5px 14px;" onclick="downloadActiveReport('pdf')">
-                  📥 Download Official PDF Report
-                </button>
-                <button class="secondary" style="font-size:12px;padding:5px 12px;" onclick="downloadActiveReport('excel')">
-                  📊 Download Formatted Excel
-                </button>
+              <!-- Active Report Header & Description -->
+              <div style="background:#f8fafc;border-left:4px solid var(--primary-blue);padding:12px 16px;border-radius:0 6px 6px 0;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                  <h3 style="margin:0;font-size:15px;color:var(--primary-blue);">${escapeHtml(activeDef.name)}</h3>
+                  <span class="badge" style="background:var(--light-blue);color:var(--primary-blue);font-size:10.5px;font-weight:700;">${escapeHtml(activeDef.category)}</span>
+                </div>
+                <div style="font-size:12.5px;color:#475569;">${escapeHtml(activeDef.desc)}</div>
               </div>
+
+              ${errorMsg ? `<div class="card" style="color:var(--danger);padding:14px;">${escapeHtml(errorMsg)}</div>` : `
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                  <span style="font-size:12.5px;font-weight:600;color:#334155;">Previewing Records (${records.length} total)</span>
+                  <span style="font-size:11px;color:#64748b;">Showing first 25 records below. Full records exported in PDF &amp; Excel.</span>
+                </div>
+
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        ${records.length > 0 ? Object.keys(records[0]).map(k => `<th>${escapeHtml(k.replace(/_/g, ' ').toUpperCase())}</th>`).join('') : '<th>Records</th>'}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${records.length === 0 ? '<tr><td colspan="10" class="muted" style="text-align:center;padding:24px;">No records available for this report type.</td></tr>' : ''}
+                      ${records.slice(0, 25).map(row => `
+                        <tr>
+                          ${Object.keys(row).map(k => {
+                            let val = row[k];
+                            if (typeof val === 'number' && (k.includes('amount') || k.includes('allocated') || k.includes('approved') || k.includes('pending') || k.includes('available') || k.includes('revenue') || k.includes('requested'))) {
+                              val = inr(val);
+                            }
+                            return `<td>${escapeHtml(String(val ?? '—'))}</td>`;
+                          }).join('')}
+                        </tr>
+                      `).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              `}
             </div>
           </div>
-
-          <!-- Active Report Header & Description -->
-          <div style="background:#f8fafc;border-left:4px solid var(--primary-blue);padding:12px 16px;margin-bottom:16px;border-radius:0 6px 6px 0;">
-            <h3 style="margin:0 0 4px;font-size:15px;color:var(--primary-blue);">${escapeHtml(activeDef.name)}</h3>
-            <div style="font-size:12.5px;color:#475569;">${escapeHtml(activeDef.desc)}</div>
-          </div>
-
-          ${errorMsg ? `<div class="card" style="color:var(--danger);padding:14px;">${escapeHtml(errorMsg)}</div>` : `
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-              <span style="font-size:12.5px;font-weight:600;color:#334155;">Previewing Records (${records.length} total)</span>
-              <span style="font-size:11px;color:#64748b;">Showing first 25 records below. Full records exported in PDF &amp; Excel.</span>
-            </div>
-
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    ${records.length > 0 ? Object.keys(records[0]).map(k => `<th>${escapeHtml(k.replace(/_/g, ' ').toUpperCase())}</th>`).join('') : '<th>Records</th>'}
-                  </tr>
-                </thead>
-                <tbody>
-                  ${records.length === 0 ? '<tr><td colspan="10" class="muted" style="text-align:center;padding:24px;">No records available for this report type.</td></tr>' : ''}
-                  ${records.slice(0, 25).map(row => `
-                    <tr>
-                      ${Object.keys(row).map(k => {
-                        let val = row[k];
-                        if (typeof val === 'number' && (k.includes('amount') || k.includes('allocated') || k.includes('approved') || k.includes('pending') || k.includes('available') || k.includes('revenue') || k.includes('requested'))) {
-                          val = inr(val);
-                        }
-                        return `<td>${escapeHtml(String(val ?? '—'))}</td>`;
-                      }).join('')}
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-            </div>
-          `}
         </div>
       `;
 
@@ -10439,7 +10498,7 @@
     <div class="card">
       <h2 class="card-title" style="margin-bottom:12px">Academic &amp; Financial Years</h2>
       <div class="row" style="margin-bottom:14px">
-        <input id="fyLabel" placeholder="e.g. 2027-28" style="max-width:220px;margin-bottom:0" />
+        <input name="fyLabel" id="fyLabel" placeholder="e.g. 2027-28" style="max-width:220px;margin-bottom:0" />
         <button onclick="addFy()">Add Financial Year</button>
       </div>
       <div class="table-wrap">
@@ -10486,10 +10545,10 @@
       <!-- Search & Filters Toolbar -->
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:#F8F9FA;padding:12px;border-radius:var(--radius);border:1px solid var(--border);margin-bottom:16px;">
         <div style="flex:2;min-width:200px;">
-          <input id="userSearchInput" placeholder="🔍 Search by name or email..." style="margin-bottom:0;padding:8px 12px;font-size:13px;" oninput="filterAdminUserTable()" />
+          <input name="userSearchInput" id="userSearchInput" placeholder="🔍 Search by name or email..." style="margin-bottom:0;padding:8px 12px;font-size:13px;" oninput="filterAdminUserTable()" />
         </div>
         <div style="flex:1;min-width:140px;">
-          <select id="userRoleFilter" style="margin-bottom:0;height:38px;min-height:38px;padding:6px 10px;font-size:13px;" onchange="filterAdminUserTable()">
+          <select name="userRoleFilter" id="userRoleFilter" style="margin-bottom:0;height:38px;min-height:38px;padding:6px 10px;font-size:13px;" onchange="filterAdminUserTable()">
             <option value="all">All Roles</option>
             <option value="faculty">Faculty</option>
             <option value="hod">HOD</option>
@@ -10501,13 +10560,13 @@
           </select>
         </div>
         <div style="flex:1.5;min-width:160px;">
-          <select id="userDeptFilter" style="margin-bottom:0;height:38px;min-height:38px;padding:6px 10px;font-size:13px;" onchange="filterAdminUserTable()">
+          <select name="userDeptFilter" id="userDeptFilter" style="margin-bottom:0;height:38px;min-height:38px;padding:6px 10px;font-size:13px;" onchange="filterAdminUserTable()">
             <option value="all">All Departments</option>
             ${departments.map(d => `<option value="${d.id}">${escapeHtml(d.name)} (${d.code})</option>`).join('')}
           </select>
         </div>
         <div style="flex:1;min-width:120px;">
-          <select id="userStatusFilter" style="margin-bottom:0;height:38px;min-height:38px;padding:6px 10px;font-size:13px;" onchange="filterAdminUserTable()">
+          <select name="userStatusFilter" id="userStatusFilter" style="margin-bottom:0;height:38px;min-height:38px;padding:6px 10px;font-size:13px;" onchange="filterAdminUserTable()">
             <option value="all">All Statuses</option>
             <option value="active">Active Only</option>
             <option value="inactive">Deactivated Only</option>
@@ -11116,7 +11175,7 @@
             `<option value="${opt.value}" ${(r.role || 'faculty') === opt.value ? 'selected' : ''}>${opt.label}</option>`
           ).join('');
 
-          const roleSelector = `<select style="padding:4px 6px;font-size:11.5px;font-weight:600;border:1px solid #CBD5E1;border-radius:4px;background:#FFF;cursor:pointer;" onchange="updateExcelPreviewRowRole(${idx}, this.value)">${roleOptions}</select>`;
+          const roleSelector = `<select id="excelPreviewRole_${idx}" name="excelPreviewRole_${idx}" aria-label="Select Role for Row ${idx + 1}" style="padding:4px 6px;font-size:11.5px;font-weight:600;border:1px solid #CBD5E1;border-radius:4px;background:#FFF;cursor:pointer;" onchange="updateExcelPreviewRowRole(${idx}, this.value)">${roleOptions}</select>`;
 
           // School column display (preserves joint affiliation note if present)
           const schoolLabel = r.school
@@ -11137,7 +11196,7 @@
               )
             ].join('');
 
-            deptOrScopeDisplay = `<select style="padding:4px 6px;font-size:11.5px;border:1px solid ${!r.department_id ? '#F59E0B' : '#CBD5E1'};background:${!r.department_id ? '#FFFBEB' : '#FFF'};border-radius:4px;max-width:210px;" onchange="updateExcelPreviewRowDept(${idx}, this.value)">${deptOptions}</select>`;
+            deptOrScopeDisplay = `<select id="excelPreviewDept_${idx}" name="excelPreviewDept_${idx}" aria-label="Select Department for Row ${idx + 1}" style="padding:4px 6px;font-size:11.5px;border:1px solid ${!r.department_id ? '#F59E0B' : '#CBD5E1'};background:${!r.department_id ? '#FFFBEB' : '#FFF'};border-radius:4px;max-width:210px;" onchange="updateExcelPreviewRowDept(${idx}, this.value)">${deptOptions}</select>`;
           }
 
           return `

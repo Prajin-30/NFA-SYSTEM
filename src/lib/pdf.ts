@@ -5,6 +5,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import type { Nfa, NfaItem, Department, BudgetCategory, Approval } from '../types.js';
 
+import { registerUnicodeFonts, formatPdfCurrency } from './fontResolver.js';
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const logoPath = path.join(__dirname, '..', '..', 'public', 'christ-logo.png');
 const signaturesDir = path.join(__dirname, '..', '..', 'data', 'signatures');
@@ -13,12 +15,6 @@ const signaturesDir = path.join(__dirname, '..', '..', 'data', 'signatures');
 const CHRIST_BLUE = '#274897';
 const BORDER_COLOR = '#444444';
 const LIGHT_BG = '#F4F6FA';
-
-// TrueType font paths with Unicode support for ₹ (U+20B9)
-const fontTimesRegular = 'C:\\Windows\\Fonts\\times.ttf';
-const fontTimesBold = 'C:\\Windows\\Fonts\\timesbd.ttf';
-const fontTimesItalic = 'C:\\Windows\\Fonts\\timesi.ttf';
-const fontTimesBoldItalic = 'C:\\Windows\\Fonts\\timesbi.ttf';
 
 function formatDate(value?: string | null): string {
   if (!value) return '—';
@@ -104,19 +100,12 @@ export function renderNfaPdf(
     bufferPages: true,
   });
 
-  // Typography configuration: Times New Roman provides native support for ₹ (U+20B9)
-  const hasTimes = fs.existsSync(fontTimesRegular) && fs.existsSync(fontTimesBold);
-  const fontRegular = hasTimes ? 'Times-Unicode-Regular' : 'Times-Roman';
-  const fontBold = hasTimes ? 'Times-Unicode-Bold' : 'Times-Bold';
-  const fontItalic = hasTimes && fs.existsSync(fontTimesItalic) ? 'Times-Unicode-Italic' : 'Times-Italic';
-  const fontBoldItalic = hasTimes && fs.existsSync(fontTimesBoldItalic) ? 'Times-Unicode-BoldItalic' : 'Times-BoldItalic';
-
-  if (hasTimes) {
-    doc.registerFont(fontRegular, fontTimesRegular);
-    doc.registerFont(fontBold, fontTimesBold);
-    if (fs.existsSync(fontTimesItalic)) doc.registerFont(fontItalic, fontTimesItalic);
-    if (fs.existsSync(fontTimesBoldItalic)) doc.registerFont(fontBoldItalic, fontTimesBoldItalic);
-  }
+  // Cross-platform Unicode font configuration with native support for ₹ (U+20B9)
+  const fonts = registerUnicodeFonts(doc);
+  const fontRegular = fonts.fontRegular;
+  const fontBold = fonts.fontBold;
+  const fontItalic = fonts.fontItalic;
+  const fontBoldItalic = fonts.fontBoldItalic;
 
   if (typeof (res as any).setHeader === 'function') {
     res.setHeader('Content-Type', 'application/pdf');

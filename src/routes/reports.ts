@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import { store } from '../store.js';
 import { requireAuth, type AuthedRequest } from '../middleware/auth.js';
 import type { Role, Department, Nfa, DepartmentBudget, BudgetCategory } from '../types.js';
+import { registerUnicodeFonts, formatPdfCurrency, type RegisteredPdfFonts } from '../lib/fontResolver.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const logoPath = path.join(__dirname, '..', '..', 'public', 'christ-logo.png');
@@ -1279,12 +1280,13 @@ function renderPdfTable(
   pageWidth: number,
   pageHeight: number,
   leftMargin: number,
-  rightMargin: number
+  rightMargin: number,
+  fonts?: RegisteredPdfFonts
 ) {
   const tableWidth = pageWidth - leftMargin - rightMargin;
 
   if (!rows || rows.length === 0) {
-    doc.font('Helvetica-Oblique').fontSize(8.5).fillColor('#64748B').text('No records available for the selected organization and academic year.', leftMargin, startY);
+    doc.font(fonts?.fontItalic || 'Times-Italic').fontSize(8.5).fillColor('#64748B').text('No records available for the selected organization and academic year.', leftMargin, startY);
     return startY + 20;
   }
 
@@ -1355,6 +1357,9 @@ function renderPdfTable(
   const finalColWidths = colWidths.map((w) => Math.floor(w * scale));
 
   let curY = startY;
+  const boldFont = fonts?.fontBold || 'Times-Bold';
+  const regFont = fonts?.fontRegular || 'Times-Roman';
+  const hasUnicode = Boolean(fonts?.hasUnicode);
 
   function drawTableHeader() {
     doc.rect(leftMargin, curY, tableWidth, 22).fillColor(CHRIST_BLUE).fill();
@@ -1364,7 +1369,7 @@ function renderPdfTable(
       const isCurr = isCurrencyKey(k);
       const isCenter = k === 'sl_no' || k === 's_no' || k.includes('count') || k === 'type' || k === 'nfa_type';
       doc
-        .font('Helvetica-Bold')
+        .font(boldFont)
         .fontSize(8)
         .fillColor('#FFFFFF')
         .text(k.replace(/_/g, ' ').toUpperCase(), colX + 4, curY + 6, {
@@ -1389,13 +1394,13 @@ function renderPdfTable(
       const val = row[k];
       let cellText: string;
       if (typeof val === 'number') {
-        cellText = isCurrencyKey(k) ? `₹${val.toLocaleString('en-IN')}` : val.toLocaleString('en-IN');
+        cellText = isCurrencyKey(k) ? formatPdfCurrency(val, hasUnicode) : val.toLocaleString('en-IN');
       } else if (k === 'status' || k.includes('status') || k === 'current_stage') {
         cellText = formatStatusLabel(val);
       } else {
         cellText = String(val ?? '—');
       }
-      doc.fontSize(7.5);
+      doc.font(regFont).fontSize(7.5);
       const h = doc.heightOfString(cellText, { width: colW - 8 });
       if (h > maxCellHeight) maxCellHeight = h;
     });
@@ -1421,7 +1426,7 @@ function renderPdfTable(
       const isCenter = k === 'sl_no' || k === 's_no' || k.includes('count') || k === 'type' || k === 'nfa_type';
       let cellText: string;
       if (typeof val === 'number') {
-        cellText = isCurr ? `₹${val.toLocaleString('en-IN')}` : val.toLocaleString('en-IN');
+        cellText = isCurr ? formatPdfCurrency(val, hasUnicode) : val.toLocaleString('en-IN');
       } else if (k === 'status' || k.includes('status') || k === 'current_stage') {
         cellText = formatStatusLabel(val);
       } else {
@@ -1429,7 +1434,7 @@ function renderPdfTable(
       }
 
       doc
-        .font('Helvetica')
+        .font(regFont)
         .fontSize(7.5)
         .fillColor(TEXT_DARK)
         .text(cellText, colX + 4, curY + 4, {
@@ -1456,7 +1461,8 @@ function drawOfficialHeader(
   user: any,
   leftMargin: number,
   contentWidth: number,
-  fyLabel: string = '2026-27'
+  fyLabel: string = '2026-27',
+  fonts?: RegisteredPdfFonts
 ) {
   const topY = 36;
   if (fs.existsSync(logoPath)) {
@@ -1465,24 +1471,27 @@ function drawOfficialHeader(
     } catch {}
   }
 
+  const boldFont = fonts?.fontBold || 'Times-Bold';
+  const regFont = fonts?.fontRegular || 'Times-Roman';
+
   doc
-    .font('Helvetica-Bold')
+    .font(boldFont)
     .fontSize(15)
     .fillColor(CHRIST_BLUE)
     .text('CHRIST (Deemed to be University)', leftMargin + 65, topY + 2);
 
   doc
-    .font('Helvetica')
+    .font(regFont)
     .fontSize(9.5)
     .fillColor(TEXT_DARK)
     .text('Bengaluru – Kengeri Campus · Institutional NFA & Budget Management System', leftMargin + 65, topY + 20)
-    .font('Helvetica-Bold')
+    .font(boldFont)
     .fontSize(11)
     .fillColor(CHRIST_BLUE)
     .text(`OFFICIAL INSTITUTIONAL REPORT: ${title.toUpperCase()}`, leftMargin + 65, topY + 34);
 
   doc
-    .font('Helvetica')
+    .font(regFont)
     .fontSize(8)
     .fillColor('#64748B')
     .text(`Academic Year: ${fyLabel} | Generated: ${new Date().toLocaleString('en-IN')} | Authorized User: ${user.name} (${user.role.toUpperCase()})`, leftMargin, topY + 64);
@@ -1495,14 +1504,15 @@ function drawOfficialHeader(
 /**
  * Renders footers across all buffered pages with ZERO accidental page breaks
  */
-function renderPdfFooters(doc: PDFKit.PDFDocument, leftMargin: number, contentWidth: number, pageHeight: number) {
+function renderPdfFooters(doc: PDFKit.PDFDocument, leftMargin: number, contentWidth: number, pageHeight: number, fonts?: RegisteredPdfFonts) {
+  const regFont = fonts?.fontRegular || 'Times-Roman';
   const pageRange = doc.bufferedPageRange();
   for (let i = 0; i < pageRange.count; i++) {
     doc.switchToPage(i);
     // CRITICAL: set margins.bottom to 0 so footer text never triggers an auto-page-break
     doc.page.margins.bottom = 0;
     doc
-      .font('Helvetica')
+      .font(regFont)
       .fontSize(7.5)
       .fillColor('#94A3B8')
       .text(
@@ -1525,18 +1535,20 @@ reportsRouter.all('/summary/export/pdf', (req: AuthedRequest, res: Response) => 
 
   const doc = new PDFDocument({
     size: 'A4',
-    layout: 'landscape',
+    layout: 'portrait',
     margins: { top: 36, bottom: 20, left: 36, right: 36 },
     bufferPages: true,
   });
+
+  const fonts = registerUnicodeFonts(doc);
 
   const filename = `CU_Executive_Summary_${summary.org_code}_${Date.now()}.pdf`;
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
   doc.pipe(res);
 
-  const pageWidth = 841.89;
-  const pageHeight = 595.28;
+  const pageWidth = 595.28;
+  const pageHeight = 841.89;
   const leftMargin = 36;
   const rightMargin = 36;
   const contentWidth = pageWidth - leftMargin - rightMargin;
@@ -1547,45 +1559,46 @@ reportsRouter.all('/summary/export/pdf', (req: AuthedRequest, res: Response) => 
     user,
     leftMargin,
     contentWidth,
-    summary.financial_year
+    summary.financial_year,
+    fonts
   );
 
   // Section 1: Executive KPI Overview Box
-  doc.font('Helvetica-Bold').fontSize(11).fillColor(CHRIST_BLUE).text('SECTION 1: FINANCIAL CEILING & COMMITMENTS SUMMARY', leftMargin, curY);
+  doc.font(fonts.fontBold).fontSize(11).fillColor(CHRIST_BLUE).text('SECTION 1: FINANCIAL CEILING & COMMITMENTS SUMMARY', leftMargin, curY);
   curY += 16;
 
   doc.rect(leftMargin, curY, contentWidth, 48).fillColor('#F1F5F9').strokeColor(BORDER_LIGHT).lineWidth(1).fillAndStroke();
   const kpiCol = Math.floor(contentWidth / 4);
   const m = summary.metrics;
   const kpis = [
-    { l: 'Allocated Budget', v: `₹${m.allocated.toLocaleString('en-IN')}`, c: CHRIST_BLUE },
-    { l: 'Approved Expenditure', v: `₹${m.approved.toLocaleString('en-IN')}`, c: '#16A34A' },
-    { l: 'Active Reservations', v: `₹${m.pending.toLocaleString('en-IN')}`, c: '#CA8A04' },
-    { l: 'Available Balance', v: `₹${m.available.toLocaleString('en-IN')}`, c: '#0284C7' },
+    { l: 'Allocated Budget', v: formatPdfCurrency(m.allocated, fonts.hasUnicode), c: CHRIST_BLUE },
+    { l: 'Approved Expenditure', v: formatPdfCurrency(m.approved, fonts.hasUnicode), c: '#16A34A' },
+    { l: 'Active Reservations', v: formatPdfCurrency(m.pending, fonts.hasUnicode), c: '#CA8A04' },
+    { l: 'Available Balance', v: formatPdfCurrency(m.available, fonts.hasUnicode), c: '#0284C7' },
   ];
   kpis.forEach((k, idx) => {
-    doc.font('Helvetica-Bold').fontSize(7.5).fillColor('#64748B').text(k.l.toUpperCase(), leftMargin + idx * kpiCol + 8, curY + 8);
-    doc.font('Helvetica-Bold').fontSize(13).fillColor(k.c).text(k.v, leftMargin + idx * kpiCol + 8, curY + 24);
+    doc.font(fonts.fontBold).fontSize(7.5).fillColor('#64748B').text(k.l.toUpperCase(), leftMargin + idx * kpiCol + 8, curY + 8);
+    doc.font(fonts.fontBold).fontSize(13).fillColor(k.c).text(k.v, leftMargin + idx * kpiCol + 8, curY + 24);
   });
   curY += 60;
 
   // Secondary metrics line
-  doc.font('Helvetica').fontSize(8.5).fillColor(TEXT_DARK).text(
-    `Total NFAs: ${m.total_nfas} (Approved: ${m.approved_nfas} · In-Flight: ${m.pending_nfas} · Rejected: ${m.rejected_nfas}) | Events Completed: ${m.events_completed_count}/${m.event_nfas_count} | Revenue Generated: ₹${m.total_revenue.toLocaleString('en-IN')} (Verified: ₹${m.verified_revenue.toLocaleString('en-IN')}) | Invoices Paid: ₹${m.invoices_paid.toLocaleString('en-IN')} (Pending: ₹${m.invoices_pending.toLocaleString('en-IN')})`,
+  doc.font(fonts.fontRegular).fontSize(8.5).fillColor(TEXT_DARK).text(
+    `Total NFAs: ${m.total_nfas} (Approved: ${m.approved_nfas} · In-Flight: ${m.pending_nfas} · Rejected: ${m.rejected_nfas}) | Events Completed: ${m.events_completed_count}/${m.event_nfas_count} | Revenue Generated: ${formatPdfCurrency(m.total_revenue, fonts.hasUnicode)} (Verified: ${formatPdfCurrency(m.verified_revenue, fonts.hasUnicode)}) | Invoices Paid: ${formatPdfCurrency(m.invoices_paid, fonts.hasUnicode)} (Pending: ${formatPdfCurrency(m.invoices_pending, fonts.hasUnicode)})`,
     leftMargin,
     curY
   );
   curY += 20;
 
   // Section 2: Faculty-wise NFA Activity Table
-  doc.font('Helvetica-Bold').fontSize(11).fillColor(CHRIST_BLUE).text(`SECTION 2: FACULTY-WISE NFA ACTIVITY (${summary.faculty_activity.length} Faculty Members)`, leftMargin, curY);
+  doc.font(fonts.fontBold).fontSize(11).fillColor(CHRIST_BLUE).text(`SECTION 2: FACULTY-WISE NFA ACTIVITY (${summary.faculty_activity.length} Faculty Members)`, leftMargin, curY);
   curY += 16;
 
   if (summary.faculty_activity.length > 0) {
     const facKeys = ['sl_no', 'faculty_name', 'department', 'total_submitted', 'total_approved', 'total_pending', 'total_rejected', 'total_requested', 'total_approved_amount', 'events_completed'];
-    curY = renderPdfTable(doc, facKeys, summary.faculty_activity, curY, pageWidth, pageHeight, leftMargin, rightMargin);
+    curY = renderPdfTable(doc, facKeys, summary.faculty_activity, curY, pageWidth, pageHeight, leftMargin, rightMargin, fonts);
   } else {
-    doc.font('Helvetica').fontSize(9).fillColor('#64748B').text('No active faculty submissions found for this organization in the selected academic year.', leftMargin, curY);
+    doc.font(fonts.fontRegular).fontSize(9).fillColor('#64748B').text('No active faculty submissions found for this organization in the selected academic year.', leftMargin, curY);
     curY += 24;
   }
 
@@ -1597,18 +1610,18 @@ reportsRouter.all('/summary/export/pdf', (req: AuthedRequest, res: Response) => 
     curY += 20;
   }
 
-  doc.font('Helvetica-Bold').fontSize(11).fillColor(CHRIST_BLUE).text(`SECTION 3: DETAILED NFA PROPOSALS (${summary.detailed_nfas.length} Records)`, leftMargin, curY);
+  doc.font(fonts.fontBold).fontSize(11).fillColor(CHRIST_BLUE).text(`SECTION 3: DETAILED NFA PROPOSALS (${summary.detailed_nfas.length} Records)`, leftMargin, curY);
   curY += 16;
 
   if (summary.detailed_nfas.length > 0) {
     const nfaKeys = ['sl_no', 'ref_no', 'date', 'proposer', 'department', 'title', 'type', 'requested_amount', 'approved_amount', 'status', 'completion_status'];
-    curY = renderPdfTable(doc, nfaKeys, summary.detailed_nfas, curY, pageWidth, pageHeight, leftMargin, rightMargin);
+    curY = renderPdfTable(doc, nfaKeys, summary.detailed_nfas, curY, pageWidth, pageHeight, leftMargin, rightMargin, fonts);
   } else {
-    doc.font('Helvetica').fontSize(9).fillColor('#64748B').text('No submitted NFA proposals found matching criteria.', leftMargin, curY);
+    doc.font(fonts.fontRegular).fontSize(9).fillColor('#64748B').text('No submitted NFA proposals found matching criteria.', leftMargin, curY);
   }
 
   // Render footers safely without blank pages
-  renderPdfFooters(doc, leftMargin, contentWidth, pageHeight);
+  renderPdfFooters(doc, leftMargin, contentWidth, pageHeight, fonts);
   doc.end();
 });
 
@@ -1623,23 +1636,22 @@ reportsRouter.all('/export/:reportType/pdf', (req: AuthedRequest, res: Response)
   const data = getReportDataset(reportType, user, filters);
   const resolution = resolveAuthorizedScope(user, filters);
 
-  const isWide = ['nfa_activity', 'department_budget', 'school_budget', 'revenue_earnings', 'event_activity', 'purchase_invoice', 'payment_status', 'financial_ledger', 'faculty_nfa'].includes(reportType);
-  const layout = isWide ? 'landscape' : 'portrait';
-
   const doc = new PDFDocument({
     size: 'A4',
-    layout,
+    layout: 'portrait',
     margins: { top: 36, bottom: 20, left: 36, right: 36 },
     bufferPages: true,
   });
+
+  const fonts = registerUnicodeFonts(doc);
 
   const filename = `CU_Report_${reportType}_${Date.now()}.pdf`;
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
   doc.pipe(res);
 
-  const pageWidth = layout === 'landscape' ? 841.89 : 595.28;
-  const pageHeight = layout === 'landscape' ? 595.28 : 841.89;
+  const pageWidth = 595.28;
+  const pageHeight = 841.89;
   const leftMargin = 36;
   const rightMargin = 36;
   const contentWidth = pageWidth - leftMargin - rightMargin;
@@ -1650,7 +1662,8 @@ reportsRouter.all('/export/:reportType/pdf', (req: AuthedRequest, res: Response)
     user,
     leftMargin,
     contentWidth,
-    resolution.financialYear.label
+    resolution.financialYear.label,
+    fonts
   );
 
   if (reportType === 'school_budget') {
@@ -1658,41 +1671,41 @@ reportsRouter.all('/export/:reportType/pdf', (req: AuthedRequest, res: Response)
     const targetSchool = filters.school || filters.targetId || filters.id || resolution.selectedSchool?.id || 'SOET';
     const bundle = getSchoolReportBundle(targetSchool, user, resolution.financialYear.id);
 
-    doc.font('Helvetica-Bold').fontSize(11).fillColor(CHRIST_BLUE).text(`SECTION 1: ${bundle.overview.school_name.toUpperCase()} OVERVIEW & METRICS`, leftMargin, curY);
+    doc.font(fonts.fontBold).fontSize(11).fillColor(CHRIST_BLUE).text(`SECTION 1: ${bundle.overview.school_name.toUpperCase()} OVERVIEW & METRICS`, leftMargin, curY);
     curY += 16;
 
     // KPI box
     doc.rect(leftMargin, curY, contentWidth, 44).fillColor('#F1F5F9').strokeColor(BORDER_LIGHT).lineWidth(1).fillAndStroke();
     const kpiCol = Math.floor(contentWidth / 4);
     const kpis = [
-      { l: 'Allocated Budget', v: `₹${bundle.overview.allocated_budget.toLocaleString('en-IN')}`, c: CHRIST_BLUE },
-      { l: 'Approved Expenses', v: `₹${bundle.overview.approved_expenditure.toLocaleString('en-IN')}`, c: '#16A34A' },
-      { l: 'Active Reservations', v: `₹${bundle.overview.pending_reservations.toLocaleString('en-IN')}`, c: '#CA8A04' },
-      { l: 'Remaining Balance', v: `₹${bundle.overview.available_balance.toLocaleString('en-IN')}`, c: '#0284C7' },
+      { l: 'Allocated Budget', v: formatPdfCurrency(bundle.overview.allocated_budget, fonts.hasUnicode), c: CHRIST_BLUE },
+      { l: 'Approved Expenses', v: formatPdfCurrency(bundle.overview.approved_expenditure, fonts.hasUnicode), c: '#16A34A' },
+      { l: 'Active Reservations', v: formatPdfCurrency(bundle.overview.pending_reservations, fonts.hasUnicode), c: '#CA8A04' },
+      { l: 'Remaining Balance', v: formatPdfCurrency(bundle.overview.available_balance, fonts.hasUnicode), c: '#0284C7' },
     ];
     kpis.forEach((k, idx) => {
-      doc.font('Helvetica-Bold').fontSize(7.5).fillColor('#64748B').text(k.l.toUpperCase(), leftMargin + idx * kpiCol + 8, curY + 8);
-      doc.font('Helvetica-Bold').fontSize(13).fillColor(k.c).text(k.v, leftMargin + idx * kpiCol + 8, curY + 22);
+      doc.font(fonts.fontBold).fontSize(7.5).fillColor('#64748B').text(k.l.toUpperCase(), leftMargin + idx * kpiCol + 8, curY + 8);
+      doc.font(fonts.fontBold).fontSize(13).fillColor(k.c).text(k.v, leftMargin + idx * kpiCol + 8, curY + 22);
     });
     curY += 56;
 
-    doc.font('Helvetica-Bold').fontSize(11).fillColor(CHRIST_BLUE).text('SECTION 2: DEPARTMENT-WISE FINANCIAL & APPROVAL STATUS', leftMargin, curY);
+    doc.font(fonts.fontBold).fontSize(11).fillColor(CHRIST_BLUE).text('SECTION 2: DEPARTMENT-WISE FINANCIAL & APPROVAL STATUS', leftMargin, curY);
     curY += 16;
 
     const deptKeys = ['sl_no', 'department_code', 'total_nfas', 'approved_nfas', 'pending_nfas', 'allocated', 'approved', 'pending', 'available', 'utilization'];
-    curY = renderPdfTable(doc, deptKeys, bundle.departments, curY, pageWidth, pageHeight, leftMargin, rightMargin);
+    curY = renderPdfTable(doc, deptKeys, bundle.departments, curY, pageWidth, pageHeight, leftMargin, rightMargin, fonts);
   } else {
     // Standard 14 report table
     if (data.length === 0) {
-      doc.font('Helvetica').fontSize(10).fillColor(TEXT_DARK).text('No records found matching the requested reporting criteria.', leftMargin, curY);
+      doc.font(fonts.fontRegular).fontSize(10).fillColor(TEXT_DARK).text('No records found matching the requested reporting criteria.', leftMargin, curY);
     } else {
       const keys = Object.keys(data[0]);
-      curY = renderPdfTable(doc, keys, data, curY, pageWidth, pageHeight, leftMargin, rightMargin);
+      curY = renderPdfTable(doc, keys, data, curY, pageWidth, pageHeight, leftMargin, rightMargin, fonts);
     }
   }
 
   // Footer on all pages with zero blank pages
-  renderPdfFooters(doc, leftMargin, contentWidth, pageHeight);
+  renderPdfFooters(doc, leftMargin, contentWidth, pageHeight, fonts);
   doc.end();
 });
 

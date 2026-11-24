@@ -151,7 +151,7 @@ nfasRouter.get('/attachment-preview/:filename', (req: AuthedRequest, res) => {
 
 /** GET /api/nfas/:id/attachments/:type/:index? — Secure download / stream for NFA attachments */
 nfasRouter.get('/:id/attachments/:type/:index?', (req: AuthedRequest, res) => {
-  const nfa = store.data.nfas.find((n) => n.id === req.params.id);
+  const nfa = store.data.nfas.find((n) => n.id === req.params.id && !n.is_deleted);
   if (!nfa) return res.status(404).json({ error: 'NFA not found' });
 
   // Role-based / ownership access verification
@@ -596,7 +596,7 @@ nfasRouter.get('/next-ref', (req: AuthedRequest, res) => {
 
 /** GET /api/nfas/:id */
 nfasRouter.get('/:id', (req: AuthedRequest, res) => {
-  const nfa = store.data.nfas.find((n) => n.id === req.params.id);
+  const nfa = store.data.nfas.find((n) => n.id === req.params.id && !n.is_deleted);
   if (!nfa) return res.status(404).json({ error: 'NFA not found' });
   if (req.user) {
     const { role, id, department_id } = req.user;
@@ -616,7 +616,7 @@ nfasRouter.get('/:id', (req: AuthedRequest, res) => {
 
 /** GET /api/nfas/:id/pdf */
 nfasRouter.get('/:id/pdf', (req: AuthedRequest, res) => {
-  const nfa = store.data.nfas.find((n) => n.id === req.params.id);
+  const nfa = store.data.nfas.find((n) => n.id === req.params.id && !n.is_deleted);
   if (!nfa) return res.status(404).json({ error: 'NFA not found' });
   if (req.user) {
     const { role, id, department_id } = req.user;

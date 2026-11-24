@@ -1,4 +1,6 @@
 import fs from 'fs';
+import os from 'os';
+import path from 'path';
 import puppeteer from 'puppeteer-core';
 
 async function validateCss() {
@@ -94,9 +96,11 @@ async function validateCss() {
 
   // 2. Headless Chrome DOM CSS Parser Audit
   console.log('\n[Browser CSS Engine] Auditing stylesheet via Chromium CSS parser...');
+  const tmpProfile = path.join(os.tmpdir(), `puppeteer_css_${Date.now()}_${Math.random().toString(36).substring(7)}`);
   const browser = await puppeteer.launch({
     executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
     headless: true,
+    userDataDir: tmpProfile,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
 

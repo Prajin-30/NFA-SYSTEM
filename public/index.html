@@ -494,6 +494,7 @@
       gap: 20px;
       border-bottom: 2px solid var(--gold-accent);
       position: relative;
+      z-index: 1000;
       width: 100%;
       box-sizing: border-box;
     }
@@ -746,8 +747,8 @@
 
     .report-catalogue-sidebar {
       position: sticky;
-      top: 112px;
-      max-height: calc(100vh - 140px);
+      top: calc(var(--header-nav-offset, 112px) + 12px);
+      max-height: calc(100vh - var(--header-nav-offset, 112px) - 30px);
       overflow-y: auto;
       overflow-x: hidden;
       background: #f8fafc;
@@ -1528,14 +1529,44 @@
       inset: 0;
       background: rgba(0, 45, 112, 0.55);
       display: none;
-      align-items: flex-start;
+      align-items: center;
       justify-content: center;
       padding: clamp(12px, 3vh, 32px) clamp(8px, 2vw, 20px);
       overflow-y: auto;
-      /* Fix: raised above fixed header (z-index:1000) and nav (z-index:999) */
-      z-index: 1100;
+      /* Stacking: Strictly above fixed header (1000), nav (999), and footer (998) */
+      z-index: 1200;
       backdrop-filter: blur(3px);
       box-sizing: border-box;
+    }
+
+    .btn-delete {
+      color: #dc2626 !important;
+      border: 1px solid rgba(220, 38, 38, 0.4) !important;
+      background: transparent !important;
+      border-radius: var(--radius-sm, 4px) !important;
+      font-weight: 600 !important;
+      cursor: pointer !important;
+      transition: background-color 0.15s, border-color 0.15s;
+    }
+
+    .btn-delete:hover,
+    .btn-delete:focus-visible {
+      background: rgba(220, 38, 38, 0.08) !important;
+      border-color: #dc2626 !important;
+    }
+
+    .revenue-modal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    @media (max-width: 640px) {
+      .revenue-modal-grid {
+        grid-template-columns: 1fr !important;
+      }
     }
 
     .modal,
@@ -4034,8 +4065,14 @@
     let activeTabRequestId = 0;
     async function showTab(tab) {
       closeModal();
+      // Unconditionally remove any secondary or orphaned modal elements from the DOM
+      ['revenueDetailsModal', 'deleteRevenueConfirmDialog', 'deleteDraftConfirmDialog', 'returnForCorrectionModal', 'unsavedConfirmDialog'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.remove();
+      });
       document.body.classList.remove('modal-open');
       currentTab = tab;
+      window.currentTab = tab;
       [...document.querySelectorAll('nav button')].forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
       const main = document.getElementById('main');
       main.innerHTML = '<div class="card muted" style="text-align:center;padding:40px 20px;">Loading data…</div>';
@@ -5103,8 +5140,10 @@
               <td class="nfa-amount-cell"><strong>${inr(n.total_amount)}</strong></td>
               <td><span class="badge b-${n.status}">${fmtStatus(n.status)}</span></td>
               <td>
-                <button class="secondary" onclick="openNfa('${n.id}')">View Details →</button>
-                ${n.status === 'draft' && n.created_by === USER.id ? `<button class="danger" style="margin-left:6px;padding:5px 10px;font-size:12px;" onclick="confirmDeleteDraft('${n.id}')">Delete Draft</button>` : ''}
+                <div style="display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap;">
+                  <button class="secondary" style="font-size:12px;padding:4px 10px;min-height:28px;" onclick="openNfa('${n.id}')">View</button>
+                  ${n.status === 'draft' && n.created_by === USER.id ? `<button class="btn-delete" type="button" style="font-size:12px;padding:4px 10px;min-height:28px;" onclick="confirmDeleteDraft('${n.id}')">Delete</button>` : ''}
+                </div>
               </td>
             </tr>
           `;
@@ -5974,14 +6013,14 @@
                       <td style="text-align:right;font-weight:700;color:var(--primary);white-space:nowrap;">${inr(r.amount)}</td>
                       <td style="text-align:center;">${badge}</td>
                       <td style="text-align:center;">
-                        <div style="display:inline-flex;gap:4px;align-items:center;">
-                          <button class="secondary" style="font-size:11px;padding:3px 8px;" onclick="showRevenueDetails('${r.id}')">View</button>
-                          ${isFinance && r.status === 'submitted' ? `
-                            <button class="primary" style="font-size:11px;padding:3px 8px;background:#16a34a;" title="Verify" onclick="verifyRevenueEntry('${r.id}', 'verified')">✓</button>
-                            <button class="secondary" style="font-size:11px;padding:3px 8px;color:#dc2626;" title="Return" onclick="verifyRevenueEntry('${r.id}', 'returned')">✕</button>
-                          ` : ''}
+                        <div style="display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:center;">
+                          <button class="secondary" style="font-size:12px;padding:4px 10px;min-height:28px;" onclick="showRevenueDetails('${r.id}')">View</button>
                           ${canDelete ? `
-                            <button class="secondary" style="font-size:11px;padding:3px 6px;color:#94a3b8;" title="Delete" onclick="deleteRevenueEntry('${r.id}')">🗑</button>
+                            <button class="btn-delete" type="button" style="font-size:12px;padding:4px 10px;min-height:28px;" onclick="confirmDeleteRevenueEntry('${r.id}')">Delete</button>
+                          ` : ''}
+                          ${isFinance && r.status === 'submitted' ? `
+                            <button class="primary" style="font-size:12px;padding:4px 10px;min-height:28px;background:#16a34a;" onclick="verifyRevenueEntry('${r.id}', 'verified')">Verify</button>
+                            <button class="secondary" style="font-size:12px;padding:4px 10px;min-height:28px;color:#dc2626;border-color:rgba(220,38,38,0.3);" onclick="verifyRevenueEntry('${r.id}', 'returned')">Return</button>
                           ` : ''}
                         </div>
                       </td>
@@ -6001,56 +6040,73 @@
       const r = (window._cachedRevenueEntries || []).find(e => e.id === id);
       if (!r) return;
       const isFinance = ['finance', 'finance_head', 'super_admin'].includes(USER.role);
-      const modal = document.createElement('div');
-      modal.className = 'modal-backdrop';
-      modal.id = 'revenueDetailsModal';
-      modal.innerHTML = `
-        <div class="modal" style="max-width:540px;background:#ffffff;border-radius:8px;padding:20px;box-shadow:0 10px 25px rgba(0,0,0,0.15);">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;border-bottom:1px solid #e2e8f0;padding-bottom:10px;">
-            <h3 style="margin:0;color:var(--primary-blue);font-size:16px;">Revenue Entry Details</h3>
-            <button class="secondary" style="padding:2px 8px;font-size:14px;" onclick="document.getElementById('revenueDetailsModal').remove()">✕</button>
+      activeModalType = 'revenue_details';
+
+      const html = `
+        <div id="revenueDetailsModal" class="revenue-details-container">
+          <div class="modal-header">
+            <h2 style="margin:0;color:var(--primary-blue);font-size:18px;font-weight:700;">Revenue Entry Details</h2>
+            <button class="modal-close" type="button" onclick="closeModal()" aria-label="Close dialog">✕</button>
           </div>
-          <div style="display:flex;flex-direction:column;gap:12px;font-size:13px;">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;background:#f8fafc;padding:12px;border-radius:6px;border:1px solid #e2e8f0;">
-              <div><span style="color:#64748b;font-size:11px;font-weight:600;">NFA REFERENCE</span><div style="font-weight:700;font-family:monospace;color:var(--primary);margin-top:2px;">${escapeHtml(r.nfa_ref_no)}</div></div>
-              <div><span style="color:#64748b;font-size:11px;font-weight:600;">COLLECTION DATE</span><div style="font-weight:600;margin-top:2px;">${escapeHtml(r.collection_date)}</div></div>
-              <div><span style="color:#64748b;font-size:11px;font-weight:600;">DEPARTMENT</span><div style="font-weight:600;margin-top:2px;">${escapeHtml(r.department_code || '—')}</div></div>
-              <div><span style="color:#64748b;font-size:11px;font-weight:600;">REVENUE SOURCE</span><div style="font-weight:600;margin-top:2px;">${escapeHtml(r.revenue_source.replace(/_/g, ' ').toUpperCase())}</div></div>
-              <div><span style="color:#64748b;font-size:11px;font-weight:600;">AMOUNT</span><div style="font-weight:700;color:var(--primary);font-size:15px;margin-top:2px;">${inr(r.amount)}</div></div>
-              <div><span style="color:#64748b;font-size:11px;font-weight:600;">PAYMENT METHOD</span><div style="font-weight:600;text-transform:capitalize;margin-top:2px;">${escapeHtml(r.payment_method || 'Online')}</div></div>
-            </div>
-            <div>
-              <span style="color:#64748b;font-size:11px;font-weight:600;">EVENT TITLE</span>
-              <div style="font-weight:600;margin-top:2px;">${escapeHtml(r.nfa_title)}</div>
-            </div>
-            <div>
-              <span style="color:#64748b;font-size:11px;font-weight:600;">DESCRIPTION / REMARKS</span>
-              <div style="background:#ffffff;border:1px solid #e2e8f0;padding:10px;border-radius:4px;margin-top:2px;white-space:pre-wrap;font-size:12.5px;">${escapeHtml(r.description || '—')}</div>
-            </div>
-            <div>
-              <span style="color:#64748b;font-size:11px;font-weight:600;">RECEIPT DOCUMENT</span>
-              <div style="margin-top:2px;">
-                ${r.receipt_url ? `<a href="${r.receipt_url}" target="_blank" style="color:var(--primary-blue);text-decoration:underline;font-weight:600;">🔗 Open Receipt Document</a>` : '<span class="muted">No receipt uploaded</span>'}
+          <div style="display:flex;flex-direction:column;gap:14px;font-size:13.5px;max-height:calc(82vh - 120px);overflow-y:auto;padding-right:4px;">
+            <div class="revenue-modal-grid" style="background:#f8fafc;padding:14px;border-radius:8px;border:1px solid var(--border);">
+              <div>
+                <span style="color:#64748b;font-size:11px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;">NFA Reference</span>
+                <div style="font-weight:700;font-family:monospace;color:var(--primary-blue);margin-top:3px;font-size:14px;">${escapeHtml(r.nfa_ref_no)}</div>
+              </div>
+              <div>
+                <span style="color:#64748b;font-size:11px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;">Collection Date</span>
+                <div style="font-weight:600;margin-top:3px;">${escapeHtml(r.collection_date)}</div>
+              </div>
+              <div>
+                <span style="color:#64748b;font-size:11px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;">Department</span>
+                <div style="font-weight:600;margin-top:3px;">${escapeHtml(r.department_code || '—')}</div>
+              </div>
+              <div>
+                <span style="color:#64748b;font-size:11px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;">Revenue Source</span>
+                <div style="font-weight:600;margin-top:3px;">${escapeHtml(r.revenue_source.replace(/_/g, ' ').toUpperCase())}</div>
+              </div>
+              <div>
+                <span style="color:#64748b;font-size:11px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;">Amount</span>
+                <div style="font-weight:800;color:var(--primary-blue);font-size:16px;margin-top:3px;font-variant-numeric:tabular-nums;">${inr(r.amount)}</div>
+              </div>
+              <div>
+                <span style="color:#64748b;font-size:11px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;">Payment Method</span>
+                <div style="font-weight:600;text-transform:capitalize;margin-top:3px;">${escapeHtml(r.payment_method || 'Online')}</div>
               </div>
             </div>
             <div>
-              <span style="color:#64748b;font-size:11px;font-weight:600;">VERIFICATION STATUS</span>
-              <div style="margin-top:2px;">
+              <span style="color:#64748b;font-size:11px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;">Event Title</span>
+              <div style="font-weight:600;margin-top:3px;font-size:14px;color:#1e293b;">${escapeHtml(r.nfa_title)}</div>
+            </div>
+            <div>
+              <span style="color:#64748b;font-size:11px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;">Description / Remarks</span>
+              <div style="background:#ffffff;border:1px solid var(--border);padding:10px 12px;border-radius:6px;margin-top:3px;white-space:pre-wrap;font-size:13px;line-height:1.5;">${escapeHtml(r.description || '—')}</div>
+            </div>
+            <div>
+              <span style="color:#64748b;font-size:11px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;">Receipt Document</span>
+              <div style="margin-top:4px;">
+                ${r.receipt_url ? `<a href="${r.receipt_url}" target="_blank" rel="noopener noreferrer" style="color:var(--primary-blue);text-decoration:underline;font-weight:600;font-size:13px;">Open Receipt Document</a>` : '<span class="muted" style="font-size:13px;">No receipt uploaded</span>'}
+              </div>
+            </div>
+            <div>
+              <span style="color:#64748b;font-size:11px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;">Verification Status</span>
+              <div style="margin-top:4px;">
                 <span class="badge ${r.status === 'verified' ? 'b-approved' : r.status === 'returned' ? 'b-rejected' : 'b-submitted'}">${r.status.toUpperCase()}</span>
-                ${r.verification_remarks ? `<div style="font-size:11.5px;color:#64748b;margin-top:4px;"><strong>Finance Note:</strong> ${escapeHtml(r.verification_remarks)}</div>` : ''}
+                ${r.verification_remarks ? `<div style="font-size:12px;color:#64748b;margin-top:6px;background:#f1f5f9;padding:8px 10px;border-radius:4px;"><strong>Finance Note:</strong> ${escapeHtml(r.verification_remarks)}</div>` : ''}
               </div>
             </div>
           </div>
-          <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;border-top:1px solid #e2e8f0;padding-top:12px;">
+          <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;border-top:1px solid var(--border);padding-top:14px;flex-wrap:wrap;">
             ${isFinance && r.status === 'submitted' ? `
-              <button class="primary" style="background:#16a34a;padding:5px 14px;font-size:12px;" onclick="document.getElementById('revenueDetailsModal').remove(); verifyRevenueEntry('${r.id}', 'verified');">Verify Entry</button>
-              <button class="secondary" style="color:#dc2626;padding:5px 14px;font-size:12px;" onclick="document.getElementById('revenueDetailsModal').remove(); verifyRevenueEntry('${r.id}', 'returned');">Return Entry</button>
+              <button class="primary" style="background:#16a34a;padding:7px 16px;font-size:13px;font-weight:600;" onclick="closeModal(); verifyRevenueEntry('${r.id}', 'verified');">Verify Entry</button>
+              <button class="secondary" style="color:#dc2626;border-color:rgba(220,38,38,0.3);padding:7px 16px;font-size:13px;font-weight:600;" onclick="closeModal(); verifyRevenueEntry('${r.id}', 'returned');">Return Entry</button>
             ` : ''}
-            <button class="secondary" style="padding:5px 14px;font-size:12px;" onclick="document.getElementById('revenueDetailsModal').remove()">Close</button>
+            <button class="secondary" style="padding:7px 16px;font-size:13px;font-weight:600;" onclick="closeModal()">Close</button>
           </div>
         </div>
       `;
-      document.body.appendChild(modal);
+      openModal(html);
     }
 
     async function renderEventCompletion(container) {
@@ -6430,15 +6486,75 @@
       }
     }
 
-    async function deleteRevenueEntry(id) {
-      if (!confirm('Are you sure you want to remove this revenue entry?')) return;
+    function confirmDeleteRevenueEntry(id) {
+      const existing = document.getElementById('deleteRevenueConfirmDialog');
+      if (existing) existing.remove();
+
+      const r = (window._cachedRevenueEntries || []).find(e => e.id === id);
+      const refNoText = r?.nfa_ref_no ? escapeHtml(r.nfa_ref_no) : 'Revenue Entry';
+      const titleText = r?.nfa_title ? escapeHtml(r.nfa_title) : '';
+      const amountText = r ? inr(r.amount) : '';
+
+      const dialog = document.createElement('div');
+      dialog.id = 'deleteRevenueConfirmDialog';
+      dialog.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.65);z-index:999999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px);';
+      dialog.innerHTML = `
+        <div style="background:#ffffff;border-radius:12px;padding:24px 28px;max-width:460px;width:90%;box-shadow:0 25px 50px -12px rgba(0,0,0,0.35);border-top:5px solid #dc2626;text-align:left;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+            <h3 style="margin:0;font-size:18px;font-weight:700;color:#0f172a;">Delete Revenue Entry</h3>
+          </div>
+          <p style="margin:0 0 12px;font-size:14.5px;color:#334155;line-height:1.55;">
+            Are you sure you want to permanently delete the revenue entry of <strong>${amountText}</strong> for NFA <strong>${refNoText}</strong>? This action cannot be undone.
+          </p>
+          ${titleText ? `<div style="font-size:13px;color:#64748b;margin-bottom:18px;font-style:italic;">"${titleText}"</div>` : ''}
+          <div id="deleteRevenueErrorMsg" style="color:var(--danger);font-size:13px;margin:8px 0;display:none;"></div>
+          <div style="display:flex;justify-content:flex-end;gap:12px;">
+            <button id="cancelDeleteRevenueBtn" type="button" class="secondary" style="padding:9px 18px;font-size:13.5px;font-weight:600;" onclick="dismissDeleteRevenueConfirmation()">Cancel</button>
+            <button id="confirmDeleteRevenueBtn" type="button" class="danger" style="padding:9px 18px;font-size:13.5px;font-weight:600;" onclick="executeDeleteRevenue('${id}')">Delete Entry</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(dialog);
+    }
+
+    function dismissDeleteRevenueConfirmation() {
+      const dialog = document.getElementById('deleteRevenueConfirmDialog');
+      if (dialog) dialog.remove();
+    }
+
+    async function executeDeleteRevenue(id) {
+      const confirmBtn = document.getElementById('confirmDeleteRevenueBtn');
+      const cancelBtn = document.getElementById('cancelDeleteRevenueBtn');
+      const errorDiv = document.getElementById('deleteRevenueErrorMsg');
+
+      if (confirmBtn) {
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = 'Deleting…';
+      }
+      if (cancelBtn) cancelBtn.disabled = true;
+
       try {
         await api(`/revenue/entries/${id}`, { method: 'DELETE' });
-        toast('Revenue entry deleted.');
+        dismissDeleteRevenueConfirmation();
+        toast('Revenue entry deleted successfully.');
         if (currentTab === 'invoices') showTab('invoices');
       } catch (err) {
-        toast(err.message);
+        if (confirmBtn) {
+          confirmBtn.disabled = false;
+          confirmBtn.textContent = 'Delete Entry';
+        }
+        if (cancelBtn) cancelBtn.disabled = false;
+        if (errorDiv) {
+          errorDiv.textContent = err.message || 'Failed to delete revenue entry';
+          errorDiv.style.display = 'block';
+        } else {
+          toast(err.message || 'Failed to delete revenue entry');
+        }
       }
+    }
+
+    async function deleteRevenueEntry(id) {
+      confirmDeleteRevenueEntry(id);
     }
 
     // ---------------- CREATE NEW NFA MODAL ----------------
@@ -10303,62 +10419,6 @@
                 </div>
 
                 <!-- Entity Dropdown & Academic Year Row -->
-                <div style="display:grid;grid-template-columns:${currentReportScope === 'campus' ? '1fr' : 'repeat(auto-fit, minmax(280px, 1fr))'};gap:14px;align-items:end;margin-bottom:12px;">
-                  ${currentReportScope === 'school' ? `
-                    <div>
-                      <label for="reportSchoolSelect" style="font-size:12px;font-weight:600;color:#334155;margin-bottom:6px;display:block;">School</label>
-                      <select id="reportSchoolSelect" name="reportSchool" aria-label="Select School for Report" style="height:42px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;width:100%;padding:0 12px;margin:0;background:#ffffff;" onchange="onReportTargetChange(this.value)">
-                        <option value="">All Schools</option>
-                        ${(REF.schools || []).map(s => `<option value="${s.id || s.code}" ${(currentReportTargetId === s.id || currentReportTargetId === s.code) ? 'selected' : ''}>${escapeHtml(s.name)} (${s.code})</option>`).join('')}
-                      </select>
-                    </div>
-                  ` : ''}
-
-                  ${currentReportScope === 'department' ? `
-                    <div>
-                      <label for="reportDeptSelect" style="font-size:12px;font-weight:600;color:#334155;margin-bottom:6px;display:block;">Department</label>
-                      <select id="reportDeptSelect" name="reportDept" aria-label="Select Department for Report" style="height:42px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;width:100%;padding:0 12px;margin:0;background:#ffffff;" onchange="onReportTargetChange(this.value)" ${(!isSenior && !isDean) ? 'disabled' : ''}>
-                        ${isSenior || isDean ? '<option value="">All Departments</option>' : ''}
-                        ${academicDepts.map(d => `<option value="${d.id}" ${currentReportTargetId === d.id ? 'selected' : ''}>${escapeHtml(d.name)} (${d.code})</option>`).join('')}
-                      </select>
-                    </div>
-                  ` : ''}
-
-                  ${currentReportScope === 'centre' ? `
-                    <div>
-                      <label for="reportCentreSelect" style="font-size:12px;font-weight:600;color:#334155;margin-bottom:6px;display:block;">Centres / Offices</label>
-                      <select id="reportCentreSelect" name="reportCentre" aria-label="Select Centre or Office for Report" style="height:42px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;width:100%;padding:0 12px;margin:0;background:#ffffff;" onchange="onReportTargetChange(this.value)">
-                        <option value="">All Centres / Offices</option>
-                        ${centreDepts.map(c => `<option value="${c.id}" ${currentReportTargetId === c.id ? 'selected' : ''}>${escapeHtml(c.name)} (${c.code})</option>`).join('')}
-                      </select>
-                    </div>
-                  ` : ''}
-
-                  <div>
-                    <label for="reportFySelect" style="font-size:12px;font-weight:600;color:#334155;margin-bottom:6px;display:block;">Academic Year</label>
-                    <select id="reportFySelect" name="reportFy" aria-label="Select Academic Year for Report" style="height:42px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;width:100%;padding:0 12px;margin:0;background:#ffffff;" onchange="onReportFyChange(this.value)">
-                      ${(REF.financialYears || REF.financial_years || []).map(f => `<option value="${f.id}" ${currentReportFyId === f.id ? 'selected' : ''}>${escapeHtml(f.label)}${f.is_active ? ' (Active)' : ''}</option>`).join('')}
-                    </select>
-                  </div>
-                </div>
-
-                <!-- Toggle & Action Buttons: Refresh Preview | Download PDF | Download Excel -->
-                <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding-top:12px;border-top:1px solid #e2e8f0;">
-                  <div>
-                    ${currentSelectedReport === 'faculty_nfa' ? `
-                      <label for="reportIncludeFaculty" style="display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:#334155;cursor:pointer;">
-                        <input type="checkbox" id="reportIncludeFaculty" name="reportIncludeFaculty" style="width:16px;height:16px;margin:0;accent-color:var(--primary-blue);" ${currentReportIncludeAllFaculty ? 'checked' : ''} onchange="onReportFacultyToggle(this.checked)" />
-                        <span>Include faculty with no NFA activity</span>
-                      </label>
-                    ` : '<span style="font-size:11.5px;color:#64748b;">Filtering: Institutional Organization Scope</span>'}
-                  </div>
-
-                  <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                    <button class="secondary" style="height:38px;padding:0 16px;font-size:12.5px;font-weight:600;border-radius:6px;border:1px solid #cbd5e1;background:#ffffff;color:#334155;" onclick="renderReportGeneration(document.querySelector('#mainContent > div:last-child'))">
-                      Refresh Preview
-                    </button>
-                    <button class="primary" style="height:38px;padding:0 18px;font-size:12.5px;font-weight:600;border-radius:6px;background:var(--primary-blue);color:#ffffff;border:1px solid var(--primary-blue);" onclick="downloadActiveReport('pdf')">
-                      Download PDF
                     </button>
                     <button class="secondary" style="height:38px;padding:0 16px;font-size:12.5px;font-weight:600;border-radius:6px;border:1px solid #cbd5e1;background:#ffffff;color:#334155;" onclick="downloadActiveReport('excel')">
                       Download Excel
@@ -10375,12 +10435,20 @@
                 </div>
 
                 <div class="table-wrap">
-                  <table>
+                  <table style="width:100%;border-collapse:collapse;">
                     <thead>
                       <tr>
                         ${records.length > 0 ? Object.keys(records[0]).map(k => {
                           const isCurr = k.includes('amount') || k.includes('allocated') || k.includes('approved') || k.includes('pending') || k.includes('available') || k.includes('revenue') || k.includes('requested');
-                          return `<th style="${isCurr ? 'text-align:right;' : ''}">${escapeHtml(k.replace(/_/g, ' ').toUpperCase())}</th>`;
+                          const isDate = k.includes('date');
+                          const isSl = k === 'sl_no' || k === 'id';
+                          const isStatus = k.includes('status');
+                          let thStyle = '';
+                          if (isCurr) thStyle = 'text-align:right;white-space:nowrap;';
+                          else if (isDate) thStyle = 'width:105px;white-space:nowrap;';
+                          else if (isSl) thStyle = 'width:50px;text-align:center;white-space:nowrap;';
+                          else if (isStatus) thStyle = 'text-align:center;white-space:nowrap;';
+                          return `<th style="${thStyle}">${escapeHtml(k.replace(/_/g, ' ').toUpperCase())}</th>`;
                         }).join('') : '<th>Records</th>'}
                       </tr>
                     </thead>
@@ -10391,10 +10459,28 @@
                           ${Object.keys(row).map(k => {
                             let val = row[k];
                             const isCurr = typeof val === 'number' && (k.includes('amount') || k.includes('allocated') || k.includes('approved') || k.includes('pending') || k.includes('available') || k.includes('revenue') || k.includes('requested'));
+                            const isDate = k.includes('date');
+                            const isSl = k === 'sl_no' || k === 'id';
+                            const isStatus = k.includes('status');
+                            const isTitleDesc = k.includes('title') || k.includes('particulars') || k.includes('desc') || k.includes('remarks') || k.includes('reason');
+
+                            let formattedVal = val ?? '—';
                             if (isCurr) {
-                              val = inr(val);
+                              formattedVal = inr(val);
+                            } else if (isStatus && typeof val === 'string') {
+                              formattedVal = `<span class="badge ${val.includes('approved') || val === 'completed' || val === 'verified' ? 'b-approved' : val.includes('reject') || val === 'returned' ? 'b-rejected' : 'b-submitted'}">${escapeHtml(val.replace(/_/g, ' ').toUpperCase())}</span>`;
+                            } else {
+                              formattedVal = escapeHtml(String(formattedVal));
                             }
-                            return `<td style="${isCurr ? 'text-align:right;font-weight:600;' : ''}">${escapeHtml(String(val ?? '—'))}</td>`;
+
+                            let tdStyle = '';
+                            if (isCurr) tdStyle = 'text-align:right;font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums;';
+                            else if (isDate) tdStyle = 'white-space:nowrap;width:105px;';
+                            else if (isSl) tdStyle = 'text-align:center;white-space:nowrap;width:50px;';
+                            else if (isStatus) tdStyle = 'text-align:center;white-space:nowrap;';
+                            else if (isTitleDesc) tdStyle = 'min-width:180px;line-height:1.4;word-break:normal;overflow-wrap:break-word;';
+
+                            return `<td style="${tdStyle}">${formattedVal}</td>`;
                           }).join('')}
                         </tr>
                       `).join('')}
@@ -11613,8 +11699,13 @@
     }
 
     function openModal(html) {
-      document.getElementById('modalBody').innerHTML = html;
-      document.getElementById('modalBg').style.display = 'flex';
+      const modalBg = document.getElementById('modalBg');
+      const modalBody = document.getElementById('modalBody');
+      if (modalBody) modalBody.innerHTML = html;
+      if (modalBg) {
+        modalBg.style.display = 'flex';
+        modalBg.scrollTop = 0;
+      }
       document.body.classList.add('modal-open');
     }
     function closeModal() {
@@ -11624,7 +11715,13 @@
       }
       activeModalType = null;
       dismissUnsavedConfirmation();
-      document.getElementById('modalBg').style.display = 'none';
+      dismissDeleteNfaConfirmation();
+      dismissReturnForCorrectionModal();
+      dismissDeleteRevenueConfirmation();
+      const revModal = document.getElementById('revenueDetailsModal');
+      if (revModal) revModal.remove();
+      const modalBg = document.getElementById('modalBg');
+      if (modalBg) modalBg.style.display = 'none';
       document.body.classList.remove('modal-open');
     }
     document.getElementById('modalBg').addEventListener('click', e => {
@@ -11637,13 +11734,49 @@
 
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape' || e.key === 'Esc') {
+        const deleteRevDialog = document.getElementById('deleteRevenueConfirmDialog');
+        if (deleteRevDialog) {
+          dismissDeleteRevenueConfirmation();
+          return;
+        }
+        const deleteNfaDialog = document.getElementById('deleteDraftConfirmDialog');
+        if (deleteNfaDialog) {
+          dismissDeleteNfaConfirmation();
+          return;
+        }
+        const returnModal = document.getElementById('returnForCorrectionModal');
+        if (returnModal) {
+          dismissReturnForCorrectionModal();
+          return;
+        }
+        const unsavedDialog = document.getElementById('unsavedConfirmDialog');
+        if (unsavedDialog) {
+          dismissUnsavedConfirmation();
+          return;
+        }
         if (activeModalType === 'new_nfa' || activeModalType === 'nfa_preview' || activeModalType === 'edit_nfa') {
           // Prevent Escape key from accidentally closing Apply NFA or NFA Preview modals
           e.preventDefault();
           return;
         }
+        const modalBg = document.getElementById('modalBg');
+        if (modalBg && modalBg.style.display === 'flex') {
+          closeModal();
+        }
       }
     });
+
+    function updateHeaderNavOffset() {
+      const header = document.querySelector('header');
+      const nav = document.querySelector('nav');
+      if (header && nav) {
+        const hHeight = header.offsetHeight || 60;
+        const nHeight = nav.offsetHeight || 46;
+        document.documentElement.style.setProperty('--header-nav-offset', `${hHeight + nHeight}px`);
+      }
+    }
+    window.addEventListener('resize', updateHeaderNavOffset);
+    window.addEventListener('load', updateHeaderNavOffset);
 
     // Initialize system mode badge for login
     initLoginMode();

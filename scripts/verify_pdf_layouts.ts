@@ -130,6 +130,7 @@ async function runPdfLayoutAudit() {
   if (totalPassed !== totalAudited) {
     process.exit(1);
   }
+  process.exit(0);
 }
 
 runPdfLayoutAudit().catch((e) => {

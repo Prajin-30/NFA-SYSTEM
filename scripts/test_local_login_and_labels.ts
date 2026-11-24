@@ -82,6 +82,7 @@ async function testLocalLoginAndLabels() {
   } finally {
     await browser.close();
     server.close();
+    process.exit(0);
   }
 }
 

@@ -51,6 +51,10 @@ async function testReconciliation() {
   );
 
   console.log(`\nReconciliation Result: ${matched ? '✅ PERFECT 100% RECONCILED!' : '❌ DISCREPANCY DETECTED'}`);
+  process.exit(matched ? 0 : 1);
 }
 
-testReconciliation().catch(console.error);
+testReconciliation().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

@@ -1,5 +1,6 @@
 import http from 'http';
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import puppeteer from 'puppeteer-core';
 import { app } from '../src/server.js';
@@ -40,9 +41,11 @@ async function runReportLayoutAudit() {
   const baseUrl = `http://localhost:${port}`;
   console.log(`Ephemeral test server listening on ${baseUrl}`);
 
+  const tempUserDataDir = path.join(os.tmpdir(), `cu_nfa_rep_test_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`);
   const browser = await puppeteer.launch({
     executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
     headless: true,
+    userDataDir: tempUserDataDir,
     args: ['--no-sandbox', '--disable-setuid-sandbox', '--window-size=1440,900']
   });
 

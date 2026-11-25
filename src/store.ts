@@ -31,6 +31,10 @@ function emptyDb(): DB {
     event_revenues: [],
     event_revenue_reminders: [],
     revoked_tokens: [],
+    user_mfa_settings: [],
+    security_audit_logs: [],
+    security_alerts: [],
+    emergency_mode_state: { id: 'current_state', is_active: false, reason: 'Normal operation', updated_at: new Date().toISOString() },
   };
 }
 
@@ -84,6 +88,10 @@ class Store {
       this.db.purchase_invoices ||= [];
       this.db.event_revenues ||= [];
       this.db.event_revenue_reminders ||= [];
+      this.db.user_mfa_settings ||= [];
+      this.db.security_audit_logs ||= [];
+      this.db.security_alerts ||= [];
+      this.db.emergency_mode_state ||= { id: 'current_state', is_active: false, reason: 'Normal operation', updated_at: new Date().toISOString() };
       this.db.schools ||= [];
       if (this.db.schools.length === 0) {
         this.db.schools = [

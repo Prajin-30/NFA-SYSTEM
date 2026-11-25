@@ -12,4 +12,5 @@ data/*credential*
 data/*.txt
 data/supabase_backup*
 data/budget_subcategories_backup*
+data/backups/
 scratch/

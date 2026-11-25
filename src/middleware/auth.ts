@@ -5,6 +5,7 @@ import type { Role } from '../types.js';
 import { store } from '../store.js';
 import { query } from '../db/pool.js';
 import { getSystemMode, isDemoAuthenticationAllowed } from '../services/supabaseAuth.js';
+import { securityService } from '../services/securityService.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'change_this_secret_in_production';
 
@@ -144,6 +145,10 @@ export async function requireAuth(req: AuthedRequest, res: Response, next: NextF
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as any;
 
+    if (decoded.mfa_pending) {
+      return res.status(401).json({ error: 'MFA_REQUIRED', message: 'Multi-factor authentication verification pending.' });
+    }
+
     // Load authoritative profile from PostgreSQL if in postgres mode (for non-demo accounts), or local store
     let dbUser: any = null;
     const isDemo = isDemoAuthenticationAllowed(decoded.email);
@@ -212,7 +217,7 @@ export async function requireAuth(req: AuthedRequest, res: Response, next: NextF
     if (req.user?.must_change_password) {
       // Normalize path to strip mount prefixes or trailing slashes
       const reqPath = req.originalUrl ? req.originalUrl.split('?')[0] : req.path;
-      const allowedPaths = ['/api/auth/change-password', '/api/auth/logout', '/api/auth/refresh', '/api/users/me'];
+      const allowedPaths = ['/api/auth/change-password', '/api/auth/logout', '/api/auth/refresh', '/api/users/me', '/api/auth/mfa/status', '/api/auth/mfa/setup', '/api/auth/mfa/verify'];
       if (!allowedPaths.includes(reqPath)) {
         return res.status(403).json({
           error: 'PasswordChangeRequired',
@@ -233,6 +238,18 @@ export function requireRole(...roles: Role[]) {
   return (req: AuthedRequest, res: Response, next: NextFunction) => {
     if (!req.user) return res.status(401).json({ error: 'Not authenticated' });
     if (!roles.includes(req.user.role)) {
+      securityService.logEvent({
+        user_id: req.user.id,
+        user_email: req.user.email,
+        user_role: req.user.role,
+        ip_address: req.ip,
+        user_agent: (req.headers['user-agent'] as string) || null,
+        action: 'ACCESS_DENIED',
+        resource_type: req.baseUrl || req.path,
+        status: 'blocked',
+        severity: 'low',
+        metadata: { requiredRoles: roles, userRole: req.user.role, path: req.originalUrl },
+      });
       return res.status(403).json({ error: `Forbidden: requires role in [${roles.join(', ')}], you are '${req.user.role}'` });
     }
     next();

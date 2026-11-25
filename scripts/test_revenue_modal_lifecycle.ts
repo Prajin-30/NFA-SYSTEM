@@ -1,4 +1,6 @@
 import http from 'http';
+import os from 'os';
+import path from 'path';
 import puppeteer from 'puppeteer-core';
 import { app } from '../src/server.js';
 import { store } from '../src/store.js';
@@ -56,9 +58,11 @@ async function runRevenueModalLifecycleTests() {
   const baseUrl = `http://127.0.0.1:${port}`;
   console.log(`Local test server running at ${baseUrl}`);
 
+  const tempUserDataDir = path.join(os.tmpdir(), `cu_nfa_rev_test_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`);
   const browser = await puppeteer.launch({
     executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
     headless: true,
+    userDataDir: tempUserDataDir,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
 

@@ -553,6 +553,66 @@ export interface EventRevenueReminder {
   created_at?: string;
 }
 
+export interface UserMfaSetting {
+  user_id: string;
+  mfa_enabled: boolean;
+  secret?: string;
+  recovery_codes?: string[];
+  enrolled_at?: string;
+  last_verified_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export type SecuritySeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+export type SecurityLogStatus = 'SUCCESS' | 'FAILURE' | 'BLOCKED' | 'FLAGGED';
+
+export interface SecurityAuditLog {
+  id: string;
+  event_type: string;
+  severity: SecuritySeverity;
+  user_id?: string;
+  user_role?: string;
+  ip_address?: string;
+  user_agent?: string;
+  resource?: string;
+  action?: string;
+  status: SecurityLogStatus;
+  details?: Record<string, any>;
+  request_id?: string;
+  created_at: string;
+}
+
+export type SecurityAlertStatus = 'ACTIVE' | 'ACKNOWLEDGED' | 'RESOLVED' | 'FALSE_POSITIVE';
+
+export interface SecurityAlert {
+  id: string;
+  incident_ref: string;
+  alert_type: string;
+  severity: SecuritySeverity;
+  affected_component: string;
+  description: string;
+  action_taken: string;
+  recommended_action: string;
+  status: SecurityAlertStatus;
+  acknowledged_by?: string;
+  acknowledged_at?: string;
+  resolved_by?: string;
+  resolved_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EmergencyModeState {
+  id: string;
+  is_active: boolean;
+  activated_by?: string;
+  activated_at?: string;
+  reason?: string;
+  restrictions?: Record<string, boolean>;
+  updated_at: string;
+}
+
 export interface DB {
   users: User[];
   departments: Department[];
@@ -577,4 +637,8 @@ export interface DB {
   event_revenues?: EventRevenue[];
   event_revenue_reminders?: EventRevenueReminder[];
   revoked_tokens?: { token_hash: string; expires_at: number }[];
+  user_mfa_settings?: UserMfaSetting[];
+  security_audit_logs?: SecurityAuditLog[];
+  security_alerts?: SecurityAlert[];
+  emergency_mode_state?: EmergencyModeState;
 }

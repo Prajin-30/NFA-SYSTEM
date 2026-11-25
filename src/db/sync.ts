@@ -25,6 +25,15 @@ export async function loadAllFromPostgres(client: pg.PoolClient): Promise<DB> {
   const revRes = await client.query('SELECT * FROM event_revenues ORDER BY created_at DESC');
   const revRemRes = await client.query('SELECT * FROM event_revenue_reminders ORDER BY sent_at DESC');
 
+  let mfaRes: any = { rows: [] };
+  let secAuditRes: any = { rows: [] };
+  let secAlertsRes: any = { rows: [] };
+  let emRes: any = { rows: [] };
+  try { mfaRes = await client.query('SELECT * FROM user_mfa_settings'); } catch {}
+  try { secAuditRes = await client.query('SELECT * FROM security_audit_logs ORDER BY created_at DESC LIMIT 500'); } catch {}
+  try { secAlertsRes = await client.query('SELECT * FROM security_alerts ORDER BY created_at DESC LIMIT 100'); } catch {}
+  try { emRes = await client.query('SELECT * FROM emergency_mode_state WHERE id = $1', ['current_state']); } catch {}
+
   return {
     users: usersRes.rows as any,
     departments: deptsRes.rows as any,
@@ -106,6 +115,10 @@ export async function loadAllFromPostgres(client: pg.PoolClient): Promise<DB> {
       collection_date: r.collection_date ? new Date(r.collection_date).toISOString().slice(0, 10) : '',
     })) as any,
     event_revenue_reminders: revRemRes.rows as any,
+    user_mfa_settings: mfaRes.rows as any,
+    security_audit_logs: secAuditRes.rows as any,
+    security_alerts: secAlertsRes.rows as any,
+    emergency_mode_state: emRes.rows[0] || { id: 'current_state', is_active: false, reason: 'Normal operation', updated_at: new Date().toISOString() },
   };
 }
 
@@ -530,5 +543,97 @@ export async function persistDiffToPostgres(client: pg.PoolClient, before: DB, a
         rem.id, rem.nfa_id, rem.sent_to, rem.sent_to_email, rem.sent_at, rem.status || 'mock_delivered', rem.error_message || null
       ]);
     }
+  }
+
+  // 14. Security Audit Logs (Append-only)
+  const beforeSecLogs = new Set((before.security_audit_logs || []).map((l) => l.id));
+  for (const log of after.security_audit_logs || []) {
+    if (!beforeSecLogs.has(log.id)) {
+      try {
+        await client.query(`
+          INSERT INTO security_audit_logs (id, event_type, severity, user_id, user_role, ip_address, user_agent, resource, action, status, details, request_id, created_at)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+          ON CONFLICT (id) DO NOTHING;
+        `, [
+          log.id, log.event_type, log.severity, log.user_id || null, log.user_role || null,
+          log.ip_address || null, log.user_agent || null, log.resource || null, log.action || null,
+          log.status, JSON.stringify(log.details || {}), log.request_id || null, log.created_at
+        ]);
+      } catch {}
+    }
+  }
+
+  // 15. Security Alerts
+  const beforeSecAlerts = new Map((before.security_alerts || []).map((a) => [a.id, JSON.stringify(a)]));
+  for (const alert of after.security_alerts || []) {
+    const prev = beforeSecAlerts.get(alert.id);
+    if (!prev || prev !== JSON.stringify(alert)) {
+      try {
+        await client.query(`
+          INSERT INTO security_alerts (id, incident_ref, alert_type, severity, affected_component, description, action_taken, recommended_action, status, acknowledged_by, acknowledged_at, resolved_by, resolved_at, created_at, updated_at)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+          ON CONFLICT (id) DO UPDATE SET
+            status = EXCLUDED.status,
+            acknowledged_by = EXCLUDED.acknowledged_by,
+            acknowledged_at = EXCLUDED.acknowledged_at,
+            resolved_by = EXCLUDED.resolved_by,
+            resolved_at = EXCLUDED.resolved_at,
+            updated_at = EXCLUDED.updated_at;
+        `, [
+          alert.id, alert.incident_ref, alert.alert_type, alert.severity, alert.affected_component,
+          alert.description, alert.action_taken, alert.recommended_action, alert.status,
+          alert.acknowledged_by || null, alert.acknowledged_at || null, alert.resolved_by || null,
+          alert.resolved_at || null, alert.created_at, alert.updated_at
+        ]);
+      } catch {}
+    }
+  }
+
+  // 16. User MFA Settings
+  const beforeMfa = new Map((before.user_mfa_settings || []).map((m) => [m.user_id, JSON.stringify(m)]));
+  for (const mfa of after.user_mfa_settings || []) {
+    const prev = beforeMfa.get(mfa.user_id);
+    if (!prev || prev !== JSON.stringify(mfa)) {
+      try {
+        await client.query(`
+          INSERT INTO user_mfa_settings (user_id, mfa_enabled, secret, recovery_codes, enrolled_at, last_verified_at, created_at, updated_at)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+          ON CONFLICT (user_id) DO UPDATE SET
+            mfa_enabled = EXCLUDED.mfa_enabled,
+            secret = EXCLUDED.secret,
+            recovery_codes = EXCLUDED.recovery_codes,
+            enrolled_at = EXCLUDED.enrolled_at,
+            last_verified_at = EXCLUDED.last_verified_at,
+            updated_at = EXCLUDED.updated_at;
+        `, [
+          mfa.user_id, mfa.mfa_enabled, mfa.secret || null, mfa.recovery_codes || [],
+          mfa.enrolled_at || null, mfa.last_verified_at || null, mfa.created_at, mfa.updated_at
+        ]);
+      } catch {}
+    }
+  }
+
+  // 17. Emergency Mode State
+  if (after.emergency_mode_state) {
+    try {
+      await client.query(`
+        INSERT INTO emergency_mode_state (id, is_active, activated_by, activated_at, reason, restrictions, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        ON CONFLICT (id) DO UPDATE SET
+          is_active = EXCLUDED.is_active,
+          activated_by = EXCLUDED.activated_by,
+          activated_at = EXCLUDED.activated_at,
+          reason = EXCLUDED.reason,
+          restrictions = EXCLUDED.restrictions,
+          updated_at = EXCLUDED.updated_at;
+      `, [
+        'current_state', after.emergency_mode_state.is_active,
+        after.emergency_mode_state.activated_by || null,
+        after.emergency_mode_state.activated_at || null,
+        after.emergency_mode_state.reason || 'Normal operation',
+        JSON.stringify(after.emergency_mode_state.restrictions || {}),
+        after.emergency_mode_state.updated_at || new Date().toISOString()
+      ]);
+    } catch {}
   }
 }

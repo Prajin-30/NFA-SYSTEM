@@ -5,6 +5,7 @@ import { store } from '../store.js';
 import { requireAuth, requireRole, AuthedRequest } from '../middleware/auth.js';
 import { inspectExcelWorkbook, parseExcelDiff } from '../lib/excel.js';
 import { findBudgetLine, reviseApprovedAmount } from '../lib/budgetEngine.js';
+import { validateFileBuffer } from '../lib/fileValidation.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -17,6 +18,8 @@ const uploadsDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..',
 /** POST /api/budgets/upload — save an original year budget without overwriting it. */
 excelRouter.post('/upload', requireRole('hod', 'super_admin'), upload.single('file'), async (req: AuthedRequest, res) => {
   if (!req.file) return res.status(400).json({ error: 'file is required' });
+  const validation = validateFileBuffer(req.file.buffer, req.file.originalname, ['excel']);
+  if (!validation.valid) return res.status(400).json({ error: validation.error });
   const { department_id, financial_year_id } = req.body || {};
   if (!department_id || !financial_year_id) return res.status(400).json({ error: 'department_id and financial_year_id are required' });
   if (req.user!.role === 'hod' && department_id !== req.user!.department_id) return res.status(403).json({ error: 'HOD can only upload the budget for their department' });

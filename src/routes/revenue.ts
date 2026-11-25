@@ -8,6 +8,7 @@ import { store } from '../store.js';
 import { requireAuth, type AuthedRequest } from '../middleware/auth.js';
 import type { EventRevenue, EventRevenueSource, EventRevenueStatus, Nfa, Role } from '../types.js';
 import { sendRevenueReminderNotification } from '../services/revenueReminder.js';
+import { validateDiskFile } from '../lib/fileValidation.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const attachmentsDir = path.join(__dirname, '..', '..', 'data', 'attachments');
@@ -59,13 +60,13 @@ export function canAccessRevenue(
 
   // School Deans & Assoc Deans
   if (['dean', 'associate_dean', 'deans_office'].includes(user.role)) {
-    const dept = store.data.departments.find((d) => d.id === nfa.department_id);
-    if (dept?.school_id) {
-      const school = store.data.schools?.find((s) => s.id === dept.school_id);
-      if (school?.code === 'SOET') return true; // Dean of Engineering
+    const deanSchoolCode = (user as any).school || 'SOET';
+    const deanSchool = store.getSchool(deanSchoolCode);
+    const dept = store.getDepartment(nfa.department_id);
+    if (deanSchool && dept?.school_id) {
+      return dept.school_id === deanSchool.id;
     }
-    // Also grant access to institutional COEs if relevant
-    return true;
+    return false;
   }
 
   // HOD of department
@@ -262,6 +263,13 @@ revenueRouter.get('/eligible-nfas', (req: AuthedRequest, res) => {
 revenueRouter.post('/entries', uploadReceipt.single('receipt'), async (req: AuthedRequest, res) => {
   const user = req.user!;
   const { nfa_id, revenue_source, description, amount, collection_date, payment_method, remarks } = req.body;
+
+  if (req.file) {
+    const val = validateDiskFile(req.file.path, req.file.originalname, ['pdf', 'image']);
+    if (!val.valid) {
+      return res.status(400).json({ error: val.error });
+    }
+  }
 
   if (!nfa_id || !revenue_source || !description || !amount || !collection_date) {
     if (req.file) fs.unlink(req.file.path, () => {});

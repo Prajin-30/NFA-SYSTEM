@@ -25,6 +25,7 @@ import {
   validateIfsc,
 } from '../lib/encryption.js';
 import type { NfaStatus, Role, ResourcePersonBankDetail, ResourcePersonBankDetailDTO } from '../types.js';
+import { validateDiskFile } from '../lib/fileValidation.js';
 
 // Server-side Idempotency Cache to prevent duplicate NFA creation
 interface IdempotencyRecord {
@@ -111,6 +112,10 @@ nfasRouter.post('/upload-attachment', (req: AuthedRequest, res) => {
     }
 
     const fullPath = path.join(attachmentsDir, file.filename);
+    const validation = validateDiskFile(fullPath, file.originalname, ['pdf', 'image', 'excel']);
+    if (!validation.valid) {
+      return res.status(400).json({ error: validation.error });
+    }
     const hash = computeFileHash(fullPath);
 
     res.json({
@@ -160,7 +165,8 @@ nfasRouter.get('/:id/attachments/:type/:index?', (req: AuthedRequest, res) => {
   if (nfa.status === 'draft' && nfa.created_by !== u.id) {
     return res.status(403).json({ error: 'Forbidden: Draft attachments are private to the creator until submitted for approval' });
   }
-  const isPrivileged = ['super_admin', 'dean', 'associate_dean', 'finance', 'director'].includes(u.role);
+  const isSenior = ['super_admin', 'finance', 'director'].includes(u.role);
+  const isDean = ['dean', 'associate_dean', 'deans_office'].includes(u.role);
   const isCreator = nfa.created_by === u.id;
   const isSameDept = nfa.department_id === u.department_id;
 
@@ -170,7 +176,14 @@ nfasRouter.get('/:id/attachments/:type/:index?', (req: AuthedRequest, res) => {
   if ((u.role === 'hod' || u.role === 'it_admin') && !isSameDept) {
     return res.status(403).json({ error: 'You are only authorized to access attachments from your own department' });
   }
-  if (!isPrivileged && !isCreator && !isSameDept) {
+  if (isDean && u.school) {
+    const deanSchool = store.getSchool(u.school);
+    const dept = store.getDepartment(nfa.department_id);
+    if (deanSchool && dept?.school_id && dept.school_id !== deanSchool.id) {
+      return res.status(403).json({ error: 'You are only authorized to access attachments from departments in your authorized School' });
+    }
+  }
+  if (!isSenior && !isDean && !isCreator && !isSameDept) {
     return res.status(403).json({ error: 'Not authorized to access this attachment' });
   }
 
@@ -480,8 +493,16 @@ nfasRouter.get('/', (req: AuthedRequest, res) => {
     list = list.filter((n) => n.created_by === id);
   } else if (role === 'hod' || role === 'it_admin') {
     list = list.filter((n) => n.department_id === department_id);
+  } else if (['dean', 'associate_dean', 'deans_office'].includes(role)) {
+    const deanSchool = req.user!.school ? store.getSchool(req.user!.school) : null;
+    if (deanSchool) {
+      list = list.filter((n) => {
+        const dept = store.getDepartment(n.department_id);
+        return dept?.school_id === deanSchool.id;
+      });
+    }
   }
-  // deans_office, dean, associate_dean, director, finance, finance_head, super_admin see all departments
+  // director, finance, finance_head, super_admin see all departments
 
   // Strict Draft Privacy: Unsubmitted draft NFAs are strictly private to their creator.
   // Super Admin, HOD, Dean, Finance, Director, and other users must NOT see another user's draft.
@@ -610,6 +631,13 @@ nfasRouter.get('/:id', (req: AuthedRequest, res) => {
     if ((role === 'hod' || role === 'it_admin') && nfa.department_id !== department_id) {
       return res.status(403).json({ error: 'You can only view NFAs from your own department' });
     }
+    if (['dean', 'associate_dean', 'deans_office'].includes(role) && req.user.school) {
+      const deanSchool = store.getSchool(req.user.school);
+      const dept = store.getDepartment(nfa.department_id);
+      if (deanSchool && dept?.school_id && dept.school_id !== deanSchool.id) {
+        return res.status(403).json({ error: 'You can only view NFAs from departments in your authorized School' });
+      }
+    }
   }
   res.json({ ...nfa, items: withItems(nfa.id), approvals: withApprovals(nfa.id) });
 });
@@ -629,6 +657,13 @@ nfasRouter.get('/:id/pdf', (req: AuthedRequest, res) => {
     }
     if ((role === 'hod' || role === 'it_admin') && nfa.department_id !== department_id) {
       return res.status(403).json({ error: 'You can only download NFAs from your own department' });
+    }
+    if (['dean', 'associate_dean', 'deans_office'].includes(role) && req.user.school) {
+      const deanSchool = store.getSchool(req.user.school);
+      const dept = store.getDepartment(nfa.department_id);
+      if (deanSchool && dept?.school_id && dept.school_id !== deanSchool.id) {
+        return res.status(403).json({ error: 'You can only download NFAs from departments in your authorized School' });
+      }
     }
   }
   const dept = store.data.departments.find((d) => d.id === nfa.department_id) || {
@@ -1260,7 +1295,14 @@ nfasRouter.put('/:id', async (req: AuthedRequest, res) => {
 
     const isOwner = nfa.created_by === req.user!.id;
     const isHod = req.user!.role === 'hod' && req.user!.department_id === nfa.department_id;
-    const isDean = ['dean', 'associate_dean'].includes(req.user!.role);
+    let isDean = ['dean', 'associate_dean'].includes(req.user!.role);
+    if (isDean && req.user!.school) {
+      const deanSchool = store.getSchool(req.user!.school);
+      const dept = store.getDepartment(nfa.department_id);
+      if (deanSchool && dept?.school_id && dept.school_id !== deanSchool.id) {
+        isDean = false;
+      }
+    }
     const isSuperAdmin = req.user!.role === 'super_admin';
 
     // Strict Draft Editing: An unsubmitted Draft can ONLY be edited by its creator
@@ -1954,8 +1996,24 @@ nfasRouter.post('/:id/review', async (req: AuthedRequest, res) => {
       return { error: 403 as const, msg: `This stage requires review by '${requiredRoles.join(' or ')}'` };
     }
 
+    // Segregation of Duties (SoD): Proposers cannot approve or review their own proposals
+    if (nfa.created_by === req.user!.id) {
+      return {
+        error: 403 as const,
+        msg: 'Segregation of Duties: Proposers cannot approve or review their own proposals.',
+      };
+    }
+
     if (role === 'hod' && req.user!.department_id !== nfa.department_id) {
       return { error: 403 as const, msg: 'You can only review NFAs in your own department' };
+    }
+
+    if (['dean', 'associate_dean', 'deans_office'].includes(role) && req.user!.school) {
+      const deanSchool = store.getSchool(req.user!.school);
+      const dept = store.getDepartment(nfa.department_id);
+      if (deanSchool && dept?.school_id && dept.school_id !== deanSchool.id) {
+        return { error: 403 as const, msg: 'You can only review NFAs from departments in your authorized School' };
+      }
     }
 
     const approverUser = db.users.find((u) => u.id === req.user!.id);

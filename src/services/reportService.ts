@@ -86,8 +86,10 @@ export function resolveAuthorizedScope(
     const dept = db.departments.find((d) => d.id === requestedDeptId || d.code.toUpperCase() === String(requestedDeptId).toUpperCase());
     if (dept) {
       const isCoe = dept.category === 'coe' || dept.code.startsWith('COE-');
+      const deanSchool = (user as any).school ? store.getSchool((user as any).school) : null;
+      const isDeanAuthorized = isDean ? Boolean(dept.school_id && deanSchool && dept.school_id === deanSchool.id) : false;
       // Authorization check
-      if (isSenior || isDean || (user.role === 'hod' && user.department_id === dept.id) || (user.role === 'faculty' && user.department_id === dept.id)) {
+      if (isSenior || isDeanAuthorized || (user.role === 'hod' && user.department_id === dept.id) || (user.role === 'faculty' && user.department_id === dept.id)) {
         return {
           scope: isCoe ? 'centre' : 'department',
           targetDeptIds: new Set([dept.id]),
@@ -132,7 +134,9 @@ export function resolveAuthorizedScope(
     const mappedCode = legacySchoolCodeMap[String(targetSchoolId)] || String(targetSchoolId).toUpperCase();
     const school = (db.schools || []).find((s) => s.id === targetSchoolId || s.code.toUpperCase() === String(targetSchoolId).toUpperCase() || s.code.toUpperCase() === mappedCode)
       || (requestedSchoolId ? { id: requestedSchoolId, code: mappedCode, name: `School (${mappedCode})`, campus: 'Bengaluru Central Campus' } : (db.schools && db.schools[0]));
-    if (school && (isSenior || isDean)) {
+    const deanSchool = (user as any).school ? store.getSchool((user as any).school) : null;
+    const isDeanAuthorizedSchool = isDean ? Boolean(deanSchool && deanSchool.id === school.id) : false;
+    if (school && (isSenior || isDeanAuthorizedSchool)) {
       const schoolDepts = db.departments.filter((d) => d.school_id === school.id || (!d.school_id && school.code === 'SOET' && d.category === 'academic'));
       return {
         scope: 'school',
@@ -171,7 +175,9 @@ export function resolveAuthorizedScope(
     };
     const mappedCode = legacySchoolCodeMap[String(requestedTargetId)] || String(requestedTargetId).toUpperCase();
     const school = (db.schools || []).find((s) => s.id === requestedTargetId || s.code.toUpperCase() === String(requestedTargetId).toUpperCase() || s.code.toUpperCase() === mappedCode);
-    if (school && (isSenior || isDean)) {
+    const deanSchool = (user as any).school ? store.getSchool((user as any).school) : null;
+    const isDeanAuthorizedSchool = isDean ? Boolean(deanSchool && deanSchool.id === school.id) : false;
+    if (school && (isSenior || isDeanAuthorizedSchool)) {
       const schoolDepts = db.departments.filter((d) => d.school_id === school.id || (!d.school_id && school.code === 'SOET' && d.category === 'academic'));
       return {
         scope: 'school',

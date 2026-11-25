@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url';
 import { store } from '../store.js';
 import { requireAuth, type AuthedRequest } from '../middleware/auth.js';
 import type { PurchaseInvoice, InvoiceVerificationStatus, InvoicePaymentStatus } from '../types.js';
+import { validateDiskFile } from '../lib/fileValidation.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const attachmentsDir = path.join(__dirname, '..', '..', 'data', 'attachments');
@@ -74,8 +75,14 @@ invoicesRouter.get('/dashboard-summary', async (req: AuthedRequest, res) => {
       return n.created_by === user.id;
     }
     // HOD / Dean restricted to department
-    if (['hod', 'dean', 'associate_dean'].includes(user.role)) {
+    if (user.role === 'hod') {
       return n.department_id === user.department_id;
+    }
+    if (['dean', 'associate_dean', 'deans_office'].includes(user.role)) {
+      const deanSchoolCode = (user as any).school || 'SOET';
+      const deanSchool = store.getSchool(deanSchoolCode);
+      const dept = store.getDepartment(n.department_id);
+      return Boolean(deanSchool && dept?.school_id === deanSchool.id);
     }
     // Finance / Director / Super Admin sees all
     return true;
@@ -126,8 +133,14 @@ invoicesRouter.get('/', async (req: AuthedRequest, res) => {
     if (user.role === 'faculty') {
       return n.created_by === user.id;
     }
-    if (['hod', 'dean', 'associate_dean'].includes(user.role)) {
+    if (user.role === 'hod') {
       return n.department_id === user.department_id;
+    }
+    if (['dean', 'associate_dean', 'deans_office'].includes(user.role)) {
+      const deanSchoolCode = (user as any).school || 'SOET';
+      const deanSchool = store.getSchool(deanSchoolCode);
+      const dept = store.getDepartment(n.department_id);
+      return Boolean(deanSchool && dept?.school_id === deanSchool.id);
     }
     if (deptFilter && deptFilter !== 'all') {
       return n.department_id === deptFilter;
@@ -198,6 +211,12 @@ invoicesRouter.post('/upload-file', (req: AuthedRequest, res) => {
     const file = req.file;
     if (!file) {
       return res.status(400).json({ error: 'No invoice file uploaded' });
+    }
+
+    const fullPath = path.join(attachmentsDir, file.filename);
+    const validation = validateDiskFile(fullPath, file.originalname, ['pdf', 'image']);
+    if (!validation.valid) {
+      return res.status(400).json({ error: validation.error });
     }
 
     res.json({

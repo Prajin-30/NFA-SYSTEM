@@ -14,6 +14,9 @@ import {
 } from '../services/supabaseAuth.js';
 import type { Role } from '../types.js';
 import { getResendConfigStatus, sendSuperAdminTestEmail, isEmailTestingEnabled } from '../services/resendService.js';
+import { securityService } from '../services/securityService.js';
+import { validateFileBuffer, sanitizeFormulaInjection } from '../lib/fileValidation.js';
+import { createDatabaseBackup } from '../services/backupService.js';
 
 export const adminRouter = Router();
 adminRouter.use(requireAuth, requireRole('super_admin'));
@@ -82,6 +85,101 @@ adminRouter.post('/email-testing/logs/clear', (req: AuthedRequest, res) => {
     created_at: new Date().toISOString(),
   });
   res.json({ success: true, count: 0 });
+});
+
+/**
+ * GET /api/admin/security/status — Super Admin view of enterprise cybersecurity posture
+ */
+adminRouter.get('/security/status', (_req: AuthedRequest, res) => {
+  const users = store.data.users || [];
+  const activeUsers = users.filter((u) => u.is_active !== false);
+  const mfaSettings = store.data.user_mfa_settings || [];
+  const mfaEnrolledCount = mfaSettings.filter((m) => m.mfa_enabled).length;
+  const alerts = store.data.security_alerts || [];
+  const activeAlerts = alerts.filter((a) => a.status === 'ACTIVE');
+  const emergencyMode = securityService.getEmergencyModeState();
+
+  res.json({
+    emergency_mode: emergencyMode,
+    total_users: activeUsers.length,
+    mfa_enrolled_count: mfaEnrolledCount,
+    active_alerts_count: activeAlerts.length,
+    rls_enabled: true,
+    security_headers: true,
+    rate_limiting: true,
+    threat_detection: true,
+  });
+});
+
+/**
+ * GET /api/admin/security/alerts — List security alerts
+ */
+adminRouter.get('/security/alerts', (req: AuthedRequest, res) => {
+  const status = req.query.status as string;
+  let alerts = securityService.getAlerts(100);
+  if (status && status !== 'all') {
+    alerts = alerts.filter((a) => a.status.toLowerCase() === status.toLowerCase());
+  }
+  res.json(alerts);
+});
+
+/**
+ * PATCH /api/admin/security/alerts/:id — Update alert status (acknowledge or resolve)
+ */
+adminRouter.patch('/security/alerts/:id', async (req: AuthedRequest, res) => {
+  const { id } = req.params;
+  const { status } = req.body || {};
+  const upperStatus = String(status || '').toUpperCase();
+  if (!['ACKNOWLEDGED', 'RESOLVED'].includes(upperStatus)) {
+    return res.status(400).json({ error: 'Status must be either "acknowledged" or "resolved"' });
+  }
+  const updated = await securityService.updateAlertStatus(id, upperStatus as any, req.user!.id);
+  if (!updated) {
+    return res.status(404).json({ error: 'Security alert not found' });
+  }
+  res.json(updated);
+});
+
+/**
+ * GET /api/admin/security/logs — Super Admin view of recent security audit logs
+ */
+adminRouter.get('/security/logs', (req: AuthedRequest, res) => {
+  const limit = Math.min(Number(req.query.limit) || 50, 200);
+  const logs = (store.data.security_audit_logs || []).slice(-limit).reverse();
+  res.json({
+    total: (store.data.security_audit_logs || []).length,
+    logs,
+  });
+});
+
+/**
+ * POST /api/admin/emergency-mode — Toggle Emergency Security Mode
+ */
+adminRouter.post('/emergency-mode', async (req: AuthedRequest, res) => {
+  const { active, reason } = req.body || {};
+  if (typeof active !== 'boolean') {
+    return res.status(400).json({ error: 'Boolean field "active" is required' });
+  }
+  const result = await securityService.setEmergencyMode(active, req.user!, reason);
+  res.json({
+    success: true,
+    emergency_mode: result,
+  });
+});
+
+/**
+ * POST /api/admin/security/backup — Trigger instant cryptographic backup
+ */
+adminRouter.post('/security/backup', async (_req: AuthedRequest, res) => {
+  try {
+    const { metadata } = await createDatabaseBackup();
+    res.json({
+      success: true,
+      metadata,
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Backup creation failed' });
+  }
 });
 
 const upload = multer({
@@ -853,6 +951,11 @@ export function resolveSchoolAndDepartment(
 adminRouter.post('/users/preview-upload', upload.single('file'), async (req: AuthedRequest, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'Excel file (.xlsx) is required' });
+  }
+
+  const validation = validateFileBuffer(req.file.buffer, req.file.originalname, ['excel']);
+  if (!validation.valid) {
+    return res.status(400).json({ error: validation.error });
   }
 
   try {

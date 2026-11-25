@@ -9,6 +9,8 @@ if (typeof (globalThis as any).WebSocket === 'undefined') {
 import express from 'express';
 import compression from 'compression';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
@@ -24,6 +26,8 @@ import { invoicesRouter } from './routes/invoices.js';
 import { revenueRouter } from './routes/revenue.js';
 import { reportsRouter } from './routes/reports.js';
 import { requireAuth, AuthedRequest } from './middleware/auth.js';
+import { emergencyModeGuard } from './middleware/emergencyMode.js';
+import { securityService } from './services/securityService.js';
 import { store } from './store.js';
 import { query, closeDbPool } from './db/pool.js';
 import { isLiveSupabaseAuthConfigured, getSupabaseAdmin } from './services/supabaseAuth.js';
@@ -33,7 +37,92 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const signaturesDir = path.join(__dirname, '..', 'data', 'signatures');
 export const app = express();
 
+// Trust reverse proxy (Render cloud infrastructure) to correctly resolve client IP addresses
+app.set('trust proxy', 1);
+
+// HTTP Security Headers and Content Security Policy
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrcAttr: ["'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+        styleSrcAttr: ["'unsafe-inline'"],
+        fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],
+        imgSrc: ["'self'", 'data:', 'blob:'],
+        connectSrc: ["'self'", 'https://*.supabase.co', 'https://*.supabase.com'],
+        frameAncestors: ["'self'"],
+        objectSrc: ["'none'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
+      },
+    },
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    hsts: {
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: true,
+    },
+  })
+);
+
 app.use(cors());
+
+// Rate Limiting Protection Layer
+const isTestEnv = process.env.NODE_ENV === 'test';
+
+const globalApiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: isTestEnv ? 10000 : 600,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    error: 'TOO_MANY_REQUESTS',
+    message: 'Too many requests from this IP address. Please try again after 15 minutes.',
+  },
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: isTestEnv ? 10000 : 25,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    securityService.logEvent({
+      ip_address: req.ip,
+      action: 'RATE_LIMIT_EXCEEDED',
+      resource_type: 'auth',
+      status: 'blocked',
+      severity: 'medium',
+    });
+    res.status(429).json({
+      error: 'TOO_MANY_AUTH_ATTEMPTS',
+      message: 'Too many authentication attempts from this IP address. Access temporarily limited for 15 minutes.',
+    });
+  },
+});
+
+const exportLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: isTestEnv ? 10000 : 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    error: 'EXPORT_RATE_LIMIT',
+    message: 'Too many export or generation requests. Please slow down and try again.',
+  },
+});
+
+app.use('/api', globalApiLimiter);
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/mfa', authLimiter);
+app.use('/api/auth/forgot-password', authLimiter);
+app.use('/api/reports/*/pdf', exportLimiter);
+app.use('/api/reports/*/excel', exportLimiter);
+app.use(emergencyModeGuard);
 app.use(compression({
   threshold: 1024,
   filter: (req, res) => {

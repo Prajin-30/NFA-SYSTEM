@@ -5,6 +5,7 @@ import path from 'path';
 import fs from 'fs';
 import puppeteer from 'puppeteer-core';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 import { app } from '../src/server.js';
 import { store } from '../src/store.js';
 import { signToken } from '../src/middleware/auth.js';
@@ -34,6 +35,24 @@ async function runAuthAndSessionLifecycleTests() {
   } catch (e: any) {
     console.log('Store init notice (using local authoritative dataset):', e.message);
     (store as any).isPostgres = false;
+  }
+
+  // Ensure test demo HOD user exists with known password in local store
+  const existingHod = store.data.users.find((u) => u.email.toLowerCase() === 'hod@christ.edu');
+  if (existingHod) {
+    existingHod.password_hash = bcrypt.hashSync('password123', 8);
+    (existingHod as any).is_active = true;
+  } else {
+    store.data.users.push({
+      id: 'usr-hod-test',
+      name: 'Dr. Michael Moses (HOD)',
+      email: 'hod@christ.edu',
+      password_hash: bcrypt.hashSync('password123', 8),
+      role: 'hod',
+      department_id: 'dept-adse',
+      created_at: new Date().toISOString(),
+      is_active: true,
+    } as any);
   }
   const server = http.createServer(app);
   await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', () => resolve()));
@@ -325,6 +344,7 @@ async function runAuthAndSessionLifecycleTests() {
       };
     });
 
+    console.log('  [A11y Audit Issues]:', JSON.stringify(a11yAudit.issues, null, 2));
     record(21, 'Live DOM labels with `for` reference valid elements', a11yAudit.issues.filter((i) => i.includes('Label for=')).length === 0, `Audited: ${a11yAudit.labelCount} labels`);
     record(22, 'Live DOM form controls have valid accessible names', a11yAudit.issues.filter((i) => i.includes('lacks accessible name')).length === 0, `Audited: ${a11yAudit.controlCount} controls`);
 

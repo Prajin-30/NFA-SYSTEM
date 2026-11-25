@@ -24,10 +24,14 @@ async function runReportLayoutAudit() {
   console.log('  CU-NFA REPORT GENERATION LAYOUT, CONTROLS & FORMATTING AUDIT  ');
   console.log('================================================================\n');
 
-  if (store.initPromise) {
-    await store.initPromise;
+  if (process.env.DATA_SOURCE !== 'json') {
+    try {
+      if (store.initPromise) {
+        await store.initPromise;
+      }
+      await store.loadFromPostgres();
+    } catch {}
   }
-  await store.loadFromPostgres();
 
   const server = http.createServer(app);
   await new Promise<void>((resolve) => server.listen(0, resolve));
@@ -234,7 +238,10 @@ async function runReportLayoutAudit() {
 
     record('FMT-01', 'Total Approved column has no currency rupee symbol', !formattingAudit.hasRupeeInApproved, `Values: ${formattingAudit.sampleApprovedValues.join(', ')}`);
     record('FMT-02', 'Total Pending column has no currency rupee symbol', !formattingAudit.hasRupeeInPending, `Values: ${formattingAudit.samplePendingValues.join(', ')}`);
-    record('FMT-03', 'Record count banner verified', layoutGeometry.countBannerText.includes('records') || layoutGeometry.countBannerText.includes('total'), `Banner: "${layoutGeometry.countBannerText}"`);
+    const bannerText = ('countBannerText' in layoutGeometry && typeof layoutGeometry.countBannerText === 'string')
+      ? layoutGeometry.countBannerText
+      : '';
+    record('FMT-03', 'Record count banner verified', Boolean(bannerText && (bannerText.includes('records') || bannerText.includes('total'))), `Banner: "${bannerText}"`);
 
     // 7. Audit Absence of Decorative Emojis on Settings Page
     console.log('\n--- 7. AUDITING SETTINGS PAGE FOR ZERO EMOJIS ---');

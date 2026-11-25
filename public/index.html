@@ -2527,7 +2527,7 @@
       <!-- Step 1: Upload & Inspect -->
       <div id="excelStepUpload">
         <div id="facultyDropzone" class="file-dropzone" onclick="document.getElementById('facultyExcelInput').click()">
-          <input type="file" id="facultyExcelInput" name="facultyExcelInput" accept=".xlsx" style="display:none;"
+          <input type="file" id="facultyExcelInput" name="facultyExcelInput" aria-label="Faculty Onboarding Excel File (.xlsx)" accept=".xlsx" style="display:none;"
             onchange="onFacultyExcelSelected()" />
           <div class="file-dropzone-icon">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--primary-blue);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
@@ -2650,6 +2650,47 @@
     const API = '/api';
     let TOKEN = localStorage.getItem('token') || '';
     let USER = JSON.parse(localStorage.getItem('user') || 'null');
+    window.setSessionToken = function(t, u = null) {
+      TOKEN = t || '';
+      if (t) localStorage.setItem('token', t);
+      else localStorage.removeItem('token');
+      if (u) {
+        USER = u;
+        localStorage.setItem('user', JSON.stringify(u));
+      }
+    };
+    let activeAbortController = new AbortController();
+    let activeRefreshPromise = null;
+    let isLoggingOut = false;
+
+    function parseJwtPayload(t) {
+      if (!t || typeof t !== 'string') return null;
+      try {
+        const parts = t.split('.');
+        if (parts.length !== 3) return null;
+        let base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+        while (base64.length % 4 !== 0) {
+          base64 += '=';
+        }
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+      } catch (_) {
+        return null;
+      }
+    }
+
+    function isTokenExpiringSoon(t, skewSeconds = 30) {
+      const payload = parseJwtPayload(t);
+      if (!payload || !payload.exp) return true;
+      const expiresAtMs = payload.exp * 1000;
+      return (expiresAtMs - Date.now()) <= (skewSeconds * 1000);
+    }
+
+    function isTokenExpired(t) {
+      return isTokenExpiringSoon(t, 0);
+    }
     let REF = { departments: [], categories: [], subcategories: [], financialYears: [], budgetTypes: [] };
     let currentTab = 'dashboard';
     let currentActiveFyId = '';
@@ -3200,12 +3241,12 @@
               ` : ''}
               ${p.key === 'travel_expenses' ? `
                 <div class="event-subfield" style="padding-left:25px;">
-                  <input id="${prefix}subfield_${p.key}" name="${prefix}subfield_${p.key}" value="${escapeHtml(distVal)}" placeholder="${p.notePlaceholder}" oninput="onPredefinedSubfieldChange('${p.key}', this, ${isEdit})" />
+                  <input id="${prefix}subfield_${p.key}" name="${prefix}subfield_${p.key}" aria-label="Travel distance in kilometers or transport details" value="${escapeHtml(distVal)}" placeholder="${p.notePlaceholder}" oninput="onPredefinedSubfieldChange('${p.key}', this, ${isEdit})" />
                 </div>
               ` : ''}
               ${p.key === 'memento' ? `
                 <div class="event-subfield" style="padding-left:25px;">
-                  <input id="${prefix}subfield_${p.key}" name="${prefix}subfield_${p.key}" value="${escapeHtml(carryBackVal)}" placeholder="${p.notePlaceholder}" oninput="onPredefinedSubfieldChange('${p.key}', this, ${isEdit})" />
+                  <input id="${prefix}subfield_${p.key}" name="${prefix}subfield_${p.key}" aria-label="Memento carry back or distribution arrangement" value="${escapeHtml(carryBackVal)}" placeholder="${p.notePlaceholder}" oninput="onPredefinedSubfieldChange('${p.key}', this, ${isEdit})" />
                 </div>
               ` : ''}
             </div>
@@ -3243,21 +3284,21 @@
               </div>
               <div>
                 <label class="field-label" for="${prefix}quoteVendor${idx}" style="margin:0 0 2px;font-size:11.5px;">Vendor Name <span style="color:var(--danger)">*</span></label>
-    <input name="__prefix_quoteVendor__idx_" id="${prefix}quoteVendor${idx}" value="${escapeHtml(q.vendor_name || '')}" placeholder="Company / Vendor Name" style="margin-bottom:6px;font-size:12.5px;" />
+    <input name="${prefix}quoteVendor${idx}" id="${prefix}quoteVendor${idx}" value="${escapeHtml(q.vendor_name || '')}" placeholder="Company / Vendor Name" style="margin-bottom:6px;font-size:12.5px;" />
               </div>
               <div class="row" style="gap:6px;">
                 <div style="flex:1">
                   <label class="field-label" for="${prefix}quoteRef${idx}" style="margin:0 0 2px;font-size:11px;">Quote Ref (Optional)</label>
-    <input name="__prefix_quoteRef__idx_" id="${prefix}quoteRef${idx}" value="${escapeHtml(q.quotation_ref || '')}" placeholder="e.g. QT-2026-09" style="margin-bottom:6px;font-size:12px;" />
+    <input name="${prefix}quoteRef${idx}" id="${prefix}quoteRef${idx}" value="${escapeHtml(q.quotation_ref || '')}" placeholder="e.g. QT-2026-09" style="margin-bottom:6px;font-size:12px;" />
                 </div>
                 <div style="flex:1">
                   <label class="field-label" for="${prefix}quoteDate${idx}" style="margin:0 0 2px;font-size:11px;">Quote Date (Optional)</label>
-    <input name="__prefix_quoteDate__idx_" id="${prefix}quoteDate${idx}" type="date" value="${escapeHtml(q.quotation_date || '')}" style="margin-bottom:6px;font-size:12px;" />
+    <input name="${prefix}quoteDate${idx}" id="${prefix}quoteDate${idx}" type="date" value="${escapeHtml(q.quotation_date || '')}" style="margin-bottom:6px;font-size:12px;" />
                 </div>
               </div>
               <div style="margin-top:4px;">
-                <label class="field-label" for="editCatName" style="margin:0 0 4px;font-size:11.5px;">Quotation Document (PDF, JPG, PNG)</label>
-                <input name="__prefix_quoteFileInput__idx_" type="file" id="${prefix}quoteFileInput${idx}" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="handleQuotationFileUpload(${idx}, this, ${isEdit})" />
+                <label class="field-label" for="${prefix}quoteFileInput${idx}" style="margin:0 0 4px;font-size:11.5px;">Quotation Document (PDF, JPG, PNG)</label>
+                <input name="${prefix}quoteFileInput${idx}" type="file" id="${prefix}quoteFileInput${idx}" aria-label="Upload Quotation Document for ${v.label}" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="handleQuotationFileUpload(${idx}, this, ${isEdit})" />
                 <button type="button" id="${prefix}quoteTriggerBtn${idx}" class="secondary" style="width:100%;font-size:12px;padding:8px;" onclick="document.getElementById('${prefix}quoteFileInput${idx}').click()">
                   Upload Quotation Document
                 </button>
@@ -3277,7 +3318,7 @@
       <div class="field-help" style="margin-bottom:10px;">Upload the institutional Comparative Statement (CS) evaluating the 3 vendor quotations (PDF, JPG, PNG, or XLSX).</div>
 
       <div style="background:#ffffff;border:1px solid #cbd5e1;border-radius:var(--radius-sm);padding:14px;">
-        <input name="__prefix_csFileInput" type="file" id="${prefix}csFileInput" accept=".pdf,.jpg,.jpeg,.png,.xlsx" style="display:none" onchange="handleCsFileUpload(this, ${isEdit})" />
+        <input name="${prefix}csFileInput" type="file" id="${prefix}csFileInput" aria-label="Upload Comparative Statement Document (.pdf, .jpg, .jpeg, .png, .xlsx)" accept=".pdf,.jpg,.jpeg,.png,.xlsx" style="display:none" onchange="handleCsFileUpload(this, ${isEdit})" />
         <button type="button" id="${prefix}csTriggerBtn" class="secondary" style="font-size:12.5px;padding:8px 16px;" onclick="document.getElementById('${prefix}csFileInput').click()">
           Upload Comparative Statement
         </button>
@@ -3523,7 +3564,7 @@
           <label for="sigFileInput" class="field-label" style="font-weight:700;">Upload New Signature (PNG format only)</label>
           <div class="field-help" style="margin-bottom:8px;">Min size: 200 × 70 px. Recommended: 600 × 200 px (transparent background PNG). Max file size: 2 MB.</div>
           <div id="sigDropzone" class="file-dropzone" style="padding:14px;margin-bottom:10px;" onclick="document.getElementById('sigFileInput').click()">
-            <input name="sigFileInput" type="file" id="sigFileInput" accept="image/png" style="display:none;" />
+            <input name="sigFileInput" type="file" id="sigFileInput" aria-label="Official Digital Signature Image (PNG)" accept="image/png" style="display:none;" />
             <div class="file-dropzone-prompt" style="font-size:12.5px;">Click to select official PNG signature image</div>
             <div class="file-dropzone-sub">Transparent PNG recommended (Max 2 MB)</div>
           </div>
@@ -3546,7 +3587,7 @@
     }
 
     async function uploadMySignature(targetUserId = null) {
-      const fileInput = document.getElementById('sigFileInput');
+      const fileInput = document.getElementById('adminSigFileInput') || document.getElementById('sigFileInput');
       if (!fileInput || !fileInput.files[0]) {
         return toast('Please select a PNG signature file to upload');
       }
@@ -3634,9 +3675,9 @@
     <div class="field-help">Upload or update official digital signature for this user (PNG format only, transparent recommended).</div>
 
     <div style="margin:16px 0;">
-      <label for="sigFileInput" class="field-label" style="font-weight:700;">Select Signature File (.png)</label>
-      <div id="adminSigDropzone" class="file-dropzone" style="padding:14px;margin-bottom:10px;" onclick="document.getElementById('sigFileInput').click()">
-        <input name="sigFileInput" type="file" id="sigFileInput" accept="image/png" style="display:none;" />
+      <label for="adminSigFileInput" class="field-label" style="font-weight:700;">Select Signature File (.png)</label>
+      <div id="adminSigDropzone" class="file-dropzone" style="padding:14px;margin-bottom:10px;" onclick="document.getElementById('adminSigFileInput').click()">
+        <input name="adminSigFileInput" type="file" id="adminSigFileInput" aria-label="Official Digital Signature Image for Administrator (PNG)" accept="image/png" style="display:none;" />
         <div class="file-dropzone-prompt" style="font-size:12.5px;">Click to select official PNG signature image</div>
         <div class="file-dropzone-sub">Transparent PNG recommended (Max 2 MB)</div>
       </div>
@@ -3648,39 +3689,172 @@
     </div>
   `);
 
-      setupFileDropzone('adminSigDropzone', 'sigFileInput', 'adminSigDropzoneCard', { icon: '' });
+      setupFileDropzone('adminSigDropzone', 'adminSigFileInput', 'adminSigDropzoneCard', { icon: '' });
+    }
+
+    async function refreshTokenSingleFlight() {
+      if (activeRefreshPromise) {
+        return activeRefreshPromise;
+      }
+      if (!TOKEN) {
+        throw new Error('No active session token to refresh');
+      }
+      activeRefreshPromise = (async () => {
+        try {
+          const res = await fetch(API + '/auth/refresh', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: 'Bearer ' + TOKEN,
+            },
+            signal: activeAbortController.signal,
+          });
+          if (!res.ok) {
+            throw new Error('Session refresh rejected: HTTP ' + res.status);
+          }
+          const data = await res.json();
+          if (!data || !data.token) {
+            throw new Error('Invalid refresh response payload');
+          }
+          TOKEN = data.token;
+          localStorage.setItem('token', TOKEN);
+          if (data.user) {
+            USER = { ...USER, ...data.user };
+            localStorage.setItem('user', JSON.stringify(USER));
+          }
+          return data.token;
+        } finally {
+          activeRefreshPromise = null;
+        }
+      })();
+      return activeRefreshPromise;
+    }
+
+    function handleSessionExpired(reason = 'Your session has expired. Please sign in again.') {
+      if (isLoggingOut) return;
+      isLoggingOut = true;
+
+      try {
+        activeAbortController.abort();
+      } catch (_) {}
+      activeAbortController = new AbortController();
+
+      TOKEN = '';
+      USER = null;
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.clear();
+      clearTimeout(inactivityTimer);
+
+      closeModal();
+      const mustChangeModal = document.getElementById('modalMustChangePassword');
+      if (mustChangeModal) mustChangeModal.style.display = 'none';
+      const forgotModal = document.getElementById('modalForgotPassword');
+      if (forgotModal) forgotModal.style.display = 'none';
+      document.body.classList.remove('modal-open');
+
+      const appEl = document.getElementById('app');
+      if (appEl) appEl.style.display = 'none';
+      const loginEl = document.getElementById('login');
+      if (loginEl) loginEl.style.display = 'block';
+
+      const pwdInput = document.getElementById('loginPassword');
+      if (pwdInput) pwdInput.value = '';
+
+      const errEl = document.getElementById('loginErr');
+      if (errEl) {
+        errEl.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><span>${escapeHtml(reason)}</span>`;
+        errEl.style.display = 'flex';
+      }
+      initLoginMode();
+      isLoggingOut = false;
     }
 
     async function api(path, opts = {}) {
-      const res = await fetch(API + path, {
-        ...opts,
-        headers: {
-          ...(opts.body && !(opts.body instanceof FormData) ? { 'Content-Type': 'application/json' } : {}),
-          Authorization: TOKEN ? 'Bearer ' + TOKEN : '',
-          ...(opts.headers || {})
-        },
-        body: opts.body && !(opts.body instanceof FormData) ? JSON.stringify(opts.body) : opts.body
-      });
-      if (res.status === 401) {
-        if (path.includes('/auth/login') || path.includes('/auth/reset-password') || path.includes('/auth/must-change-password')) {
-          const data = await res.json().catch(() => ({}));
-          throw new Error(data.error || 'Invalid official email ID or password');
+      const isAuthRoute = path.includes('/auth/login') ||
+                          path.includes('/auth/forgot-password') ||
+                          path.includes('/auth/reset-password') ||
+                          path.includes('/auth/mode');
+
+      // 1. Session validation before protected API requests
+      if (!isAuthRoute) {
+        if (!TOKEN) {
+          handleSessionExpired('Please sign in to access the system.');
+          throw new Error('Session expired');
         }
-        logout();
-        throw new Error('Session expired');
+
+        // Proactive single-flight token refresh if token expires within 30s
+        if (!path.includes('/auth/refresh') && !path.includes('/auth/logout') && isTokenExpiringSoon(TOKEN, 30)) {
+          try {
+            await refreshTokenSingleFlight();
+          } catch (refreshErr) {
+            console.warn('[Session] Proactive token refresh failed:', refreshErr.message);
+            handleSessionExpired('Your session has expired. Please sign in again.');
+            throw new Error('Session expired');
+          }
+        }
       }
-      const ct = res.headers.get('content-type') || '';
-      if (!ct.includes('application/json')) {
-        if (!res.ok) throw new Error('Request failed');
-        return res;
+
+      const controller = new AbortController();
+      const onParentAbort = () => controller.abort();
+      activeAbortController.signal.addEventListener('abort', onParentAbort, { once: true });
+
+      try {
+        const res = await fetch(API + path, {
+          ...opts,
+          signal: opts.signal || controller.signal,
+          headers: {
+            ...(opts.body && !(opts.body instanceof FormData) ? { 'Content-Type': 'application/json' } : {}),
+            Authorization: TOKEN ? 'Bearer ' + TOKEN : '',
+            ...(opts.headers || {})
+          },
+          body: opts.body && !(opts.body instanceof FormData) ? JSON.stringify(opts.body) : opts.body
+        });
+
+        activeAbortController.signal.removeEventListener('abort', onParentAbort);
+
+        if (res.status === 401) {
+          if (isAuthRoute) {
+            const data = await res.json().catch(() => ({}));
+            throw new Error(data.error || 'Invalid official email ID or password');
+          }
+
+          // Attempt single-flight token refresh once on 401
+          if (!opts._retried && !path.includes('/auth/refresh') && !path.includes('/auth/logout')) {
+            try {
+              const freshToken = await refreshTokenSingleFlight();
+              if (freshToken) {
+                return await api(path, { ...opts, _retried: true });
+              }
+            } catch (refreshErr) {
+              console.warn('[Session] Token refresh on 401 failed:', refreshErr.message);
+            }
+          }
+
+          // Unrecoverable 401: gracefully return to login
+          handleSessionExpired('Your session has expired. Please sign in again.');
+          throw new Error('Session expired');
+        }
+
+        const ct = res.headers.get('content-type') || '';
+        if (!ct.includes('application/json')) {
+          if (!res.ok) throw new Error('Request failed');
+          return res;
+        }
+        const data = await res.json();
+        if (res.status === 403 && data && (data.error === 'PasswordChangeRequired' || data.must_change_password)) {
+          showMustChangePasswordModal();
+          throw new Error('Mandatory password change required before accessing system.');
+        }
+        if (!res.ok) throw new Error(data.error || 'Request failed');
+        return data;
+      } catch (err) {
+        activeAbortController.signal.removeEventListener('abort', onParentAbort);
+        if (err.name === 'AbortError') {
+          throw new Error('Request cancelled');
+        }
+        throw err;
       }
-      const data = await res.json();
-      if (res.status === 403 && data && (data.error === 'PasswordChangeRequired' || data.must_change_password)) {
-        showMustChangePasswordModal();
-        throw new Error('Mandatory password change required before accessing system.');
-      }
-      if (!res.ok) throw new Error(data.error || 'Request failed');
-      return data;
     }
 
     function togglePasswordVisibility(inputId, btnEl) {
@@ -3740,6 +3914,7 @@
 
       try {
         const data = await api('/auth/login', { method: 'POST', body: { email, password } });
+        activeAbortController = new AbortController();
         TOKEN = data.token;
         USER = data.user;
         localStorage.setItem('token', TOKEN);
@@ -3749,7 +3924,7 @@
           showMustChangePasswordModal();
           return;
         }
-        boot();
+        await boot();
       } catch (e) {
         if (errEl) {
           errEl.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><span>${escapeHtml(e.message || 'Login failed')}</span>`;
@@ -3765,42 +3940,20 @@
     }
 
     async function logout() {
-      if (TOKEN) {
-        api('/auth/logout', { method: 'POST' }).catch(() => {});
+      const tokenToRevoke = TOKEN;
+      handleSessionExpired('You have been signed out successfully.');
+      if (tokenToRevoke) {
+        fetch(API + '/auth/logout', {
+          method: 'POST',
+          headers: { Authorization: 'Bearer ' + tokenToRevoke }
+        }).catch(() => {});
       }
-      TOKEN = '';
-      USER = null;
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      localStorage.clear();
-      clearTimeout(inactivityTimer);
-
-      const mustChangeModal = document.getElementById('modalMustChangePassword');
-      if (mustChangeModal) mustChangeModal.style.display = 'none';
-      const forgotModal = document.getElementById('modalForgotPassword');
-      if (forgotModal) forgotModal.style.display = 'none';
-      document.getElementById('app').style.display = 'none';
-      document.getElementById('login').style.display = 'block';
-      const pwdInput = document.getElementById('loginPassword');
-      if (pwdInput) pwdInput.value = '';
-      const errEl = document.getElementById('loginErr');
-      if (errEl) {
-        errEl.innerHTML = '';
-        errEl.style.display = 'none';
-      }
-      initLoginMode();
     }
 
     // Cross-Tab Logout Synchronization: If another tab logs out, synchronize immediately
     window.addEventListener('storage', (e) => {
       if ((e.key === 'token' || e.key === null) && !localStorage.getItem('token')) {
-        TOKEN = '';
-        USER = null;
-        clearTimeout(inactivityTimer);
-        document.getElementById('app').style.display = 'none';
-        document.getElementById('login').style.display = 'block';
-        closeModal();
-        toast('Your session was closed from another browser tab. Please sign in again.');
+        handleSessionExpired('Your session was closed from another browser tab. Please sign in again.');
       }
     });
 
@@ -4000,14 +4153,14 @@
 
     async function boot() {
       resetInactivityTimer();
+      if (!TOKEN || !USER || isTokenExpired(TOKEN)) {
+        handleSessionExpired('Please sign in to continue.');
+        return;
+      }
       if (USER && USER.must_change_password) {
         showMustChangePasswordModal();
         return;
       }
-      document.getElementById('login').style.display = 'none';
-      document.getElementById('app').style.display = 'block';
-      document.getElementById('whoamiName').textContent = USER ? USER.name : '';
-      document.getElementById('whoamiRole').textContent = USER && USER.role ? String(USER.role).replace('_', ' ') : '';
 
       try {
         const me = await api('/users/me');
@@ -4015,21 +4168,37 @@
           USER = { ...USER, ...me };
           localStorage.setItem('user', JSON.stringify(USER));
         }
-      } catch (e) { }
+      } catch (e) {
+        console.warn('[Boot] Session verification failed:', e.message);
+        return;
+      }
 
-      const [depts, cats, subcats, fys, btypes] = await Promise.all([
-        api('/budgets/departments'),
-        api('/budgets/categories'),
-        api('/budgets/subcategories'),
-        api('/budgets/financial-years'),
-        api('/budgets/budget-types').catch(() => [])
-      ]);
-      REF.departments = depts;
-      REF.categories = cats;
-      REF.subcategories = subcats;
-      REF.financialYears = fys;
-      REF.financial_years = fys;
+      let depts, cats, subcats, fys, btypes;
+      try {
+        [depts, cats, subcats, fys, btypes] = await Promise.all([
+          api('/budgets/departments'),
+          api('/budgets/categories'),
+          api('/budgets/subcategories'),
+          api('/budgets/financial-years'),
+          api('/budgets/budget-types').catch(() => [])
+        ]);
+      } catch (err) {
+        console.error('[Boot] Failed to load reference data:', err);
+        return;
+      }
+
+      REF.departments = depts || [];
+      REF.categories = cats || [];
+      REF.subcategories = subcats || [];
+      REF.financialYears = fys || [];
+      REF.financial_years = fys || [];
       REF.budgetTypes = btypes || [];
+
+      // Switch UI from login to application view only after successful authentication & reference load
+      document.getElementById('login').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      document.getElementById('whoamiName').textContent = USER ? USER.name : '';
+      document.getElementById('whoamiRole').textContent = USER && USER.role ? String(USER.role).replace('_', ' ') : '';
 
       const activeFyObj = activeFy();
       currentActiveFyId = activeFyObj.id;
@@ -4638,7 +4807,7 @@
           </select>
         </div>
         <div style="flex:1">
-          <label class="field-label" for="clearBudgetFy">Target Academic / Financial Year</label>
+          <label class="field-label" for="masterUploadFy">Target Academic / Financial Year</label>
           <div class="row" style="gap:6px">
             <select name="masterUploadFy" id="masterUploadFy" style="flex:1;margin-bottom:0;">
               ${REF.financialYears.map(f => `<option value="${f.id}" ${f.id === fy.id ? 'selected' : ''}>${f.label}${f.is_active ? ' (Active)' : ''}</option>`).join('')}
@@ -4649,7 +4818,7 @@
       </div>
 
       <div id="masterDropzone" class="file-dropzone" onclick="document.getElementById('masterExcelFileInput').click()">
-        <input name="masterExcelFileInput" type="file" id="masterExcelFileInput" accept=".xlsx" style="display:none;" onchange="onMasterExcelFileSelected(this)" />
+        <input name="masterExcelFileInput" type="file" id="masterExcelFileInput" aria-label="Master Budget Excel Workbook (.xlsx)" accept=".xlsx" style="display:none;" onchange="onMasterExcelFileSelected(this)" />
         <div class="file-dropzone-prompt">Select Multi-Sheet Excel Workbook (.xlsx) or drag &amp; drop here</div>
         <div class="file-dropzone-sub">Ingests and validates multi-sheet departmental financial allocations</div>
       </div>
@@ -4829,7 +4998,7 @@
       // Mode Selection
       html += `
     <div style="padding:12px;background:var(--section-bg);border:1px solid var(--border);border-radius:var(--radius-sm);">
-      <label class="field-label" style="margin-top:0;font-weight:700;">Select Import Commitment Mode:</label>
+      <div class="field-label" style="margin-top:0;font-weight:700;">Select Import Commitment Mode:</div>
       <div class="row" style="gap:16px;">
         <label style="cursor:pointer;display:flex;align-items:center;gap:6px;">
           <input type="radio" id="modeReplace" name="masterImportModeRadio" value="replace" checked style="width:auto;margin:0;" />
@@ -4925,7 +5094,7 @@
     <h2 style="color:var(--danger)">Clear Previous Year / Historical Budget Data</h2>
     <div class="field-help">Super Admin tool: Reset or wipe previous year budget allocations and test NFAs before uploading a new financial year's master budget sheet.</div>
 
-    <label for="clearYearSelect" class="field-label">Select Academic / Financial Year to Clear</label>
+    <label for="clearBudgetFy" class="field-label">Select Academic / Financial Year to Clear</label>
     <select name="clearBudgetFy" id="clearBudgetFy">
       ${REF.financialYears.map(f => `<option value="${f.id}" ${f.id === fy.id ? 'selected' : ''}>${f.label}${f.is_active ? ' (Active)' : ''}</option>`).join('')}
       <option value="all">All Financial Years (Complete System Budget Wipe)</option>
@@ -5201,8 +5370,8 @@
               <div class="card-sub">Institutional master ledger of requested, reviewed, and debited expenditures</div>
             </div>
             <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-              <input name="nfaSearchInput" type="text" id="nfaSearchInput" placeholder="Search Ref, Title, Proposer..." value="${escapeHtml(nfaSearchQuery)}" oninput="onNfaSearchInput(this.value)" style="padding:6px 12px;font-size:13px;border:1px solid #cbd5e1;border-radius:6px;min-width:220px;" />
-              <select name="nfaStatusFilterSelect" id="nfaStatusFilterSelect" onchange="onNfaStatusChange(this.value)" style="padding:6px 10px;font-size:13px;border:1px solid #cbd5e1;border-radius:6px;">
+              <input name="nfaSearchInput" type="text" id="nfaSearchInput" aria-label="Search Note for Approval by Reference, Title, or Proposer" placeholder="Search Ref, Title, Proposer..." value="${escapeHtml(nfaSearchQuery)}" oninput="onNfaSearchInput(this.value)" style="padding:6px 12px;font-size:13px;border:1px solid #cbd5e1;border-radius:6px;min-width:220px;" />
+              <select name="nfaStatusFilterSelect" id="nfaStatusFilterSelect" aria-label="Filter Note for Approval by Status" onchange="onNfaStatusChange(this.value)" style="padding:6px 10px;font-size:13px;border:1px solid #cbd5e1;border-radius:6px;">
                 <option value="">All Statuses</option>
                 <option value="draft" ${nfaStatusFilter === 'draft' ? 'selected' : ''}>Draft</option>
                 <option value="submitted_to_hod" ${nfaStatusFilter === 'submitted_to_hod' ? 'selected' : ''}>Submitted to HOD</option>
@@ -5691,7 +5860,7 @@
                 </div>
               </div>
               <div id="returnReasonWrap" style="display:none;margin-bottom:14px;">
-                <label class="field-label" style="font-size:12px;color:var(--danger);">Return Reason / Required Correction *</label>
+                <label class="field-label" for="verifyReturnRemarks" style="font-size:12px;color:var(--danger);">Return Reason / Required Correction *</label>
     <textarea name="verifyReturnRemarks" id="verifyReturnRemarks" rows="2" placeholder="Specify why the invoice is returned (e.g. GST discrepancy, missing vendor stamp)"></textarea>
               </div>
               <div class="row" style="justify-content:flex-end;gap:10px;">
@@ -6639,8 +6808,8 @@
             <option value="__custom__">Other / Enter Custom Department Name...</option>
           </select>
           <div id="customDeptWrap" style="display:none;margin-top:8px;">
-            <input name="customDeptName" id="customDeptName" placeholder="Enter Full Department Name (e.g. Dept. of Data Science)" style="margin-bottom:6px;" />
-            <input name="customDeptCode" id="customDeptCode" placeholder="Department Code (optional, e.g. DS)" style="max-width:200px;" />
+            <input name="customDeptName" id="customDeptName" aria-label="Custom Department Name" placeholder="Enter Full Department Name (e.g. Dept. of Data Science)" style="margin-bottom:6px;" />
+            <input name="customDeptCode" id="customDeptCode" aria-label="Custom Department Code" placeholder="Department Code (optional, e.g. DS)" style="max-width:200px;" />
           </div>
         `;
       }
@@ -6648,7 +6817,7 @@
       let centreSelectorHtml = '';
       if (authorizedCentres.length > 0) {
         centreSelectorHtml = `
-          <select name="nfaCentreSelect" id="nfaCentreSelect" onchange="onNfaCentreSelect(this.value)" style="margin-bottom:0;">
+          <select name="nfaCentreSelect" id="nfaCentreSelect" aria-label="Authorized Centre or Office" onchange="onNfaCentreSelect(this.value)" style="margin-bottom:0;">
             <option value="">— Select an Authorized Centre or Office —</option>
             ${authorizedCentres.map(c => `<option value="${c.id}">${escapeHtml(c.name)} (${c.code})</option>`).join('')}
           </select>
@@ -6710,7 +6879,7 @@
 
       <!-- Dynamic Container for Option B: Centres / Offices -->
       <div id="wrapOrgCentre" style="display:none;">
-        <label class="field-label" style="font-weight:600;margin-bottom:4px;">Centres / Offices <span style="color:var(--danger)">*</span></label>
+        <label class="field-label" for="nfaCentreSelect" style="font-weight:600;margin-bottom:4px;">Centres / Offices <span style="color:var(--danger)">*</span></label>
         ${centreSelectorHtml}
       </div>
     </div>
@@ -6742,9 +6911,9 @@
       </div>
 
       <div>
-        <label class="field-label" for="nfaTitle" style="font-weight:700;color:var(--primary)">3. Available Budget Items</label>
+        <label class="field-label" for="nfaSubcat" style="font-weight:700;color:var(--primary)">3. Available Budget Items</label>
         <div class="field-help" id="budgetItemsHelp" style="margin-bottom:6px;">Select a Budget Main Category above to view and select individual budget items.</div>
-        <select name="nfaSubcat" id="nfaSubcat" onchange="onBudgetItemSelect(this.value)" style="margin-bottom:6px;">
+        <select name="nfaSubcat" id="nfaSubcat" aria-label="Available Budget Items" onchange="onBudgetItemSelect(this.value)" style="margin-bottom:6px;">
           <option value="">— Select a Budget Main Category above first —</option>
         </select>
         <div id="budgetItemsGrid" class="budget-items-chip-grid" style="display:none;"></div>
@@ -6755,7 +6924,7 @@
     <div id="nfaBudgetStatusCard" style="display:none;margin-top:10px;padding:10px 14px;border-radius:var(--radius-sm);font-size:13px;border:1px solid #86efac;background:#f0fdf4;"></div>
 
     <div style="margin-top:14px;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);">
-      <label class="field-label" style="font-weight:700;color:var(--primary);margin:0 0 8px;">Select NFA Category Type</label>
+      <div class="field-label" style="font-weight:700;color:var(--primary);margin:0 0 8px;">Select NFA Category Type</div>
       <div class="row" style="gap:14px;">
         <label id="nfaTypeCardEvent" class="nfa-type-card active">
           <input type="radio" name="nfaType" id="nfaTypeEvent" value="event" checked onchange="switchNfaCategory('event', false)" />
@@ -6774,13 +6943,13 @@
     <!-- FOUR DESCRIPTION POINTS (MAX 50 WORDS EACH) -->
     <div style="margin-top:14px;padding:14px;background:#FAFBFC;border:1px solid var(--border);border-radius:var(--radius-sm);">
       <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px;">
-        <label class="field-label" for="eventResourcePerson" style="font-weight:700;color:var(--primary);margin:0;">Four NFA Description Points (Max 50 Words Each)</label>
+        <div class="field-label" style="font-weight:700;color:var(--primary);margin:0;">Four NFA Description Points (Max 50 Words Each)</div>
         <span class="field-help" style="margin:0;">Strict limit: 50 words per point</span>
       </div>
 
       <div style="margin-bottom:10px;">
         <div class="row" style="justify-content:space-between;margin-bottom:3px;">
-          <span style="font-size:12px;font-weight:600;">1. Proposal Purpose &amp; Objective</span>
+          <label for="nfaPoint1" class="field-label" style="font-size:12px;font-weight:600;margin:0;">1. Proposal Purpose &amp; Objective</label>
           <span id="p1CountBadge" class="word-badge">0 / 50 words</span>
         </div>
         <textarea name="nfaPoint1" id="nfaPoint1" rows="2" placeholder="Explain the specific purpose, target audience, and outcome of this proposal (max 50 words)" oninput="updateWordCount('nfaPoint1', 'p1CountBadge', 50)"></textarea>
@@ -6788,7 +6957,7 @@
 
       <div style="margin-bottom:10px;">
         <div class="row" style="justify-content:space-between;margin-bottom:3px;">
-          <span style="font-size:12px;font-weight:600;">2. Operational Logistics &amp; Arrangements</span>
+          <label for="nfaPoint2" class="field-label" style="font-size:12px;font-weight:600;margin:0;">2. Operational Logistics &amp; Arrangements</label>
           <span id="p2CountBadge" class="word-badge">0 / 50 words</span>
         </div>
         <textarea name="nfaPoint2" id="nfaPoint2" rows="2" placeholder="Outline operational execution, infrastructure, venue, or technical arrangements (max 50 words)" oninput="updateWordCount('nfaPoint2', 'p2CountBadge', 50)"></textarea>
@@ -6796,7 +6965,7 @@
 
       <div style="margin-bottom:10px;">
         <div class="row" style="justify-content:space-between;margin-bottom:3px;">
-          <span style="font-size:12px;font-weight:600;">3. Justification of Need &amp; Institutional Value</span>
+          <label for="nfaPoint3" class="field-label" style="font-size:12px;font-weight:600;margin:0;">3. Justification of Need &amp; Institutional Value</label>
           <span id="p3CountBadge" class="word-badge">0 / 50 words</span>
         </div>
         <textarea name="nfaPoint3" id="nfaPoint3" rows="2" placeholder="Institutional impact, academic relevance, and rationale for sanctioning (max 50 words)" oninput="updateWordCount('nfaPoint3', 'p3CountBadge', 50)"></textarea>
@@ -6804,7 +6973,7 @@
 
       <div>
         <div class="row" style="justify-content:space-between;margin-bottom:3px;">
-          <span style="font-size:12px;font-weight:600;">4. Financial Implication &amp; Annexure Statement</span>
+          <label for="nfaPoint4" class="field-label" style="font-size:12px;font-weight:600;margin:0;">4. Financial Implication &amp; Annexure Statement</label>
           <span id="p4CountBadge" class="word-badge">8 / 50 words</span>
         </div>
         <textarea name="nfaPoint4" id="nfaPoint4" rows="2" placeholder="The estimated expenditure details are attached as Annexure-I. (max 50 words)" oninput="updateWordCount('nfaPoint4', 'p4CountBadge', 50)">The estimated expenditure details are attached as Annexure-I.</textarea>
@@ -6884,7 +7053,7 @@
       <h3 style="margin:0 0 10px;font-size:14px;color:var(--primary-blue);">Purchase / Item Details</h3>
       <div class="row" style="gap:10px;margin-bottom:8px;">
         <div style="flex:2">
-          <label for="purItemName" class="field-label">Item / Product Name</label>
+          <label for="purchaseItemName" class="field-label">Item / Product Name</label>
     <input name="purchaseItemName" id="purchaseItemName" placeholder="Full product or equipment name" />
         </div>
         <div style="flex:1">
@@ -6907,7 +7076,7 @@
     </div>
 
     <!-- 3. SUSTAINABLE DEVELOPMENT GOALS (SDGs) -->
-    <label class="field-label" for="correctionReasonInput" style="margin-top:16px;font-weight:700">Select Relevant UN Sustainable Development Goals (SDGs)</label>
+    <div class="field-label" style="margin-top:16px;font-weight:700">Select Relevant UN Sustainable Development Goals (SDGs)</div>
     <div class="field-help">Click to highlight all sustainable development goals addressed:</div>
     <div class="sdg-grid" id="sdgGrid">
       ${SDG_LIST.map(sdg => `
@@ -6926,7 +7095,7 @@
 
     <!-- 5. BUDGET ITEM ROWS -->
     <div class="card-header" style="margin-top:20px;margin-bottom:8px">
-      <label id="itemsSectionTitle" class="field-label" style="margin:0">Event Budget Items (Select from predefined list above or add custom rows)</label>
+      <div id="itemsSectionTitle" class="field-label" style="margin:0;font-weight:700;">Event Budget Items (Select from predefined list above or add custom rows)</div>
       <button class="secondary" type="button" onclick="addItemRow('', '', '', '', false)">+ Add Item Row</button>
     </div>
     
@@ -7345,69 +7514,69 @@
         <div style="font-size:11.5px;font-weight:700;color:#475569;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">1. Personal Details</div>
         <div class="grid2" style="gap:10px;margin-bottom:8px;">
           <div>
-            <label class="field-label" style="font-size:11.5px;margin-top:0;">Full Name *</label>
-            <input name="resource_person_name" aria-label="Resource Person Full Name" class="bd-rp-name" placeholder="e.g. Dr. Jane Smith" value="${escapeHtml(data.resource_person_name || '')}" />
+            <label for="${rowId}_rp_name" class="field-label" style="font-size:11.5px;margin-top:0;">Full Name *</label>
+            <input id="${rowId}_rp_name" name="resource_person_name" aria-label="Resource Person Full Name" class="bd-rp-name" placeholder="e.g. Dr. Jane Smith" value="${escapeHtml(data.resource_person_name || '')}" />
           </div>
           <div>
-            <label class="field-label" style="font-size:11.5px;margin-top:0;">Designation *</label>
-            <input name="resource_person_designation" aria-label="Resource Person Designation" class="bd-designation" placeholder="e.g. Professor / Senior Scientist" value="${escapeHtml(data.designation || '')}" />
+            <label for="${rowId}_designation" class="field-label" style="font-size:11.5px;margin-top:0;">Designation *</label>
+            <input id="${rowId}_designation" name="resource_person_designation" aria-label="Resource Person Designation" class="bd-designation" placeholder="e.g. Professor / Senior Scientist" value="${escapeHtml(data.designation || '')}" />
           </div>
         </div>
         <div class="grid2" style="gap:10px;margin-bottom:8px;">
           <div>
-            <label class="field-label" style="font-size:11.5px;margin-top:0;">Organization / Institution *</label>
-            <input name="resource_person_org" aria-label="Resource Person Organization" class="bd-org" placeholder="e.g. IISc Bangalore / IIT Madras" value="${escapeHtml(data.organization || '')}" />
+            <label for="${rowId}_org" class="field-label" style="font-size:11.5px;margin-top:0;">Organization / Institution *</label>
+            <input id="${rowId}_org" name="resource_person_org" aria-label="Resource Person Organization" class="bd-org" placeholder="e.g. IISc Bangalore / IIT Madras" value="${escapeHtml(data.organization || '')}" />
           </div>
           <div>
-            <label class="field-label" style="font-size:11.5px;margin-top:0;">Honorarium Amount (₹) *</label>
-            <input name="honorarium_amount" aria-label="Honorarium Amount in Rupees" class="bd-honorarium" type="number" min="0" step="any" placeholder="e.g. 5000" value="${escapeHtml(data.honorarium_amount !== undefined ? data.honorarium_amount : '')}" oninput="calcRpHonorariumTotal(${isEdit})" style="font-weight:700;color:var(--primary-blue);" />
+            <label for="${rowId}_honorarium" class="field-label" style="font-size:11.5px;margin-top:0;">Honorarium Amount (₹) *</label>
+            <input id="${rowId}_honorarium" name="honorarium_amount" aria-label="Honorarium Amount in Rupees" class="bd-honorarium" type="number" min="0" step="any" placeholder="e.g. 5000" value="${escapeHtml(data.honorarium_amount !== undefined ? data.honorarium_amount : '')}" oninput="calcRpHonorariumTotal(${isEdit})" style="font-weight:700;color:var(--primary-blue);" />
           </div>
         </div>
         <div class="grid2" style="gap:10px;margin-bottom:12px;">
           <div>
-            <label class="field-label" style="font-size:11.5px;margin-top:0;">Email Address *</label>
-            <input name="resource_person_email" aria-label="Resource Person Email Address" class="bd-email" type="email" placeholder="e.g. speaker@institution.ac.in" value="${escapeHtml(data.email || '')}" />
+            <label for="${rowId}_email" class="field-label" style="font-size:11.5px;margin-top:0;">Email Address *</label>
+            <input id="${rowId}_email" name="resource_person_email" aria-label="Resource Person Email Address" class="bd-email" type="email" placeholder="e.g. speaker@institution.ac.in" value="${escapeHtml(data.email || '')}" />
           </div>
           <div>
-            <label class="field-label" style="font-size:11.5px;margin-top:0;">Mobile Number *</label>
-            <input name="resource_person_mobile" aria-label="Resource Person Mobile Number" class="bd-mobile" placeholder="e.g. +91 9876543210" value="${escapeHtml(data.mobile || '')}" />
+            <label for="${rowId}_mobile" class="field-label" style="font-size:11.5px;margin-top:0;">Mobile Number *</label>
+            <input id="${rowId}_mobile" name="resource_person_mobile" aria-label="Resource Person Mobile Number" class="bd-mobile" placeholder="e.g. +91 9876543210" value="${escapeHtml(data.mobile || '')}" />
           </div>
         </div>
 
         <div style="font-size:11.5px;font-weight:700;color:#0f766e;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;padding-top:8px;border-top:1px dashed #e2e8f0;">2. Bank Transfer Details (Encrypted at Rest)</div>
         <div class="grid2" style="gap:10px;margin-bottom:8px;">
           <div>
-            <label class="field-label" style="font-size:11.5px;margin-top:0;">Beneficiary / Account Holder Name *</label>
-            <input name="account_holder_name" aria-label="Beneficiary or Account Holder Name" class="bd-holder-name" placeholder="Exact name as in passbook / bank" value="${escapeHtml(data.account_holder_name || '')}" />
+            <label for="${rowId}_holder_name" class="field-label" style="font-size:11.5px;margin-top:0;">Beneficiary / Account Holder Name *</label>
+            <input id="${rowId}_holder_name" name="account_holder_name" aria-label="Beneficiary or Account Holder Name" class="bd-holder-name" placeholder="Exact name as in passbook / bank" value="${escapeHtml(data.account_holder_name || '')}" />
           </div>
           <div>
-            <label class="field-label" style="font-size:11.5px;margin-top:0;">Bank Name *</label>
-            <input name="bank_name" aria-label="Bank Name" class="bd-bank-name" placeholder="e.g. State Bank of India / HDFC Bank" value="${escapeHtml(data.bank_name || '')}" />
-          </div>
-        </div>
-        <div class="grid2" style="gap:10px;margin-bottom:8px;">
-          <div>
-            <label class="field-label" style="font-size:11.5px;margin-top:0;">Bank Branch Name *</label>
-            <input name="bank_branch" aria-label="Bank Branch Name" class="bd-branch" placeholder="e.g. Koramangala Branch, Bangalore" value="${escapeHtml(data.branch_name || '')}" />
-          </div>
-          <div>
-            <label class="field-label" style="font-size:11.5px;margin-top:0;">IFSC Code (11 Chars) *</label>
-            <input name="ifsc_code" aria-label="Bank IFSC Code" class="bd-ifsc" style="text-transform:uppercase;font-family:monospace;" placeholder="e.g. SBIN0001234" value="${escapeHtml(data.ifsc_code || '')}" maxlength="11" />
+            <label for="${rowId}_bank_name" class="field-label" style="font-size:11.5px;margin-top:0;">Bank Name *</label>
+            <input id="${rowId}_bank_name" name="bank_name" aria-label="Bank Name" class="bd-bank-name" placeholder="e.g. State Bank of India / HDFC Bank" value="${escapeHtml(data.bank_name || '')}" />
           </div>
         </div>
         <div class="grid2" style="gap:10px;margin-bottom:8px;">
           <div>
-            <label class="field-label" style="font-size:11.5px;margin-top:0;">${isExisting ? 'Update Account Number (Leave blank to keep existing ' + escapeHtml(maskedAcct) + ')' : 'Bank Account Number *'}</label>
-            <input name="bank_account_number" aria-label="Bank Account Number" class="bd-acct-no" type="password" placeholder="${isExisting ? 'Enter new account number only if changing' : 'Enter bank account number'}" />
+            <label for="${rowId}_branch" class="field-label" style="font-size:11.5px;margin-top:0;">Bank Branch Name *</label>
+            <input id="${rowId}_branch" name="bank_branch" aria-label="Bank Branch Name" class="bd-branch" placeholder="e.g. Koramangala Branch, Bangalore" value="${escapeHtml(data.branch_name || '')}" />
           </div>
           <div>
-            <label class="field-label" style="font-size:11.5px;margin-top:0;">Confirm Bank Account Number *</label>
-            <input name="confirm_bank_account_number" aria-label="Confirm Bank Account Number" class="bd-confirm-acct-no" type="password" placeholder="${isExisting ? 'Confirm new account number' : 'Re-enter bank account number'}" />
+            <label for="${rowId}_ifsc" class="field-label" style="font-size:11.5px;margin-top:0;">IFSC Code (11 Chars) *</label>
+            <input id="${rowId}_ifsc" name="ifsc_code" aria-label="Bank IFSC Code" class="bd-ifsc" style="text-transform:uppercase;font-family:monospace;" placeholder="e.g. SBIN0001234" value="${escapeHtml(data.ifsc_code || '')}" maxlength="11" />
+          </div>
+        </div>
+        <div class="grid2" style="gap:10px;margin-bottom:8px;">
+          <div>
+            <label for="${rowId}_acct_no" class="field-label" style="font-size:11.5px;margin-top:0;">${isExisting ? 'Update Account Number (Leave blank to keep existing ' + escapeHtml(maskedAcct) + ')' : 'Bank Account Number *'}</label>
+            <input id="${rowId}_acct_no" name="bank_account_number" aria-label="Bank Account Number" class="bd-acct-no" type="password" placeholder="${isExisting ? 'Enter new account number only if changing' : 'Enter bank account number'}" />
+          </div>
+          <div>
+            <label for="${rowId}_confirm_acct_no" class="field-label" style="font-size:11.5px;margin-top:0;">Confirm Bank Account Number *</label>
+            <input id="${rowId}_confirm_acct_no" name="confirm_bank_account_number" aria-label="Confirm Bank Account Number" class="bd-confirm-acct-no" type="password" placeholder="${isExisting ? 'Confirm new account number' : 'Re-enter bank account number'}" />
           </div>
         </div>
         <div>
-          <label class="field-label" style="font-size:11.5px;margin-top:0;">Payment Reference / Remarks (Optional)</label>
-          <input name="payment_remarks" aria-label="Payment Reference Remarks" class="bd-remarks" placeholder="e.g. Keynote speaker honorarium + local travel" value="${escapeHtml(data.remarks || '')}" />
+          <label for="${rowId}_remarks" class="field-label" style="font-size:11.5px;margin-top:0;">Payment Reference / Remarks (Optional)</label>
+          <input id="${rowId}_remarks" name="payment_remarks" aria-label="Payment Reference Remarks" class="bd-remarks" placeholder="e.g. Keynote speaker honorarium + local travel" value="${escapeHtml(data.remarks || '')}" />
         </div>
       `;
       container.appendChild(row);
@@ -8249,7 +8418,7 @@
             <div><strong>Reviewing Authority:</strong> ${escapeHtml(reviewingAuthority || USER.name)}</div>
           </div>
           <div style="margin-bottom:18px;">
-            <label style="display:block;font-size:13px;font-weight:600;color:#334155;margin-bottom:6px;">Mandatory Correction Reason <span style="color:#dc2626;">*</span></label>
+            <label for="correctionReasonInput" style="display:block;font-size:13px;font-weight:600;color:#334155;margin-bottom:6px;">Mandatory Correction Reason <span style="color:#dc2626;">*</span></label>
     <textarea name="correctionReasonInput" id="correctionReasonInput" rows="4" placeholder="Detail the specific corrections, missing documents, or revisions required by the faculty..." style="width:100%;box-sizing:border-box;border:1px solid #cbd5e1;border-radius:6px;padding:10px;font-family:inherit;font-size:13.5px;"></textarea>
           </div>
           <div style="display:flex;justify-content:flex-end;gap:12px;">
@@ -8684,20 +8853,20 @@
 
     <div class="row" style="margin-top:10px;">
       <div style="flex:1">
-        <label class="field-label" for="editNfaFy">NFA Type</label>
+        <div class="field-label">NFA Type</div>
         <div style="padding:9px 12px;background:#F8FAFC;border:1px solid #CBD5E1;border-radius:6px;font-weight:600;font-size:13px;color:#1E293B;">
           ${(n.organization_type === 'centre_or_office' || (REF.departments.find(d => d.id === n.department_id)?.category === 'coe')) ? 'Centres / Offices' : 'Department'}
         </div>
       </div>
       <div style="flex:1">
-        <label class="field-label">Organization</label>
+        <div class="field-label">Organization</div>
         <div style="padding:9px 12px;background:#F8FAFC;border:1px solid #CBD5E1;border-radius:6px;font-weight:600;font-size:13px;color:#1E293B;">
           ${escapeHtml(deptName(n.department_id))}
         </div>
         <input name="editNfaDept" type="hidden" id="editNfaDept" value="${n.department_id}" />
       </div>
       <div style="flex:1">
-        <label for="nfaFy" class="field-label">Academic / Financial Year</label>
+        <label for="editNfaFy" class="field-label">Academic / Financial Year</label>
     <select name="editNfaFy" id="editNfaFy">
           ${REF.financialYears.map(f => `<option value="${f.id}" ${f.id === n.financial_year_id ? 'selected' : ''}>${escapeHtml(f.label)}</option>`).join('')}
         </select>
@@ -8723,7 +8892,7 @@
     </div>
 
     <div class="card" style="padding:14px;background:var(--section-bg);border:1px solid var(--accent-border);margin-top:12px;margin-bottom:14px;">
-      <label class="field-label" for="editEventResourcePerson" style="font-weight:700;color:var(--primary);margin:0 0 8px;">Select NFA Category Type</label>
+      <div class="field-label" style="font-weight:700;color:var(--primary);margin:0 0 8px;">Select NFA Category Type</div>
       <div class="row" style="gap:14px;">
         <label id="editNfaTypeCardEvent" class="nfa-type-card ${!isPurchase ? 'active' : ''}">
           <input type="radio" name="editNfaType" id="editNfaTypeEvent" value="event" ${!isPurchase ? 'checked' : ''} onchange="switchNfaCategory('event', true)" />
@@ -8742,7 +8911,7 @@
 
       <div style="margin-bottom:12px;">
         <div class="row" style="justify-content:space-between;align-items:center;">
-          <label class="field-label" style="margin:0;font-weight:600;">1. Purpose of the Proposal</label>
+          <label for="editPoint1" class="field-label" style="margin:0;font-weight:600;">1. Purpose of the Proposal</label>
           <span class="word-badge" id="editPoint1Badge">${countWords(p1)}/50 words</span>
         </div>
         <textarea name="editPoint1" id="editPoint1" rows="2" oninput="updateWordCount('editPoint1', 'editPoint1Badge')">${escapeHtml(p1)}</textarea>
@@ -8750,7 +8919,7 @@
 
       <div style="margin-bottom:12px;">
         <div class="row" style="justify-content:space-between;align-items:center;">
-          <label class="field-label" style="margin:0;font-weight:600;">2. Logistics &amp; Scheduling Details</label>
+          <label for="editPoint2" class="field-label" style="margin:0;font-weight:600;">2. Logistics &amp; Scheduling Details</label>
           <span class="word-badge" id="editPoint2Badge">${countWords(p2)}/50 words</span>
         </div>
         <textarea name="editPoint2" id="editPoint2" rows="2" oninput="updateWordCount('editPoint2', 'editPoint2Badge')">${escapeHtml(p2)}</textarea>
@@ -8758,7 +8927,7 @@
 
       <div style="margin-bottom:12px;">
         <div class="row" style="justify-content:space-between;align-items:center;">
-          <label class="field-label" style="margin:0;font-weight:600;">3. Justification &amp; Expected Outcomes</label>
+          <label for="editPoint3" class="field-label" style="margin:0;font-weight:600;">3. Justification &amp; Expected Outcomes</label>
           <span class="word-badge" id="editPoint3Badge">${countWords(p3)}/50 words</span>
         </div>
         <textarea name="editPoint3" id="editPoint3" rows="2" oninput="updateWordCount('editPoint3', 'editPoint3Badge')">${escapeHtml(p3)}</textarea>
@@ -8766,7 +8935,7 @@
 
       <div style="margin-bottom:6px;">
         <div class="row" style="justify-content:space-between;align-items:center;">
-          <label class="field-label" style="margin:0;font-weight:600;">4. Statement of Total Expenditure</label>
+          <label for="editPoint4" class="field-label" style="margin:0;font-weight:600;">4. Statement of Total Expenditure</label>
           <span class="word-badge" id="editPoint4Badge">${countWords(p4)}/50 words</span>
         </div>
         <textarea name="editPoint4" id="editPoint4" rows="2" oninput="updateWordCount('editPoint4', 'editPoint4Badge')">${escapeHtml(p4)}</textarea>
@@ -8778,7 +8947,7 @@
       <h3 style="margin-top:0;font-size:15px;color:#1e3a8a;font-weight:700;">Event &amp; Resource Person Details</h3>
       <div class="grid2" style="gap:12px;">
         <div>
-          <label for="eventResourcePerson" class="field-label" style="margin-top:0">Resource Person Name</label>
+          <label for="editEventResourcePerson" class="field-label" style="margin-top:0">Resource Person Name</label>
     <input name="editEventResourcePerson" id="editEventResourcePerson" value="${escapeHtml(ed.resource_person_name || '')}" placeholder="e.g. Dr. Jane Smith" />
         </div>
         <div>
@@ -8802,9 +8971,9 @@
     <textarea name="editEventAdditionalInfo" id="editEventAdditionalInfo" rows="2" placeholder="Target audience, expected attendees, etc.">${escapeHtml(ed.additional_info || '')}</textarea>
         </div>
         <div style="grid-column: 1 / -1;margin-top:4px;padding:8px 12px;background:#ffffff;border:1px solid #bfdbfe;border-radius:6px;">
-          <label class="field-label" for="editPurchaseItemName" style="font-weight:700;color:var(--primary-blue);margin-bottom:4px;">
+          <div class="field-label" style="font-weight:700;color:var(--primary-blue);margin-bottom:4px;">
             Will this event generate revenue?
-          </label>
+          </div>
           <div style="display:flex;gap:20px;align-items:center;">
             <label class="radio-label" style="font-size:13px;cursor:pointer;">
               <input type="radio" name="editNfaWillGenerateRevenue" id="editRevNo" value="false" ${!nfa.will_generate_revenue ? 'checked' : ''} />
@@ -8841,7 +9010,7 @@
       <h3 style="margin-top:0;font-size:15px;color:#14532d;font-weight:700;">Purchase &amp; Procurement Details</h3>
       <div class="grid2" style="gap:12px;">
         <div>
-          <label class="field-label" style="margin-top:0">Item Name / Equipment</label>
+          <label for="editPurchaseItemName" class="field-label" style="margin-top:0">Item Name / Equipment</label>
     <input name="editPurchaseItemName" id="editPurchaseItemName" value="${escapeHtml(pd.item_name || '')}" placeholder="e.g. 4K Ultra-HD Projector" />
         </div>
         <div>
@@ -8864,7 +9033,7 @@
     </div>
 
     <!-- 3. SDGs -->
-    <label class="field-label" for="pjName" style="margin-top:16px;font-weight:700">Select Relevant UN Sustainable Development Goals (SDGs)</label>
+    <div class="field-label" style="margin-top:16px;font-weight:700">Select Relevant UN Sustainable Development Goals (SDGs)</div>
     <div class="sdg-grid" id="sdgGrid">
       ${SDG_LIST.map(sdg => `
         <div class="sdg-chip ${selectedSdgs.includes(sdg) ? 'active' : ''}" onclick="toggleSdg('${sdg}', this)">
@@ -8882,7 +9051,7 @@
 
     <!-- 5. BUDGET ITEM ROWS -->
     <div class="card-header" style="margin-top:20px;margin-bottom:8px">
-      <label id="itemsSectionTitle" class="field-label" style="margin:0">${isPurchase ? 'Purchase Budget Items (Enter item description, quantity, and rate)' : 'Event Budget Items (Select from predefined list above or add custom rows)'}</label>
+      <div id="itemsSectionTitle" class="field-label" style="margin:0;font-weight:700;">${isPurchase ? 'Purchase Budget Items (Enter item description, quantity, and rate)' : 'Event Budget Items (Select from predefined list above or add custom rows)'}</div>
       <button class="secondary" type="button" onclick="addItemRow('', '', '', '', true)">+ Add Item Row</button>
     </div>
     
@@ -9828,7 +9997,7 @@
       </div>
       <p class="card-sub">All workbook changes are previewed against the master ledger before any allocations are committed.</p>
       <div id="syncDropzone" class="file-dropzone" style="max-width:440px;margin-bottom:12px;" onclick="document.getElementById('excelFile').click()">
-        <input name="excelFile" type="file" id="excelFile" accept=".xlsx" style="display:none;" />
+        <input name="excelFile" type="file" id="excelFile" aria-label="Department Excel Workbook (.xlsx)" accept=".xlsx" style="display:none;" />
         <div class="file-dropzone-prompt" style="font-size:13px;">Choose modified Excel workbook (.xlsx) or drag &amp; drop here</div>
         <div class="file-dropzone-sub">Preview differences against the master ledger</div>
       </div>
@@ -10875,7 +11044,7 @@
     <div class="card">
       <h2 class="card-title" style="margin-bottom:12px">Academic &amp; Financial Years</h2>
       <div class="row" style="margin-bottom:14px">
-        <input name="fyLabel" id="fyLabel" placeholder="e.g. 2027-28" style="max-width:220px;margin-bottom:0" />
+        <input name="fyLabel" id="fyLabel" aria-label="Academic / Financial Year Label" placeholder="e.g. 2027-28" style="max-width:220px;margin-bottom:0" />
         <button onclick="addFy()">Add Financial Year</button>
       </div>
       <div class="table-wrap">
@@ -10922,10 +11091,10 @@
       <!-- Search & Filters Toolbar -->
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:#F8F9FA;padding:12px;border-radius:var(--radius);border:1px solid var(--border);margin-bottom:16px;">
         <div style="flex:2;min-width:200px;">
-          <input name="userSearchInput" id="userSearchInput" placeholder="Search by name or email..." style="margin-bottom:0;padding:8px 12px;font-size:13px;" oninput="filterAdminUserTable()" />
+          <input name="userSearchInput" id="userSearchInput" aria-label="Search users by name or email" placeholder="Search by name or email..." style="margin-bottom:0;padding:8px 12px;font-size:13px;" oninput="filterAdminUserTable()" />
         </div>
         <div style="flex:1;min-width:140px;">
-          <select name="userRoleFilter" id="userRoleFilter" style="margin-bottom:0;height:38px;min-height:38px;padding:6px 10px;font-size:13px;" onchange="filterAdminUserTable()">
+          <select name="userRoleFilter" id="userRoleFilter" aria-label="Filter users by institutional role" style="margin-bottom:0;height:38px;min-height:38px;padding:6px 10px;font-size:13px;" onchange="filterAdminUserTable()">
             <option value="all">All Roles</option>
             <option value="faculty">Faculty</option>
             <option value="hod">HOD</option>
@@ -10937,13 +11106,13 @@
           </select>
         </div>
         <div style="flex:1.5;min-width:160px;">
-          <select name="userDeptFilter" id="userDeptFilter" style="margin-bottom:0;height:38px;min-height:38px;padding:6px 10px;font-size:13px;" onchange="filterAdminUserTable()">
+          <select name="userDeptFilter" id="userDeptFilter" aria-label="Filter users by department" style="margin-bottom:0;height:38px;min-height:38px;padding:6px 10px;font-size:13px;" onchange="filterAdminUserTable()">
             <option value="all">All Departments</option>
             ${departments.map(d => `<option value="${d.id}">${escapeHtml(d.name)} (${d.code})</option>`).join('')}
           </select>
         </div>
         <div style="flex:1;min-width:120px;">
-          <select name="userStatusFilter" id="userStatusFilter" style="margin-bottom:0;height:38px;min-height:38px;padding:6px 10px;font-size:13px;" onchange="filterAdminUserTable()">
+          <select name="userStatusFilter" id="userStatusFilter" aria-label="Filter users by status" style="margin-bottom:0;height:38px;min-height:38px;padding:6px 10px;font-size:13px;" onchange="filterAdminUserTable()">
             <option value="all">All Statuses</option>
             <option value="active">Active Only</option>
             <option value="inactive">Deactivated Only</option>
@@ -11920,8 +12089,14 @@
     // Initialize system mode badge for login
     initLoginMode();
 
-    // Auto-boot if logged in
-    if (TOKEN && USER) boot();
+    // Auto-boot if logged in with valid token
+    if (TOKEN && USER) {
+      if (isTokenExpired(TOKEN)) {
+        handleSessionExpired('Your session has expired. Please sign in again.');
+      } else {
+        boot();
+      }
+    }
   </script>
 </body>
 

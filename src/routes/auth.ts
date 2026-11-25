@@ -210,6 +210,50 @@ authRouter.post('/forgot-password', async (req, res) => {
 });
 
 /**
+ * POST /api/auth/refresh
+ * Validates the caller's active session, verifies active user account status,
+ * and issues a refreshed JWT access token.
+ */
+authRouter.post('/refresh', requireAuth, async (req: AuthedRequest, res) => {
+  try {
+    const user = req.user;
+    if (!user || user.is_active === false) {
+      return res.status(401).json({ error: 'Account is deactivated or session is invalid.' });
+    }
+
+    const refreshedToken = signToken({
+      id: user.id,
+      role: user.role,
+      department_id: user.department_id,
+      authorized_centre_ids: user.authorized_centre_ids || [],
+      school: user.school,
+      name: user.name,
+      email: user.email,
+      must_change_password: Boolean(user.must_change_password),
+      is_active: true,
+      refreshed_at: Date.now(),
+    } as any);
+
+    return res.json({
+      success: true,
+      token: refreshedToken,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        department_id: user.department_id,
+        authorized_centre_ids: user.authorized_centre_ids || [],
+        school: user.school,
+        must_change_password: Boolean(user.must_change_password),
+      },
+    });
+  } catch (err: any) {
+    return res.status(401).json({ error: err?.message || 'Token refresh failed' });
+  }
+});
+
+/**
  * POST /api/auth/logout
  * Session logout endpoint with server-side token revocation.
  */

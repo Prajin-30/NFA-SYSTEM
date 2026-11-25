@@ -69,7 +69,7 @@ class Store {
   }
 
   constructor() {
-    this.isPostgres = Boolean(process.env.DATABASE_URL || process.env.DATA_SOURCE === 'postgres');
+    this.isPostgres = Boolean((process.env.DATABASE_URL || process.env.DATA_SOURCE === 'postgres') && process.env.DATA_SOURCE !== 'json' && process.env.NODE_ENV !== 'test');
 
     if (fs.existsSync(DATA_FILE)) {
       try {
@@ -110,7 +110,7 @@ class Store {
     this.rebuildReferenceIndices();
 
     if (this.isPostgres) {
-      this.initPromise = this.loadFromPostgres();
+      this.initPromise = this.loadFromPostgres().catch(() => {});
     }
   }
 

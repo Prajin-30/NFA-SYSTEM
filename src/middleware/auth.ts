@@ -212,7 +212,7 @@ export async function requireAuth(req: AuthedRequest, res: Response, next: NextF
     if (req.user?.must_change_password) {
       // Normalize path to strip mount prefixes or trailing slashes
       const reqPath = req.originalUrl ? req.originalUrl.split('?')[0] : req.path;
-      const allowedPaths = ['/api/auth/change-password', '/api/auth/logout', '/api/users/me'];
+      const allowedPaths = ['/api/auth/change-password', '/api/auth/logout', '/api/auth/refresh', '/api/users/me'];
       if (!allowedPaths.includes(reqPath)) {
         return res.status(403).json({
           error: 'PasswordChangeRequired',

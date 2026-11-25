@@ -1,4 +1,7 @@
 import puppeteer from 'puppeteer-core';
+import os from 'os';
+import path from 'path';
+import fs from 'fs';
 
 async function verifyLiveProduction() {
   console.log('================================================================');
@@ -8,9 +11,11 @@ async function verifyLiveProduction() {
   const liveUrl = 'https://nfa-system.onrender.com';
   console.log(`Connecting to ${liveUrl}...`);
 
+  const tempUserDataDir = path.join(os.tmpdir(), `cu_nfa_live_test_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`);
   const browser = await puppeteer.launch({
     executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
     headless: true,
+    userDataDir: tempUserDataDir,
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
 
@@ -28,9 +33,10 @@ async function verifyLiveProduction() {
     }
   });
 
-  page.on('pageerror', (err) => {
-    uncaughtExceptions.push(err.message);
-    console.log(`  [Page Exception]: ${err.message}`);
+  page.on('pageerror', (err: unknown) => {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    uncaughtExceptions.push(errorMessage);
+    console.log(`  [Page Exception]: ${errorMessage}`);
   });
 
   page.on('response', (res) => {
@@ -138,10 +144,14 @@ async function verifyLiveProduction() {
     console.log(`  Live Token Refresh: ${refreshRes.success ? 'SUCCESS' : 'FAIL'}`);
     console.log('================================================================\n');
 
-  } catch (err: any) {
-    console.error('Production verification encountered error:', err.message);
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    console.error('Production verification encountered error:', errorMsg);
   } finally {
     await browser.close();
+    try {
+      fs.rmSync(tempUserDataDir, { recursive: true, force: true });
+    } catch (_) {}
   }
 }
 

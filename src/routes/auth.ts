@@ -12,6 +12,8 @@ import {
   updateUserPassword,
   validatePasswordStrength,
   validateUniversityEmail,
+  resolveUsernameToEmail,
+  auditUsernameConflicts,
   getSystemMode,
   setRuntimeMode,
 } from '../services/supabaseAuth.js';
@@ -59,13 +61,21 @@ authRouter.post('/mode', (req, res) => {
  */
 authRouter.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body || {};
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Official Email ID and Password are required' });
+    const rawIdentifier = (req.body?.email || req.body?.username || req.body?.identifier || '').toString().trim();
+    const { password } = req.body || {};
+    if (!rawIdentifier || !password) {
+      return res.status(400).json({ error: 'Username or Official Email ID and Password are required' });
     }
 
+    const resolved = await resolveUsernameToEmail(rawIdentifier);
+    if (resolved.ambiguous) {
+      return res.status(400).json({ error: resolved.error || 'Ambiguous username prefix. Multiple accounts match. Please sign in with your full university email.' });
+    }
+
+    const targetEmail = resolved.email || rawIdentifier;
+
     const { user, must_change_password } = await authenticateInstitutionalUser(
-      String(email).trim(),
+      targetEmail,
       String(password)
     );
 
@@ -137,8 +147,8 @@ authRouter.post('/login', async (req, res) => {
     });
   } catch (err: any) {
     const rawMessage = String(err?.message || 'Authentication failed');
-    const email = req.body?.email ? String(req.body.email).trim() : 'unknown';
-    const masked = maskEmail(email);
+    const rawTarget = (req.body?.email || req.body?.username || req.body?.identifier || 'unknown').toString().trim();
+    const masked = maskEmail(rawTarget);
 
     if (rawMessage.includes('deactivated')) {
       console.warn(`[Auth Failure] Category: ACCOUNT_DEACTIVATED | Target: ${masked}`);
@@ -163,9 +173,9 @@ authRouter.post('/login', async (req, res) => {
       console.error(`[Auth Failure] Category: UNEXPECTED_ERROR | Target: ${masked} | Name: ${err?.name || 'Error'} | Message: ${rawMessage}`);
     }
 
-    const bruteCheck = securityService.recordFailedLogin(req.ip || '127.0.0.1', email);
+    const bruteCheck = securityService.recordFailedLogin(req.ip || '127.0.0.1', rawTarget);
     securityService.logEvent({
-      user_email: email,
+      user_email: rawTarget,
       ip_address: req.ip,
       user_agent: (req.headers['user-agent'] as string) || null,
       action: 'LOGIN_FAILURE',
@@ -244,12 +254,13 @@ authRouter.post('/change-password', requireAuth, async (req: AuthedRequest, res)
  */
 authRouter.post('/forgot-password', async (req, res) => {
   try {
-    const { email } = req.body || {};
-    if (!email) {
-      return res.status(400).json({ error: 'Official Email ID is required' });
+    const rawIdentifier = (req.body?.email || req.body?.username || req.body?.identifier || '').toString().trim();
+    if (!rawIdentifier) {
+      return res.status(400).json({ error: 'Official Email ID or Username is required' });
     }
 
-    const cleanEmail = String(email).trim().toLowerCase();
+    const resolved = await resolveUsernameToEmail(rawIdentifier);
+    const cleanEmail = String(resolved.email || rawIdentifier).trim().toLowerCase();
     const domainCheck = validateUniversityEmail(cleanEmail);
     if (!domainCheck.valid) {
       return res.status(400).json({ error: domainCheck.error });
@@ -258,11 +269,23 @@ authRouter.post('/forgot-password', async (req, res) => {
     // Generic safe response to prevent email enumeration
     return res.json({
       success: true,
-      message: 'If an account exists for this official email ID, password reset instructions have been dispatched.',
+      message: 'If an account exists for this official email ID or username, password reset instructions have been dispatched.',
     });
   } catch (err: any) {
     return res.status(400).json({ error: err?.message || 'Password reset request failed' });
   }
+});
+
+/**
+ * GET /api/auth/username-conflicts
+ * Audits accounts for potential username collisions across domains.
+ */
+authRouter.get('/username-conflicts', requireAuth, (req: AuthedRequest, res) => {
+  if (req.user!.role !== 'super_admin' && req.user!.role !== 'it_admin') {
+    return res.status(403).json({ error: 'Forbidden: Admin access required' });
+  }
+  const audit = auditUsernameConflicts();
+  res.json(audit);
 });
 
 /**

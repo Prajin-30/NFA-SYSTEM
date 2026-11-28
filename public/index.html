@@ -2159,8 +2159,8 @@
     <div id="loginModeBadge" style="display:none;"></div>
 
     <form id="loginForm" onsubmit="event.preventDefault(); doLogin();" style="margin-top:16px;text-align:left;">
-      <label for="loginEmail" style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:6px;">Email ID</label>
-      <input id="loginEmail" name="email" type="email" placeholder="e.g. name@christuniversity.in" autocomplete="username"
+      <label for="loginEmail" style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:6px;">Username or Email</label>
+      <input id="loginEmail" name="email" type="text" placeholder="e.g. arul.v or name@christuniversity.in" autocomplete="username"
         style="margin-bottom:14px;" />
 
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
@@ -2283,13 +2283,13 @@
         </div>
       </div>
       <p style="font-size:12px;color:var(--text-muted);line-height:1.4;margin-bottom:16px;">
-        Enter your official CHRIST University email address (@christuniversity.in or @christ.edu). Instructions to reset
+        Enter your official CHRIST University email address (@christuniversity.in or @christ.edu) or username. Instructions to reset
         your password will be sent.
       </p>
 
       <div style="margin-bottom:14px;text-align:left;">
-        <label for="forgotEmailInput" style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Email ID</label>
-        <input id="forgotEmailInput" name="forgotEmail" type="email" placeholder="e.g. name@christuniversity.in" autocomplete="email"
+        <label for="forgotEmailInput" style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Username or Email ID</label>
+        <input id="forgotEmailInput" name="forgotEmail" type="text" placeholder="e.g. arul.v or name@christuniversity.in" autocomplete="username"
           style="width:100%;padding:10px;border:1px solid var(--border);border-radius:6px;font-size:13px;"
           onkeydown="if(event.key==='Enter')submitForgotPassword()" />
       </div>
@@ -2838,13 +2838,25 @@
     let currentDraftId = null;
     let currentBudgetScope = 'soet';
 
-    // SDG 17 List
+    // SDG 17 List — Official UN Sustainable Development Goals
     const SDG_LIST = [
-      "SDG 1: No Poverty", "SDG 2: Zero Hunger", "SDG 3: Good Health", "SDG 4: Quality Education",
-      "SDG 5: Gender Equality", "SDG 6: Clean Water", "SDG 7: Clean Energy", "SDG 8: Decent Work",
-      "SDG 9: Industry & Innovation", "SDG 10: Reduced Inequalities", "SDG 11: Sustainable Cities",
-      "SDG 12: Responsible Consumption", "SDG 13: Climate Action", "SDG 14: Life Below Water",
-      "SDG 15: Life on Land", "SDG 16: Peace & Justice", "SDG 17: Partnerships"
+      "SDG 1: No Poverty",
+      "SDG 2: Zero Hunger",
+      "SDG 3: Good Health and Well-being",
+      "SDG 4: Quality Education",
+      "SDG 5: Gender Equality",
+      "SDG 6: Clean Water and Sanitation",
+      "SDG 7: Affordable and Clean Energy",
+      "SDG 8: Decent Work and Economic Growth",
+      "SDG 9: Industry, Innovation and Infrastructure",
+      "SDG 10: Reduced Inequalities",
+      "SDG 11: Sustainable Cities and Communities",
+      "SDG 12: Responsible Consumption and Production",
+      "SDG 13: Climate Action",
+      "SDG 14: Life Below Water",
+      "SDG 15: Life on Land",
+      "SDG 16: Peace, Justice and Strong Institutions",
+      "SDG 17: Partnerships for the Goals"
     ];
 
     function toast(msg) {
@@ -4035,7 +4047,7 @@
 
       if (!email || !password) {
         if (errEl) {
-          errEl.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><span>Please enter both Email ID and Password</span>`;
+          errEl.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><span>Please enter Username or Email ID, and Password</span>`;
           errEl.style.display = 'flex';
         }
         return;
@@ -5720,6 +5732,7 @@
     const nfaPageSize = 15;
     let nfaSearchQuery = '';
     let nfaStatusFilter = '';
+    let nfaOrgFilter = '';
 
     const debouncedNfaFilter = debounce(() => {
       nfaListPage = 1;
@@ -5737,6 +5750,43 @@
       updateNfaTableDom();
     }
 
+    function onNfaOrgFilterChange(val) {
+      nfaOrgFilter = val || '';
+      nfaListPage = 1;
+      updateNfaTableDom();
+    }
+
+    function openDedicatedCreateNfaPage(draftId = null) {
+      const url = draftId ? `/nfa-create.html?draft_id=${encodeURIComponent(draftId)}` : '/nfa-create.html';
+      window.open(url, '_blank');
+    }
+
+    // Cross-tab broadcast listener to silently refresh NFA list without losing state
+    try {
+      const nfaChannel = new BroadcastChannel('cu_nfa_channel');
+      nfaChannel.onmessage = (event) => {
+        if (event && event.data && (event.data.type === 'NFA_UPDATED' || event.data.type === 'NFA_CREATED')) {
+          if (currentTab === 'nfas') {
+            api('/nfas').then(res => {
+              allNfasCache = Array.isArray(res) ? res : (res.nfas || []);
+              updateNfaTableDom();
+            }).catch(() => {});
+          }
+        }
+      };
+    } catch (e) { }
+
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'cu_nfa_updated_event') {
+        if (currentTab === 'nfas') {
+          api('/nfas').then(res => {
+            allNfasCache = Array.isArray(res) ? res : (res.nfas || []);
+            updateNfaTableDom();
+          }).catch(() => {});
+        }
+      }
+    });
+
     function changeNfaPage(delta) {
       nfaListPage += delta;
       updateNfaTableDom();
@@ -5745,6 +5795,11 @@
     function getFilteredNfas() {
       return allNfasCache.filter(n => {
         if (nfaStatusFilter && n.status !== nfaStatusFilter) return false;
+        if (nfaOrgFilter) {
+          const isCentre = n.organization_type === 'centre_or_office' || (REF.departments.find(d => d.id === n.department_id)?.category === 'coe');
+          if (nfaOrgFilter === 'centre_or_office' && !isCentre) return false;
+          if (nfaOrgFilter === 'department' && isCentre) return false;
+        }
         if (nfaSearchQuery) {
           const q = nfaSearchQuery;
           const ref = (n.ref_no || '').toLowerCase();
@@ -5825,26 +5880,34 @@
 
       let html = `
         <div class="card">
-          <div class="card-header" style="flex-wrap:wrap;gap:12px;align-items:center;">
-            <div>
-              <h2 class="card-title">Note for Approval (NFA)</h2>
-              <div class="card-sub">Institutional master ledger of requested, reviewed, and debited expenditures</div>
+          <div style="text-align:center;padding:16px 20px 20px;border-bottom:1px solid #E2E8F0;">
+            <h2 class="card-title" style="font-size:22px;font-family:'Outfit',sans-serif;color:var(--primary-blue);margin:0 0 6px;justify-content:center;">Note for Approval (NFA)</h2>
+            <div class="card-sub" style="font-size:13.5px;color:var(--text-muted);margin:0 0 16px;">Create, manage and track institutional approval requests.</div>
+            <div style="display:flex;justify-content:center;gap:12px;">
+              <button id="btnCreateNewNfa" class="primary" onclick="openDedicatedCreateNfaPage()" style="padding:10px 24px;font-size:14px;font-weight:700;box-shadow:var(--shadow-sm);border-radius:6px;display:inline-flex;align-items:center;gap:8px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Create New NFA
+              </button>
             </div>
-            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-              <input name="nfaSearchInput" type="text" id="nfaSearchInput" aria-label="Search Note for Approval by Reference, Title, or Proposer" placeholder="Search Ref, Title, Proposer..." value="${escapeHtml(nfaSearchQuery)}" oninput="onNfaSearchInput(this.value)" style="padding:6px 12px;font-size:13px;border:1px solid #cbd5e1;border-radius:6px;min-width:220px;" />
-              <select name="nfaStatusFilterSelect" id="nfaStatusFilterSelect" aria-label="Filter Note for Approval by Status" onchange="onNfaStatusChange(this.value)" style="padding:6px 10px;font-size:13px;border:1px solid #cbd5e1;border-radius:6px;">
-                <option value="">All Statuses</option>
-                <option value="draft" ${nfaStatusFilter === 'draft' ? 'selected' : ''}>Draft</option>
-                <option value="submitted_to_hod" ${nfaStatusFilter === 'submitted_to_hod' ? 'selected' : ''}>Submitted to HOD</option>
-                <option value="pending_dean" ${nfaStatusFilter === 'pending_dean' ? 'selected' : ''}>Pending Dean</option>
-                <option value="pending_finance" ${nfaStatusFilter === 'pending_finance' ? 'selected' : ''}>Pending Finance</option>
-                <option value="pending_director" ${nfaStatusFilter === 'pending_director' ? 'selected' : ''}>Pending Director</option>
-                <option value="approved" ${nfaStatusFilter === 'approved' ? 'selected' : ''}>Approved</option>
-                <option value="rejected" ${nfaStatusFilter === 'rejected' ? 'selected' : ''}>Rejected</option>
-                <option value="revision_required" ${nfaStatusFilter === 'revision_required' ? 'selected' : ''}>Revision Required</option>
-              </select>
-              <button onclick="newNfaModal()">+ Request New NFA</button>
-            </div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 16px;background:#F8FAFC;border-bottom:1px solid #E2E8F0;">
+            <input name="nfaSearchInput" type="text" id="nfaSearchInput" aria-label="Search Note for Approval by Reference, Title, or Proposer" placeholder="Search Ref, Title, Proposer..." value="${escapeHtml(nfaSearchQuery)}" oninput="onNfaSearchInput(this.value)" style="padding:6px 12px;font-size:13px;border:1px solid #cbd5e1;border-radius:6px;min-width:240px;flex:1;" />
+            <select name="nfaStatusFilterSelect" id="nfaStatusFilterSelect" aria-label="Filter Note for Approval by Status" onchange="onNfaStatusChange(this.value)" style="padding:6px 10px;font-size:13px;border:1px solid #cbd5e1;border-radius:6px;min-width:160px;">
+              <option value="">All Statuses</option>
+              <option value="draft" ${nfaStatusFilter === 'draft' ? 'selected' : ''}>Draft</option>
+              <option value="submitted_to_hod" ${nfaStatusFilter === 'submitted_to_hod' ? 'selected' : ''}>Submitted to HOD</option>
+              <option value="pending_dean" ${nfaStatusFilter === 'pending_dean' ? 'selected' : ''}>Pending Dean</option>
+              <option value="pending_finance" ${nfaStatusFilter === 'pending_finance' ? 'selected' : ''}>Pending Finance</option>
+              <option value="pending_director" ${nfaStatusFilter === 'pending_director' ? 'selected' : ''}>Pending Director</option>
+              <option value="approved" ${nfaStatusFilter === 'approved' ? 'selected' : ''}>Approved</option>
+              <option value="rejected" ${nfaStatusFilter === 'rejected' ? 'selected' : ''}>Rejected</option>
+              <option value="revision_required" ${nfaStatusFilter === 'revision_required' ? 'selected' : ''}>Revision Required</option>
+            </select>
+            <select name="nfaOrgFilterSelect" id="nfaOrgFilterSelect" aria-label="Filter Note for Approval by Organization Type" onchange="onNfaOrgFilterChange(this.value)" style="padding:6px 10px;font-size:13px;border:1px solid #cbd5e1;border-radius:6px;min-width:180px;">
+              <option value="">All Organization Types</option>
+              <option value="department" ${nfaOrgFilter === 'department' ? 'selected' : ''}>Academic Departments</option>
+              <option value="centre_or_office" ${nfaOrgFilter === 'centre_or_office' ? 'selected' : ''}>Centres &amp; Offices</option>
+            </select>
           </div>
           <div class="table-wrap">
             <table>

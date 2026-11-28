@@ -121,6 +121,118 @@ export function validateUniversityEmail(email: string): { valid: boolean; error?
   return { valid: true };
 }
 
+/**
+ * Resolves an institutional username prefix or full email to an authoritative email.
+ * Supports usernames like 'admin', 'arul.v', 'faculty', 'hod', etc.
+ * Enforces ambiguity check across domains (e.g. christ.edu vs christuniversity.in).
+ */
+export async function resolveUsernameToEmail(identifier: string): Promise<{
+  email: string;
+  ambiguous: boolean;
+  error?: string;
+}> {
+  const clean = String(identifier || '').trim().toLowerCase();
+  if (!clean) {
+    return { email: '', ambiguous: false };
+  }
+
+  // Already a full email address
+  if (clean.includes('@')) {
+    return { email: clean, ambiguous: false };
+  }
+
+  // 1. Search in local store users
+  const localMatches = (store.data.users || []).filter((u) => {
+    const userEmail = (u.email || '').trim().toLowerCase();
+    const prefix = userEmail.split('@')[0];
+    const username = ((u as any).username || '').trim().toLowerCase();
+    return prefix === clean || username === clean;
+  });
+
+  // 2. Search in mockAuthUsers map
+  const mockMatches: string[] = [];
+  for (const [mockEmail] of mockAuthUsers.entries()) {
+    const prefix = mockEmail.split('@')[0].toLowerCase();
+    if (prefix === clean && !localMatches.some((u) => u.email.toLowerCase() === mockEmail)) {
+      mockMatches.push(mockEmail);
+    }
+  }
+
+  // 3. Search in PostgreSQL database if connected
+  let dbMatches: string[] = [];
+  if (process.env.DATABASE_URL && process.env.DATA_SOURCE !== 'json') {
+    try {
+      const res = await query(
+        `SELECT DISTINCT LOWER(email) as email FROM user_profiles 
+         WHERE LOWER(SPLIT_PART(email, '@', 1)) = $1`,
+        [clean]
+      );
+      if (res && res.rows) {
+        dbMatches = res.rows.map((r: any) => String(r.email).toLowerCase());
+      }
+    } catch {
+      // Ignore DB query errors in mock or disconnected environments
+    }
+  }
+
+  // Deduplicate matches
+  const allMatches = Array.from(
+    new Set([
+      ...localMatches.map((u) => u.email.trim().toLowerCase()),
+      ...mockMatches,
+      ...dbMatches,
+    ])
+  );
+
+  // Ambiguity check: more than one user with the same prefix across different domains
+  if (allMatches.length > 1) {
+    return {
+      email: '',
+      ambiguous: true,
+      error: 'Multiple accounts match this username prefix. Please log in using your full university email address.',
+    };
+  }
+
+  if (allMatches.length === 1) {
+    return { email: allMatches[0], ambiguous: false };
+  }
+
+  // If no user found, construct a default domain format so downstream auth rejects with standard INVALID_CREDENTIALS
+  return { email: `${clean}@christ.edu`, ambiguous: false };
+}
+
+/**
+ * Audits all existing accounts for potential username collisions across domains.
+ */
+export function auditUsernameConflicts(): { hasConflicts: boolean; conflicts: Record<string, string[]> } {
+  const prefixMap = new Map<string, Set<string>>();
+  for (const u of store.data.users || []) {
+    const email = (u.email || '').trim().toLowerCase();
+    const prefix = email.split('@')[0];
+    if (prefix) {
+      if (!prefixMap.has(prefix)) prefixMap.set(prefix, new Set());
+      prefixMap.get(prefix)!.add(email);
+    }
+  }
+  for (const [mockEmail] of mockAuthUsers.entries()) {
+    const prefix = mockEmail.split('@')[0].toLowerCase();
+    if (prefix) {
+      if (!prefixMap.has(prefix)) prefixMap.set(prefix, new Set());
+      prefixMap.get(prefix)!.add(mockEmail);
+    }
+  }
+
+  const conflicts: Record<string, string[]> = {};
+  let hasConflicts = false;
+  for (const [prefix, emails] of prefixMap.entries()) {
+    if (emails.size > 1) {
+      hasConflicts = true;
+      conflicts[prefix] = Array.from(emails);
+    }
+  }
+  return { hasConflicts, conflicts };
+}
+
 // In-memory mock auth storage for isolated test harness / development when live Supabase is offline
 interface MockAuthUser {
   id: string;

@@ -1,0 +1,2284 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>CU-NFA — Create New Note for Approval (NFA)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/png" href="/christ-logo.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --primary-blue: #003D8F;
+      --primary: #003D8F;
+      --dark-blue: #002D70;
+      --hover-blue: #1554A5;
+      --primary-hover: #1554A5;
+      --light-blue: #EAF2FF;
+      --primary-light: #EAF2FF;
+      --primary-glow: rgba(0, 61, 143, 0.18);
+
+      --accent: #D4AF37;
+      --gold-accent: #D4AF37;
+      --accent-hover: #bfa02e;
+      --accent-light: #fefcf3;
+      --accent-border: #e8d78d;
+
+      --page-background: #F5F7FA;
+      --section-bg: #F8FAFC;
+      --bg: #FFFFFF;
+      --card: #FFFFFF;
+      --card-background: #FFFFFF;
+
+      --text-primary: #1F2937;
+      --text: #1F2937;
+      --text-muted: #4B5563;
+      --text-subtle: #9CA3AF;
+
+      --border: #E2E6ED;
+      --border-light: #EEF1F5;
+
+      --success: #1E7E51;
+      --success-bg: #E8F5EE;
+      --warning: #B45309;
+      --warning-bg: #FEF3C7;
+      --danger: #991B1B;
+      --danger-bg: #FEE2E2;
+
+      --radius-sm: 6px;
+      --radius: 10px;
+      --radius-lg: 14px;
+
+      --shadow-sm: 0 1px 3px rgba(31, 41, 55, 0.05);
+      --shadow: 0 4px 10px -2px rgba(31, 41, 55, 0.08), 0 2px 4px -2px rgba(31, 41, 55, 0.04);
+      --shadow-lg: 0 14px 28px -5px rgba(31, 41, 55, 0.12), 0 6px 12px -4px rgba(31, 41, 55, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--page-background);
+      color: var(--text-primary);
+      line-height: 1.5;
+      font-size: 14px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* HEADER */
+    header {
+      background: var(--dark-blue);
+      color: #ffffff;
+      padding: 12px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--accent);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+      color: #ffffff;
+    }
+
+    .brand img {
+      height: 44px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .brand-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .brand-sub {
+      font-size: 11.5px;
+      color: #CBD5E1;
+      display: block;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .user-pill {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .user-pill .role-tag {
+      background: var(--accent);
+      color: #0F172A;
+      font-weight: 700;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      text-transform: uppercase;
+    }
+
+    /* CONTAINER & GRID */
+    .container {
+      max-width: 1360px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 24px 20px 48px;
+      flex: 1;
+    }
+
+    .page-title-bar {
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .page-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--primary-blue);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .page-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      padding: 20px 24px;
+      margin-bottom: 20px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--primary-blue);
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .grid2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .grid3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 860px) {
+      .grid2, .grid3 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* FORM CONTROLS */
+    label.field-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .field-help {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 3px;
+      line-height: 1.35;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 9px 12px;
+      font-size: 13px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: #FFFFFF;
+      color: var(--text-primary);
+      font-family: inherit;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 3px var(--primary-glow);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 64px;
+    }
+
+    .word-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 12px;
+      background: #E2E8F0;
+      color: #334155;
+    }
+    .word-badge.warning {
+      background: var(--warning-bg);
+      color: var(--warning);
+    }
+    .word-badge.danger {
+      background: var(--danger-bg);
+      color: var(--danger);
+      font-weight: 700;
+    }
+
+    /* BUTTONS */
+    button, .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 9px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease-in-out;
+      text-decoration: none;
+      font-family: inherit;
+    }
+
+    button.primary, .btn-primary {
+      background: var(--primary-blue);
+      color: #ffffff;
+      border-color: var(--primary-blue);
+    }
+    button.primary:hover, .btn-primary:hover {
+      background: var(--hover-blue);
+      border-color: var(--hover-blue);
+    }
+
+    button.secondary, .btn-secondary {
+      background: #FFFFFF;
+      color: var(--text-primary);
+      border-color: var(--border);
+    }
+    button.secondary:hover, .btn-secondary:hover {
+      background: #F8FAFC;
+      border-color: #CBD5E1;
+    }
+
+    button.success, .btn-success {
+      background: var(--success);
+      color: #ffffff;
+      border-color: var(--success);
+    }
+    button.success:hover, .btn-success:hover {
+      background: #176541;
+      border-color: #176541;
+    }
+
+    button.danger, .btn-danger {
+      background: #ffffff;
+      color: var(--danger);
+      border-color: #FECACA;
+    }
+    button.danger:hover, .btn-danger:hover {
+      background: #FEF2F2;
+      border-color: var(--danger);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed !important;
+    }
+
+    /* TYPE CARDS */
+    .type-switcher {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .type-card {
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      background: #ffffff;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .type-card:hover {
+      border-color: #93C5FD;
+      background: #F8FAFC;
+    }
+
+    .type-card.active {
+      border-color: var(--primary-blue);
+      background: var(--light-blue);
+    }
+
+    .type-card input[type="radio"] {
+      width: auto;
+      margin-top: 3px;
+      cursor: pointer;
+    }
+
+    .type-card-title {
+      font-weight: 700;
+      color: var(--primary-blue);
+      font-size: 13.5px;
+    }
+
+    .type-card-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* SDG GRID */
+    .sdg-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .sdg-chip {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font-size: 12.5px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+
+    .sdg-chip:hover {
+      border-color: var(--primary-blue);
+      background: #F8FAFC;
+    }
+
+    .sdg-chip.active {
+      background: var(--light-blue);
+      border-color: var(--primary-blue);
+      color: var(--primary-blue);
+      font-weight: 700;
+      box-shadow: 0 1px 3px rgba(0, 61, 143, 0.12);
+    }
+
+    .sdg-checkbox {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      border: 1.5px solid #94A3B8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+    }
+
+    .sdg-chip.active .sdg-checkbox {
+      background: var(--primary-blue);
+      border-color: var(--primary-blue);
+    }
+
+    .sdg-checkbox::after {
+      content: '';
+      display: none;
+      width: 4px;
+      height: 8px;
+      border: solid #ffffff;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+      margin-bottom: 2px;
+    }
+
+    .sdg-chip.active .sdg-checkbox::after {
+      display: block;
+    }
+
+    /* EXPENDITURE ITEMS TABLE */
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: #ffffff;
+      margin-top: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th {
+      background: #F8FAFC;
+      color: #334155;
+      font-weight: 700;
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border-light);
+      vertical-align: top;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* RESOURCE PERSON CARDS */
+    .rp-card {
+      background: #ffffff;
+      border: 1px solid #CBD5E1;
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      margin-bottom: 14px;
+      position: relative;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    .rp-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #F1F5F9;
+    }
+
+    .rp-card-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--primary-blue);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .rp-sec-title {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 10px 0 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* BUDGET CARD */
+    .budget-status-card {
+      background: #F0FDF4;
+      border: 1px solid #86EFAC;
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+      margin-top: 14px;
+    }
+
+    .budget-status-card.warning {
+      background: #FEF3C7;
+      border-color: #FCD34D;
+    }
+
+    .budget-status-card.danger {
+      background: #FEE2E2;
+      border-color: #FCA5A5;
+    }
+
+    .budget-metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 768px) {
+      .budget-metrics {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .budget-metric-item {
+      background: #ffffff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .budget-metric-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748B;
+      text-transform: uppercase;
+    }
+
+    .budget-metric-val {
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: #0F172A;
+      margin-top: 2px;
+    }
+
+    /* ACTION BAR */
+    .action-bar {
+      position: sticky;
+      bottom: 0;
+      background: #FFFFFF;
+      padding: 14px 32px;
+      border-top: 2px solid var(--border);
+      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.06);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 999;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .action-bar-summary {
+      font-size: 13.5px;
+      color: var(--text-muted);
+    }
+
+    .action-bar-summary strong {
+      color: var(--primary-blue);
+      font-size: 18px;
+      font-family: 'Outfit', sans-serif;
+      margin-left: 6px;
+    }
+
+    .action-bar-buttons {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 74px;
+      right: 32px;
+      background: #0F172A;
+      color: #FFFFFF;
+      padding: 12px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      box-shadow: var(--shadow-lg);
+      display: none;
+      z-index: 10001;
+      max-width: 440px;
+      animation: fadeIn 0.2s ease;
+    }
+
+    /* MODAL */
+    .modal-bg {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      padding: 20px;
+      backdrop-filter: blur(2px);
+    }
+
+    .modal-box {
+      background: #FFFFFF;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      max-width: 760px;
+      width: 100%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      background: var(--dark-blue);
+      color: #ffffff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .modal-footer {
+      padding: 12px 20px;
+      border-top: 1px solid var(--border);
+      background: #F8FAFC;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    /* FOOTER */
+    footer {
+      background: #002D70;
+      color: #CBD5E1;
+      padding: 16px 32px;
+      text-align: center;
+      font-size: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: auto;
+    }
+
+    /* SPINNER */
+    .spinner-sm {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #ffffff;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- HEADER -->
+  <header>
+    <a href="/" class="brand" title="Return to Dashboard">
+      <img src="/christ-logo.png" alt="CHRIST University Logo" />
+      <div>
+        <div class="brand-title">CHRIST <span style="font-weight:400;opacity:0.9;">(Deemed to be University)</span></div>
+        <span class="brand-sub">Bengaluru – Kengeri Campus · Institutional NFA &amp; Budget System</span>
+      </div>
+    </a>
+
+    <div class="header-actions">
+      <div id="userPill" class="user-pill">
+        <span id="userNameText">Faculty Proposer</span>
+        <span id="userRoleBadge" class="role-tag">FACULTY</span>
+      </div>
+      <button class="secondary" style="padding:5px 12px;font-size:12px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.12);color:#fff;" onclick="handleClosePage()">✕ Close &amp; Return</button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="container">
+    <div class="page-title-bar">
+      <div>
+        <h1 class="page-title">
+          <span style="display:inline-block;width:10px;height:24px;background:var(--accent);border-radius:2px;"></span>
+          Create Note for Approval (NFA)
+        </h1>
+        <div class="page-subtitle">Submit official academic, operational, or capital expenditure requests through institutional hierarchy.</div>
+      </div>
+      <div>
+        <button type="button" class="secondary" onclick="restoreSavedDraftPrompt()">Restore Saved Draft</button>
+      </div>
+    </div>
+
+    <!-- FORM -->
+    <form id="nfaForm" onsubmit="event.preventDefault();">
+      <!-- SECTION 1: BASIC COORDINATES & BUDGET SELECTION -->
+      <div class="card">
+        <div class="card-title">1. Proposal Coordinates &amp; Budget Source</div>
+
+        <div class="grid3" style="margin-bottom:14px;">
+          <div>
+            <label for="nfaRefNo" class="field-label">Reference Number (Auto-Generated)</label>
+            <input id="nfaRefNo" name="ref_no" readonly style="background:#F8FAFC;font-weight:700;color:var(--primary-blue);" />
+            <div class="field-help">Institutional sequential reference number</div>
+          </div>
+          <div>
+            <label for="nfaFy" class="field-label">Financial / Academic Year <span style="color:var(--danger)">*</span></label>
+            <select id="nfaFy" name="financial_year_id" onchange="onFyOrDeptChange()"></select>
+          </div>
+          <div>
+            <label for="nfaFacultyName" class="field-label">Faculty Proposer Name</label>
+            <input id="nfaFacultyName" name="faculty_name" readonly style="background:#F8FAFC;font-weight:600;" />
+          </div>
+        </div>
+
+        <!-- ORGANIZATION TYPE -->
+        <div style="background:#F8FAFC;border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:14px;">
+          <label class="field-label" style="font-weight:700;color:var(--primary-blue);margin-bottom:8px;">Organization Unit Type <span style="color:var(--danger)">*</span></label>
+          <div style="display:flex;gap:24px;align-items:center;margin-bottom:10px;">
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:600;font-size:13px;">
+              <input type="radio" name="orgType" id="orgTypeDept" value="department" checked onchange="onOrgTypeChange('department')" />
+              <span>Academic Department</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:600;font-size:13px;">
+              <input type="radio" name="orgType" id="orgTypeCentre" value="centre_or_office" onchange="onOrgTypeChange('centre_or_office')" />
+              <span>Centres / Offices / Units</span>
+            </label>
+          </div>
+
+          <div id="wrapDeptSelect" style="display:block;">
+            <label for="nfaDept" class="field-label">Department <span style="color:var(--danger)">*</span></label>
+            <div id="deptControlWrap"></div>
+          </div>
+
+          <div id="wrapCentreSelect" style="display:none;">
+            <label for="nfaCentre" class="field-label">Centre or Office <span style="color:var(--danger)">*</span></label>
+            <select id="nfaCentre" name="centre_id" onchange="onFyOrDeptChange()"></select>
+          </div>
+        </div>
+
+        <!-- BUDGET CATEGORY & SUBCATEGORY -->
+        <div class="grid3">
+          <div>
+            <label for="nfaBudgetType" class="field-label">Budget Nature / Classification <span style="color:var(--danger)">*</span></label>
+            <select id="nfaBudgetType" onchange="filterCategories(this.value)">
+              <option value="">— Select Classification —</option>
+              <option value="revenue">Revenue Expenditure (Operating / Departmental)</option>
+              <option value="capex">Capital Expenditure (CAPEX - Computing, Lab, Equipment)</option>
+              <option value="earnings">Revenue / Earnings (Grants, Consultancy, Registrations)</option>
+              <option value="all">All Classifications</option>
+            </select>
+          </div>
+          <div>
+            <label for="nfaCategory" class="field-label">Budget Main Category <span style="color:var(--danger)">*</span></label>
+            <select id="nfaCategory" onchange="onCategoryChange(this.value)">
+              <option value="">— Select Classification above first —</option>
+            </select>
+          </div>
+          <div>
+            <label for="nfaSubcategory" class="field-label">Available Budget Line Item</label>
+            <select id="nfaSubcategory" onchange="onSubcategoryChange(this.value)">
+              <option value="">— Select Main Category first —</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- LIVE BUDGET CARD -->
+        <div id="budgetCard" class="budget-status-card" style="display:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong id="budgetLineTitle" style="color:#0F172A;font-size:13.5px;">Budget Line Status</strong>
+            <span id="budgetStatusBadge" class="word-badge" style="background:#DCFCE7;color:#166534;">Sufficient Balance</span>
+          </div>
+          <div class="budget-metrics">
+            <div class="budget-metric-item">
+              <div class="budget-metric-label">Allocated</div>
+              <div id="bMetricAllocated" class="budget-metric-val">₹0</div>
+            </div>
+            <div class="budget-metric-item">
+              <div class="budget-metric-label">Approved Debits</div>
+              <div id="bMetricApproved" class="budget-metric-val">₹0</div>
+            </div>
+            <div class="budget-metric-item">
+              <div class="budget-metric-label">Pending Reserved</div>
+              <div id="bMetricReserved" class="budget-metric-val">₹0</div>
+            </div>
+            <div class="budget-metric-item">
+              <div class="budget-metric-label">Available Balance</div>
+              <div id="bMetricAvailable" class="budget-metric-val" style="color:var(--success);">₹0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PROPOSAL TITLE -->
+        <div style="margin-top:16px;">
+          <label for="nfaTitle" class="field-label">Proposal Title <span style="color:var(--danger)">*</span></label>
+          <input id="nfaTitle" name="title" placeholder="e.g. Procurement of Research GPU Servers / National Conference on AI and Robotics" required />
+        </div>
+      </div>
+
+      <!-- SECTION 2: PROPOSAL CLASSIFICATION & DETAILS -->
+      <div class="card">
+        <div class="card-title">2. Proposal Classification &amp; Specifications</div>
+
+        <div class="type-switcher">
+          <label id="typeCardEvent" class="type-card active" onclick="switchProposalType('event')">
+            <input type="radio" name="nfaType" id="nfaTypeEvent" value="event" checked />
+            <div>
+              <div class="type-card-title">Event / Program NFA</div>
+              <div class="type-card-desc">Seminars, Conferences, Workshops, Fests, Guest Lectures, Expert Talks &amp; Certifications</div>
+            </div>
+          </label>
+          <label id="typeCardPurchase" class="type-card" onclick="switchProposalType('purchase')">
+            <input type="radio" name="nfaType" id="nfaTypePurchase" value="purchase" />
+            <div>
+              <div class="type-card-title">Purchase / Procurement NFA</div>
+              <div class="type-card-desc">Computing Equipment, Laboratory Components, Hardware, Software, Services &amp; Consumables</div>
+            </div>
+          </label>
+        </div>
+
+        <!-- EVENT DETAILS -->
+        <div id="eventDetailsWrap" style="background:#F0F4FA;border:1px solid #CCD6E8;border-radius:var(--radius-sm);padding:16px;">
+          <h3 style="font-size:13.5px;color:var(--primary-blue);margin-bottom:12px;">Event Operational Details</h3>
+          <div class="grid3" style="margin-bottom:12px;">
+            <div>
+              <label for="eventDate" class="field-label">Proposed Event Date</label>
+              <input id="eventDate" type="date" />
+            </div>
+            <div>
+              <label for="eventVenue" class="field-label">Venue / Location</label>
+              <input id="eventVenue" placeholder="e.g. Kengeri Auditorium / Lab 304" />
+            </div>
+            <div>
+              <label for="eventAudience" class="field-label">Target Audience / Est. Participants</label>
+              <input id="eventAudience" placeholder="e.g. 120 Students &amp; Faculty" />
+            </div>
+          </div>
+
+          <div>
+            <label for="eventAdditionalInfo" class="field-label">Additional Relevant Information</label>
+            <textarea id="eventAdditionalInfo" rows="2" placeholder="Schedule highlights, session tracks, travel requirements, or hospitality arrangements..."></textarea>
+          </div>
+
+          <!-- REVENUE GENERATION -->
+          <div style="background:#ffffff;border:2px solid #93c5fd;border-radius:6px;padding:12px 14px;margin-top:12px;">
+            <label class="field-label" style="font-weight:700;color:var(--primary-blue);margin-bottom:4px;">
+              Will this event generate revenue? <span style="color:var(--danger)">*</span>
+            </label>
+            <div style="font-size:11.5px;color:#64748B;margin-bottom:8px;">Registration fees, corporate sponsorships, stall bookings, or delegate participation fees</div>
+            <div style="display:flex;gap:24px;align-items:center;">
+              <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;cursor:pointer;">
+                <input type="radio" name="willGenerateRevenue" id="revNo" value="false" checked />
+                <span>No (Zero Revenue)</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;cursor:pointer;">
+                <input type="radio" name="willGenerateRevenue" id="revYes" value="true" />
+                <span>Yes (Revenue Generation Planned)</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- PURCHASE DETAILS -->
+        <div id="purchaseDetailsWrap" style="display:none;background:#F0F4FA;border:1px solid #CCD6E8;border-radius:var(--radius-sm);padding:16px;">
+          <h3 style="font-size:13.5px;color:var(--primary-blue);margin-bottom:12px;">Purchase / Item Specifications</h3>
+          <div class="grid2" style="margin-bottom:12px;">
+            <div>
+              <label for="purchaseItemName" class="field-label">Product / Item Name <span style="color:var(--danger)">*</span></label>
+              <input id="purchaseItemName" placeholder="e.g. High-Performance GPU Workstation" />
+            </div>
+            <div>
+              <label for="purchaseQuantity" class="field-label">Quantity &amp; Units <span style="color:var(--danger)">*</span></label>
+              <input id="purchaseQuantity" placeholder="e.g. 2 Units / 5 Licenses" />
+            </div>
+          </div>
+          <div style="margin-bottom:12px;">
+            <label for="purchaseDescription" class="field-label">Detailed Technical Specifications</label>
+            <textarea id="purchaseDescription" rows="2" placeholder="Brand, model, CPU/GPU, RAM, storage, certifications, or technical parameters"></textarea>
+          </div>
+          <div>
+            <label for="purchasePurpose" class="field-label">Institutional Purpose &amp; Justification</label>
+            <textarea id="purchasePurpose" rows="2" placeholder="Explain lab requirements, research grant alignment, or curriculum utility"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 3: 4-POINT OBJECTIVES & JUSTIFICATION -->
+      <div class="card">
+        <div class="card-title">
+          <span>3. Institutional Objectives &amp; Four Justification Points</span>
+          <span style="font-size:11.5px;font-weight:normal;color:var(--text-muted);">Strict limit: 50 words per point</span>
+        </div>
+
+        <div style="background:#FAFBFC;border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;">
+          <div style="margin-bottom:14px;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+              <label for="nfaPoint1" class="field-label" style="font-weight:700;">1. Purpose &amp; Academic Objective <span style="color:var(--danger)">*</span></label>
+              <span id="p1Badge" class="word-badge">0 / 50 words</span>
+            </div>
+            <textarea id="nfaPoint1" rows="2" placeholder="Explain the specific purpose, target audience, and academic/institutional outcome..." oninput="checkWordCount('nfaPoint1', 'p1Badge')"></textarea>
+          </div>
+
+          <div style="margin-bottom:14px;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+              <label for="nfaPoint2" class="field-label" style="font-weight:700;">2. Operational Logistics &amp; Arrangements <span style="color:var(--danger)">*</span></label>
+              <span id="p2Badge" class="word-badge">0 / 50 words</span>
+            </div>
+            <textarea id="nfaPoint2" rows="2" placeholder="Outline operational execution, infrastructure, facilities, or technical arrangements..." oninput="checkWordCount('nfaPoint2', 'p2Badge')"></textarea>
+          </div>
+
+          <div style="margin-bottom:14px;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+              <label for="nfaPoint3" class="field-label" style="font-weight:700;">3. Justification of Need &amp; Institutional Value <span style="color:var(--danger)">*</span></label>
+              <span id="p3Badge" class="word-badge">0 / 50 words</span>
+            </div>
+            <textarea id="nfaPoint3" rows="2" placeholder="Institutional impact, student competencies, and rationale for sanctioning..." oninput="checkWordCount('nfaPoint3', 'p3Badge')"></textarea>
+          </div>
+
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+              <label for="nfaPoint4" class="field-label" style="font-weight:700;">4. Financial Implication &amp; Annexure Statement</label>
+              <span id="p4Badge" class="word-badge">8 / 50 words</span>
+            </div>
+            <textarea id="nfaPoint4" rows="2" placeholder="The estimated expenditure details are attached as Annexure-I." oninput="checkWordCount('nfaPoint4', 'p4Badge')">The estimated expenditure details are attached as Annexure-I.</textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 4: COMPLETE 17 SUSTAINABLE DEVELOPMENT GOALS -->
+      <div class="card">
+        <div class="card-title">
+          <span>4. United Nations Sustainable Development Goals (SDGs)</span>
+          <span id="sdgCountBadge" class="word-badge" style="background:var(--light-blue);color:var(--primary-blue);">Selected: 0 / 17</span>
+        </div>
+        <div class="field-help" style="margin-bottom:12px;">Click relevant Sustainable Development Goals addressed by this initiative. Persisted across approvals and official document outputs:</div>
+        
+        <div id="sdgGridContainer" class="sdg-grid"></div>
+      </div>
+
+      <!-- SECTION 5: MULTIPLE RESOURCE PERSONS (EVENT NFAs) -->
+      <div id="resourcePersonsSection" class="card">
+        <div class="card-title">
+          <span>5. Resource Persons &amp; Honorarium Bank Details</span>
+          <button type="button" class="secondary" style="font-size:12px;padding:4px 12px;" onclick="addResourcePersonCard()">+ Add Resource Person</button>
+        </div>
+        <div class="field-help" style="margin-bottom:14px;">
+          Add dynamic resource persons. Bank accounts are encrypted at rest with AES-256-GCM and strictly accessible to Finance Office only.
+        </div>
+
+        <div id="resourcePersonsList"></div>
+
+        <div id="rpSummaryBar" style="background:#F8FAFC;border:1px solid #CBD5E1;border-radius:6px;padding:10px 14px;margin-top:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+          <div style="font-size:13px;color:#334155;">
+            Total Resource Persons: <strong id="rpCountText">0</strong> | Total Honorarium: <strong id="rpHonorariumText" style="color:var(--primary-blue);">₹0</strong>
+          </div>
+          <button type="button" class="secondary" style="font-size:11.5px;padding:4px 10px;" onclick="syncHonorariumToItems()">Reconcile Honorarium with Expenditure Table</button>
+        </div>
+      </div>
+
+      <!-- SECTION 6: EXPENDITURE PARTICULARS (ANNEXURE-I) -->
+      <div class="card">
+        <div class="card-title">
+          <span id="expenditureSectionTitle">6. Expenditure Statement (Annexure-I)</span>
+          <div style="display:flex;gap:8px;">
+            <button type="button" class="secondary" style="font-size:12px;padding:4px 12px;" onclick="addExpenditureRow()">+ Add Expenditure Row</button>
+          </div>
+        </div>
+        <div class="field-help" style="margin-bottom:12px;">
+          Enter detailed itemized breakdown. Amount is auto-calculated from Quantity and Rate.
+        </div>
+
+        <div class="table-wrap">
+          <table id="expenditureTable">
+            <thead>
+              <tr>
+                <th style="width:40px;text-align:center;">#</th>
+                <th style="min-width:240px;">Particulars / Description *</th>
+                <th style="width:110px;">Quantity</th>
+                <th style="width:130px;">Rate (₹)</th>
+                <th style="width:140px;">Amount (₹) *</th>
+                <th style="min-width:200px;">Justification / Basis</th>
+                <th style="width:60px;text-align:center;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="expenditureTbody"></tbody>
+          </table>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-top:16px;padding-top:12px;border-top:1px solid var(--border);">
+          <span style="font-size:14px;color:var(--text-muted);font-weight:600;">Total Budget Requested:</span>
+          <span id="grandTotalDisplay" style="font-family:'Outfit',sans-serif;font-size:22px;font-weight:800;color:var(--primary-blue);">₹0</span>
+        </div>
+      </div>
+
+      <!-- SECTION 7: SUPPORTING DOCUMENTS -->
+      <div id="supportingDocsSection" class="card">
+        <div class="card-title">7. Supporting Quotations &amp; Documents</div>
+
+        <!-- PURCHASE QUOTATIONS -->
+        <div id="purchaseQuotationsWrap" style="display:none;">
+          <div class="field-help" style="margin-bottom:14px;">
+            Institutional procurement policy requires 3 distinct competitive vendor quotations and an official comparative statement.
+          </div>
+          <div class="grid3" style="margin-bottom:14px;">
+            <!-- Vendor 1 -->
+            <div style="background:#F8FAFC;border:1px solid var(--border);border-radius:6px;padding:12px;">
+              <strong style="font-size:12.5px;color:var(--primary-blue);display:block;margin-bottom:8px;">Vendor A (Quotation 1) *</strong>
+              <input id="vName0" placeholder="Vendor Company Name *" style="margin-bottom:6px;" />
+              <input id="vRef0" placeholder="Quotation Ref No." style="margin-bottom:6px;" />
+              <input id="vDate0" type="date" style="margin-bottom:8px;" />
+              <input type="file" id="vFile0" accept=".pdf,.jpg,.jpeg,.png,.xlsx" onchange="uploadQuotationFile(0, this.files[0])" />
+              <div id="vStatus0" class="field-help">No file uploaded</div>
+            </div>
+            <!-- Vendor 2 -->
+            <div style="background:#F8FAFC;border:1px solid var(--border);border-radius:6px;padding:12px;">
+              <strong style="font-size:12.5px;color:var(--primary-blue);display:block;margin-bottom:8px;">Vendor B (Quotation 2) *</strong>
+              <input id="vName1" placeholder="Vendor Company Name *" style="margin-bottom:6px;" />
+              <input id="vRef1" placeholder="Quotation Ref No." style="margin-bottom:6px;" />
+              <input id="vDate1" type="date" style="margin-bottom:8px;" />
+              <input type="file" id="vFile1" accept=".pdf,.jpg,.jpeg,.png,.xlsx" onchange="uploadQuotationFile(1, this.files[0])" />
+              <div id="vStatus1" class="field-help">No file uploaded</div>
+            </div>
+            <!-- Vendor 3 -->
+            <div style="background:#F8FAFC;border:1px solid var(--border);border-radius:6px;padding:12px;">
+              <strong style="font-size:12.5px;color:var(--primary-blue);display:block;margin-bottom:8px;">Vendor C (Quotation 3) *</strong>
+              <input id="vName2" placeholder="Vendor Company Name *" style="margin-bottom:6px;" />
+              <input id="vRef2" placeholder="Quotation Ref No." style="margin-bottom:6px;" />
+              <input id="vDate2" type="date" style="margin-bottom:8px;" />
+              <input type="file" id="vFile2" accept=".pdf,.jpg,.jpeg,.png,.xlsx" onchange="uploadQuotationFile(2, this.files[0])" />
+              <div id="vStatus2" class="field-help">No file uploaded</div>
+            </div>
+          </div>
+
+          <div style="background:#F8FAFC;border:1px solid var(--border);border-radius:6px;padding:12px;">
+            <strong style="font-size:12.5px;color:var(--primary-blue);display:block;margin-bottom:6px;">Comparative Statement Document *</strong>
+            <input type="file" id="compFile" accept=".pdf,.xlsx,.xls,.png,.jpg" onchange="uploadComparativeStatementFile(this.files[0])" />
+            <div id="compStatus" class="field-help">Upload comparative statement spreadsheet or PDF</div>
+          </div>
+        </div>
+
+        <!-- EVENT SUPPORTING DOCS -->
+        <div id="eventDocsWrap">
+          <div class="field-help" style="margin-bottom:8px;">Upload optional event proposal note, brochure, schedule, or syllabus (PDF / Images, Max 10MB):</div>
+          <input type="file" id="eventProposalDoc" accept=".pdf,.png,.jpg,.jpeg" onchange="uploadEventDoc(this.files[0])" />
+          <div id="eventDocStatus" class="field-help">No file selected</div>
+        </div>
+      </div>
+    </form>
+  </main>
+
+  <!-- STICKY ACTION BAR -->
+  <div class="action-bar">
+    <div class="action-bar-summary">
+      Total Proposed: <strong id="barTotalText">₹0</strong>
+      <span id="barBudgetWarning" style="display:none;color:var(--danger);font-size:12px;margin-left:12px;font-weight:600;">⚠️ Requested amount exceeds available balance</span>
+    </div>
+    <div class="action-bar-buttons">
+      <button type="button" class="secondary" onclick="handleClosePage()">Cancel</button>
+      <button type="button" id="btnSaveDraft" class="secondary" onclick="saveNfa(false)">Save Draft</button>
+      <button type="button" class="secondary" onclick="openPreviewModal()">Preview Proposal</button>
+      <button type="button" id="btnSubmitNfa" class="primary" onclick="saveNfa(true)">Submit for Approval</button>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="toast"></div>
+
+  <!-- PREVIEW MODAL -->
+  <div id="previewModal" class="modal-bg">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 style="font-size:16px;font-weight:700;">Proposal Summary Preview</h2>
+        <button type="button" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;" onclick="closePreviewModal()">✕</button>
+      </div>
+      <div class="modal-body" id="previewModalContent"></div>
+      <div class="modal-footer">
+        <button type="button" class="secondary" onclick="closePreviewModal()">Close Preview</button>
+        <button type="button" class="primary" onclick="closePreviewModal(); saveNfa(true);">Submit Proposal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    CHRIST (Deemed to be University), Bengaluru – Kengeri Campus &copy; 2026. Institutional Financial Management &amp; Approvals.
+  </footer>
+
+  <!-- APPLICATION SCRIPTS -->
+  <script>
+    // ---------------- AUTHENTICATION & INITIALIZATION ----------------
+    let TOKEN = localStorage.getItem('token') || '';
+    let USER = null;
+    try {
+      USER = JSON.parse(localStorage.getItem('user') || 'null');
+    } catch (e) { }
+
+    if (!TOKEN || !USER) {
+      alert('Active session not found. Please log in through the institutional portal.');
+      window.location.href = '/';
+    }
+
+    // Set user info
+    document.getElementById('userNameText').textContent = USER.name || 'User';
+    document.getElementById('userRoleBadge').textContent = (USER.role || 'faculty').toUpperCase().replace(/_/g, ' ');
+    document.getElementById('nfaFacultyName').value = USER.name || '';
+
+    // Broadcast channel for cross-tab synchronization
+    let nfaChannel = null;
+    try {
+      nfaChannel = new BroadcastChannel('cu_nfa_channel');
+    } catch (e) { }
+
+    // Reference Data Store
+    let REF = {
+      departments: [],
+      financialYears: [],
+      categories: [],
+      subcategories: [],
+      budgetTypes: []
+    };
+
+    let selectedSdgs = [];
+    let currentDraftId = null;
+    let hasUnsavedChanges = false;
+    let isSubmitting = false;
+    let idempotencyKey = 'nfa_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
+    let currentAvailableBudget = null;
+
+    // 17 UN Sustainable Development Goals (Full official names)
+    const SDG_LIST = [
+      "SDG 1: No Poverty",
+      "SDG 2: Zero Hunger",
+      "SDG 3: Good Health and Well-being",
+      "SDG 4: Quality Education",
+      "SDG 5: Gender Equality",
+      "SDG 6: Clean Water and Sanitation",
+      "SDG 7: Affordable and Clean Energy",
+      "SDG 8: Decent Work and Economic Growth",
+      "SDG 9: Industry, Innovation and Infrastructure",
+      "SDG 10: Reduced Inequalities",
+      "SDG 11: Sustainable Cities and Communities",
+      "SDG 12: Responsible Consumption and Production",
+      "SDG 13: Climate Action",
+      "SDG 14: Life Below Water",
+      "SDG 15: Life on Land",
+      "SDG 16: Peace, Justice and Strong Institutions",
+      "SDG 17: Partnerships for the Goals"
+    ];
+
+    let quotationUploads = [null, null, null];
+    let comparativeStatementUpload = null;
+    let eventAttachmentUpload = null;
+
+    function toast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.style.display = 'block';
+      setTimeout(() => { el.style.display = 'none'; }, 4000);
+    }
+
+    function inr(n) {
+      return '₹' + Number(n || 0).toLocaleString('en-IN');
+    }
+
+    function escapeHtml(s) {
+      return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function countWords(str) {
+      if (!str) return 0;
+      return str.trim().split(/\s+/).filter(Boolean).length;
+    }
+
+    function checkWordCount(fieldId, badgeId) {
+      hasUnsavedChanges = true;
+      const el = document.getElementById(fieldId);
+      const badge = document.getElementById(badgeId);
+      if (!el || !badge) return;
+      const count = countWords(el.value);
+      badge.textContent = `${count} / 50 words`;
+      badge.className = 'word-badge' + (count > 50 ? ' danger' : count > 42 ? ' warning' : '');
+    }
+
+    // ---------------- API HELPER ----------------
+    async function api(path, opts = {}) {
+      const headers = Object.assign({}, opts.headers || {});
+      if (TOKEN) headers['Authorization'] = `Bearer ${TOKEN}`;
+      if (opts.body && typeof opts.body === 'object' && !(opts.body instanceof FormData)) {
+        headers['Content-Type'] = 'application/json';
+        opts.body = JSON.stringify(opts.body);
+      }
+      opts.headers = headers;
+
+      const res = await fetch('/api' + path, opts);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error || data.message || `Request failed (${res.status})`);
+      }
+      return data;
+    }
+
+    // ---------------- BOOTSTRAP DATA ----------------
+    async function boot() {
+      try {
+        const [depts, fys, cats, subcats, bTypes] = await Promise.all([
+          api('/budgets/departments'),
+          api('/budgets/financial-years'),
+          api('/budgets/categories'),
+          api('/budgets/subcategories'),
+          api('/budgets/budget-types')
+        ]);
+
+        REF.departments = depts || [];
+        REF.financialYears = fys || [];
+        REF.categories = cats || [];
+        REF.subcategories = subcats || [];
+        REF.budgetTypes = bTypes || [];
+
+        renderSdgGrid();
+        renderFyOptions();
+        renderDepartmentControls();
+        filterCategories('all');
+
+        // Check URL params for draft_id or id to edit
+        const urlParams = new URLSearchParams(window.location.search);
+        const editId = urlParams.get('draft_id') || urlParams.get('id');
+        if (editId) {
+          loadExistingDraft(editId);
+        } else {
+          // Add default initial rows
+          addExpenditureRow();
+          addResourcePersonCard();
+          refreshNextRef();
+        }
+
+        // Setup beforeunload
+        window.addEventListener('beforeunload', (e) => {
+          if (hasUnsavedChanges && !isSubmitting) {
+            e.preventDefault();
+            e.returnValue = 'You have unsaved changes in your NFA proposal. Are you sure you want to leave?';
+          }
+        });
+      } catch (err) {
+        console.error('Failed to boot NFA Creation page:', err);
+        toast(err.message || 'Error initializing NFA Form');
+      }
+    }
+
+    function renderSdgGrid() {
+      const container = document.getElementById('sdgGridContainer');
+      container.innerHTML = SDG_LIST.map((sdg, index) => {
+        const isActive = selectedSdgs.includes(sdg);
+        return `
+          <div class="sdg-chip ${isActive ? 'active' : ''}" onclick="toggleSdg('${escapeHtml(sdg)}', this)">
+            <div class="sdg-checkbox"></div>
+            <span>${escapeHtml(sdg)}</span>
+          </div>
+        `;
+      }).join('');
+      updateSdgBadge();
+    }
+
+    function toggleSdg(sdg, el) {
+      hasUnsavedChanges = true;
+      if (selectedSdgs.includes(sdg)) {
+        selectedSdgs = selectedSdgs.filter(s => s !== sdg);
+        el.classList.remove('active');
+      } else {
+        selectedSdgs.push(sdg);
+        el.classList.add('active');
+      }
+      updateSdgBadge();
+    }
+
+    function updateSdgBadge() {
+      document.getElementById('sdgCountBadge').textContent = `Selected: ${selectedSdgs.length} / 17`;
+    }
+
+    function renderFyOptions() {
+      const fySelect = document.getElementById('nfaFy');
+      const activeFy = REF.financialYears.find(f => f.is_active) || REF.financialYears[0];
+      fySelect.innerHTML = REF.financialYears.map(f => {
+        const tag = f.is_active ? ' — (Active Year)' : '';
+        return `<option value="${f.id}" ${activeFy && activeFy.id === f.id ? 'selected' : ''}>${escapeHtml(f.label)}${tag}</option>`;
+      }).join('');
+    }
+
+    function renderDepartmentControls() {
+      const wrap = document.getElementById('deptControlWrap');
+      const userDept = USER.department_id ? REF.departments.find(d => d.id === USER.department_id) : null;
+      const isSuperAdmin = USER.role === 'super_admin';
+
+      if (!isSuperAdmin) {
+        if (userDept) {
+          wrap.innerHTML = `
+            <div style="padding:10px 14px;background:#FFFFFF;border:1px solid #CBD5E1;border-radius:6px;display:flex;align-items:center;justify-content:space-between;">
+              <div>
+                <div style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;">Assigned Primary Department</div>
+                <div style="font-weight:700;color:#0F172A;font-size:14px;">${escapeHtml(userDept.name)} (${escapeHtml(userDept.code)})</div>
+              </div>
+              <span class="word-badge" style="background:#EBF5FF;color:#003D8F;border:1px solid #BFDBFE;">Primary</span>
+            </div>
+            <input type="hidden" id="nfaDept" value="${userDept.id}" />
+          `;
+        } else {
+          wrap.innerHTML = `
+            <div style="padding:10px 14px;background:#FEF2F2;border:1px solid #FECACA;border-radius:6px;color:#991B1B;font-weight:600;">
+              No primary department assignment exists on your profile. Please contact Super Admin.
+            </div>
+            <input type="hidden" id="nfaDept" value="" />
+          `;
+        }
+      } else {
+        const activeAcademic = REF.departments.filter(d => d.is_active && d.category === 'academic');
+        wrap.innerHTML = `
+          <select id="nfaDept" onchange="onFyOrDeptChange()">
+            ${activeAcademic.map(d => `<option value="${d.id}">${escapeHtml(d.name)} (${escapeHtml(d.code)})</option>`).join('')}
+          </select>
+        `;
+      }
+
+      // Populate centres
+      const centreSelect = document.getElementById('nfaCentre');
+      const userCentres = Array.isArray(USER.authorized_centre_ids) ? USER.authorized_centre_ids : [];
+      const authorizedCentres = REF.departments.filter(d => d.is_active && (d.category === 'coe' || (d.code && d.code.startsWith('COE-'))) && (isSuperAdmin || userCentres.includes(d.id)));
+
+      if (authorizedCentres.length > 0) {
+        centreSelect.innerHTML = `<option value="">— Select an Authorized Centre / Office —</option>` +
+          authorizedCentres.map(c => `<option value="${c.id}">${escapeHtml(c.name)} (${escapeHtml(c.code)})</option>`).join('');
+      } else {
+        centreSelect.innerHTML = `<option value="">No authorized Centres / Offices found for your account</option>`;
+      }
+    }
+
+    function onOrgTypeChange(type) {
+      hasUnsavedChanges = true;
+      document.getElementById('wrapDeptSelect').style.display = type === 'department' ? 'block' : 'none';
+      document.getElementById('wrapCentreSelect').style.display = type === 'centre_or_office' ? 'block' : 'none';
+      onFyOrDeptChange();
+    }
+
+    async function refreshNextRef() {
+      const orgType = document.querySelector('input[name="orgType"]:checked')?.value || 'department';
+      const deptId = orgType === 'department' ? document.getElementById('nfaDept')?.value : document.getElementById('nfaCentre')?.value;
+      const fyId = document.getElementById('nfaFy')?.value;
+      if (!deptId || !fyId) return;
+
+      try {
+        const data = await api(`/nfas/next-ref?department_id=${deptId}&financial_year_id=${fyId}`);
+        if (data.ref_no) {
+          document.getElementById('nfaRefNo').value = data.ref_no;
+        }
+      } catch (e) {
+        const fyObj = REF.financialYears.find(f => f.id === fyId);
+        document.getElementById('nfaRefNo').value = `NFA/CU/${fyObj ? fyObj.label : '2026-27'}/${String(Date.now()).slice(-4)}`;
+      }
+    }
+
+    function onFyOrDeptChange() {
+      hasUnsavedChanges = true;
+      refreshNextRef();
+      checkBudgetAvailability();
+    }
+
+    function filterCategories(typeVal) {
+      hasUnsavedChanges = true;
+      const catSelect = document.getElementById('nfaCategory');
+      let filtered = REF.categories;
+
+      if (typeVal && typeVal !== 'all') {
+        const matchedType = REF.budgetTypes.find(t => t.name.toLowerCase().includes(typeVal));
+        if (matchedType) {
+          filtered = REF.categories.filter(c => c.budget_type_id === matchedType.id);
+        }
+      }
+
+      catSelect.innerHTML = `<option value="">— Select Budget Main Category —</option>` +
+        filtered.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+
+      document.getElementById('nfaSubcategory').innerHTML = `<option value="">— Select Main Category first —</option>`;
+      checkBudgetAvailability();
+    }
+
+    function onCategoryChange(catId) {
+      hasUnsavedChanges = true;
+      const subcatSelect = document.getElementById('nfaSubcategory');
+      if (!catId) {
+        subcatSelect.innerHTML = `<option value="">— Select Main Category first —</option>`;
+        checkBudgetAvailability();
+        return;
+      }
+
+      const orgType = document.querySelector('input[name="orgType"]:checked')?.value || 'department';
+      const deptId = orgType === 'department' ? document.getElementById('nfaDept')?.value : document.getElementById('nfaCentre')?.value;
+
+      const subcats = REF.subcategories.filter(s => s.budget_category_id === catId && (!s.department_id || s.department_id === deptId));
+      if (subcats.length > 0) {
+        subcatSelect.innerHTML = `<option value="">— Select Available Budget Item / Subcategory —</option>` +
+          subcats.map(s => `<option value="${s.id}" data-name="${escapeHtml(s.name)}">${escapeHtml(s.name)}</option>`).join('');
+      } else {
+        subcatSelect.innerHTML = `<option value="">General Allocation (No subcategories defined)</option>`;
+      }
+      checkBudgetAvailability();
+    }
+
+    function onSubcategoryChange(subcatId) {
+      hasUnsavedChanges = true;
+      checkBudgetAvailability();
+    }
+
+    async function checkBudgetAvailability() {
+      const orgType = document.querySelector('input[name="orgType"]:checked')?.value || 'department';
+      const deptId = orgType === 'department' ? document.getElementById('nfaDept')?.value : document.getElementById('nfaCentre')?.value;
+      const fyId = document.getElementById('nfaFy')?.value;
+      const catId = document.getElementById('nfaCategory')?.value;
+      const subcatId = document.getElementById('nfaSubcategory')?.value;
+
+      const card = document.getElementById('budgetCard');
+      if (!deptId || !fyId || !catId) {
+        card.style.display = 'none';
+        currentAvailableBudget = null;
+        return;
+      }
+
+      try {
+        const queryParams = new URLSearchParams({
+          department_id: deptId,
+          financial_year_id: fyId,
+          budget_category_id: catId
+        });
+        if (subcatId) queryParams.set('budget_subcategory_id', subcatId);
+
+        const data = await api(`/budgets/availability?${queryParams.toString()}`);
+        if (data) {
+          card.style.display = 'block';
+          const alloc = Number(data.allocated_amount) || 0;
+          const appr = Number(data.approved_amount) || 0;
+          const pend = Number(data.pending_amount) || 0;
+          const avail = Math.max(0, alloc - appr - pend);
+          currentAvailableBudget = avail;
+
+          document.getElementById('bMetricAllocated').textContent = inr(alloc);
+          document.getElementById('bMetricApproved').textContent = inr(appr);
+          document.getElementById('bMetricReserved').textContent = inr(pend);
+          document.getElementById('bMetricAvailable').textContent = inr(avail);
+
+          const badge = document.getElementById('budgetStatusBadge');
+          const grandTotal = calculateGrandTotal();
+
+          if (grandTotal > avail && avail > 0) {
+            card.className = 'budget-status-card warning';
+            badge.textContent = 'Exceeds Available Balance';
+            badge.style.background = '#FEF3C7';
+            badge.style.color = '#B45309';
+            document.getElementById('barBudgetWarning').style.display = 'inline';
+          } else if (avail === 0) {
+            card.className = 'budget-status-card danger';
+            badge.textContent = 'Zero Budget Remaining';
+            badge.style.background = '#FEE2E2';
+            badge.style.color = '#991B1B';
+            document.getElementById('barBudgetWarning').style.display = 'inline';
+          } else {
+            card.className = 'budget-status-card';
+            badge.textContent = 'Sufficient Balance';
+            badge.style.background = '#DCFCE7';
+            badge.style.color = '#166534';
+            document.getElementById('barBudgetWarning').style.display = 'none';
+          }
+        }
+      } catch (e) {
+        card.style.display = 'none';
+        currentAvailableBudget = null;
+      }
+    }
+
+    // ---------------- PROPOSAL TYPE SWITCHING ----------------
+    function switchProposalType(type) {
+      hasUnsavedChanges = true;
+      const isPurchase = type === 'purchase';
+      document.getElementById('typeCardEvent').className = 'type-card ' + (!isPurchase ? 'active' : '');
+      document.getElementById('typeCardPurchase').className = 'type-card ' + (isPurchase ? 'active' : '');
+      document.getElementById('nfaTypeEvent').checked = !isPurchase;
+      document.getElementById('nfaTypePurchase').checked = isPurchase;
+
+      document.getElementById('eventDetailsWrap').style.display = !isPurchase ? 'block' : 'none';
+      document.getElementById('resourcePersonsSection').style.display = !isPurchase ? 'block' : 'none';
+      document.getElementById('purchaseDetailsWrap').style.display = isPurchase ? 'block' : 'none';
+      document.getElementById('purchaseQuotationsWrap').style.display = isPurchase ? 'block' : 'none';
+      document.getElementById('eventDocsWrap').style.display = !isPurchase ? 'block' : 'none';
+
+      document.getElementById('expenditureSectionTitle').textContent = isPurchase ? '6. Purchase Particulars & Quotation Breakdown' : '6. Expenditure Statement (Annexure-I)';
+    }
+
+    // ---------------- MULTIPLE RESOURCE PERSONS ----------------
+    let rpCounter = 0;
+
+    function addResourcePersonCard(data = {}) {
+      hasUnsavedChanges = true;
+      rpCounter++;
+      const id = 'rp_' + rpCounter;
+      const container = document.getElementById('resourcePersonsList');
+
+      const card = document.createElement('div');
+      card.className = 'rp-card';
+      card.id = id;
+      card.dataset.id = data.id || '';
+
+      card.innerHTML = `
+        <div class="rp-card-header">
+          <div class="rp-card-title">
+            <span style="display:inline-block;width:8px;height:8px;background:var(--primary-blue);border-radius:50%;"></span>
+            <span class="rp-num-label">Resource Person #${container.children.length + 1}</span>
+          </div>
+          <button type="button" class="danger" style="font-size:11.5px;padding:3px 10px;" onclick="removeResourcePersonCard('${id}')">✕ Remove</button>
+        </div>
+
+        <div class="rp-sec-title">1. Personal &amp; Institutional Credentials</div>
+        <div class="grid3" style="margin-bottom:10px;">
+          <div>
+            <label class="field-label">Full Name *</label>
+            <input class="rp-name" placeholder="e.g. Dr. Jane Smith" value="${escapeHtml(data.resource_person_name || '')}" oninput="hasUnsavedChanges=true;" required />
+          </div>
+          <div>
+            <label class="field-label">Designation *</label>
+            <input class="rp-designation" placeholder="e.g. Professor / Lead AI Scientist" value="${escapeHtml(data.designation || '')}" oninput="hasUnsavedChanges=true;" required />
+          </div>
+          <div>
+            <label class="field-label">Organization / University *</label>
+            <input class="rp-org" placeholder="e.g. IISc Bangalore / Microsoft Research" value="${escapeHtml(data.organization || '')}" oninput="hasUnsavedChanges=true;" required />
+          </div>
+        </div>
+
+        <div class="grid3" style="margin-bottom:12px;">
+          <div>
+            <label class="field-label">Official Email Address *</label>
+            <input class="rp-email" type="email" placeholder="e.g. speaker@institution.ac.in" value="${escapeHtml(data.email || '')}" oninput="hasUnsavedChanges=true;" required />
+          </div>
+          <div>
+            <label class="field-label">Mobile Number *</label>
+            <input class="rp-mobile" placeholder="e.g. +91 9876543210" value="${escapeHtml(data.mobile || '')}" oninput="hasUnsavedChanges=true;" required />
+          </div>
+          <div>
+            <label class="field-label">Honorarium Amount (₹) *</label>
+            <input class="rp-honorarium" type="number" min="0" step="any" placeholder="e.g. 5000" value="${escapeHtml(data.honorarium_amount !== undefined ? data.honorarium_amount : '')}" oninput="calculateRpHonorariumTotal()" style="font-weight:700;color:var(--primary-blue);" />
+          </div>
+        </div>
+
+        <div class="rp-sec-title">2. Banking Details (Encrypted at Rest with AES-256-GCM)</div>
+        <div class="grid3" style="margin-bottom:10px;">
+          <div>
+            <label class="field-label">Account Holder Name *</label>
+            <input class="rp-holder" placeholder="Exact name as in bank account" value="${escapeHtml(data.account_holder_name || '')}" oninput="hasUnsavedChanges=true;" />
+          </div>
+          <div>
+            <label class="field-label">Bank Name *</label>
+            <input class="rp-bank" placeholder="e.g. State Bank of India / HDFC" value="${escapeHtml(data.bank_name || '')}" oninput="hasUnsavedChanges=true;" />
+          </div>
+          <div>
+            <label class="field-label">Bank Branch Name</label>
+            <input class="rp-branch" placeholder="e.g. Koramangala Branch, Bangalore" value="${escapeHtml(data.branch_name || '')}" oninput="hasUnsavedChanges=true;" />
+          </div>
+        </div>
+
+        <div class="grid3">
+          <div>
+            <label class="field-label">IFSC Code (11 Chars) *</label>
+            <input class="rp-ifsc" style="text-transform:uppercase;font-family:monospace;" placeholder="e.g. SBIN0001234" maxlength="11" value="${escapeHtml(data.ifsc_code || '')}" oninput="hasUnsavedChanges=true;" />
+          </div>
+          <div>
+            <label class="field-label">${data.id ? 'Account No. (Blank keeps ' + escapeHtml(data.masked_account_number || 'saved') + ')' : 'Bank Account Number *'}</label>
+            <input class="rp-acct" type="password" placeholder="${data.id ? 'Enter only to change' : 'Bank account number'}" oninput="hasUnsavedChanges=true;" />
+          </div>
+          <div>
+            <label class="field-label">Confirm Account Number *</label>
+            <input class="rp-confirm-acct" type="password" placeholder="Re-enter bank account number" oninput="hasUnsavedChanges=true;" />
+          </div>
+        </div>
+      `;
+
+      container.appendChild(card);
+      renumberResourcePersons();
+      calculateRpHonorariumTotal();
+    }
+
+    function removeResourcePersonCard(id) {
+      hasUnsavedChanges = true;
+      const el = document.getElementById(id);
+      if (el) el.remove();
+      renumberResourcePersons();
+      calculateRpHonorariumTotal();
+    }
+
+    function renumberResourcePersons() {
+      const cards = document.querySelectorAll('#resourcePersonsList .rp-card');
+      cards.forEach((c, idx) => {
+        const lbl = c.querySelector('.rp-num-label');
+        if (lbl) lbl.textContent = `Resource Person #${idx + 1}`;
+      });
+      document.getElementById('rpCountText').textContent = cards.length;
+    }
+
+    function calculateRpHonorariumTotal() {
+      hasUnsavedChanges = true;
+      const inputs = document.querySelectorAll('#resourcePersonsList .rp-honorarium');
+      let total = 0;
+      inputs.forEach(inp => {
+        total += Number(inp.value) || 0;
+      });
+      document.getElementById('rpHonorariumText').textContent = inr(total);
+      return total;
+    }
+
+    function syncHonorariumToItems() {
+      const honorariumTotal = calculateRpHonorariumTotal();
+      if (honorariumTotal <= 0) {
+        toast('Total honorarium is ₹0. Please enter honorarium amounts for resource persons.');
+        return;
+      }
+
+      // Check if honorarium line already exists
+      const rows = document.querySelectorAll('#expenditureTbody tr');
+      let existingHonorariumRow = null;
+      rows.forEach(r => {
+        const pInput = r.querySelector('.item-p');
+        if (pInput && pInput.value.toLowerCase().includes('honorarium')) {
+          existingHonorariumRow = r;
+        }
+      });
+
+      if (existingHonorariumRow) {
+        existingHonorariumRow.querySelector('.item-p').value = `Remuneration / Honorarium to Resource Persons (${document.querySelectorAll('#resourcePersonsList .rp-card').length} Persons)`;
+        existingHonorariumRow.querySelector('.item-q').value = document.querySelectorAll('#resourcePersonsList .rp-card').length.toString();
+        existingHonorariumRow.querySelector('.item-r').value = '';
+        existingHonorariumRow.querySelector('.item-a').value = honorariumTotal;
+        existingHonorariumRow.querySelector('.item-j').value = 'Consolidated resource person honorarium as per institutional rates';
+      } else {
+        addExpenditureRow({
+          particulars: `Remuneration / Honorarium to Resource Persons (${document.querySelectorAll('#resourcePersonsList .rp-card').length} Persons)`,
+          quantity: document.querySelectorAll('#resourcePersonsList .rp-card').length.toString(),
+          rate: '',
+          amount: honorariumTotal,
+          justification: 'Consolidated resource person honorarium as per institutional rates'
+        });
+      }
+      calculateGrandTotal();
+      toast('Honorarium total synchronized with expenditure statement!');
+    }
+
+    // ---------------- EXPENDITURE STATEMENT ROWS ----------------
+    let itemCounter = 0;
+
+    function addExpenditureRow(data = {}) {
+      hasUnsavedChanges = true;
+      itemCounter++;
+      const tbody = document.getElementById('expenditureTbody');
+      const tr = document.createElement('tr');
+      tr.id = 'expRow_' + itemCounter;
+
+      tr.innerHTML = `
+        <td style="text-align:center;font-weight:700;color:#64748B;padding-top:14px;" class="row-num">${tbody.children.length + 1}</td>
+        <td>
+          <input class="item-p" placeholder="e.g. Honorarium / Hardware Components / Printing" value="${escapeHtml(data.particulars || '')}" oninput="hasUnsavedChanges=true;" required />
+        </td>
+        <td>
+          <input class="item-q" placeholder="e.g. 2" value="${escapeHtml(data.quantity || '')}" oninput="calculateRowAmount(this)" />
+        </td>
+        <td>
+          <input class="item-r" type="number" step="any" placeholder="Rate (₹)" value="${escapeHtml(data.rate || '')}" oninput="calculateRowAmount(this)" />
+        </td>
+        <td>
+          <input class="item-a" type="number" step="any" placeholder="Amount (₹)" value="${escapeHtml(data.amount !== undefined ? data.amount : '')}" oninput="calculateGrandTotal()" style="font-weight:700;color:var(--primary-blue);" required />
+        </td>
+        <td>
+          <input class="item-j" placeholder="Institutional rationale / quote basis" value="${escapeHtml(data.justification || '')}" oninput="hasUnsavedChanges=true;" />
+        </td>
+        <td style="text-align:center;padding-top:10px;">
+          <button type="button" class="danger" style="padding:4px 8px;font-size:12px;" onclick="this.closest('tr').remove(); renumberExpenditureRows(); calculateGrandTotal();">✕</button>
+        </td>
+      `;
+
+      tbody.appendChild(tr);
+      renumberExpenditureRows();
+      calculateGrandTotal();
+    }
+
+    function renumberExpenditureRows() {
+      const rows = document.querySelectorAll('#expenditureTbody tr');
+      rows.forEach((r, idx) => {
+        r.querySelector('.row-num').textContent = idx + 1;
+      });
+    }
+
+    function calculateRowAmount(el) {
+      hasUnsavedChanges = true;
+      const tr = el.closest('tr');
+      const q = parseFloat(tr.querySelector('.item-q').value);
+      const r = parseFloat(tr.querySelector('.item-r').value);
+      const aInput = tr.querySelector('.item-a');
+
+      if (!isNaN(q) && q > 0 && !isNaN(r) && r >= 0) {
+        aInput.value = Math.round(q * r * 100) / 100;
+      }
+      calculateGrandTotal();
+    }
+
+    function calculateGrandTotal() {
+      const rows = document.querySelectorAll('#expenditureTbody tr');
+      let total = 0;
+      rows.forEach(r => {
+        total += Number(r.querySelector('.item-a').value) || 0;
+      });
+      document.getElementById('grandTotalDisplay').textContent = inr(total);
+      document.getElementById('barTotalText').textContent = inr(total);
+
+      if (currentAvailableBudget !== null && total > currentAvailableBudget && currentAvailableBudget >= 0) {
+        document.getElementById('barBudgetWarning').style.display = 'inline';
+      } else {
+        document.getElementById('barBudgetWarning').style.display = 'none';
+      }
+      return total;
+    }
+
+    // ---------------- SUPPORTING DOCUMENT UPLOADS ----------------
+    async function uploadQuotationFile(index, file) {
+      if (!file) return;
+      const statusEl = document.getElementById(`vStatus${index}`);
+      statusEl.textContent = 'Uploading file...';
+      const fd = new FormData();
+      fd.append('file', file);
+
+      try {
+        const res = await fetch('/api/nfas/upload-attachment', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${TOKEN}` },
+          body: fd
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Upload failed');
+        quotationUploads[index] = data;
+        statusEl.innerHTML = `✓ Uploaded: <strong>${escapeHtml(file.name)}</strong> (${(file.size / 1024).toFixed(1)} KB)`;
+        toast(`Quotation ${index + 1} uploaded successfully.`);
+      } catch (err) {
+        statusEl.textContent = 'Error: ' + err.message;
+        toast(err.message);
+      }
+    }
+
+    async function uploadComparativeStatementFile(file) {
+      if (!file) return;
+      const statusEl = document.getElementById('compStatus');
+      statusEl.textContent = 'Uploading statement...';
+      const fd = new FormData();
+      fd.append('file', file);
+
+      try {
+        const res = await fetch('/api/nfas/upload-attachment', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${TOKEN}` },
+          body: fd
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Upload failed');
+        comparativeStatementUpload = data;
+        statusEl.innerHTML = `✓ Statement uploaded: <strong>${escapeHtml(file.name)}</strong>`;
+        toast('Comparative statement uploaded successfully.');
+      } catch (err) {
+        statusEl.textContent = 'Error: ' + err.message;
+        toast(err.message);
+      }
+    }
+
+    async function uploadEventDoc(file) {
+      if (!file) return;
+      const statusEl = document.getElementById('eventDocStatus');
+      statusEl.textContent = 'Uploading proposal attachment...';
+      const fd = new FormData();
+      fd.append('file', file);
+
+      try {
+        const res = await fetch('/api/nfas/upload-attachment', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${TOKEN}` },
+          body: fd
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Upload failed');
+        eventAttachmentUpload = data;
+        statusEl.innerHTML = `✓ Attachment uploaded: <strong>${escapeHtml(file.name)}</strong>`;
+        toast('Event supporting document uploaded.');
+      } catch (err) {
+        statusEl.textContent = 'Error: ' + err.message;
+        toast(err.message);
+      }
+    }
+
+    // ---------------- DRAFT LOAD & PERSISTENCE ----------------
+    async function loadExistingDraft(id) {
+      try {
+        const nfa = await api(`/nfas/${id}`);
+        if (!nfa) return;
+        currentDraftId = nfa.id;
+
+        document.getElementById('nfaRefNo').value = nfa.ref_no || '';
+        document.getElementById('nfaTitle').value = nfa.title || '';
+        document.getElementById('nfaPoint1').value = nfa.point1 || nfa.purpose || '';
+        document.getElementById('nfaPoint2').value = nfa.point2 || nfa.description || '';
+        document.getElementById('nfaPoint3').value = nfa.point3 || nfa.justification || '';
+        document.getElementById('nfaPoint4').value = nfa.point4 || '';
+
+        checkWordCount('nfaPoint1', 'p1Badge');
+        checkWordCount('nfaPoint2', 'p2Badge');
+        checkWordCount('nfaPoint3', 'p3Badge');
+        checkWordCount('nfaPoint4', 'p4Badge');
+
+        // SDGs
+        selectedSdgs = nfa.sdgs ? nfa.sdgs.split(';').map(s => s.trim()).filter(Boolean) : [];
+        renderSdgGrid();
+
+        // Org type & department
+        if (nfa.organization_type === 'centre_or_office') {
+          document.getElementById('orgTypeCentre').checked = true;
+          onOrgTypeChange('centre_or_office');
+          document.getElementById('nfaCentre').value = nfa.centre_id || nfa.department_id || '';
+        } else {
+          document.getElementById('orgTypeDept').checked = true;
+          onOrgTypeChange('department');
+          const deptEl = document.getElementById('nfaDept');
+          if (deptEl) deptEl.value = nfa.department_id;
+        }
+
+        // FY & Category
+        document.getElementById('nfaFy').value = nfa.financial_year_id;
+        filterCategories('all');
+        document.getElementById('nfaCategory').value = nfa.budget_category_id;
+        onCategoryChange(nfa.budget_category_id);
+        if (nfa.budget_subcategory_id) {
+          document.getElementById('nfaSubcategory').value = nfa.budget_subcategory_id;
+        }
+
+        // Type
+        switchProposalType(nfa.nfa_type || 'event');
+        if (nfa.nfa_type === 'purchase' && nfa.purchase_details) {
+          document.getElementById('purchaseItemName').value = nfa.purchase_details.item_name || '';
+          document.getElementById('purchaseQuantity').value = nfa.purchase_details.quantity || '';
+          document.getElementById('purchaseDescription').value = nfa.purchase_details.description || '';
+          document.getElementById('purchasePurpose').value = nfa.purchase_details.purpose || '';
+        } else if (nfa.event_details) {
+          document.getElementById('eventDate').value = nfa.event_details.event_date || '';
+          document.getElementById('eventVenue').value = nfa.event_details.venue || '';
+          document.getElementById('eventAdditionalInfo').value = nfa.event_details.additional_info || '';
+          if (nfa.will_generate_revenue) {
+            document.getElementById('revYes').checked = true;
+          }
+        }
+
+        // Expenditure Items
+        document.getElementById('expenditureTbody').innerHTML = '';
+        if (Array.isArray(nfa.items) && nfa.items.length > 0) {
+          nfa.items.forEach(it => addExpenditureRow(it));
+        } else {
+          addExpenditureRow();
+        }
+
+        // Resource Persons
+        document.getElementById('resourcePersonsList').innerHTML = '';
+        const rps = nfa.resource_persons || nfa.resource_person_bank_details || [];
+        if (Array.isArray(rps) && rps.length > 0) {
+          rps.forEach(rp => addResourcePersonCard(rp));
+        } else {
+          addResourcePersonCard();
+        }
+
+        checkBudgetAvailability();
+        hasUnsavedChanges = false;
+        toast(`Draft loaded: ${nfa.ref_no}`);
+      } catch (err) {
+        console.error('Error loading draft:', err);
+        toast('Failed to load draft NFA: ' + err.message);
+      }
+    }
+
+    function restoreSavedDraftPrompt() {
+      const local = localStorage.getItem('cu_nfa_draft_data');
+      if (!local) {
+        toast('No locally cached draft found.');
+        return;
+      }
+      try {
+        const d = JSON.parse(local);
+        if (confirm(`Restore draft "${d.title || d.ref_no || 'Untitled'}" saved at ${new Date(d.saved_at).toLocaleTimeString()}?`)) {
+          document.getElementById('nfaTitle').value = d.title || '';
+          document.getElementById('nfaPoint1').value = d.point1 || '';
+          document.getElementById('nfaPoint2').value = d.point2 || '';
+          document.getElementById('nfaPoint3').value = d.point3 || '';
+          document.getElementById('nfaPoint4').value = d.point4 || '';
+          checkWordCount('nfaPoint1', 'p1Badge');
+          checkWordCount('nfaPoint2', 'p2Badge');
+          checkWordCount('nfaPoint3', 'p3Badge');
+          checkWordCount('nfaPoint4', 'p4Badge');
+          selectedSdgs = d.selectedSdgs || [];
+          renderSdgGrid();
+          toast('Draft recovered from local browser storage.');
+        }
+      } catch (e) {
+        toast('Failed to parse cached draft.');
+      }
+    }
+
+    // ---------------- SAVE & SUBMISSION ----------------
+    async function saveNfa(andSubmit = false) {
+      if (isSubmitting) return;
+
+      const title = document.getElementById('nfaTitle').value.trim();
+      const orgType = document.querySelector('input[name="orgType"]:checked')?.value || 'department';
+      const deptId = orgType === 'department' ? document.getElementById('nfaDept')?.value : document.getElementById('nfaCentre')?.value;
+      const fyId = document.getElementById('nfaFy').value;
+      const catId = document.getElementById('nfaCategory').value;
+      const subcatSelect = document.getElementById('nfaSubcategory');
+      const subcatId = subcatSelect?.value || null;
+      const subcatName = subcatSelect?.selectedOptions?.[0]?.dataset?.name || '';
+      const refNo = document.getElementById('nfaRefNo').value.trim();
+      const nfaType = document.getElementById('nfaTypePurchase').checked ? 'purchase' : 'event';
+
+      const point1 = document.getElementById('nfaPoint1').value.trim();
+      const point2 = document.getElementById('nfaPoint2').value.trim();
+      const point3 = document.getElementById('nfaPoint3').value.trim();
+      const point4 = document.getElementById('nfaPoint4').value.trim();
+
+      // Validation
+      if (!title) return toast('Proposal title is required.');
+      if (!deptId) return toast('Please select an authorized Department or Centre.');
+      if (!catId) return toast('Please select a Budget Main Category.');
+
+      if (countWords(point1) > 50) return toast('Point 1 exceeds 50 words.');
+      if (countWords(point2) > 50) return toast('Point 2 exceeds 50 words.');
+      if (countWords(point3) > 50) return toast('Point 3 exceeds 50 words.');
+      if (countWords(point4) > 50) return toast('Point 4 exceeds 50 words.');
+
+      // Collect items
+      const itemRows = document.querySelectorAll('#expenditureTbody tr');
+      const items = [];
+      itemRows.forEach((r, idx) => {
+        const p = r.querySelector('.item-p').value.trim();
+        const q = r.querySelector('.item-q').value.trim();
+        const rate = r.querySelector('.item-r').value.trim();
+        const amt = parseFloat(r.querySelector('.item-a').value) || 0;
+        const j = r.querySelector('.item-j').value.trim();
+        if (p && amt > 0) {
+          items.push({
+            particulars: p,
+            quantity: q,
+            rate: rate,
+            amount: amt,
+            justification: j,
+            sl_no: idx + 1
+          });
+        }
+      });
+
+      if (items.length === 0) {
+        return toast('Please enter at least one expenditure item with description and positive amount.');
+      }
+
+      const totalReq = calculateGrandTotal();
+
+      // Collect Resource Persons (for Event NFAs)
+      const resourcePersons = [];
+      if (nfaType === 'event') {
+        const rpCards = document.querySelectorAll('#resourcePersonsList .rp-card');
+        for (const card of rpCards) {
+          const name = card.querySelector('.rp-name').value.trim();
+          const desig = card.querySelector('.rp-designation').value.trim();
+          const org = card.querySelector('.rp-org').value.trim();
+          const email = card.querySelector('.rp-email').value.trim();
+          const mobile = card.querySelector('.rp-mobile').value.trim();
+          const hon = parseFloat(card.querySelector('.rp-honorarium').value) || 0;
+
+          const holder = card.querySelector('.rp-holder').value.trim();
+          const bank = card.querySelector('.rp-bank').value.trim();
+          const branch = card.querySelector('.rp-branch').value.trim();
+          const ifsc = card.querySelector('.rp-ifsc').value.trim().toUpperCase();
+          const acct = card.querySelector('.rp-acct').value.trim();
+          const conf = card.querySelector('.rp-confirm-acct').value.trim();
+
+          if (name) {
+            if (andSubmit) {
+              if (acct && acct !== conf) {
+                return toast(`Bank account number and confirmation do not match for "${name}".`);
+              }
+              if (acct && acct.length < 6) {
+                return toast(`Invalid bank account number for "${name}": minimum 6 digits.`);
+              }
+              if (ifsc && !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc)) {
+                return toast(`Invalid IFSC Code "${ifsc}" for "${name}". Expected format: SBIN0001234.`);
+              }
+            }
+            resourcePersons.push({
+              id: card.dataset.id || undefined,
+              resource_person_name: name,
+              designation: desig,
+              organization: org,
+              email: email,
+              mobile: mobile,
+              honorarium_amount: hon,
+              account_holder_name: holder || name,
+              bank_name: bank,
+              branch_name: branch,
+              ifsc_code: ifsc,
+              account_number: acct || undefined,
+              confirm_account_number: conf || undefined
+            });
+          }
+        }
+      }
+
+      // Check budget on submission
+      if (andSubmit && currentAvailableBudget !== null && currentAvailableBudget >= 0 && totalReq > currentAvailableBudget) {
+        return toast(`Cannot submit: Requested amount (${inr(totalReq)}) exceeds available balance (${inr(currentAvailableBudget)}).`);
+      }
+
+      // Collect purchase details
+      const purchaseDetails = nfaType === 'purchase' ? {
+        item_name: document.getElementById('purchaseItemName').value.trim(),
+        quantity: document.getElementById('purchaseQuantity').value.trim(),
+        description: document.getElementById('purchaseDescription').value.trim(),
+        purpose: document.getElementById('purchasePurpose').value.trim()
+      } : undefined;
+
+      // Collect quotations
+      const quotations = nfaType === 'purchase' ? [0, 1, 2].map(idx => {
+        const up = quotationUploads[idx] || {};
+        const vName = document.getElementById(`vName${idx}`).value.trim();
+        const vRef = document.getElementById(`vRef${idx}`).value.trim();
+        const vDate = document.getElementById(`vDate${idx}`).value.trim();
+        if (!vName && !up.file_path) return null;
+        return {
+          vendor_name: vName,
+          quotation_ref: vRef,
+          quotation_date: vDate,
+          file_id: up.file_id || '',
+          original_filename: up.original_filename || '',
+          file_path: up.file_path || '',
+          file_size: up.file_size || 0,
+          file_hash: up.file_hash || '',
+          mime_type: up.mime_type || '',
+          uploaded_at: up.uploaded_at || new Date().toISOString()
+        };
+      }).filter(Boolean) : [];
+
+      if (andSubmit && nfaType === 'purchase') {
+        if (quotations.length < 3) {
+          return toast('All 3 vendor quotations must be entered before submitting for approval.');
+        }
+        if (!comparativeStatementUpload || !comparativeStatementUpload.file_path) {
+          return toast('Comparative statement document upload is mandatory before submitting.');
+        }
+      }
+
+      const payload = {
+        id: currentDraftId || undefined,
+        draft_id: currentDraftId || undefined,
+        idempotency_key: idempotencyKey,
+        ref_no: refNo,
+        organization_type: orgType,
+        workflow_type: orgType,
+        department_id: deptId,
+        centre_id: orgType === 'centre_or_office' ? deptId : null,
+        financial_year_id: fyId,
+        budget_category_id: catId,
+        budget_subcategory_id: subcatId,
+        budget_subcategory_name: subcatName,
+        title,
+        nfa_type: nfaType,
+        point1,
+        point2,
+        point3,
+        point4,
+        purpose: point1,
+        description: point2,
+        justification: point3,
+        event_details: nfaType === 'event' ? {
+          event_date: document.getElementById('eventDate').value.trim(),
+          venue: document.getElementById('eventVenue').value.trim(),
+          additional_info: document.getElementById('eventAdditionalInfo').value.trim()
+        } : undefined,
+        will_generate_revenue: nfaType === 'event' && document.getElementById('revYes').checked,
+        purchase_details: purchaseDetails,
+        quotations,
+        comparative_statement: comparativeStatementUpload || undefined,
+        resource_person_bank_details: nfaType === 'event' ? resourcePersons : undefined,
+        sdgs: selectedSdgs.join('; '),
+        submitted_by_name: USER.name,
+        items
+      };
+
+      const btnSubmit = document.getElementById('btnSubmitNfa');
+      const btnDraft = document.getElementById('btnSaveDraft');
+      isSubmitting = true;
+      btnSubmit.disabled = true;
+      btnDraft.disabled = true;
+
+      if (andSubmit) {
+        btnSubmit.innerHTML = `<span class="spinner-sm"></span> Submitting...`;
+      } else {
+        btnDraft.innerHTML = `<span class="spinner-sm"></span> Saving...`;
+      }
+
+      try {
+        const result = await api('/nfas', {
+          method: 'POST',
+          headers: { 'Idempotency-Key': idempotencyKey },
+          body: payload
+        });
+
+        currentDraftId = result.id;
+        hasUnsavedChanges = false;
+
+        // Broadcast to parent dashboard tab
+        if (nfaChannel) {
+          nfaChannel.postMessage({
+            type: 'NFA_UPDATED',
+            nfaId: result.id,
+            refNo: result.ref_no,
+            status: result.status
+          });
+        }
+        localStorage.setItem('cu_nfa_updated_event', Date.now().toString());
+
+        // Cache local draft copy
+        localStorage.setItem('cu_nfa_draft_data', JSON.stringify(Object.assign({}, payload, { saved_at: new Date().toISOString() })));
+
+        if (andSubmit) {
+          // Formal submission endpoint to advance state to submitted_to_hod
+          await api(`/nfas/${result.id}/submit`, { method: 'POST' });
+          toast(`NFA ${result.ref_no} submitted for approval successfully!`);
+          alert(`NFA ${result.ref_no} has been successfully submitted to your Head of Department (HOD) for review.\n\nThe main dashboard in your other tab has been updated automatically.`);
+          window.close();
+          window.location.href = '/';
+        } else {
+          toast(`Draft saved successfully! (Ref: ${result.ref_no})`);
+          btnDraft.disabled = false;
+          btnDraft.textContent = 'Draft Saved ✓';
+          setTimeout(() => { btnDraft.textContent = 'Save Draft'; }, 2500);
+          btnSubmit.disabled = false;
+          btnSubmit.textContent = 'Submit for Approval';
+          isSubmitting = false;
+        }
+      } catch (err) {
+        console.error('Error saving NFA:', err);
+        toast(err.message || 'Failed to save NFA');
+        btnSubmit.disabled = false;
+        btnSubmit.textContent = 'Submit for Approval';
+        btnDraft.disabled = false;
+        btnDraft.textContent = 'Save Draft';
+        isSubmitting = false;
+      }
+    }
+
+    // ---------------- PREVIEW MODAL ----------------
+    function openPreviewModal() {
+      const modal = document.getElementById('previewModal');
+      const content = document.getElementById('previewModalContent');
+
+      const title = document.getElementById('nfaTitle').value.trim() || 'Untitled Proposal';
+      const refNo = document.getElementById('nfaRefNo').value.trim();
+      const nfaType = document.getElementById('nfaTypePurchase').checked ? 'Purchase NFA' : 'Event NFA';
+      const grandTotal = calculateGrandTotal();
+
+      content.innerHTML = `
+        <div style="background:#F8FAFC;border:1px solid var(--border);border-radius:6px;padding:14px;margin-bottom:14px;">
+          <div style="font-size:12px;color:var(--text-muted);text-transform:uppercase;font-weight:700;">Ref No: ${escapeHtml(refNo)} · ${escapeHtml(nfaType)}</div>
+          <h2 style="font-size:18px;font-weight:700;color:var(--primary-blue);margin:4px 0 8px;">${escapeHtml(title)}</h2>
+          <div style="font-size:13px;color:#334155;">Proposer: <strong>${escapeHtml(USER.name)}</strong> (${escapeHtml(USER.role.toUpperCase())})</div>
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <strong style="font-size:13px;color:var(--primary-blue);display:block;margin-bottom:6px;">Proposal Objectives &amp; Description</strong>
+          <div style="font-size:12.5px;line-height:1.45;color:#334155;background:#FAFBFC;padding:10px 12px;border:1px solid var(--border-light);border-radius:4px;">
+            <p style="margin-bottom:6px;"><strong>1. Purpose:</strong> ${escapeHtml(document.getElementById('nfaPoint1').value.trim() || '—')}</p>
+            <p style="margin-bottom:6px;"><strong>2. Logistics:</strong> ${escapeHtml(document.getElementById('nfaPoint2').value.trim() || '—')}</p>
+            <p style="margin-bottom:6px;"><strong>3. Justification:</strong> ${escapeHtml(document.getElementById('nfaPoint3').value.trim() || '—')}</p>
+            <p style="margin-bottom:0;"><strong>4. Annexure:</strong> ${escapeHtml(document.getElementById('nfaPoint4').value.trim() || '—')}</p>
+          </div>
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <strong style="font-size:13px;color:var(--primary-blue);display:block;margin-bottom:6px;">Selected SDGs (${selectedSdgs.length}):</strong>
+          <div style="font-size:12px;color:#475569;">
+            ${selectedSdgs.length > 0 ? selectedSdgs.map(s => `<span class="word-badge" style="display:inline-block;margin:2px 4px 2px 0;">${escapeHtml(s)}</span>`).join('') : 'None selected'}
+          </div>
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <strong style="font-size:13px;color:var(--primary-blue);display:block;margin-bottom:6px;">Expenditure Summary</strong>
+          <div style="font-size:15px;font-weight:700;color:var(--primary-blue);">Total Sanction Requested: ${inr(grandTotal)}</div>
+        </div>
+      `;
+
+      modal.style.display = 'flex';
+    }
+
+    function closePreviewModal() {
+      document.getElementById('previewModal').style.display = 'none';
+    }
+
+    function handleClosePage() {
+      if (hasUnsavedChanges) {
+        if (!confirm('You have unsaved changes in your NFA. Are you sure you want to close this page?')) {
+          return;
+        }
+      }
+      try {
+        window.close();
+      } catch (e) { }
+      window.location.href = '/';
+    }
+
+    // Start application
+    window.addEventListener('DOMContentLoaded', boot);
+  </script>
+</body>
+
+</html>

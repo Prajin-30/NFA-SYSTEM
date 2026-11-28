@@ -251,6 +251,9 @@ export interface Nfa {
   event_completion_remarks?: string;
   event_completed_by?: string;
   event_completed_at?: string;
+  // Multiple Resource Persons & Bank Details
+  resource_person_bank_details?: ResourcePersonBankDetailDTO[];
+  resource_persons?: ResourcePersonBankDetailDTO[];
 }
 
 export interface Approval {

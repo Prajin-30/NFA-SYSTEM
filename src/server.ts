@@ -185,6 +185,12 @@ app.use(express.static(path.join(__dirname, '..', 'public'), {
   },
 }));
 
+// Dedicated NFA Creation route aliases
+app.get(['/nfa/new', '/nfa-create'], (_req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.sendFile(path.join(__dirname, '..', 'public', 'nfa-create.html'));
+});
+
 /**
  * GET /api/signatures/:filename — Authenticated, role-validated digital signature retrieval.
  * Unauthenticated requests receive 401; unauthorized access to another user's signature receives 403.

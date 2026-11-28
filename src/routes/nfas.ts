@@ -639,7 +639,44 @@ nfasRouter.get('/:id', (req: AuthedRequest, res) => {
       }
     }
   }
-  res.json({ ...nfa, items: withItems(nfa.id), approvals: withApprovals(nfa.id) });
+  const isCreator = req.user?.id === nfa.created_by;
+  const isFinanceOrAdmin = req.user && ['finance', 'finance_head', 'super_admin'].includes(req.user.role);
+  let bankDetailsDTO: any[] = [];
+  if (isCreator || isFinanceOrAdmin) {
+    const details = (store.data.resource_person_bank_details || []).filter((d) => d.nfa_id === nfa.id);
+    bankDetailsDTO = details.map((d) => ({
+      id: d.id,
+      nfa_id: d.nfa_id,
+      resource_person_name: d.resource_person_name,
+      designation: d.designation,
+      organization: d.organization,
+      email: d.email,
+      mobile: d.mobile,
+      honorarium_amount: d.honorarium_amount,
+      account_holder_name: d.account_holder_name,
+      bank_name: d.bank_name,
+      masked_account_number: d.masked_account_number,
+      ifsc_code: d.ifsc_code,
+      branch_name: d.branch_name,
+      remarks: d.remarks,
+      tracking_status: d.tracking_status || 'details_submitted',
+      approved_honorarium: d.approved_honorarium,
+      deductions: d.deductions,
+      net_payable_amount: d.net_payable_amount,
+      payment_date: d.payment_date,
+      payment_ref_utr: d.payment_ref_utr,
+      payment_remarks: d.payment_remarks,
+      created_at: d.created_at,
+      can_reveal: isFinanceOrAdmin,
+    }));
+  }
+  res.json({
+    ...nfa,
+    items: withItems(nfa.id),
+    approvals: withApprovals(nfa.id),
+    resource_person_bank_details: bankDetailsDTO,
+    resource_persons: bankDetailsDTO,
+  });
 });
 
 /** GET /api/nfas/:id/pdf */

@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import type { Nfa, NfaItem, Department, BudgetCategory, Approval } from '../types.js';
+import { store } from '../store.js';
 
 import { registerUnicodeFonts, formatPdfCurrency } from './fontResolver.js';
 
@@ -218,33 +219,71 @@ export function renderNfaPdf(
     `The estimated expenditure details are attached as Annexure-I. (${formatAmount(nfa.total_amount || 0)})`;
   renderBullet(p4);
 
-  // If Event NFA has Resource Person details, format as ONE bullet point within the main NFA description section
+  // If Event NFA has Resource Person details, format as bullet point(s)
   const isPurchase = nfa.nfa_type === 'purchase';
-  if (!isPurchase && nfa.event_details) {
-    const ed = nfa.event_details;
-    const parts: string[] = [];
-    if (ed.resource_person_name && ed.resource_person_name.trim()) {
-      parts.push(`Resource Person: ${ed.resource_person_name.trim()}`);
+  if (!isPurchase) {
+    const bankDetails = (store.data.resource_person_bank_details || []).filter((d) => d.nfa_id === nfa.id);
+    if (bankDetails.length > 0) {
+      if (bankDetails.length === 1) {
+        const bd = bankDetails[0];
+        const parts: string[] = [`Resource Person: ${bd.resource_person_name}`];
+        if (bd.designation && bd.designation.trim()) parts.push(bd.designation.trim());
+        if (bd.organization && bd.organization.trim()) parts.push(bd.organization.trim());
+        if (bd.honorarium_amount && bd.honorarium_amount > 0) {
+          parts.push(`Honorarium: ₹${bd.honorarium_amount.toLocaleString('en-IN')}`);
+        }
+        renderBullet(parts.join(', '));
+      } else {
+        renderBullet(`Resource Persons (${bankDetails.length}):`);
+        let totalHonorarium = 0;
+        bankDetails.forEach((bd, idx) => {
+          const parts: string[] = [`${idx + 1}. ${bd.resource_person_name}`];
+          if (bd.designation && bd.designation.trim()) parts.push(bd.designation.trim());
+          if (bd.organization && bd.organization.trim()) parts.push(bd.organization.trim());
+          if (bd.honorarium_amount && bd.honorarium_amount > 0) {
+            parts.push(`Honorarium: ₹${bd.honorarium_amount.toLocaleString('en-IN')}`);
+            totalHonorarium += bd.honorarium_amount;
+          }
+          renderBullet(`   ${parts.join(', ')}`);
+        });
+        if (totalHonorarium > 0) {
+          renderBullet(`Total Honorarium for Resource Persons: ₹${totalHonorarium.toLocaleString('en-IN')}`);
+        }
+      }
+    } else if (nfa.event_details) {
+      const ed = nfa.event_details;
+      const parts: string[] = [];
+      if (ed.resource_person_name && ed.resource_person_name.trim()) {
+        parts.push(`Resource Person: ${ed.resource_person_name.trim()}`);
+      }
+      if (ed.designation && ed.designation.trim()) {
+        parts.push(ed.designation.trim());
+      }
+      if (ed.organization && ed.organization.trim()) {
+        parts.push(ed.organization.trim());
+      }
+      if (parts.length > 0) {
+        renderBullet(parts.join(', '));
+      }
     }
-    if (ed.designation && ed.designation.trim()) {
-      parts.push(ed.designation.trim());
+
+    if (nfa.event_details) {
+      const ed = nfa.event_details;
+      const metaParts: string[] = [];
+      if (ed.event_date && ed.event_date.trim()) {
+        metaParts.push(`Event Date: ${formatDate(ed.event_date)}`);
+      }
+      if (ed.venue && ed.venue.trim()) {
+        metaParts.push(`Venue: ${ed.venue.trim()}`);
+      }
+      if (ed.additional_info && ed.additional_info.trim()) {
+        metaParts.push(`(${ed.additional_info.trim()})`);
+      }
+      if (metaParts.length > 0) {
+        renderBullet(metaParts.join('. '));
+      }
     }
-    if (ed.organization && ed.organization.trim()) {
-      parts.push(ed.organization.trim());
-    }
-    let rpSentence = parts.join(', ');
-    if (ed.event_date && ed.event_date.trim()) {
-      rpSentence += `${rpSentence ? '. ' : ''}Event Date: ${formatDate(ed.event_date)}`;
-    }
-    if (ed.venue && ed.venue.trim()) {
-      rpSentence += `${rpSentence ? '. ' : ''}Venue: ${ed.venue.trim()}`;
-    }
-    if (ed.additional_info && ed.additional_info.trim()) {
-      rpSentence += `${rpSentence ? '. ' : ''}(${ed.additional_info.trim()})`;
-    }
-    if (rpSentence.trim()) {
-      renderBullet(rpSentence);
-    }
+
     if (nfa.will_generate_revenue) {
       renderBullet('Revenue Generation: This event is scheduled to generate institutional revenue (Registration / Sponsorships / Collections).');
     } else {
@@ -253,6 +292,11 @@ export function renderNfaPdf(
     if (nfa.event_completion_status === 'completed') {
       renderBullet(`Event Completion: Successfully concluded on ${formatDate(nfa.event_completion_date || '')}.${nfa.event_completion_remarks ? ` Remarks: ${nfa.event_completion_remarks}` : ''}`);
     }
+  }
+
+  // UN Sustainable Development Goals (SDGs)
+  if (nfa.sdgs && nfa.sdgs.trim()) {
+    renderBullet(`Relevant UN Sustainable Development Goals (SDGs): ${nfa.sdgs.trim()}`);
   }
 
   // Change 1: Display "Sampling — Required" when selected; omit when not selected

@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8" />
-  <title>CU-NFA — Create New Note for Approval (NFA)</title>
+  <title>CU-NFA — Create Note for Approval (NFA)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" type="image/png" href="/christ-logo.png" />
   <link rel="shortcut icon" href="/favicon.ico" />
@@ -345,6 +345,12 @@
       margin-bottom: 16px;
     }
 
+    @media (max-width: 640px) {
+      .type-switcher {
+        grid-template-columns: 1fr;
+      }
+    }
+
     .type-card {
       border: 2px solid var(--border);
       border-radius: var(--radius);
@@ -383,6 +389,127 @@
       font-size: 12px;
       color: var(--text-muted);
       margin-top: 2px;
+    }
+
+    /* PREDEFINED EVENT PARTICULARS GRID */
+    .event-particulars-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .event-particular-item {
+      background: #ffffff;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      transition: all 0.2s ease;
+    }
+
+    .event-particular-item:hover {
+      border-color: var(--primary-blue);
+    }
+
+    .event-particular-item.checked {
+      border-color: var(--primary-blue);
+      background: var(--light-blue);
+    }
+
+    .event-particular-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .event-particular-header input[type="checkbox"] {
+      width: auto;
+      cursor: pointer;
+    }
+
+    .event-subfield {
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px dashed #CBD5E1;
+    }
+
+    .event-subfield input {
+      font-size: 11.5px;
+      padding: 5px 8px;
+      background: #ffffff;
+    }
+
+    /* PREDEFINED PURCHASE CATEGORIES CHIP GRID */
+    .purchase-particulars-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .purchase-category-chip {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      cursor: pointer;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.15s ease;
+    }
+
+    .purchase-category-chip:hover {
+      border-color: var(--primary-blue);
+      background: var(--light-blue);
+      color: var(--primary-blue);
+    }
+
+    .purchase-category-chip .chip-action {
+      font-size: 11px;
+      color: var(--primary-blue);
+      font-weight: 700;
+      background: rgba(0, 61, 143, 0.08);
+      padding: 2px 7px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    /* PURCHASE QUOTATIONS GRID */
+    .quotations-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .quotation-card {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    }
+
+    .quotation-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      color: var(--primary-blue);
+      font-size: 13px;
+      border-bottom: 1px solid #f1f5f9;
+      padding-bottom: 6px;
     }
 
     /* SDG GRID */
@@ -483,11 +610,25 @@
     td {
       padding: 8px 12px;
       border-bottom: 1px solid var(--border-light);
-      vertical-align: top;
+      vertical-align: middle;
     }
 
     tr:last-child td {
       border-bottom: none;
+    }
+
+    /* SAMPLING NOTICE */
+    .sampling-banner {
+      background: #F0FDF4;
+      border: 1px solid #86EFAC;
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      margin-top: 10px;
+      font-size: 12.5px;
+      color: #166534;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     /* RESOURCE PERSON CARDS */
@@ -754,7 +895,7 @@
 
     <!-- FORM -->
     <form id="nfaForm" onsubmit="event.preventDefault();">
-      <!-- SECTION 1: BASIC COORDINATES & BUDGET SELECTION -->
+      <!-- SECTION 1: PROPOSAL COORDINATES & BUDGET SOURCE -->
       <div class="card">
         <div class="card-title">1. Proposal Coordinates &amp; Budget Source</div>
 
@@ -858,7 +999,7 @@
         </div>
       </div>
 
-      <!-- SECTION 2: PROPOSAL CLASSIFICATION & DETAILS -->
+      <!-- SECTION 2: PROPOSAL CLASSIFICATION & SPECIFICATIONS -->
       <div class="card">
         <div class="card-title">2. Proposal Classification &amp; Specifications</div>
 
@@ -879,9 +1020,25 @@
           </label>
         </div>
 
-        <!-- EVENT DETAILS -->
+        <!-- EVENT OPERATIONAL DETAILS -->
         <div id="eventDetailsWrap" style="background:#F0F4FA;border:1px solid #CCD6E8;border-radius:var(--radius-sm);padding:16px;">
-          <h3 style="font-size:13.5px;color:var(--primary-blue);margin-bottom:12px;">Event Operational Details</h3>
+          <h3 style="font-size:13.5px;color:var(--primary-blue);margin-bottom:12px;">Event Operational &amp; Resource Person Details</h3>
+          
+          <div class="grid3" style="margin-bottom:12px;">
+            <div>
+              <label for="eventResourcePerson" class="field-label">Resource Person Name (Primary)</label>
+              <input id="eventResourcePerson" placeholder="Full name of speaker / trainer" />
+            </div>
+            <div>
+              <label for="eventDesignation" class="field-label">Designation</label>
+              <input id="eventDesignation" placeholder="e.g. Professor / Lead AI Engineer" />
+            </div>
+            <div>
+              <label for="eventOrganization" class="field-label">Organization / Institution</label>
+              <input id="eventOrganization" placeholder="Affiliated University or Corporate Entity" />
+            </div>
+          </div>
+
           <div class="grid3" style="margin-bottom:12px;">
             <div>
               <label for="eventDate" class="field-label">Proposed Event Date</label>
@@ -897,7 +1054,7 @@
             </div>
           </div>
 
-          <div>
+          <div style="margin-bottom:12px;">
             <label for="eventAdditionalInfo" class="field-label">Additional Relevant Information</label>
             <textarea id="eventAdditionalInfo" rows="2" placeholder="Schedule highlights, session tracks, travel requirements, or hospitality arrangements..."></textarea>
           </div>
@@ -921,7 +1078,7 @@
           </div>
         </div>
 
-        <!-- PURCHASE DETAILS -->
+        <!-- PURCHASE SPECIFICATIONS -->
         <div id="purchaseDetailsWrap" style="display:none;background:#F0F4FA;border:1px solid #CCD6E8;border-radius:var(--radius-sm);padding:16px;">
           <h3 style="font-size:13.5px;color:var(--primary-blue);margin-bottom:12px;">Purchase / Item Specifications</h3>
           <div class="grid2" style="margin-bottom:12px;">
@@ -931,16 +1088,30 @@
             </div>
             <div>
               <label for="purchaseQuantity" class="field-label">Quantity &amp; Units <span style="color:var(--danger)">*</span></label>
-              <input id="purchaseQuantity" placeholder="e.g. 2 Units / 5 Licenses" />
+              <input id="purchaseQuantity" placeholder="e.g. 2 Units / 5 Licenses" oninput="calculatePurchaseAmount()" />
+            </div>
+          </div>
+          <div class="grid2" style="margin-bottom:12px;">
+            <div>
+              <label for="purchaseRate" class="field-label">Estimated Rate per Unit (₹)</label>
+              <input id="purchaseRate" type="number" min="0" step="any" placeholder="e.g. 75000" oninput="calculatePurchaseAmount()" />
+            </div>
+            <div>
+              <label for="purchaseAmount" class="field-label">Estimated Total Amount (₹)</label>
+              <input id="purchaseAmount" type="number" min="0" step="any" placeholder="e.g. 150000" style="font-weight:700;color:var(--primary-blue);" />
             </div>
           </div>
           <div style="margin-bottom:12px;">
             <label for="purchaseDescription" class="field-label">Detailed Technical Specifications</label>
             <textarea id="purchaseDescription" rows="2" placeholder="Brand, model, CPU/GPU, RAM, storage, certifications, or technical parameters"></textarea>
           </div>
-          <div>
+          <div style="margin-bottom:12px;">
             <label for="purchasePurpose" class="field-label">Institutional Purpose &amp; Justification</label>
             <textarea id="purchasePurpose" rows="2" placeholder="Explain lab requirements, research grant alignment, or curriculum utility"></textarea>
+          </div>
+          <div>
+            <label for="purchaseAdditionalInfo" class="field-label">Additional Relevant Information</label>
+            <textarea id="purchaseAdditionalInfo" rows="2" placeholder="Warranty, installation, delivery timeline, AMC, or vendor details"></textarea>
           </div>
         </div>
       </div>
@@ -998,10 +1169,37 @@
         <div id="sdgGridContainer" class="sdg-grid"></div>
       </div>
 
-      <!-- SECTION 5: MULTIPLE RESOURCE PERSONS (EVENT NFAs) -->
+      <!-- SECTION 5: BUDGET PARTICULARS SELECTION -->
+      <div class="card">
+        <!-- PREDEFINED EVENT BUDGET PARTICULARS -->
+        <div id="eventPredefinedSection">
+          <div class="card-title">
+            <span>5. Select Event Budget Particulars</span>
+            <span class="word-badge" style="background:#EBF5FF;color:#003D8F;">Editable Qty &amp; Rate Required</span>
+          </div>
+          <div class="field-help" style="margin-bottom:12px;">
+            Select required event expenses. Rows will be automatically added to the Annexure table below. You must manually enter the Quantity and Rate for each item.
+          </div>
+          <div id="eventParticularsGridContainer" class="event-particulars-grid"></div>
+        </div>
+
+        <!-- PREDEFINED PURCHASE BUDGET PARTICULARS -->
+        <div id="purchaseParticularsSection" style="display:none;">
+          <div class="card-title">
+            <span>5. Select Purchase Budget Particulars</span>
+            <span class="word-badge" style="background:#EBF5FF;color:#003D8F;">Click Category to Add Item Row</span>
+          </div>
+          <div class="field-help" style="margin-bottom:12px;">
+            Select a procurement category below to generate a budget item row, or use &quot;+ Add Item Row&quot; below to manually enter any purchase item.
+          </div>
+          <div id="purchaseCategoriesGridContainer" class="purchase-particulars-grid"></div>
+        </div>
+      </div>
+
+      <!-- SECTION 6: MULTIPLE RESOURCE PERSONS (EVENT NFAs) -->
       <div id="resourcePersonsSection" class="card">
         <div class="card-title">
-          <span>5. Resource Persons &amp; Honorarium Bank Details</span>
+          <span>6. Resource Persons &amp; Honorarium Bank Details</span>
           <button type="button" class="secondary" style="font-size:12px;padding:4px 12px;" onclick="addResourcePersonCard()">+ Add Resource Person</button>
         </div>
         <div class="field-help" style="margin-bottom:14px;">
@@ -1018,16 +1216,22 @@
         </div>
       </div>
 
-      <!-- SECTION 6: EXPENDITURE PARTICULARS (ANNEXURE-I) -->
+      <!-- SECTION 7: EXPENDITURE PARTICULARS (ANNEXURE-I) -->
       <div class="card">
         <div class="card-title">
-          <span id="expenditureSectionTitle">6. Expenditure Statement (Annexure-I)</span>
+          <span id="expenditureSectionTitle">7. Event Budget Items (Annexure-I)</span>
           <div style="display:flex;gap:8px;">
-            <button type="button" class="secondary" style="font-size:12px;padding:4px 12px;" onclick="addExpenditureRow()">+ Add Expenditure Row</button>
+            <button type="button" class="secondary" style="font-size:12px;padding:4px 12px;" onclick="addExpenditureRow()">+ Add Item Row</button>
           </div>
         </div>
         <div class="field-help" style="margin-bottom:12px;">
-          Enter detailed itemized breakdown. Amount is auto-calculated from Quantity and Rate.
+          Enter detailed itemized breakdown. Amount is auto-calculated from Quantity &times; Rate per Unit (with manual adjustment supported).
+        </div>
+
+        <!-- SAMPLING NOTICE BANNER -->
+        <div id="samplingNoticeBanner" class="sampling-banner" style="display:none;">
+          <strong style="color:#166534;">Sampling Requirement Selected:</strong>
+          <span>Indicated as a non-monetary logistical/booth requirement only. Non-monetary items carry ₹0 financial impact.</span>
         </div>
 
         <div class="table-wrap">
@@ -1053,57 +1257,130 @@
         </div>
       </div>
 
-      <!-- SECTION 7: SUPPORTING DOCUMENTS -->
+      <!-- SECTION 8: SUPPORTING DOCUMENTS & QUOTATIONS -->
       <div id="supportingDocsSection" class="card">
-        <div class="card-title">7. Supporting Quotations &amp; Documents</div>
+        <div class="card-title">8. Supporting Quotations &amp; Documents</div>
 
         <!-- PURCHASE QUOTATIONS -->
         <div id="purchaseQuotationsWrap" style="display:none;">
           <div class="field-help" style="margin-bottom:14px;">
-            Institutional procurement policy requires 3 distinct competitive vendor quotations and an official comparative statement.
+            Institutional procurement policy requires 3 distinct competitive vendor quotations and an official comparative statement (Drafts allow partial uploads).
           </div>
-          <div class="grid3" style="margin-bottom:14px;">
+          
+          <div class="quotations-grid">
             <!-- Vendor 1 -->
-            <div style="background:#F8FAFC;border:1px solid var(--border);border-radius:6px;padding:12px;">
-              <strong style="font-size:12.5px;color:var(--primary-blue);display:block;margin-bottom:8px;">Vendor A (Quotation 1) *</strong>
-              <input id="vName0" placeholder="Vendor Company Name *" style="margin-bottom:6px;" />
-              <input id="vRef0" placeholder="Quotation Ref No." style="margin-bottom:6px;" />
-              <input id="vDate0" type="date" style="margin-bottom:8px;" />
-              <input type="file" id="vFile0" accept=".pdf,.jpg,.jpeg,.png,.xlsx" onchange="uploadQuotationFile(0, this.files[0])" />
-              <div id="vStatus0" class="field-help">No file uploaded</div>
+            <div class="quotation-card">
+              <div class="quotation-card-header">
+                <span>Quotation 1 — Vendor A</span>
+                <span class="word-badge" style="background:#E0F2FE;color:#0369A1;font-size:10px;">Vendor A</span>
+              </div>
+              <div>
+                <label for="vName0" class="field-label" style="font-size:11.5px;">Vendor Name <span style="color:var(--danger)">*</span></label>
+                <input id="vName0" placeholder="Company / Vendor Name" style="margin-bottom:6px;font-size:12.5px;" />
+              </div>
+              <div class="grid2" style="gap:6px;margin-bottom:6px;">
+                <div>
+                  <label for="vRef0" class="field-label" style="font-size:11px;">Quote Ref (Optional)</label>
+                  <input id="vRef0" placeholder="e.g. QT-2026-01" style="font-size:12px;" />
+                </div>
+                <div>
+                  <label for="vDate0" class="field-label" style="font-size:11px;">Quote Date (Optional)</label>
+                  <input id="vDate0" type="date" style="font-size:12px;" />
+                </div>
+              </div>
+              <div>
+                <label for="vFile0" class="field-label" style="font-size:11.5px;">Quotation Document (PDF, JPG, PNG)</label>
+                <input type="file" id="vFile0" accept=".pdf,.jpg,.jpeg,.png,.xlsx" style="display:none;" onchange="uploadQuotationFile(0, this.files[0])" />
+                <button type="button" class="secondary" style="width:100%;font-size:12px;padding:8px;" onclick="document.getElementById('vFile0').click()">
+                  Upload Quotation Document
+                </button>
+                <div id="vStatus0" class="field-help" style="margin-top:4px;">No document uploaded</div>
+              </div>
             </div>
+
             <!-- Vendor 2 -->
-            <div style="background:#F8FAFC;border:1px solid var(--border);border-radius:6px;padding:12px;">
-              <strong style="font-size:12.5px;color:var(--primary-blue);display:block;margin-bottom:8px;">Vendor B (Quotation 2) *</strong>
-              <input id="vName1" placeholder="Vendor Company Name *" style="margin-bottom:6px;" />
-              <input id="vRef1" placeholder="Quotation Ref No." style="margin-bottom:6px;" />
-              <input id="vDate1" type="date" style="margin-bottom:8px;" />
-              <input type="file" id="vFile1" accept=".pdf,.jpg,.jpeg,.png,.xlsx" onchange="uploadQuotationFile(1, this.files[0])" />
-              <div id="vStatus1" class="field-help">No file uploaded</div>
+            <div class="quotation-card">
+              <div class="quotation-card-header">
+                <span>Quotation 2 — Vendor B</span>
+                <span class="word-badge" style="background:#E0F2FE;color:#0369A1;font-size:10px;">Vendor B</span>
+              </div>
+              <div>
+                <label for="vName1" class="field-label" style="font-size:11.5px;">Vendor Name <span style="color:var(--danger)">*</span></label>
+                <input id="vName1" placeholder="Company / Vendor Name" style="margin-bottom:6px;font-size:12.5px;" />
+              </div>
+              <div class="grid2" style="gap:6px;margin-bottom:6px;">
+                <div>
+                  <label for="vRef1" class="field-label" style="font-size:11px;">Quote Ref (Optional)</label>
+                  <input id="vRef1" placeholder="e.g. QT-2026-02" style="font-size:12px;" />
+                </div>
+                <div>
+                  <label for="vDate1" class="field-label" style="font-size:11px;">Quote Date (Optional)</label>
+                  <input id="vDate1" type="date" style="font-size:12px;" />
+                </div>
+              </div>
+              <div>
+                <label for="vFile1" class="field-label" style="font-size:11.5px;">Quotation Document (PDF, JPG, PNG)</label>
+                <input type="file" id="vFile1" accept=".pdf,.jpg,.jpeg,.png,.xlsx" style="display:none;" onchange="uploadQuotationFile(1, this.files[0])" />
+                <button type="button" class="secondary" style="width:100%;font-size:12px;padding:8px;" onclick="document.getElementById('vFile1').click()">
+                  Upload Quotation Document
+                </button>
+                <div id="vStatus1" class="field-help" style="margin-top:4px;">No document uploaded</div>
+              </div>
             </div>
+
             <!-- Vendor 3 -->
-            <div style="background:#F8FAFC;border:1px solid var(--border);border-radius:6px;padding:12px;">
-              <strong style="font-size:12.5px;color:var(--primary-blue);display:block;margin-bottom:8px;">Vendor C (Quotation 3) *</strong>
-              <input id="vName2" placeholder="Vendor Company Name *" style="margin-bottom:6px;" />
-              <input id="vRef2" placeholder="Quotation Ref No." style="margin-bottom:6px;" />
-              <input id="vDate2" type="date" style="margin-bottom:8px;" />
-              <input type="file" id="vFile2" accept=".pdf,.jpg,.jpeg,.png,.xlsx" onchange="uploadQuotationFile(2, this.files[0])" />
-              <div id="vStatus2" class="field-help">No file uploaded</div>
+            <div class="quotation-card">
+              <div class="quotation-card-header">
+                <span>Quotation 3 — Vendor C</span>
+                <span class="word-badge" style="background:#E0F2FE;color:#0369A1;font-size:10px;">Vendor C</span>
+              </div>
+              <div>
+                <label for="vName2" class="field-label" style="font-size:11.5px;">Vendor Name <span style="color:var(--danger)">*</span></label>
+                <input id="vName2" placeholder="Company / Vendor Name" style="margin-bottom:6px;font-size:12.5px;" />
+              </div>
+              <div class="grid2" style="gap:6px;margin-bottom:6px;">
+                <div>
+                  <label for="vRef2" class="field-label" style="font-size:11px;">Quote Ref (Optional)</label>
+                  <input id="vRef2" placeholder="e.g. QT-2026-03" style="font-size:12px;" />
+                </div>
+                <div>
+                  <label for="vDate2" class="field-label" style="font-size:11px;">Quote Date (Optional)</label>
+                  <input id="vDate2" type="date" style="font-size:12px;" />
+                </div>
+              </div>
+              <div>
+                <label for="vFile2" class="field-label" style="font-size:11.5px;">Quotation Document (PDF, JPG, PNG)</label>
+                <input type="file" id="vFile2" accept=".pdf,.jpg,.jpeg,.png,.xlsx" style="display:none;" onchange="uploadQuotationFile(2, this.files[0])" />
+                <button type="button" class="secondary" style="width:100%;font-size:12px;padding:8px;" onclick="document.getElementById('vFile2').click()">
+                  Upload Quotation Document
+                </button>
+                <div id="vStatus2" class="field-help" style="margin-top:4px;">No document uploaded</div>
+              </div>
             </div>
           </div>
 
-          <div style="background:#F8FAFC;border:1px solid var(--border);border-radius:6px;padding:12px;">
-            <strong style="font-size:12.5px;color:var(--primary-blue);display:block;margin-bottom:6px;">Comparative Statement Document *</strong>
-            <input type="file" id="compFile" accept=".pdf,.xlsx,.xls,.png,.jpg" onchange="uploadComparativeStatementFile(this.files[0])" />
-            <div id="compStatus" class="field-help">Upload comparative statement spreadsheet or PDF</div>
+          <div style="background:#F8FAFC;border:1px solid var(--border);border-radius:6px;padding:14px;margin-top:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <strong style="font-size:13px;color:var(--primary-blue);">Comparative Statement / Comparison Document <span style="color:var(--danger)">*</span></strong>
+              <span class="word-badge" style="background:#E0F2FE;color:#0369A1;font-size:10px;">Mandatory on Submission</span>
+            </div>
+            <div class="field-help" style="margin-bottom:10px;">Upload the institutional Comparative Statement (CS) evaluating the 3 vendor quotations (.pdf, .xlsx, .xls, .png, .jpg).</div>
+            <input type="file" id="compFile" accept=".pdf,.xlsx,.xls,.png,.jpg" style="display:none;" onchange="uploadComparativeStatementFile(this.files[0])" />
+            <button type="button" class="secondary" style="font-size:12.5px;padding:8px 16px;" onclick="document.getElementById('compFile').click()">
+              Upload Comparative Statement
+            </button>
+            <div id="compStatus" class="field-help" style="margin-top:6px;">No statement document uploaded</div>
           </div>
         </div>
 
         <!-- EVENT SUPPORTING DOCS -->
         <div id="eventDocsWrap">
           <div class="field-help" style="margin-bottom:8px;">Upload optional event proposal note, brochure, schedule, or syllabus (PDF / Images, Max 10MB):</div>
-          <input type="file" id="eventProposalDoc" accept=".pdf,.png,.jpg,.jpeg" onchange="uploadEventDoc(this.files[0])" />
-          <div id="eventDocStatus" class="field-help">No file selected</div>
+          <input type="file" id="eventProposalDoc" accept=".pdf,.png,.jpg,.jpeg" style="display:none;" onchange="uploadEventDoc(this.files[0])" />
+          <button type="button" class="secondary" style="font-size:12.5px;padding:8px 16px;" onclick="document.getElementById('eventProposalDoc').click()">
+            Upload Proposal Attachment
+          </button>
+          <div id="eventDocStatus" class="field-help" style="margin-top:6px;">No attachment selected</div>
         </div>
       </div>
     </form>
@@ -1186,6 +1463,7 @@
     let isSubmitting = false;
     let idempotencyKey = 'nfa_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
     let currentAvailableBudget = null;
+    let currentNfaCategory = 'event';
 
     // 17 UN Sustainable Development Goals (Full official names)
     const SDG_LIST = [
@@ -1206,6 +1484,33 @@
       "SDG 15: Life on Land",
       "SDG 16: Peace, Justice and Strong Institutions",
       "SDG 17: Partnerships for the Goals"
+    ];
+
+    // Predefined Event Budget Particulars
+    const PREDEFINED_EVENT_PARTICULARS = [
+      { key: 'memento', name: 'Memento (including carry bag arrangements)', defaultLabel: 'Memento', notePlaceholder: 'Carry bag arrangement (optional)' },
+      { key: 'travel_expenses', name: 'Travel Expenses (based on distance)', defaultLabel: 'Travel Expenses', notePlaceholder: 'Distance in km (optional)' },
+      { key: 'ta', name: 'Travel Allowance (TA)', defaultLabel: 'Travel Allowance (TA)' },
+      { key: 'da', name: 'Dearness Allowance (DA)', defaultLabel: 'Dearness Allowance (DA)' },
+      { key: 'honorarium', name: 'Honorarium', defaultLabel: 'Honorarium' },
+      { key: 'refreshments_fn', name: 'Refreshments — Forenoon', defaultLabel: 'Refreshments — Forenoon' },
+      { key: 'refreshments_an', name: 'Refreshments — Afternoon', defaultLabel: 'Refreshments — Afternoon' },
+      { key: 'sampling', name: 'Sampling', defaultLabel: 'Sampling', isSampling: true },
+      { key: 'lunch', name: 'Lunch', defaultLabel: 'Lunch' },
+      { key: 'miscellaneous', name: 'Miscellaneous', defaultLabel: 'Miscellaneous' }
+    ];
+
+    // Predefined Purchase Categories
+    const PREDEFINED_PURCHASE_CATEGORIES = [
+      { key: 'equipment', name: 'Equipment' },
+      { key: 'lab_materials', name: 'Laboratory Materials / Components' },
+      { key: 'computer_hardware', name: 'Computer Hardware' },
+      { key: 'software_licenses', name: 'Software / Licences' },
+      { key: 'furniture', name: 'Furniture' },
+      { key: 'electrical_electronics', name: 'Electrical / Electronic Items' },
+      { key: 'tools_instruments', name: 'Tools / Instruments' },
+      { key: 'services_maintenance', name: 'Services / Maintenance' },
+      { key: 'other_purchase', name: 'Other Purchase' }
     ];
 
     let quotationUploads = [null, null, null];
@@ -1238,14 +1543,14 @@
       const badge = document.getElementById(badgeId);
       if (!el || !badge) return;
       const count = countWords(el.value);
-      badge.textContent = `${count} / 50 words`;
+      badge.textContent = count + ' / 50 words';
       badge.className = 'word-badge' + (count > 50 ? ' danger' : count > 42 ? ' warning' : '');
     }
 
     // ---------------- API HELPER ----------------
     async function api(path, opts = {}) {
       const headers = Object.assign({}, opts.headers || {});
-      if (TOKEN) headers['Authorization'] = `Bearer ${TOKEN}`;
+      if (TOKEN) headers['Authorization'] = 'Bearer ' + TOKEN;
       if (opts.body && typeof opts.body === 'object' && !(opts.body instanceof FormData)) {
         headers['Content-Type'] = 'application/json';
         opts.body = JSON.stringify(opts.body);
@@ -1255,7 +1560,7 @@
       const res = await fetch('/api' + path, opts);
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        throw new Error(data.error || data.message || `Request failed (${res.status})`);
+        throw new Error(data.error || data.message || ('Request failed (' + res.status + ')'));
       }
       return data;
     }
@@ -1280,6 +1585,8 @@
         renderSdgGrid();
         renderFyOptions();
         renderDepartmentControls();
+        renderEventParticularsChecklist();
+        renderPurchaseCategoriesGrid();
         filterCategories('all');
 
         // Check URL params for draft_id or id to edit
@@ -1288,7 +1595,7 @@
         if (editId) {
           loadExistingDraft(editId);
         } else {
-          // Add default initial rows
+          // Add default initial row
           addExpenditureRow();
           addResourcePersonCard();
           refreshNextRef();
@@ -1307,9 +1614,10 @@
       }
     }
 
+    // ---------------- SUSTAINABLE DEVELOPMENT GOALS ----------------
     function renderSdgGrid() {
       const container = document.getElementById('sdgGridContainer');
-      container.innerHTML = SDG_LIST.map((sdg, index) => {
+      container.innerHTML = SDG_LIST.map((sdg) => {
         const isActive = selectedSdgs.includes(sdg);
         return `
           <div class="sdg-chip ${isActive ? 'active' : ''}" onclick="toggleSdg('${escapeHtml(sdg)}', this)">
@@ -1334,9 +1642,10 @@
     }
 
     function updateSdgBadge() {
-      document.getElementById('sdgCountBadge').textContent = `Selected: ${selectedSdgs.length} / 17`;
+      document.getElementById('sdgCountBadge').textContent = 'Selected: ' + selectedSdgs.length + ' / 17';
     }
 
+    // ---------------- COORDINATES & BUDGETS ----------------
     function renderFyOptions() {
       const fySelect = document.getElementById('nfaFy');
       const activeFy = REF.financialYears.find(f => f.is_active) || REF.financialYears[0];
@@ -1413,7 +1722,7 @@
         }
       } catch (e) {
         const fyObj = REF.financialYears.find(f => f.id === fyId);
-        document.getElementById('nfaRefNo').value = `NFA/CU/${fyObj ? fyObj.label : '2026-27'}/${String(Date.now()).slice(-4)}`;
+        document.getElementById('nfaRefNo').value = 'NFA/CU/' + (fyObj ? fyObj.label : '2026-27') + '/' + String(Date.now()).slice(-4);
       }
     }
 
@@ -1535,21 +1844,239 @@
     }
 
     // ---------------- PROPOSAL TYPE SWITCHING ----------------
-    function switchProposalType(type) {
-      hasUnsavedChanges = true;
-      const isPurchase = type === 'purchase';
+    function switchProposalType(newType) {
+      if (currentNfaCategory === newType) return;
+
+      const rows = document.querySelectorAll('#expenditureTbody tr');
+      const hasEnteredItems = [...rows].some(r => {
+        const p = r.querySelector('.item-p')?.value?.trim();
+        const a = Number(r.querySelector('.item-a')?.value) || 0;
+        return Boolean(p || a > 0);
+      });
+
+      if (hasEnteredItems) {
+        const curLabel = currentNfaCategory === 'event' ? 'Event NFA' : 'Purchase NFA';
+        const targetLabel = newType === 'purchase' ? 'Purchase NFA' : 'Event NFA';
+        const ok = confirm('Switching NFA Category:\n\nYou have entered data for ' + curLabel + '. Switching categories will reset category-specific budget rows and attachments to prevent mixing incompatible expenditures.\n\nCommon proposal fields (Title, Coordinates, Justification, Financial Year, SDGs) will be preserved.\n\nDo you want to proceed with switching to ' + targetLabel + '?');
+        if (!ok) {
+          document.getElementById('nfaTypeEvent').checked = (currentNfaCategory === 'event');
+          document.getElementById('nfaTypePurchase').checked = (currentNfaCategory === 'purchase');
+          return;
+        }
+      }
+
+      currentNfaCategory = newType;
+      const isPurchase = newType === 'purchase';
+
       document.getElementById('typeCardEvent').className = 'type-card ' + (!isPurchase ? 'active' : '');
       document.getElementById('typeCardPurchase').className = 'type-card ' + (isPurchase ? 'active' : '');
       document.getElementById('nfaTypeEvent').checked = !isPurchase;
       document.getElementById('nfaTypePurchase').checked = isPurchase;
 
+      // Toggle details sections
       document.getElementById('eventDetailsWrap').style.display = !isPurchase ? 'block' : 'none';
-      document.getElementById('resourcePersonsSection').style.display = !isPurchase ? 'block' : 'none';
       document.getElementById('purchaseDetailsWrap').style.display = isPurchase ? 'block' : 'none';
+
+      // Toggle predefined budget particulars
+      document.getElementById('eventPredefinedSection').style.display = !isPurchase ? 'block' : 'none';
+      document.getElementById('purchaseParticularsSection').style.display = isPurchase ? 'block' : 'none';
+
+      // Toggle resource persons
+      document.getElementById('resourcePersonsSection').style.display = !isPurchase ? 'block' : 'none';
+
+      // Toggle uploads
       document.getElementById('purchaseQuotationsWrap').style.display = isPurchase ? 'block' : 'none';
       document.getElementById('eventDocsWrap').style.display = !isPurchase ? 'block' : 'none';
 
-      document.getElementById('expenditureSectionTitle').textContent = isPurchase ? '6. Purchase Particulars & Quotation Breakdown' : '6. Expenditure Statement (Annexure-I)';
+      // Section titles
+      document.getElementById('expenditureSectionTitle').textContent = isPurchase
+        ? '7. Purchase Budget Items (Select category above or add custom rows)'
+        : '7. Event Budget Items (Select from predefined list above or add custom rows)';
+
+      // Clear items table
+      document.getElementById('expenditureTbody').innerHTML = '';
+      if (!isPurchase) {
+        // Reset checkboxes
+        PREDEFINED_EVENT_PARTICULARS.forEach(p => {
+          const cb = document.getElementById('cb_particular_' + p.key);
+          if (cb) cb.checked = false;
+          const card = document.getElementById('card_particular_' + p.key);
+          if (card) card.classList.remove('checked');
+        });
+        document.getElementById('samplingNoticeBanner').style.display = 'none';
+        addExpenditureRow();
+      } else {
+        quotationUploads = [null, null, null];
+        comparativeStatementUpload = null;
+        [0, 1, 2].forEach(i => {
+          const st = document.getElementById('vStatus' + i);
+          if (st) st.textContent = 'No document uploaded';
+        });
+        const compSt = document.getElementById('compStatus');
+        if (compSt) compSt.textContent = 'No statement document uploaded';
+        addExpenditureRow();
+      }
+      calculateGrandTotal();
+    }
+
+    // ---------------- PREDEFINED EVENT PARTICULARS ----------------
+    function renderEventParticularsChecklist(checkedKeys = [], savedItems = []) {
+      const container = document.getElementById('eventParticularsGridContainer');
+      if (!container) return;
+
+      container.innerHTML = PREDEFINED_EVENT_PARTICULARS.map(p => {
+        const isChecked = checkedKeys.includes(p.key);
+        const matchedItem = (savedItems || []).find(it => it.predefined_key === p.key || (it.particulars && it.particulars.toLowerCase().startsWith(p.defaultLabel.toLowerCase())));
+        const distVal = matchedItem?.distance_km || '';
+        const carryBackVal = matchedItem?.carry_back_arrangement || '';
+
+        return `
+          <div id="card_particular_${p.key}" class="event-particular-item ${isChecked ? 'checked' : ''}">
+            <label class="event-particular-header" for="cb_particular_${p.key}">
+              <input type="checkbox" id="cb_particular_${p.key}" name="cb_particular_${p.key}" ${isChecked ? 'checked' : ''} onchange="onToggleEventParticular('${p.key}', this)" />
+              <span>${escapeHtml(p.name)}</span>
+            </label>
+            ${p.key === 'sampling' ? `
+              <div style="font-size:11px;color:var(--text-muted);margin-top:4px;padding-left:22px;">
+                Indicate if sampling is required for this event (Non-monetary).
+              </div>
+            ` : ''}
+            ${p.key === 'travel_expenses' ? `
+              <div class="event-subfield" style="padding-left:22px;">
+                <input id="subfield_${p.key}" name="subfield_${p.key}" aria-label="Travel distance in kilometers or transport details" value="${escapeHtml(distVal)}" placeholder="${p.notePlaceholder}" oninput="onPredefinedSubfieldChange('${p.key}', this)" />
+              </div>
+            ` : ''}
+            ${p.key === 'memento' ? `
+              <div class="event-subfield" style="padding-left:22px;">
+                <input id="subfield_${p.key}" name="subfield_${p.key}" aria-label="Memento carry back or distribution arrangement" value="${escapeHtml(carryBackVal)}" placeholder="${p.notePlaceholder}" oninput="onPredefinedSubfieldChange('${p.key}', this)" />
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function onToggleEventParticular(key, cbEl) {
+      hasUnsavedChanges = true;
+      const itemConfig = PREDEFINED_EVENT_PARTICULARS.find(p => p.key === key);
+      if (!itemConfig) return;
+
+      const itemCard = document.getElementById('card_particular_' + key);
+      if (itemCard) itemCard.classList.toggle('checked', cbEl.checked);
+
+      // Handle sampling (non-monetary requirement)
+      if (key === 'sampling') {
+        const banner = document.getElementById('samplingNoticeBanner');
+        if (banner) banner.style.display = cbEl.checked ? 'flex' : 'none';
+        return;
+      }
+
+      const existingRow = document.querySelector('#expenditureTbody tr[data-predefined-key="' + key + '"]');
+
+      if (cbEl.checked) {
+        if (!existingRow) {
+          let displayName = itemConfig.defaultLabel;
+          let dist = '';
+          let carryBack = '';
+
+          if (key === 'travel_expenses') {
+            const subIn = document.getElementById('subfield_' + key);
+            if (subIn && subIn.value.trim()) {
+              dist = subIn.value.trim();
+              displayName = 'Travel Expenses (Distance: ' + dist + ' km)';
+            }
+          } else if (key === 'memento') {
+            const subIn = document.getElementById('subfield_' + key);
+            if (subIn && subIn.value.trim()) {
+              carryBack = subIn.value.trim();
+              displayName = 'Memento (' + carryBack + ')';
+            }
+          }
+
+          addExpenditureRow({
+            particulars: displayName,
+            quantity: '',
+            rate: '',
+            amount: '',
+            predefined_key: key,
+            distance_km: dist,
+            carry_back_arrangement: carryBack
+          });
+        }
+      } else {
+        if (existingRow) {
+          const q = existingRow.querySelector('.item-q')?.value?.trim();
+          const r = existingRow.querySelector('.item-r')?.value?.trim();
+          const a = Number(existingRow.querySelector('.item-a')?.value) || 0;
+          if (q || r || a > 0) {
+            const ok = confirm('Unchecking "' + itemConfig.name + '" will remove its budget row and entered values. Do you wish to continue?');
+            if (!ok) {
+              cbEl.checked = true;
+              if (itemCard) itemCard.classList.add('checked');
+              return;
+            }
+          }
+          existingRow.remove();
+          renumberExpenditureRows();
+          calculateGrandTotal();
+        }
+      }
+    }
+
+    function onPredefinedSubfieldChange(key, inputEl) {
+      hasUnsavedChanges = true;
+      const row = document.querySelector('#expenditureTbody tr[data-predefined-key="' + key + '"]');
+      if (!row) return;
+      const pInput = row.querySelector('.item-p');
+      if (!pInput) return;
+
+      const val = inputEl.value.trim();
+      if (key === 'travel_expenses') {
+        pInput.value = val ? ('Travel Expenses (Distance: ' + val + ' km)') : 'Travel Expenses';
+        row.dataset.distanceKm = val;
+      } else if (key === 'memento') {
+        pInput.value = val ? ('Memento (' + val + ')') : 'Memento';
+        row.dataset.carryBack = val;
+      }
+    }
+
+    // ---------------- PREDEFINED PURCHASE CATEGORIES ----------------
+    function renderPurchaseCategoriesGrid() {
+      const container = document.getElementById('purchaseCategoriesGridContainer');
+      if (!container) return;
+
+      container.innerHTML = PREDEFINED_PURCHASE_CATEGORIES.map(c => `
+        <div class="purchase-category-chip" onclick="addPurchaseCategoryRow('${escapeHtml(c.name)}')">
+          <span>${escapeHtml(c.name)}</span>
+          <span class="chip-action">+ Add</span>
+        </div>
+      `).join('');
+    }
+
+    function addPurchaseCategoryRow(categoryName) {
+      hasUnsavedChanges = true;
+      const defaultDesc = categoryName === 'Other Purchase' ? '' : ('[' + categoryName + '] ');
+      addExpenditureRow({ particulars: defaultDesc, quantity: '', rate: '', amount: '' });
+      const rows = document.querySelectorAll('#expenditureTbody tr');
+      const lastRow = rows[rows.length - 1];
+      if (lastRow) {
+        const pInput = lastRow.querySelector('.item-p');
+        if (pInput) {
+          pInput.focus();
+          if (defaultDesc) {
+            try { pInput.setSelectionRange(defaultDesc.length, defaultDesc.length); } catch (e) { }
+          }
+        }
+      }
+    }
+
+    function calculatePurchaseAmount() {
+      const q = parseFloat(document.getElementById('purchaseQuantity').value);
+      const r = parseFloat(document.getElementById('purchaseRate').value);
+      const amtInput = document.getElementById('purchaseAmount');
+      if (!isNaN(q) && q > 0 && !isNaN(r) && r >= 0) {
+        amtInput.value = Math.round(q * r * 100) / 100;
+      }
     }
 
     // ---------------- MULTIPLE RESOURCE PERSONS ----------------
@@ -1579,15 +2106,15 @@
         <div class="grid3" style="margin-bottom:10px;">
           <div>
             <label class="field-label">Full Name *</label>
-            <input class="rp-name" placeholder="e.g. Dr. Jane Smith" value="${escapeHtml(data.resource_person_name || '')}" oninput="hasUnsavedChanges=true;" required />
+            <input class="rp-name" placeholder="e.g. Dr. Jane Smith" value="${escapeHtml(data.resource_person_name || '')}" oninput="syncFirstResourcePersonToEvent(); hasUnsavedChanges=true;" required />
           </div>
           <div>
             <label class="field-label">Designation *</label>
-            <input class="rp-designation" placeholder="e.g. Professor / Lead AI Scientist" value="${escapeHtml(data.designation || '')}" oninput="hasUnsavedChanges=true;" required />
+            <input class="rp-designation" placeholder="e.g. Professor / Lead AI Scientist" value="${escapeHtml(data.designation || '')}" oninput="syncFirstResourcePersonToEvent(); hasUnsavedChanges=true;" required />
           </div>
           <div>
             <label class="field-label">Organization / University *</label>
-            <input class="rp-org" placeholder="e.g. IISc Bangalore / Microsoft Research" value="${escapeHtml(data.organization || '')}" oninput="hasUnsavedChanges=true;" required />
+            <input class="rp-org" placeholder="e.g. IISc Bangalore / Microsoft Research" value="${escapeHtml(data.organization || '')}" oninput="syncFirstResourcePersonToEvent(); hasUnsavedChanges=true;" required />
           </div>
         </div>
 
@@ -1628,7 +2155,7 @@
             <input class="rp-ifsc" style="text-transform:uppercase;font-family:monospace;" placeholder="e.g. SBIN0001234" maxlength="11" value="${escapeHtml(data.ifsc_code || '')}" oninput="hasUnsavedChanges=true;" />
           </div>
           <div>
-            <label class="field-label">${data.id ? 'Account No. (Blank keeps ' + escapeHtml(data.masked_account_number || 'saved') + ')' : 'Bank Account Number *'}</label>
+            <label class="field-label">${data.id ? ('Account No. (Blank keeps ' + escapeHtml(data.masked_account_number || 'saved') + ')') : 'Bank Account Number *'}</label>
             <input class="rp-acct" type="password" placeholder="${data.id ? 'Enter only to change' : 'Bank account number'}" oninput="hasUnsavedChanges=true;" />
           </div>
           <div>
@@ -1655,7 +2182,7 @@
       const cards = document.querySelectorAll('#resourcePersonsList .rp-card');
       cards.forEach((c, idx) => {
         const lbl = c.querySelector('.rp-num-label');
-        if (lbl) lbl.textContent = `Resource Person #${idx + 1}`;
+        if (lbl) lbl.textContent = 'Resource Person #' + (idx + 1);
       });
       document.getElementById('rpCountText').textContent = cards.length;
     }
@@ -1671,6 +2198,31 @@
       return total;
     }
 
+    function syncFirstResourcePersonToEvent() {
+      const firstCard = document.querySelector('#resourcePersonsList .rp-card');
+      if (!firstCard) return;
+      const name = firstCard.querySelector('.rp-name')?.value?.trim();
+      const desig = firstCard.querySelector('.rp-designation')?.value?.trim();
+      const org = firstCard.querySelector('.rp-org')?.value?.trim();
+
+      const evName = document.getElementById('eventResourcePerson');
+      const evDesig = document.getElementById('eventDesignation');
+      const evOrg = document.getElementById('eventOrganization');
+
+      if (evName && (!evName.value.trim() || evName.dataset.autoSync === 'true')) {
+        evName.value = name || '';
+        evName.dataset.autoSync = 'true';
+      }
+      if (evDesig && (!evDesig.value.trim() || evDesig.dataset.autoSync === 'true')) {
+        evDesig.value = desig || '';
+        evDesig.dataset.autoSync = 'true';
+      }
+      if (evOrg && (!evOrg.value.trim() || evOrg.dataset.autoSync === 'true')) {
+        evOrg.value = org || '';
+        evOrg.dataset.autoSync = 'true';
+      }
+    }
+
     function syncHonorariumToItems() {
       const honorariumTotal = calculateRpHonorariumTotal();
       if (honorariumTotal <= 0) {
@@ -1678,33 +2230,42 @@
         return;
       }
 
-      // Check if honorarium line already exists
+      // Check if honorarium row or predefined row already exists
       const rows = document.querySelectorAll('#expenditureTbody tr');
       let existingHonorariumRow = null;
       rows.forEach(r => {
         const pInput = r.querySelector('.item-p');
-        if (pInput && pInput.value.toLowerCase().includes('honorarium')) {
+        const key = r.dataset.predefinedKey;
+        if (key === 'honorarium' || (pInput && pInput.value.toLowerCase().includes('honorarium'))) {
           existingHonorariumRow = r;
         }
       });
 
+      const rpCardsCount = document.querySelectorAll('#resourcePersonsList .rp-card').length;
+      const labelText = 'Honorarium / Remuneration to Resource Persons (' + rpCardsCount + ' Persons)';
+
       if (existingHonorariumRow) {
-        existingHonorariumRow.querySelector('.item-p').value = `Remuneration / Honorarium to Resource Persons (${document.querySelectorAll('#resourcePersonsList .rp-card').length} Persons)`;
-        existingHonorariumRow.querySelector('.item-q').value = document.querySelectorAll('#resourcePersonsList .rp-card').length.toString();
+        existingHonorariumRow.querySelector('.item-p').value = labelText;
+        existingHonorariumRow.querySelector('.item-q').value = rpCardsCount.toString();
         existingHonorariumRow.querySelector('.item-r').value = '';
         existingHonorariumRow.querySelector('.item-a').value = honorariumTotal;
         existingHonorariumRow.querySelector('.item-j').value = 'Consolidated resource person honorarium as per institutional rates';
       } else {
         addExpenditureRow({
-          particulars: `Remuneration / Honorarium to Resource Persons (${document.querySelectorAll('#resourcePersonsList .rp-card').length} Persons)`,
-          quantity: document.querySelectorAll('#resourcePersonsList .rp-card').length.toString(),
+          particulars: labelText,
+          quantity: rpCardsCount.toString(),
           rate: '',
           amount: honorariumTotal,
-          justification: 'Consolidated resource person honorarium as per institutional rates'
+          justification: 'Consolidated resource person honorarium as per institutional rates',
+          predefined_key: 'honorarium'
         });
+        const cb = document.getElementById('cb_particular_honorarium');
+        if (cb) cb.checked = true;
+        const card = document.getElementById('card_particular_honorarium');
+        if (card) card.classList.add('checked');
       }
       calculateGrandTotal();
-      toast('Honorarium total synchronized with expenditure statement!');
+      toast('Honorarium total synchronized with expenditure statement (no duplication)!');
     }
 
     // ---------------- EXPENDITURE STATEMENT ROWS ----------------
@@ -1717,29 +2278,60 @@
       const tr = document.createElement('tr');
       tr.id = 'expRow_' + itemCounter;
 
+      if (data.predefined_key) tr.dataset.predefinedKey = data.predefined_key;
+      if (data.distance_km) tr.dataset.distanceKm = data.distance_km;
+      if (data.carry_back_arrangement) tr.dataset.carryBack = data.carry_back_arrangement;
+      if (data.sampling_required) tr.dataset.sampling = 'true';
+
       tr.innerHTML = `
-        <td style="text-align:center;font-weight:700;color:#64748B;padding-top:14px;" class="row-num">${tbody.children.length + 1}</td>
+        <td style="text-align:center;font-weight:700;color:#64748B;" class="row-num">${tbody.children.length + 1}</td>
         <td>
-          <input class="item-p" placeholder="e.g. Honorarium / Hardware Components / Printing" value="${escapeHtml(data.particulars || '')}" oninput="hasUnsavedChanges=true;" required />
+          <input class="item-p" placeholder="e.g. Memento / Travel Expenses / Equipment" value="${escapeHtml(data.particulars || '')}" oninput="hasUnsavedChanges=true;" required />
         </td>
         <td>
-          <input class="item-q" placeholder="e.g. 2" value="${escapeHtml(data.quantity || '')}" oninput="calculateRowAmount(this)" />
+          <input class="item-q" placeholder="Qty" value="${escapeHtml(data.quantity || '')}" oninput="calculateRowAmount(this)" />
         </td>
         <td>
-          <input class="item-r" type="number" step="any" placeholder="Rate (₹)" value="${escapeHtml(data.rate || '')}" oninput="calculateRowAmount(this)" />
+          <input class="item-r" type="number" step="any" min="0" placeholder="Rate (₹)" value="${escapeHtml(data.rate || '')}" oninput="calculateRowAmount(this)" />
         </td>
         <td>
-          <input class="item-a" type="number" step="any" placeholder="Amount (₹)" value="${escapeHtml(data.amount !== undefined ? data.amount : '')}" oninput="calculateGrandTotal()" style="font-weight:700;color:var(--primary-blue);" required />
+          <input class="item-a" type="number" step="any" min="0" placeholder="Amount (₹)" value="${escapeHtml(data.amount !== undefined ? data.amount : '')}" oninput="calculateGrandTotal()" style="font-weight:700;color:var(--primary-blue);" required />
         </td>
         <td>
           <input class="item-j" placeholder="Institutional rationale / quote basis" value="${escapeHtml(data.justification || '')}" oninput="hasUnsavedChanges=true;" />
         </td>
-        <td style="text-align:center;padding-top:10px;">
-          <button type="button" class="danger" style="padding:4px 8px;font-size:12px;" onclick="this.closest('tr').remove(); renumberExpenditureRows(); calculateGrandTotal();">✕</button>
+        <td style="text-align:center;">
+          <button type="button" class="danger" style="padding:4px 8px;font-size:12px;" onclick="removeExpenditureRow(this)">✕</button>
         </td>
       `;
 
       tbody.appendChild(tr);
+      renumberExpenditureRows();
+      calculateGrandTotal();
+    }
+
+    function removeExpenditureRow(btn) {
+      const tr = btn.closest('tr');
+      if (!tr) return;
+      const key = tr.dataset.predefinedKey;
+      const p = tr.querySelector('.item-p')?.value?.trim() || '';
+      const q = tr.querySelector('.item-q')?.value?.trim() || '';
+      const r = tr.querySelector('.item-r')?.value?.trim() || '';
+      const a = Number(tr.querySelector('.item-a')?.value) || 0;
+
+      if (q || r || a > 0) {
+        const ok = confirm('Are you sure you want to remove "' + (p || 'this item') + '"? Entered financial values will be lost.');
+        if (!ok) return;
+      }
+
+      if (key) {
+        const cb = document.getElementById('cb_particular_' + key);
+        if (cb) cb.checked = false;
+        const card = document.getElementById('card_particular_' + key);
+        if (card) card.classList.remove('checked');
+      }
+
+      tr.remove();
       renumberExpenditureRows();
       calculateGrandTotal();
     }
@@ -1784,22 +2376,22 @@
     // ---------------- SUPPORTING DOCUMENT UPLOADS ----------------
     async function uploadQuotationFile(index, file) {
       if (!file) return;
-      const statusEl = document.getElementById(`vStatus${index}`);
-      statusEl.textContent = 'Uploading file...';
+      const statusEl = document.getElementById('vStatus' + index);
+      statusEl.textContent = 'Uploading quotation document...';
       const fd = new FormData();
       fd.append('file', file);
 
       try {
         const res = await fetch('/api/nfas/upload-attachment', {
           method: 'POST',
-          headers: { 'Authorization': `Bearer ${TOKEN}` },
+          headers: { 'Authorization': 'Bearer ' + TOKEN },
           body: fd
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Upload failed');
         quotationUploads[index] = data;
-        statusEl.innerHTML = `✓ Uploaded: <strong>${escapeHtml(file.name)}</strong> (${(file.size / 1024).toFixed(1)} KB)`;
-        toast(`Quotation ${index + 1} uploaded successfully.`);
+        statusEl.innerHTML = '✓ Uploaded: <strong>' + escapeHtml(file.name) + '</strong> (' + (file.size / 1024).toFixed(1) + ' KB)';
+        toast('Quotation ' + (index + 1) + ' uploaded successfully.');
       } catch (err) {
         statusEl.textContent = 'Error: ' + err.message;
         toast(err.message);
@@ -1816,13 +2408,13 @@
       try {
         const res = await fetch('/api/nfas/upload-attachment', {
           method: 'POST',
-          headers: { 'Authorization': `Bearer ${TOKEN}` },
+          headers: { 'Authorization': 'Bearer ' + TOKEN },
           body: fd
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Upload failed');
         comparativeStatementUpload = data;
-        statusEl.innerHTML = `✓ Statement uploaded: <strong>${escapeHtml(file.name)}</strong>`;
+        statusEl.innerHTML = '✓ Statement uploaded: <strong>' + escapeHtml(file.name) + '</strong> (' + (file.size / 1024).toFixed(1) + ' KB)';
         toast('Comparative statement uploaded successfully.');
       } catch (err) {
         statusEl.textContent = 'Error: ' + err.message;
@@ -1840,13 +2432,13 @@
       try {
         const res = await fetch('/api/nfas/upload-attachment', {
           method: 'POST',
-          headers: { 'Authorization': `Bearer ${TOKEN}` },
+          headers: { 'Authorization': 'Bearer ' + TOKEN },
           body: fd
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Upload failed');
         eventAttachmentUpload = data;
-        statusEl.innerHTML = `✓ Attachment uploaded: <strong>${escapeHtml(file.name)}</strong>`;
+        statusEl.innerHTML = '✓ Attachment uploaded: <strong>' + escapeHtml(file.name) + '</strong>';
         toast('Event supporting document uploaded.');
       } catch (err) {
         statusEl.textContent = 'Error: ' + err.message;
@@ -1857,7 +2449,7 @@
     // ---------------- DRAFT LOAD & PERSISTENCE ----------------
     async function loadExistingDraft(id) {
       try {
-        const nfa = await api(`/nfas/${id}`);
+        const nfa = await api('/nfas/' + id);
         if (!nfa) return;
         currentDraftId = nfa.id;
 
@@ -1903,9 +2495,41 @@
         if (nfa.nfa_type === 'purchase' && nfa.purchase_details) {
           document.getElementById('purchaseItemName').value = nfa.purchase_details.item_name || '';
           document.getElementById('purchaseQuantity').value = nfa.purchase_details.quantity || '';
+          document.getElementById('purchaseRate').value = nfa.purchase_details.rate || '';
+          document.getElementById('purchaseAmount').value = nfa.purchase_details.amount || '';
           document.getElementById('purchaseDescription').value = nfa.purchase_details.description || '';
           document.getElementById('purchasePurpose').value = nfa.purchase_details.purpose || '';
+          document.getElementById('purchaseAdditionalInfo').value = nfa.purchase_details.additional_info || '';
+          
+          if (Array.isArray(nfa.quotations)) {
+            quotationUploads = [null, null, null];
+            nfa.quotations.forEach((q, idx) => {
+              if (idx < 3) {
+                quotationUploads[idx] = q;
+                const vName = document.getElementById('vName' + idx);
+                const vRef = document.getElementById('vRef' + idx);
+                const vDate = document.getElementById('vDate' + idx);
+                const vStatus = document.getElementById('vStatus' + idx);
+                if (vName) vName.value = q.vendor_name || '';
+                if (vRef) vRef.value = q.quotation_ref || '';
+                if (vDate) vDate.value = q.quotation_date || '';
+                if (vStatus && q.original_filename) {
+                  vStatus.innerHTML = '✓ Uploaded: <strong>' + escapeHtml(q.original_filename) + '</strong>';
+                }
+              }
+            });
+          }
+          if (nfa.comparative_statement) {
+            comparativeStatementUpload = nfa.comparative_statement;
+            const csStatus = document.getElementById('compStatus');
+            if (csStatus && nfa.comparative_statement.original_filename) {
+              csStatus.innerHTML = '✓ Statement uploaded: <strong>' + escapeHtml(nfa.comparative_statement.original_filename) + '</strong>';
+            }
+          }
         } else if (nfa.event_details) {
+          document.getElementById('eventResourcePerson').value = nfa.event_details.resource_person_name || '';
+          document.getElementById('eventDesignation').value = nfa.event_details.designation || '';
+          document.getElementById('eventOrganization').value = nfa.event_details.organization || '';
           document.getElementById('eventDate').value = nfa.event_details.event_date || '';
           document.getElementById('eventVenue').value = nfa.event_details.venue || '';
           document.getElementById('eventAdditionalInfo').value = nfa.event_details.additional_info || '';
@@ -1916,10 +2540,29 @@
 
         // Expenditure Items
         document.getElementById('expenditureTbody').innerHTML = '';
-        if (Array.isArray(nfa.items) && nfa.items.length > 0) {
-          nfa.items.forEach(it => addExpenditureRow(it));
+        const savedItems = Array.isArray(nfa.items) ? nfa.items : [];
+        if (savedItems.length > 0) {
+          savedItems.filter(it => Number(it.amount) > 0 || !it.sampling_required).forEach(it => addExpenditureRow(it));
         } else {
           addExpenditureRow();
+        }
+
+        // Predefined Particulars matching
+        if (nfa.nfa_type !== 'purchase') {
+          const checkedKeys = PREDEFINED_EVENT_PARTICULARS.filter(p => {
+            return savedItems.some(it => it.predefined_key === p.key || (it.particulars && it.particulars.toLowerCase().startsWith(p.defaultLabel.toLowerCase())));
+          }).map(p => p.key);
+
+          // Check if sampling is present
+          const hasSampling = Boolean(nfa.sampling_required || savedItems.some(it => it.sampling_required || it.predefined_key === 'sampling'));
+          if (hasSampling && !checkedKeys.includes('sampling')) {
+            checkedKeys.push('sampling');
+          }
+          renderEventParticularsChecklist(checkedKeys, savedItems);
+          if (hasSampling) {
+            const banner = document.getElementById('samplingNoticeBanner');
+            if (banner) banner.style.display = 'flex';
+          }
         }
 
         // Resource Persons
@@ -1933,7 +2576,7 @@
 
         checkBudgetAvailability();
         hasUnsavedChanges = false;
-        toast(`Draft loaded: ${nfa.ref_no}`);
+        toast('Draft loaded: ' + nfa.ref_no);
       } catch (err) {
         console.error('Error loading draft:', err);
         toast('Failed to load draft NFA: ' + err.message);
@@ -1948,7 +2591,7 @@
       }
       try {
         const d = JSON.parse(local);
-        if (confirm(`Restore draft "${d.title || d.ref_no || 'Untitled'}" saved at ${new Date(d.saved_at).toLocaleTimeString()}?`)) {
+        if (confirm('Restore draft "' + (d.title || d.ref_no || 'Untitled') + '" saved at ' + new Date(d.saved_at).toLocaleTimeString() + '?')) {
           document.getElementById('nfaTitle').value = d.title || '';
           document.getElementById('nfaPoint1').value = d.point1 || '';
           document.getElementById('nfaPoint2').value = d.point2 || '';
@@ -1987,15 +2630,15 @@
       const point3 = document.getElementById('nfaPoint3').value.trim();
       const point4 = document.getElementById('nfaPoint4').value.trim();
 
-      // Validation
+      // Basic Validation
       if (!title) return toast('Proposal title is required.');
       if (!deptId) return toast('Please select an authorized Department or Centre.');
       if (!catId) return toast('Please select a Budget Main Category.');
 
-      if (countWords(point1) > 50) return toast('Point 1 exceeds 50 words.');
-      if (countWords(point2) > 50) return toast('Point 2 exceeds 50 words.');
-      if (countWords(point3) > 50) return toast('Point 3 exceeds 50 words.');
-      if (countWords(point4) > 50) return toast('Point 4 exceeds 50 words.');
+      if (countWords(point1) > 50) return toast('Point 1 (Purpose) exceeds 50 words.');
+      if (countWords(point2) > 50) return toast('Point 2 (Logistics) exceeds 50 words.');
+      if (countWords(point3) > 50) return toast('Point 3 (Justification) exceeds 50 words.');
+      if (countWords(point4) > 50) return toast('Point 4 (Expenditure Statement) exceeds 50 words.');
 
       // Collect items
       const itemRows = document.querySelectorAll('#expenditureTbody tr');
@@ -2006,6 +2649,11 @@
         const rate = r.querySelector('.item-r').value.trim();
         const amt = parseFloat(r.querySelector('.item-a').value) || 0;
         const j = r.querySelector('.item-j').value.trim();
+        const key = r.dataset.predefinedKey || undefined;
+        const dist = r.dataset.distanceKm || undefined;
+        const carryBack = r.dataset.carryBack || undefined;
+        const isSampling = r.dataset.sampling === 'true';
+
         if (p && amt > 0) {
           items.push({
             particulars: p,
@@ -2013,13 +2661,40 @@
             rate: rate,
             amount: amt,
             justification: j,
-            sl_no: idx + 1
+            sl_no: idx + 1,
+            is_predefined: Boolean(key),
+            predefined_key: key,
+            distance_km: dist,
+            carry_back_arrangement: carryBack,
+            sampling_required: isSampling,
+            item_type: Boolean(key) ? 'predefined' : (nfaType === 'purchase' ? 'purchase' : 'custom')
           });
         }
       });
 
-      if (items.length === 0) {
-        return toast('Please enter at least one expenditure item with description and positive amount.');
+      // Check sampling checkbox state (non-monetary requirement)
+      const samplingChecked = document.getElementById('cb_particular_sampling')?.checked || false;
+      if (nfaType === 'event' && samplingChecked) {
+        items.push({
+          particulars: 'Sampling',
+          quantity: '',
+          rate: '',
+          amount: 0,
+          justification: 'Non-monetary sampling logistics and booth arrangement',
+          sl_no: items.length + 1,
+          is_predefined: true,
+          predefined_key: 'sampling',
+          distance_km: undefined,
+          carry_back_arrangement: undefined,
+          sampling_required: true,
+          item_type: 'predefined'
+        });
+      }
+
+      if (items.filter(i => i.amount > 0).length === 0 && (!samplingChecked || nfaType === 'purchase')) {
+        return toast(nfaType === 'purchase'
+          ? 'Add at least one purchase item with description, quantity, rate, and amount.'
+          : 'Add at least one event expense item with quantity, rate, and amount.');
       }
 
       const totalReq = calculateGrandTotal();
@@ -2046,13 +2721,13 @@
           if (name) {
             if (andSubmit) {
               if (acct && acct !== conf) {
-                return toast(`Bank account number and confirmation do not match for "${name}".`);
+                return toast('Bank account number and confirmation do not match for "' + name + '".');
               }
               if (acct && acct.length < 6) {
-                return toast(`Invalid bank account number for "${name}": minimum 6 digits.`);
+                return toast('Invalid bank account number for "' + name + '": minimum 6 digits.');
               }
               if (ifsc && !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc)) {
-                return toast(`Invalid IFSC Code "${ifsc}" for "${name}". Expected format: SBIN0001234.`);
+                return toast('Invalid IFSC Code "' + ifsc + '" for "' + name + '". Expected format: SBIN0001234.');
               }
             }
             resourcePersons.push({
@@ -2076,23 +2751,25 @@
 
       // Check budget on submission
       if (andSubmit && currentAvailableBudget !== null && currentAvailableBudget >= 0 && totalReq > currentAvailableBudget) {
-        return toast(`Cannot submit: Requested amount (${inr(totalReq)}) exceeds available balance (${inr(currentAvailableBudget)}).`);
+        return toast('Cannot submit: Requested amount (' + inr(totalReq) + ') exceeds available balance (' + inr(currentAvailableBudget) + ').');
       }
 
-      // Collect purchase details
+      // Collect purchase details & quotations
       const purchaseDetails = nfaType === 'purchase' ? {
         item_name: document.getElementById('purchaseItemName').value.trim(),
         quantity: document.getElementById('purchaseQuantity').value.trim(),
+        rate: document.getElementById('purchaseRate').value.trim(),
+        amount: Number(document.getElementById('purchaseAmount').value) || 0,
         description: document.getElementById('purchaseDescription').value.trim(),
-        purpose: document.getElementById('purchasePurpose').value.trim()
+        purpose: document.getElementById('purchasePurpose').value.trim(),
+        additional_info: document.getElementById('purchaseAdditionalInfo').value.trim()
       } : undefined;
 
-      // Collect quotations
       const quotations = nfaType === 'purchase' ? [0, 1, 2].map(idx => {
         const up = quotationUploads[idx] || {};
-        const vName = document.getElementById(`vName${idx}`).value.trim();
-        const vRef = document.getElementById(`vRef${idx}`).value.trim();
-        const vDate = document.getElementById(`vDate${idx}`).value.trim();
+        const vName = document.getElementById('vName' + idx).value.trim();
+        const vRef = document.getElementById('vRef' + idx).value.trim();
+        const vDate = document.getElementById('vDate' + idx).value.trim();
         if (!vName && !up.file_path) return null;
         return {
           vendor_name: vName,
@@ -2109,13 +2786,41 @@
       }).filter(Boolean) : [];
 
       if (andSubmit && nfaType === 'purchase') {
-        if (quotations.length < 3) {
-          return toast('All 3 vendor quotations must be entered before submitting for approval.');
+        const vLabels = ['Vendor A (Quotation 1)', 'Vendor B (Quotation 2)', 'Vendor C (Quotation 3)'];
+        for (let i = 0; i < 3; i++) {
+          const vName = document.getElementById('vName' + i)?.value?.trim() || '';
+          const qUp = quotationUploads[i];
+          if (!vName) {
+            return toast(vLabels[i] + ': Vendor Name is mandatory before submitting.');
+          }
+          if (!qUp || !qUp.file_path) {
+            return toast(vLabels[i] + ': Quotation document upload is mandatory before submitting.');
+          }
         }
+
+        const files = quotationUploads.map(q => q && q.file_path).filter(Boolean);
+        if (new Set(files).size < 3) {
+          return toast('Distinct quotation documents must be uploaded for each vendor. Identical files detected.');
+        }
+
         if (!comparativeStatementUpload || !comparativeStatementUpload.file_path) {
-          return toast('Comparative statement document upload is mandatory before submitting.');
+          return toast('Comparative statement document upload is mandatory before submitting a Purchase NFA.');
         }
       }
+
+      // Event details
+      const primaryRpName = document.getElementById('eventResourcePerson').value.trim() || (resourcePersons[0]?.resource_person_name || '');
+      const primaryDesig = document.getElementById('eventDesignation').value.trim() || (resourcePersons[0]?.designation || '');
+      const primaryOrg = document.getElementById('eventOrganization').value.trim() || (resourcePersons[0]?.organization || '');
+
+      const eventDetails = nfaType === 'event' ? {
+        resource_person_name: primaryRpName,
+        designation: primaryDesig,
+        organization: primaryOrg,
+        event_date: document.getElementById('eventDate').value.trim(),
+        venue: document.getElementById('eventVenue').value.trim(),
+        additional_info: document.getElementById('eventAdditionalInfo').value.trim()
+      } : undefined;
 
       const payload = {
         id: currentDraftId || undefined,
@@ -2139,11 +2844,7 @@
         purpose: point1,
         description: point2,
         justification: point3,
-        event_details: nfaType === 'event' ? {
-          event_date: document.getElementById('eventDate').value.trim(),
-          venue: document.getElementById('eventVenue').value.trim(),
-          additional_info: document.getElementById('eventAdditionalInfo').value.trim()
-        } : undefined,
+        event_details: eventDetails,
         will_generate_revenue: nfaType === 'event' && document.getElementById('revYes').checked,
         purchase_details: purchaseDetails,
         quotations,
@@ -2161,9 +2862,9 @@
       btnDraft.disabled = true;
 
       if (andSubmit) {
-        btnSubmit.innerHTML = `<span class="spinner-sm"></span> Submitting...`;
+        btnSubmit.innerHTML = '<span class="spinner-sm"></span> Submitting...';
       } else {
-        btnDraft.innerHTML = `<span class="spinner-sm"></span> Saving...`;
+        btnDraft.innerHTML = '<span class="spinner-sm"></span> Saving...';
       }
 
       try {
@@ -2191,14 +2892,13 @@
         localStorage.setItem('cu_nfa_draft_data', JSON.stringify(Object.assign({}, payload, { saved_at: new Date().toISOString() })));
 
         if (andSubmit) {
-          // Formal submission endpoint to advance state to submitted_to_hod
-          await api(`/nfas/${result.id}/submit`, { method: 'POST' });
-          toast(`NFA ${result.ref_no} submitted for approval successfully!`);
-          alert(`NFA ${result.ref_no} has been successfully submitted to your Head of Department (HOD) for review.\n\nThe main dashboard in your other tab has been updated automatically.`);
+          await api('/nfas/' + result.id + '/submit', { method: 'POST' });
+          toast('NFA ' + result.ref_no + ' submitted for approval successfully!');
+          alert('NFA ' + result.ref_no + ' has been successfully submitted to your Head of Department (HOD) for review.\n\nThe main dashboard in your other tab has been updated automatically.');
           window.close();
           window.location.href = '/';
         } else {
-          toast(`Draft saved successfully! (Ref: ${result.ref_no})`);
+          toast('Draft saved successfully! (Ref: ' + result.ref_no + ')');
           btnDraft.disabled = false;
           btnDraft.textContent = 'Draft Saved ✓';
           setTimeout(() => { btnDraft.textContent = 'Save Draft'; }, 2500);

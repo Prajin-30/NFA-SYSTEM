@@ -36,7 +36,15 @@ export function formatAmount(value: number): string {
 }
 
 function safeFileName(value: string): string {
-  return value.replace(/[<>:"/\\|?*\x00-\x1F]/g, '-').replace(/\s+/g, ' ').trim().slice(0, 120) || 'NFA';
+  return (
+    value
+      .replace(/[—–]/g, '-')
+      .replace(/[^\x20-\x7E]/g, '')
+      .replace(/[<>:"/\\|?*\x00-\x1F]/g, '-')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 120) || 'NFA'
+  );
 }
 
 function cleanDepartmentName(rawName?: string): string {
